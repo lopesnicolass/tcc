@@ -26,15 +26,24 @@ const db = new sqlite3.Database(caminhoBanco, (erro) => {
 
 db.serialize(() => {
 
+    // ============================
+    // USUÁRIOS
+    // ============================
+
     db.run(`
-       CREATE TABLE IF NOT EXISTS usuarios (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    senha TEXT NOT NULL,
-    tipo TEXT NOT NULL DEFAULT 'aluno'
-)
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            senha TEXT NOT NULL,
+            tipo TEXT NOT NULL DEFAULT 'aluno'
+        )
     `);
+
+
+    // ============================
+    // RESULTADOS
+    // ============================
 
     db.run(`
         CREATE TABLE IF NOT EXISTS resultados (
@@ -48,6 +57,63 @@ db.serialize(() => {
 
             FOREIGN KEY (usuario_id)
             REFERENCES usuarios(id)
+        )
+    `);
+
+
+    // ============================
+    // QUESTÕES
+    // ============================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS questoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pergunta TEXT NOT NULL,
+            alternativa_a TEXT NOT NULL,
+            alternativa_b TEXT NOT NULL,
+            alternativa_c TEXT NOT NULL,
+            alternativa_d TEXT NOT NULL,
+            correta TEXT NOT NULL,
+            materia TEXT NOT NULL
+        )
+    `);
+
+
+    // ============================
+    // SIMULADOS
+    // ============================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS simulados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            descricao TEXT,
+            tempo_limite INTEGER NOT NULL,
+            quantidade_questoes INTEGER NOT NULL,
+            ativo INTEGER NOT NULL DEFAULT 1,
+            data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+
+    // ============================
+    // QUESTÕES DOS SIMULADOS
+    // ============================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS simulado_questoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            simulado_id INTEGER NOT NULL,
+            questao_id INTEGER NOT NULL,
+            ordem INTEGER NOT NULL,
+
+            FOREIGN KEY (simulado_id)
+            REFERENCES simulados(id),
+
+            FOREIGN KEY (questao_id)
+            REFERENCES questoes(id),
+
+            UNIQUE (simulado_id, questao_id)
         )
     `);
 

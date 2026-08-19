@@ -1,55 +1,72 @@
 const {
-    criarResultado,
-    buscarResultadosPorUsuario,
-    buscarDesempenhoPorUsuario
-} = require("../models/resultadoModel");
+    criarSimulado,
+    listarSimulados,
+    buscarSimuladoPorId,
+    adicionarQuestaoAoSimulado,
+    listarQuestoesDoSimulado,
+    removerQuestaoDoSimulado
+} = require("../models/simuladoModel");
 
 
 // ============================
-// CADASTRAR RESULTADO
+// CRIAR SIMULADO
 // ============================
 
-function cadastrarResultado(req, res) {
+function cadastrarSimulado(req, res) {
 
     const {
-        usuarioId,
-        acertos,
-        erros,
-        totalQuestoes,
-        porcentagem
+        titulo,
+        descricao,
+        tempoLimite,
+        quantidadeQuestoes
     } = req.body;
 
     if (
-        usuarioId === undefined ||
-        acertos === undefined ||
-        erros === undefined ||
-        totalQuestoes === undefined ||
-        porcentagem === undefined
+        !titulo ||
+        tempoLimite === undefined ||
+        quantidadeQuestoes === undefined
     ) {
         return res.status(400).json({
-            mensagem: "Todos os dados do resultado são obrigatórios."
+            mensagem: "Preencha os campos obrigatórios."
         });
     }
 
-    criarResultado(
-        usuarioId,
-        acertos,
-        erros,
-        totalQuestoes,
-        porcentagem,
+    if (tempoLimite <= 0) {
+        return res.status(400).json({
+            mensagem: "O tempo limite deve ser maior que zero."
+        });
+    }
+
+    if (quantidadeQuestoes <= 0) {
+        return res.status(400).json({
+            mensagem: "A quantidade de questões deve ser maior que zero."
+        });
+    }
+
+    criarSimulado(
+        titulo,
+        descricao || "",
+        tempoLimite,
+        quantidadeQuestoes,
         (erro, resultado) => {
 
             if (erro) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao salvar resultado."
+                    mensagem: "Erro ao criar simulado."
                 });
             }
 
             return res.status(201).json({
-                mensagem: "Resultado salvo com sucesso!",
-                resultadoId: resultado.insertId
+                mensagem: "Simulado criado com sucesso!",
+                simulado: {
+                    id: resultado.lastID,
+                    titulo,
+                    descricao: descricao || "",
+                    tempoLimite,
+                    quantidadeQuestoes
+                }
             });
         }
     );
@@ -57,75 +74,188 @@ function cadastrarResultado(req, res) {
 
 
 // ============================
-// LISTAR RESULTADOS
+// LISTAR SIMULADOS
 // ============================
 
-function listarResultados(req, res) {
+function listarTodosSimulados(req, res) {
 
-    const { usuarioId } = req.params;
+    listarSimulados((erro, simulados) => {
 
-    if (!usuarioId) {
-        return res.status(400).json({
-            mensagem: "ID do usuário não informado."
+        if (erro) {
+            console.error(erro);
+
+            return res.status(500).json({
+                mensagem: "Erro ao buscar simulados."
+            });
+        }
+
+        return res.status(200).json({
+            simulados
         });
-    }
+    });
+}
 
-    buscarResultadosPorUsuario(
-        usuarioId,
-        (erro, resultados) => {
+
+// ============================
+// BUSCAR SIMULADO POR ID
+// ============================
+
+function buscarSimulado(req, res) {
+
+    const { id } = req.params;
+
+    buscarSimuladoPorId(id, (erro, simulado) => {
+
+        if (erro) {
+            console.error(erro);
+
+            return res.status(500).json({
+                mensagem: "Erro ao buscar simulado."
+            });
+        }
+
+        if (!simulado) {
+            return res.status(404).json({
+                mensagem: "Simulado não encontrado."
+            });
+        }
+
+        listarQuestoesDoSimulado(id, (erro, questoes) => {
 
             if (erro) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao consultar resultados."
+                    mensagem: "Erro ao buscar questões do simulado."
                 });
             }
 
             return res.status(200).json({
-                resultados: resultados
+                simulado,
+                questoes
             });
-        }
-    );
+        });
+    });
 }
 
 
 // ============================
-// BUSCAR DESEMPENHO
+// ADICIONAR QUESTÃO AO SIMULADO
 // ============================
 
-function buscarDesempenho(req, res) {
+function adicionarQuestao(req, res) {
 
-    const { usuarioId } = req.params;
+    const { id } = req.params;
 
-    if (!usuarioId) {
+    const {
+        questaoId,
+        ordem
+    } = req.body;
+
+    if (
+        questaoId === undefined ||
+        ordem === undefined
+    ) {
         return res.status(400).json({
-            mensagem: "ID do usuário não informado."
+            mensagem: "Informe a questão e a ordem."
         });
     }
 
-    buscarDesempenhoPorUsuario(
-        usuarioId,
+    adicionarQuestaoAoSimulado(
+        id,
+        questaoId,
+        ordem,
         (erro, resultado) => {
 
             if (erro) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao consultar desempenho."
+                    mensagem: "Erro ao adicionar questão ao simulado."
                 });
             }
 
-            return res.status(200).json({
-                desempenho: resultado[0]
+            return res.status(201).json({
+                mensagem: "Questão adicionada ao simulado!",
+                id: resultado.lastID
             });
         }
     );
 }
 
 
+// ============================
+// LISTAR QUESTÕES DO SIMULADO
+// ============================
+
+function listarQuestoes(req, res) {
+
+    const { id } = req.params;
+
+    listarQuestoesDoSimulado(
+        id,
+        (erro, questoes) => {
+
+            if (erro) {
+                console.error(erro);
+
+                return res.status(500).json({
+                    mensagem: "Erro ao buscar questões."
+                });
+            }
+
+            return res.status(200).json({
+                questoes
+            });
+        }
+    );
+}
+
+
+// ============================
+// REMOVER QUESTÃO DO SIMULADO
+// ============================
+
+function removerQuestao(req, res) {
+
+    const { id, questaoId } = req.params;
+
+    removerQuestaoDoSimulado(
+        id,
+        questaoId,
+        (erro, resultado) => {
+
+            if (erro) {
+                console.error(erro);
+
+                return res.status(500).json({
+                    mensagem: "Erro ao remover questão."
+                });
+            }
+
+            if (resultado.changes === 0) {
+                return res.status(404).json({
+                    mensagem: "Questão não encontrada no simulado."
+                });
+            }
+
+            return res.status(200).json({
+                mensagem: "Questão removida do simulado!"
+            });
+        }
+    );
+}
+
+
+// ============================
+// EXPORTAÇÕES
+// ============================
+
 module.exports = {
-    cadastrarResultado,
-    listarResultados,
-    buscarDesempenho
+    cadastrarSimulado,
+    listarTodosSimulados,
+    buscarSimulado,
+    adicionarQuestao,
+    listarQuestoes,
+    removerQuestao
 };
