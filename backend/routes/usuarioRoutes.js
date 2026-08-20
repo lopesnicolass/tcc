@@ -1,19 +1,13 @@
 const express = require("express");
 
 const {
-    buscarPerfil,
-    atualizarPerfil
+    listarTodosUsuarios
 } = require("../controllers/usuarioController");
+
+const verificarAdmin = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
-
-// Buscar perfil
-router.get("/:id", buscarPerfil);
-
-
-// Atualizar perfil
-router.put("/:id", atualizarPerfil);
-
+router.get("/", verificarAdmin, listarTodosUsuarios);
 
 module.exports = router;

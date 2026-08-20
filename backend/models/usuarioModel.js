@@ -2,27 +2,6 @@ const db = require("../config/db");
 
 
 // ============================
-// CRIAR USUÁRIO
-// ============================
-
-function criarUsuario(nome, email, senha, tipo, callback) {
-
-    const sql = `
-        INSERT INTO usuarios (nome, email, senha, tipo)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    db.run(
-        sql,
-        [nome, email, senha, tipo],
-        function (erro) {
-            callback(erro, this);
-        }
-    );
-}
-
-
-// ============================
 // BUSCAR USUÁRIO POR EMAIL
 // ============================
 
@@ -34,63 +13,58 @@ function buscarUsuarioPorEmail(email, callback) {
         WHERE email = ?
     `;
 
-    db.get(
-        sql,
-        [email],
-        callback
-    );
+    db.get(sql, [email], callback);
 }
 
 
 // ============================
-// BUSCAR USUÁRIO POR ID
+// CRIAR USUÁRIO
 // ============================
 
-function buscarUsuarioPorId(id, callback) {
+function criarUsuario(
+    nome,
+    email,
+    senha,
+    tipo,
+    callback
+) {
 
     const sql = `
-        SELECT id, nome, email, tipo
-        FROM usuarios
-        WHERE id = ?
-    `;
-
-    db.get(
-        sql,
-        [id],
-        callback
-    );
-}
-
-
-// ============================
-// ATUALIZAR USUÁRIO
-// ============================
-
-function atualizarUsuario(id, nome, email, callback) {
-
-    const sql = `
-        UPDATE usuarios
-        SET nome = ?, email = ?
-        WHERE id = ?
+        INSERT INTO usuarios
+        (nome, email, senha, tipo)
+        VALUES (?, ?, ?, ?)
     `;
 
     db.run(
         sql,
-        [nome, email, id],
-        function (erro) {
-            callback(erro, this);
-        }
+        [nome, email, senha, tipo],
+        callback
     );
 }
 
 
 // ============================
-// EXPORTAÇÕES
+// LISTAR TODOS OS USUÁRIOS
 // ============================
 
+function listarUsuarios(callback) {
+
+    const sql = `
+        SELECT
+            id,
+            nome,
+            email,
+            tipo
+        FROM usuarios
+        ORDER BY id DESC
+    `;
+
+    db.all(sql, [], callback);
+}
+
+
 module.exports = {
-    criarUsuario,
     buscarUsuarioPorEmail,
-    buscarUsuarioPorId,
-    atualizarUsuario
+    criarUsuario,
+    listarUsuarios
 };

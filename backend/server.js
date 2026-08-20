@@ -28,7 +28,13 @@ app.use("/usuarios", usuarioRoutes);
 app.use("/resultados", resultadoRoutes);
 app.use("/questoes", questaoRoutes);
 app.use("/simulados", simuladoRoutes);
+app.use("/questoes", questaoRoutes);
 
+app.get("/", (req, res) => {
+    res.json({
+        mensagem: "API do Vestibulinho funcionando!"
+    });
+});
 
 // ============================
 // ROTA INICIAL
