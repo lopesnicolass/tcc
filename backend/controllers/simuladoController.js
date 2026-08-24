@@ -2,14 +2,14 @@ const {
     criarSimulado,
     listarSimulados,
     buscarSimuladoPorId,
-    adicionarQuestaoAoSimulado,
+    adicionarQuestao,
     listarQuestoesDoSimulado,
-    removerQuestaoDoSimulado
+    removerQuestao
 } = require("../models/simuladoModel");
 
 
 // ============================
-// CRIAR SIMULADO
+// CADASTRAR SIMULADO
 // ============================
 
 function cadastrarSimulado(req, res) {
@@ -27,7 +27,7 @@ function cadastrarSimulado(req, res) {
         quantidadeQuestoes === undefined
     ) {
         return res.status(400).json({
-            mensagem: "Preencha os campos obrigatórios."
+            mensagem: "Preencha todos os campos obrigatórios."
         });
     }
 
@@ -54,19 +54,13 @@ function cadastrarSimulado(req, res) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao criar simulado."
+                    mensagem: "Erro ao cadastrar simulado."
                 });
             }
 
             return res.status(201).json({
                 mensagem: "Simulado criado com sucesso!",
-                simulado: {
-                    id: resultado.lastID,
-                    titulo,
-                    descricao: descricao || "",
-                    tempoLimite,
-                    quantidadeQuestoes
-                }
+                simuladoId: resultado.lastID
             });
         }
     );
@@ -74,7 +68,7 @@ function cadastrarSimulado(req, res) {
 
 
 // ============================
-// LISTAR SIMULADOS
+// LISTAR TODOS OS SIMULADOS
 // ============================
 
 function listarTodosSimulados(req, res) {
@@ -97,7 +91,7 @@ function listarTodosSimulados(req, res) {
 
 
 // ============================
-// BUSCAR SIMULADO POR ID
+// BUSCAR SIMULADO
 // ============================
 
 function buscarSimulado(req, res) {
@@ -120,21 +114,24 @@ function buscarSimulado(req, res) {
             });
         }
 
-        listarQuestoesDoSimulado(id, (erro, questoes) => {
+        listarQuestoesDoSimulado(
+            id,
+            (erro, questoes) => {
 
-            if (erro) {
-                console.error(erro);
+                if (erro) {
+                    console.error(erro);
 
-                return res.status(500).json({
-                    mensagem: "Erro ao buscar questões do simulado."
+                    return res.status(500).json({
+                        mensagem: "Erro ao buscar questões do simulado."
+                    });
+                }
+
+                return res.status(200).json({
+                    simulado,
+                    questoes
                 });
             }
-
-            return res.status(200).json({
-                simulado,
-                questoes
-            });
-        });
+        );
     });
 }
 
@@ -143,7 +140,7 @@ function buscarSimulado(req, res) {
 // ADICIONAR QUESTÃO AO SIMULADO
 // ============================
 
-function adicionarQuestao(req, res) {
+function adicionarQuestaoAoSimulado(req, res) {
 
     const { id } = req.params;
 
@@ -161,7 +158,7 @@ function adicionarQuestao(req, res) {
         });
     }
 
-    adicionarQuestaoAoSimulado(
+    adicionarQuestao(
         id,
         questaoId,
         ordem,
@@ -200,7 +197,7 @@ function listarQuestoes(req, res) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao buscar questões."
+                    mensagem: "Erro ao buscar questões do simulado."
                 });
             }
 
@@ -213,14 +210,17 @@ function listarQuestoes(req, res) {
 
 
 // ============================
-// REMOVER QUESTÃO DO SIMULADO
+// REMOVER QUESTÃO
 // ============================
 
-function removerQuestao(req, res) {
+function removerQuestaoDoSimulado(req, res) {
 
-    const { id, questaoId } = req.params;
+    const {
+        id,
+        questaoId
+    } = req.params;
 
-    removerQuestaoDoSimulado(
+    removerQuestao(
         id,
         questaoId,
         (erro, resultado) => {
@@ -229,13 +229,13 @@ function removerQuestao(req, res) {
                 console.error(erro);
 
                 return res.status(500).json({
-                    mensagem: "Erro ao remover questão."
+                    mensagem: "Erro ao remover questão do simulado."
                 });
             }
 
             if (resultado.changes === 0) {
                 return res.status(404).json({
-                    mensagem: "Questão não encontrada no simulado."
+                    mensagem: "Questão não encontrada neste simulado."
                 });
             }
 
@@ -255,7 +255,7 @@ module.exports = {
     cadastrarSimulado,
     listarTodosSimulados,
     buscarSimulado,
-    adicionarQuestao,
+    adicionarQuestao: adicionarQuestaoAoSimulado,
     listarQuestoes,
-    removerQuestao
+    removerQuestao: removerQuestaoDoSimulado
 };

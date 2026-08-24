@@ -80,7 +80,7 @@ function buscarSimuladoPorId(id, callback) {
 // ADICIONAR QUESTÃO AO SIMULADO
 // ============================
 
-function adicionarQuestaoAoSimulado(
+function adicionarQuestao(
     simuladoId,
     questaoId,
     ordem,
@@ -133,13 +133,14 @@ function listarQuestoesDoSimulado(
             q.alternativa_b,
             q.alternativa_c,
             q.alternativa_d,
+            q.alternativa_e,
             q.materia,
             sq.ordem
 
         FROM simulado_questoes sq
 
         INNER JOIN questoes q
-            ON q.id = sq.questao_id
+        ON q.id = sq.questao_id
 
         WHERE sq.simulado_id = ?
 
@@ -158,7 +159,7 @@ function listarQuestoesDoSimulado(
 // REMOVER QUESTÃO DO SIMULADO
 // ============================
 
-function removerQuestaoDoSimulado(
+function removerQuestao(
     simuladoId,
     questaoId,
     callback
@@ -196,7 +197,7 @@ module.exports = {
     criarSimulado,
     listarSimulados,
     buscarSimuladoPorId,
-    adicionarQuestaoAoSimulado,
+    adicionarQuestao,
     listarQuestoesDoSimulado,
-    removerQuestaoDoSimulado
+    removerQuestao
 };

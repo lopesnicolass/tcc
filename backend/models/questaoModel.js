@@ -1,6 +1,5 @@
 const db = require("../config/db");
 
-
 // ============================
 // CRIAR QUESTÃO
 // ============================
@@ -11,11 +10,11 @@ function criarQuestao(
     alternativaB,
     alternativaC,
     alternativaD,
+    alternativaE,
     correta,
     materia,
     callback
 ) {
-
     const sql = `
         INSERT INTO questoes
         (
@@ -24,10 +23,11 @@ function criarQuestao(
             alternativa_b,
             alternativa_c,
             alternativa_d,
+            alternativa_e,
             correta,
             materia
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.run(
@@ -38,11 +38,11 @@ function criarQuestao(
             alternativaB,
             alternativaC,
             alternativaD,
+            alternativaE,
             correta,
             materia
         ],
         function (erro) {
-
             if (erro) {
                 return callback(erro);
             }
@@ -52,13 +52,11 @@ function criarQuestao(
     );
 }
 
-
 // ============================
 // LISTAR QUESTÕES
 // ============================
 
 function listarQuestoes(callback) {
-
     const sql = `
         SELECT *
         FROM questoes
@@ -68,13 +66,11 @@ function listarQuestoes(callback) {
     db.all(sql, [], callback);
 }
 
-
 // ============================
 // BUSCAR QUESTÃO POR ID
 // ============================
 
 function buscarQuestaoPorId(id, callback) {
-
     const sql = `
         SELECT *
         FROM questoes
@@ -83,7 +79,6 @@ function buscarQuestaoPorId(id, callback) {
 
     db.get(sql, [id], callback);
 }
-
 
 // ============================
 // ATUALIZAR QUESTÃO
@@ -96,11 +91,11 @@ function atualizarQuestao(
     alternativaB,
     alternativaC,
     alternativaD,
+    alternativaE,
     correta,
     materia,
     callback
 ) {
-
     const sql = `
         UPDATE questoes
         SET
@@ -109,6 +104,7 @@ function atualizarQuestao(
             alternativa_b = ?,
             alternativa_c = ?,
             alternativa_d = ?,
+            alternativa_e = ?,
             correta = ?,
             materia = ?
         WHERE id = ?
@@ -122,12 +118,12 @@ function atualizarQuestao(
             alternativaB,
             alternativaC,
             alternativaD,
+            alternativaE,
             correta,
             materia,
             id
         ],
         function (erro) {
-
             if (erro) {
                 return callback(erro);
             }
@@ -137,20 +133,17 @@ function atualizarQuestao(
     );
 }
 
-
 // ============================
 // EXCLUIR QUESTÃO
 // ============================
 
 function excluirQuestao(id, callback) {
-
     const sql = `
         DELETE FROM questoes
         WHERE id = ?
     `;
 
     db.run(sql, [id], function (erro) {
-
         if (erro) {
             return callback(erro);
         }
@@ -158,11 +151,6 @@ function excluirQuestao(id, callback) {
         callback(null, this);
     });
 }
-
-
-// ============================
-// EXPORTAÇÕES
-// ============================
 
 module.exports = {
     criarQuestao,

@@ -65,18 +65,19 @@ db.serialize(() => {
     // QUESTÕES
     // ============================
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS questoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            pergunta TEXT NOT NULL,
-            alternativa_a TEXT NOT NULL,
-            alternativa_b TEXT NOT NULL,
-            alternativa_c TEXT NOT NULL,
-            alternativa_d TEXT NOT NULL,
-            correta TEXT NOT NULL,
-            materia TEXT NOT NULL
-        )
-    `);
+db.run(`
+    CREATE TABLE IF NOT EXISTS questoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        pergunta TEXT NOT NULL,
+        alternativa_a TEXT NOT NULL,
+        alternativa_b TEXT NOT NULL,
+        alternativa_c TEXT NOT NULL,
+        alternativa_d TEXT NOT NULL,
+        alternativa_e TEXT NOT NULL,
+        correta TEXT NOT NULL,
+        materia TEXT NOT NULL
+    )
+`);
 
 
     // ============================
