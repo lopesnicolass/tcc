@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth.jsx';
-import AdminAuth from './pages/AdminAuth.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import Home from './pages/Home.jsx';
@@ -23,7 +22,6 @@ export default function App() {
       <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Auth />} />
-      <Route path="/admin/login" element={<AdminAuth />} />
 
       <Route element={<DashboardLayout />}>
         <Route path="/home" element={<Home />} />

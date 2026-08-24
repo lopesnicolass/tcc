@@ -4,11 +4,19 @@ import { useNavigate } from 'react-router-dom';
 export default function Perfil() {
   const navigate = useNavigate();
 
+  const usuarioSalvo = localStorage.getItem('etecamp_usuario');
+  const usuarioLogado = usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
+
   function handleLogout() {
+    localStorage.removeItem('etecamp_usuario');
     navigate('/login');
   }
   const [editing, setEditing] = useState({ nome: false, email: false, senha: false });
-  const [values, setValues] = useState({ nome: 'Ruan Pablo', email: 'ruan@email.com', senha: '••••••••' });
+  const [values, setValues] = useState({
+    nome: usuarioLogado?.nome || '',
+    email: usuarioLogado?.email || '',
+    senha: '••••••••',
+  });
 
   function toggleEdit(field) {
     setEditing((prev) => ({ ...prev, [field]: !prev[field] }));

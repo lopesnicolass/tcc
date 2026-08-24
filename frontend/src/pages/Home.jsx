@@ -2,11 +2,16 @@ import { useGamification } from '../context/GamificationContext.jsx';
 
 export default function Home() {
   const { level, title, xp, xpIntoLevel, xpForNext, streak } = useGamification();
+
+  const usuarioSalvo = localStorage.getItem('etecamp_usuario');
+  const usuario = usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
+  const primeiroNome = usuario?.nome?.split(' ')[0] || 'Aluno';
+
   return (
     
     <div>
       <div className="home-header">
-        <h1>Olá, Ruan!</h1>
+        <h1>Olá, {primeiroNome}!</h1>
         <p>Continue seus estudos e alcance seus objetivos!</p>
       </div>
 
