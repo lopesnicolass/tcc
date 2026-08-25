@@ -7,7 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const usuarioRoutes = require("./routes/usuarioRoutes");
 const resultadoRoutes = require("./routes/resultadoRoutes");
 const simuladoRoutes = require("./routes/simuladoRoutes");
-
+const muralRoutes = require("./routes/muralRoutes");
 
 const app = express();
 
@@ -30,6 +30,7 @@ app.use("/resultados", resultadoRoutes);
 app.use("/questoes", questaoRoutes);
 app.use("/simulados", simuladoRoutes);
 app.use("/questoes", questaoRoutes);
+app.use("/mural", muralRoutes);
 
 app.get("/", (req, res) => {
     res.json({

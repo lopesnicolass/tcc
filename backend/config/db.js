@@ -137,6 +137,31 @@ db.serialize(() => {
 
 
     // =====================================================
+// POST-ITS DO MURAL
+// =====================================================
+// =====================================================
+// MURAL DE POST-ITS
+// =====================================================
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS mural_postits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        usuario_id INTEGER NOT NULL,
+
+        materia TEXT NOT NULL,
+
+        texto TEXT NOT NULL,
+
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+    )
+`);
+
+
+    // =====================================================
     // MIGRAÇÃO DO BANCO EXISTENTE
     // =====================================================
     //
