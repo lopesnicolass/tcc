@@ -16,7 +16,7 @@ const emptySimulado = {
   nome: '',
   limiteTempo: '',
   dificuldade: 'Média',
-  materia: MATERIAS[0]
+  materia: 'Português'
 };
 
 const emptyQuestao = {
@@ -30,75 +30,66 @@ const emptyQuestao = {
 };
 
 export default function AdminSimulados() {
-
   const [simulados, setSimulados] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
-
   const [form, setForm] = useState(emptySimulado);
 
   const [questoes, setQuestoes] = useState([]);
 
   const [showQuestaoModal, setShowQuestaoModal] = useState(false);
-
   const [questaoForm, setQuestaoForm] = useState(emptyQuestao);
 
-  const [carregando, setCarregando] = useState(true);
+  const [questaoEditando, setQuestaoEditando] = useState(null);
 
-  const [postando, setPostando] = useState(false);
+  const [simuladoEditando, setSimuladoEditando] = useState(null);
+
+  const [carregando, setCarregando] = useState(true);
+  const [carregandoQuestoes, setCarregandoQuestoes] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   const [erro, setErro] = useState('');
-
-  const [mensagem, setMensagem] = useState('');
-
-
-  // =====================================================
-  // CARREGAR SIMULADOS DO BANCO
-  // =====================================================
 
   useEffect(() => {
     carregarSimulados();
   }, []);
 
+  // =====================================================
+  // CARREGAR SIMULADOS
+  // =====================================================
 
   async function carregarSimulados() {
-
     try {
-
       setCarregando(true);
       setErro('');
 
       const resposta = await fetch(`${API_URL}/simulados`);
 
       if (!resposta.ok) {
-        throw new Error('Erro ao buscar simulados.');
+        throw new Error('Erro ao carregar simulados.');
       }
 
       const dados = await resposta.json();
 
       setSimulados(dados.simulados || []);
-
     } catch (error) {
-
       console.error(error);
 
       setErro(
         'Não foi possível carregar os simulados. Verifique se o backend está rodando.'
       );
-
     } finally {
-
       setCarregando(false);
-
     }
   }
 
-
   // =====================================================
-  // ABRIR MODAL
+  // ABRIR MODAL PARA CRIAR
   // =====================================================
 
   function openCreate() {
+    setSimuladoEditando(null);
 
     setForm({
       ...emptySimulado
@@ -110,303 +101,258 @@ export default function AdminSimulados() {
       ...emptyQuestao
     });
 
+    setQuestaoEditando(null);
+
     setErro('');
-
-    setMensagem('');
-
     setShowModal(true);
   }
 
-
   // =====================================================
-  // ADICIONAR QUESTÃO TEMPORARIAMENTE
+  // ABRIR MODAL PARA EDITAR
   // =====================================================
 
-  function handleAddQuestao(e) {
+  async function abrirEditar(simulado) {
+    try {
+      setCarregandoQuestoes(true);
+      setErro('');
 
-    e.preventDefault();
+      const resposta = await fetch(
+        `${API_URL}/simulados/${simulado.id}`
+      );
 
-    if (!questaoForm.enunciado.trim()) {
-
-      alert('Digite o enunciado da questão.');
-
-      return;
-    }
-
-    if (
-      !questaoForm.a.trim() ||
-      !questaoForm.b.trim() ||
-      !questaoForm.c.trim() ||
-      !questaoForm.d.trim() ||
-      !questaoForm.e.trim()
-    ) {
-
-      alert('Preencha todas as alternativas.');
-
-      return;
-    }
-
-
-    setQuestoes((prev) => [
-
-      ...prev,
-
-      {
-        ...questaoForm,
-        materia: form.materia
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar o simulado.');
       }
 
-    ]);
+      const dados = await resposta.json();
 
+      const dadosSimulado =
+        dados.simulado || simulado;
+
+      const listaQuestoes =
+        dados.questoes || [];
+
+      setSimuladoEditando(simulado.id);
+
+      setForm({
+        nome: dadosSimulado.titulo || '',
+        limiteTempo:
+          dadosSimulado.tempo_limite || '',
+        dificuldade:
+          dadosSimulado.dificuldade || 'Média',
+        materia:
+          dadosSimulado.materia || 'Português'
+      });
+
+      setQuestoes(
+        listaQuestoes.map((questao) => ({
+          id: questao.id,
+          enunciado:
+            questao.pergunta || '',
+          a:
+            questao.alternativa_a || '',
+          b:
+            questao.alternativa_b || '',
+          c:
+            questao.alternativa_c || '',
+          d:
+            questao.alternativa_d || '',
+          e:
+            questao.alternativa_e || '',
+          correta:
+            questao.correta || 'A'
+        }))
+      );
+
+      setQuestaoForm({
+        ...emptyQuestao
+      });
+
+      setQuestaoEditando(null);
+
+      setShowModal(true);
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.message ||
+        'Não foi possível abrir o simulado.'
+      );
+
+      alert(
+        error.message ||
+        'Não foi possível abrir o simulado.'
+      );
+    } finally {
+      setCarregandoQuestoes(false);
+    }
+  }
+
+  // =====================================================
+  // ALTERAR FORMULÁRIO
+  // =====================================================
+
+  function alterarForm(campo, valor) {
+    setForm((prev) => ({
+      ...prev,
+      [campo]: valor
+    }));
+  }
+
+  // =====================================================
+  // ABRIR MODAL DE QUESTÃO
+  // =====================================================
+
+  function abrirCriarQuestao() {
+    setQuestaoEditando(null);
 
     setQuestaoForm({
       ...emptyQuestao
     });
 
+    setShowQuestaoModal(true);
+  }
+
+  // =====================================================
+  // ABRIR QUESTÃO PARA EDIÇÃO
+  // =====================================================
+
+  function abrirEditarQuestao(index) {
+    const questao = questoes[index];
+
+    setQuestaoEditando(index);
+
+    setQuestaoForm({
+      ...questao
+    });
+
+    setShowQuestaoModal(true);
+  }
+
+  // =====================================================
+  // ALTERAR QUESTÃO
+  // =====================================================
+
+  function alterarQuestao(campo, valor) {
+    setQuestaoForm((prev) => ({
+      ...prev,
+      [campo]: valor
+    }));
+  }
+
+  // =====================================================
+  // SALVAR QUESTÃO NO FORMULÁRIO
+  // =====================================================
+
+  function handleAddQuestao(e) {
+    e.preventDefault();
+
+    if (
+      !questaoForm.enunciado.trim() ||
+      !questaoForm.a.trim() ||
+      !questaoForm.b.trim() ||
+      !questaoForm.c.trim() ||
+      !questaoForm.d.trim() ||
+      !questaoForm.e.trim() ||
+      !questaoForm.correta
+    ) {
+      alert('Preencha todos os campos da questão.');
+      return;
+    }
+
+    if (questaoEditando !== null) {
+      setQuestoes((prev) =>
+        prev.map((questao, index) =>
+          index === questaoEditando
+            ? {
+                ...questaoForm,
+                id: questao.id
+              }
+            : questao
+        )
+      );
+    } else {
+      setQuestoes((prev) => [
+        ...prev,
+        {
+          ...questaoForm
+        }
+      ]);
+    }
+
+    setQuestaoForm({
+      ...emptyQuestao
+    });
+
+    setQuestaoEditando(null);
     setShowQuestaoModal(false);
   }
 
-
   // =====================================================
-  // POSTAR SIMULADO
+  // REMOVER QUESTÃO DA LISTA
   // =====================================================
 
-  async function handlePostar(e) {
-
-    e.preventDefault();
-
-    setErro('');
-    setMensagem('');
-
-
-    // ============================
-    // VALIDAÇÕES
-    // ============================
-
-    if (!form.nome.trim()) {
-
-      alert('Digite o nome do simulado.');
-
-      return;
-    }
-
-
-    const tempo = Number(
-      String(form.limiteTempo)
-        .replace(/\D/g, '')
+  function removerQuestao(index) {
+    const confirmar = window.confirm(
+      'Deseja realmente remover esta questão?'
     );
 
-
-    if (!tempo || tempo <= 0) {
-
-      alert('Digite um tempo válido. Exemplo: 60');
-
+    if (!confirmar) {
       return;
     }
 
+    setQuestoes((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
+  }
 
-    if (questoes.length < MIN_QUESTOES) {
+  // =====================================================
+  // EXCLUIR SIMULADO
+  // =====================================================
 
-      alert(
-        `É necessário adicionar pelo menos ${MIN_QUESTOES} questões.`
-      );
-
+  async function excluirSimulado() {
+    if (!simuladoEditando) {
       return;
     }
 
+    const confirmar = window.confirm(
+      'Tem certeza que deseja excluir este simulado?\n\n' +
+      'O simulado e os vínculos das questões serão excluídos permanentemente.'
+    );
+
+    if (!confirmar) {
+      return;
+    }
 
     try {
+      setExcluindo(true);
+      setErro('');
 
-      setPostando(true);
-
-
-      // =================================================
-      // 1. CRIAR SIMULADO
-      // =================================================
-
-      const respostaSimulado = await fetch(
-        `${API_URL}/simulados`,
+      const resposta = await fetch(
+        `${API_URL}/simulados/${simuladoEditando}`,
         {
-          method: 'POST',
-
-          headers: {
-            'Content-Type': 'application/json'
-          },
-
-          body: JSON.stringify({
-
-            titulo: form.nome,
-
-            descricao: `Simulado de ${form.materia}`,
-
-            materia: form.materia,
-
-            dificuldade: form.dificuldade,
-
-            tempoLimite: tempo,
-
-            quantidadeQuestoes: questoes.length
-
-          })
-
+          method: 'DELETE'
         }
       );
 
+      const dados = await resposta.json();
 
-      const dadosSimulado =
-        await respostaSimulado.json();
-
-
-      if (!respostaSimulado.ok) {
-
+      if (!resposta.ok) {
         throw new Error(
-          dadosSimulado.mensagem ||
-          'Erro ao criar simulado.'
+          dados.mensagem ||
+          dados.erro ||
+          'Erro ao excluir o simulado.'
         );
-
       }
 
-
-      const simuladoId =
-        dadosSimulado.simuladoId;
-
-
-      // =================================================
-      // 2. CRIAR QUESTÕES
-      // =================================================
-
-      for (
-        let index = 0;
-        index < questoes.length;
-        index++
-      ) {
-
-        const questao = questoes[index];
-
-
-        const respostaQuestao =
-          await fetch(
-            `${API_URL}/questoes`,
-            {
-              method: 'POST',
-
-              headers: {
-                'Content-Type': 'application/json'
-              },
-
-              body: JSON.stringify({
-
-                pergunta:
-                  questao.enunciado,
-
-                alternativa_a:
-                  questao.a,
-
-                alternativa_b:
-                  questao.b,
-
-                alternativa_c:
-                  questao.c,
-
-                alternativa_d:
-                  questao.d,
-
-                alternativa_e:
-                  questao.e,
-
-                correta:
-                  questao.correta,
-
-                materia:
-                  form.materia
-
-              })
-
-            }
-          );
-
-
-        const dadosQuestao =
-          await respostaQuestao.json();
-
-
-        if (!respostaQuestao.ok) {
-
-          throw new Error(
-            dadosQuestao.mensagem ||
-            `Erro ao criar a questão ${index + 1}.`
-          );
-
-        }
-
-
-        // ===============================================
-        // 3. VINCULAR QUESTÃO AO SIMULADO
-        // ===============================================
-
-        const questaoId =
-          dadosQuestao.questaoId ||
-          dadosQuestao.id;
-
-
-        if (!questaoId) {
-
-          throw new Error(
-            `A questão ${index + 1} foi criada, mas o backend não retornou o ID.`
-          );
-
-        }
-
-
-        const respostaVinculo =
-          await fetch(
-            `${API_URL}/simulados/${simuladoId}/questoes`,
-            {
-              method: 'POST',
-
-              headers: {
-                'Content-Type': 'application/json'
-              },
-
-              body: JSON.stringify({
-
-                questaoId,
-
-                ordem: index + 1
-
-              })
-
-            }
-          );
-
-
-        const dadosVinculo =
-          await respostaVinculo.json();
-
-
-        if (!respostaVinculo.ok) {
-
-          throw new Error(
-            dadosVinculo.mensagem ||
-            `Erro ao vincular a questão ${index + 1}.`
-          );
-
-        }
-
-      }
-
-
-      // =================================================
-      // 4. ATUALIZAR LISTA
-      // =================================================
-
-      await carregarSimulados();
-
-
-      setMensagem(
-        'Simulado publicado com sucesso!'
+      alert(
+        dados.mensagem ||
+        'Simulado excluído com sucesso!'
       );
 
+      setShowModal(false);
+
+      setSimuladoEditando(null);
 
       setForm({
         ...emptySimulado
@@ -414,248 +360,605 @@ export default function AdminSimulados() {
 
       setQuestoes([]);
 
-      setShowModal(false);
+      setQuestaoForm({
+        ...emptyQuestao
+      });
 
+      setQuestaoEditando(null);
+
+      await carregarSimulados();
 
     } catch (error) {
-
       console.error(error);
 
       setErro(
         error.message ||
-        'Erro ao publicar simulado.'
+        'Não foi possível excluir o simulado.'
       );
 
       alert(
         error.message ||
-        'Erro ao publicar simulado.'
+        'Não foi possível excluir o simulado.'
       );
-
     } finally {
-
-      setPostando(false);
-
+      setExcluindo(false);
     }
   }
 
+  // =====================================================
+  // VALIDAR SIMULADO
+  // =====================================================
+
+  function validarSimulado() {
+    if (!form.nome.trim()) {
+      alert('Preencha o nome do simulado.');
+      return false;
+    }
+
+    if (
+      form.limiteTempo === '' ||
+      Number(form.limiteTempo) <= 0
+    ) {
+      alert('Informe um limite de tempo válido.');
+      return false;
+    }
+
+    if (!form.materia) {
+      alert('Selecione uma matéria.');
+      return false;
+    }
+
+    if (!form.dificuldade) {
+      alert('Selecione uma dificuldade.');
+      return false;
+    }
+
+    if (questoes.length < MIN_QUESTOES) {
+      alert(
+        `É necessário adicionar no mínimo ${MIN_QUESTOES} questões.`
+      );
+      return false;
+    }
+
+    return true;
+  }
 
   // =====================================================
-  // EXCLUIR / FECHAR MODAL
+  // CRIAR NOVO SIMULADO
   // =====================================================
 
-  function fecharModal() {
+  async function criarSimulado() {
+    const respostaSimulado = await fetch(
+      `${API_URL}/simulados`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          titulo: form.nome.trim(),
+          descricao: '',
+          tempoLimite: Number(form.limiteTempo),
+          quantidadeQuestoes: questoes.length,
+          materia: form.materia,
+          dificuldade: form.dificuldade,
+          ativo: 1
+        })
+      }
+    );
 
-    if (postando) {
+    const dadosSimulado =
+      await respostaSimulado.json();
+
+    if (!respostaSimulado.ok) {
+      throw new Error(
+        dadosSimulado.mensagem ||
+        dadosSimulado.erro ||
+        'Erro ao cadastrar simulado.'
+      );
+    }
+
+    const simuladoCriado =
+      dadosSimulado.simulado ||
+      dadosSimulado;
+
+    const simuladoId =
+      simuladoCriado.id ||
+      dadosSimulado.id;
+
+    if (!simuladoId) {
+      throw new Error(
+        'O backend não retornou o ID do simulado.'
+      );
+    }
+
+    // Criar questões
+    for (let i = 0; i < questoes.length; i++) {
+      const questao = questoes[i];
+
+      const respostaQuestao = await fetch(
+        `${API_URL}/questoes`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            pergunta:
+              questao.enunciado.trim(),
+
+            alternativaA:
+              questao.a.trim(),
+
+            alternativaB:
+              questao.b.trim(),
+
+            alternativaC:
+              questao.c.trim(),
+
+            alternativaD:
+              questao.d.trim(),
+
+            alternativaE:
+              questao.e.trim(),
+
+            correta:
+              questao.correta,
+
+            materia:
+              form.materia
+          })
+        }
+      );
+
+      const dadosQuestao =
+        await respostaQuestao.json();
+
+      if (!respostaQuestao.ok) {
+        throw new Error(
+          dadosQuestao.mensagem ||
+          dadosQuestao.erro ||
+          `Erro ao cadastrar a questão ${i + 1}.`
+        );
+      }
+
+      const questaoCriada =
+        dadosQuestao.questao ||
+        dadosQuestao;
+
+      const questaoId =
+        questaoCriada.id ||
+        dadosQuestao.id;
+
+      if (!questaoId) {
+        throw new Error(
+          `O backend não retornou o ID da questão ${i + 1}.`
+        );
+      }
+
+      // Vincular questão
+      const respostaVinculo = await fetch(
+        `${API_URL}/simulados/${simuladoId}/questoes`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            questaoId: questaoId,
+            ordem: i + 1
+          })
+        }
+      );
+
+      const dadosVinculo =
+        await respostaVinculo.json();
+
+      if (!respostaVinculo.ok) {
+        throw new Error(
+          dadosVinculo.mensagem ||
+          dadosVinculo.erro ||
+          `Erro ao vincular a questão ${i + 1}.`
+        );
+      }
+    }
+  }
+
+  // =====================================================
+  // EDITAR SIMULADO
+  // =====================================================
+
+  async function editarSimulado() {
+    const simuladoId = simuladoEditando;
+
+    if (!simuladoId) {
+      throw new Error(
+        'ID do simulado não encontrado.'
+      );
+    }
+
+    // Atualizar informações do simulado
+    const respostaSimulado = await fetch(
+      `${API_URL}/simulados/${simuladoId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          titulo: form.nome.trim(),
+          descricao: '',
+          tempoLimite: Number(form.limiteTempo),
+          quantidadeQuestoes: questoes.length,
+          materia: form.materia,
+          dificuldade: form.dificuldade,
+          ativo: 1
+        })
+      }
+    );
+
+    const dadosSimulado =
+      await respostaSimulado.json();
+
+    if (!respostaSimulado.ok) {
+      throw new Error(
+        dadosSimulado.mensagem ||
+        dadosSimulado.erro ||
+        'Erro ao atualizar o simulado.'
+      );
+    }
+
+    // Processar questões
+    for (let i = 0; i < questoes.length; i++) {
+      const questao = questoes[i];
+
+      // Questão que já existe
+      if (questao.id) {
+        const respostaQuestao =
+          await fetch(
+            `${API_URL}/questoes/${questao.id}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                pergunta:
+                  questao.enunciado.trim(),
+
+                alternativaA:
+                  questao.a.trim(),
+
+                alternativaB:
+                  questao.b.trim(),
+
+                alternativaC:
+                  questao.c.trim(),
+
+                alternativaD:
+                  questao.d.trim(),
+
+                alternativaE:
+                  questao.e.trim(),
+
+                correta:
+                  questao.correta,
+
+                materia:
+                  form.materia
+              })
+            }
+          );
+
+        const dadosQuestao =
+          await respostaQuestao.json();
+
+        if (!respostaQuestao.ok) {
+          throw new Error(
+            dadosQuestao.mensagem ||
+            dadosQuestao.erro ||
+            `Erro ao atualizar a questão ${i + 1}.`
+          );
+        }
+
+        // Atualizar ordem
+        const respostaOrdem =
+          await fetch(
+            `${API_URL}/simulados/${simuladoId}/questoes/${questao.id}`,
+            {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                ordem: i + 1
+              })
+            }
+          );
+
+        if (!respostaOrdem.ok) {
+          const dadosOrdem =
+            await respostaOrdem.json();
+
+          throw new Error(
+            dadosOrdem.mensagem ||
+            'Erro ao atualizar a ordem da questão.'
+          );
+        }
+      }
+
+      // Questão nova adicionada durante edição
+      else {
+        const respostaQuestao =
+          await fetch(
+            `${API_URL}/questoes`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                pergunta:
+                  questao.enunciado.trim(),
+
+                alternativaA:
+                  questao.a.trim(),
+
+                alternativaB:
+                  questao.b.trim(),
+
+                alternativaC:
+                  questao.c.trim(),
+
+                alternativaD:
+                  questao.d.trim(),
+
+                alternativaE:
+                  questao.e.trim(),
+
+                correta:
+                  questao.correta,
+
+                materia:
+                  form.materia
+              })
+            }
+          );
+
+        const dadosQuestao =
+          await respostaQuestao.json();
+
+        if (!respostaQuestao.ok) {
+          throw new Error(
+            dadosQuestao.mensagem ||
+            dadosQuestao.erro ||
+            `Erro ao cadastrar a questão ${i + 1}.`
+          );
+        }
+
+        const questaoCriada =
+          dadosQuestao.questao ||
+          dadosQuestao;
+
+        const questaoId =
+          questaoCriada.id ||
+          dadosQuestao.id;
+
+        if (!questaoId) {
+          throw new Error(
+            `O backend não retornou o ID da questão ${i + 1}.`
+          );
+        }
+
+        const respostaVinculo =
+          await fetch(
+            `${API_URL}/simulados/${simuladoId}/questoes`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                questaoId: questaoId,
+                ordem: i + 1
+              })
+            }
+          );
+
+        const dadosVinculo =
+          await respostaVinculo.json();
+
+        if (!respostaVinculo.ok) {
+          throw new Error(
+            dadosVinculo.mensagem ||
+            dadosVinculo.erro ||
+            `Erro ao vincular a questão ${i + 1}.`
+          );
+        }
+      }
+    }
+  }
+
+  // =====================================================
+  // POSTAR / SALVAR
+  // =====================================================
+
+  async function handlePostar(e) {
+    e.preventDefault();
+
+    if (!validarSimulado()) {
       return;
     }
 
-    setShowModal(false);
+    try {
+      setSalvando(true);
+      setErro('');
 
-    setQuestaoForm({
-      ...emptyQuestao
-    });
+      if (simuladoEditando) {
+        await editarSimulado();
 
+        alert(
+          'Simulado atualizado com sucesso!'
+        );
+      } else {
+        await criarSimulado();
+
+        alert(
+          'Simulado cadastrado com sucesso!'
+        );
+      }
+
+      setShowModal(false);
+
+      setSimuladoEditando(null);
+
+      setForm({
+        ...emptySimulado
+      });
+
+      setQuestoes([]);
+
+      await carregarSimulados();
+
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.message ||
+        'Não foi possível salvar o simulado.'
+      );
+
+      alert(
+        error.message ||
+        'Não foi possível salvar o simulado.'
+      );
+    } finally {
+      setSalvando(false);
+    }
   }
 
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
-
     <div>
-
-      {/* =================================================
-          CABEÇALHO
-      ================================================= */}
-
       <div className="page-header">
-
-        <h1>
-          Simulados
-        </h1>
-
+        <h1>Simulados</h1>
       </div>
 
-
-      {/* =================================================
-          ERRO
-      ================================================= */}
-
       {erro && (
-
         <div
           className="stat-card"
           style={{
             marginBottom: '20px'
           }}
         >
-
-          <p>
-            {erro}
-          </p>
-
+          <p>{erro}</p>
         </div>
-
       )}
 
-
-      {/* =================================================
-          MENSAGEM
-      ================================================= */}
-
-      {mensagem && (
-
-        <div
-          className="stat-card"
-          style={{
-            marginBottom: '20px'
-          }}
-        >
-
-          <p>
-            {mensagem}
-          </p>
-
-        </div>
-
-      )}
-
-
-      {/* =================================================
-          LISTA
-      ================================================= */}
-
-      {carregando ? (
-
-        <div className="stat-card">
-
-          <h2>
+      <div className="admin-list">
+        {carregando ? (
+          <div className="stat-card">
             Carregando simulados...
-          </h2>
+          </div>
+        ) : simulados.length === 0 ? (
+          <div className="stat-card">
+            <h2>
+              Nenhum simulado cadastrado.
+            </h2>
 
-        </div>
-
-      ) : simulados.length === 0 ? (
-
-        <div className="stat-card">
-
-          <h2>
-            Nenhum simulado cadastrado.
-          </h2>
-
-          <p>
-            Clique no botão + para criar o primeiro simulado.
-          </p>
-
-        </div>
-
-      ) : (
-
-        <div className="admin-list">
-
-          {simulados.map((simulado) => (
-
+            <p>
+              Clique no botão + para criar o
+              primeiro simulado.
+            </p>
+          </div>
+        ) : (
+          simulados.map((s) => (
             <div
               className="admin-list-item"
-              key={simulado.id}
+              key={s.id}
             >
-
               <div>
-
                 <strong>
-                  {simulado.titulo}
+                  {s.titulo}
                 </strong>
 
                 <div
                   style={{
                     marginTop: '5px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    opacity: 0.7
                   }}
                 >
-
-                  {simulado.materia}
-
-                  {' • '}
-
-                  {simulado.dificuldade}
-
-                  {' • '}
-
-                  {simulado.quantidade_questoes} questões
-
-                  {' • '}
-
-                  {simulado.tempo_limite} min
-
+                  {s.materia || 'Sem matéria'} •{' '}
+                  {s.dificuldade || 'Média'} •{' '}
+                  {s.quantidade_questoes || 0}{' '}
+                  questões •{' '}
+                  {s.tempo_limite || 0} minutos
                 </div>
-
               </div>
-
 
               <button
                 className="admin-edit-btn"
                 type="button"
+                onClick={() =>
+                  abrirEditar(s)
+                }
+                disabled={
+                  carregandoQuestoes ||
+                  salvando ||
+                  excluindo
+                }
               >
                 Editar
               </button>
-
             </div>
-
-          ))}
-
-        </div>
-
-      )}
-
-
-      {/* =================================================
-          BOTÃO +
-      ================================================= */}
+          ))
+        )}
+      </div>
 
       <button
         className="fab-add"
         onClick={openCreate}
         aria-label="Criar simulado"
+        type="button"
       >
         +
       </button>
-
 
       {/* =================================================
           MODAL DO SIMULADO
       ================================================= */}
 
       {showModal && (
-
         <div
           className="modal-overlay"
-          onClick={fecharModal}
+          onClick={() => {
+            if (!salvando && !excluindo) {
+              setShowModal(false);
+            }
+          }}
         >
-
           <div
             className="modal-card"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) =>
+              e.stopPropagation()
+            }
           >
-
             <div className="modal-header">
-
               <h2>
-                Criar Simulado
+                {simuladoEditando
+                  ? 'Editar Simulado'
+                  : 'Criar Simulado'}
               </h2>
-
             </div>
 
-
             <form onSubmit={handlePostar}>
-
               <div className="modal-two-col">
-
-                {/* ======================================
-                    INFORMAÇÕES
-                ====================================== */}
-
                 <div>
-
                   <div className="modal-input-group">
-
                     <label>
                       Nome do Simulado
                     </label>
@@ -664,19 +967,20 @@ export default function AdminSimulados() {
                       type="text"
                       value={form.nome}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          nome: e.target.value
-                        })
+                        alterarForm(
+                          'nome',
+                          e.target.value
+                        )
                       }
                       autoFocus
+                      disabled={
+                        salvando ||
+                        excluindo
+                      }
                     />
-
                   </div>
 
-
                   <div className="modal-input-group">
-
                     <label>
                       Limite de tempo
                     </label>
@@ -685,292 +989,342 @@ export default function AdminSimulados() {
                       type="number"
                       min="1"
                       placeholder="Ex: 60"
-                      value={form.limiteTempo}
+                      value={
+                        form.limiteTempo
+                      }
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          limiteTempo: e.target.value
-                        })
+                        alterarForm(
+                          'limiteTempo',
+                          e.target.value
+                        )
+                      }
+                      disabled={
+                        salvando ||
+                        excluindo
                       }
                     />
 
+                    <small>
+                      Informe o tempo em minutos.
+                    </small>
                   </div>
 
-
                   <div className="modal-input-group">
-
                     <label>
                       Dificuldade
                     </label>
 
                     <select
-                      value={form.dificuldade}
+                      value={
+                        form.dificuldade
+                      }
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          dificuldade: e.target.value
-                        })
+                        alterarForm(
+                          'dificuldade',
+                          e.target.value
+                        )
+                      }
+                      disabled={
+                        salvando ||
+                        excluindo
                       }
                     >
-
-                      <option>
+                      <option value="Fácil">
                         Fácil
                       </option>
 
-                      <option>
+                      <option value="Média">
                         Média
                       </option>
 
-                      <option>
+                      <option value="Difícil">
                         Difícil
                       </option>
-
                     </select>
-
                   </div>
-
                 </div>
 
-
-                {/* ======================================
-                    MATÉRIA
-                ====================================== */}
-
                 <div>
-
                   <span className="modal-materia-label">
                     Matéria
                   </span>
 
-
                   <div className="modal-materia-list">
-
-                    {MATERIAS.map((materia) => (
-
+                    {MATERIAS.map((m) => (
                       <button
                         type="button"
-                        key={materia}
+                        key={m}
                         className={`materia-pill ${
-                          form.materia === materia
+                          form.materia === m
                             ? 'selected'
                             : ''
                         }`}
                         onClick={() =>
-                          setForm({
-                            ...form,
-                            materia
-                          })
+                          alterarForm(
+                            'materia',
+                            m
+                          )
+                        }
+                        disabled={
+                          salvando ||
+                          excluindo
                         }
                       >
-
-                        {materia}
-
+                        {m}
                       </button>
-
                     ))}
-
                   </div>
-
                 </div>
-
               </div>
 
-
-              {/* =================================================
-                  CRIAR QUESTÃO
-              ================================================= */}
-
-              <button
-                type="button"
-                className="mural-btn secondary"
-                onClick={() =>
-                  setShowQuestaoModal(true)
-                }
+              <div
+                style={{
+                  marginTop: '20px'
+                }}
               >
-                Criar Questão
-              </button>
-
-
-              {/* =================================================
-                  QUESTÕES ADICIONADAS
-              ================================================= */}
+                <button
+                  type="button"
+                  className="mural-btn secondary"
+                  onClick={
+                    abrirCriarQuestao
+                  }
+                  disabled={
+                    salvando ||
+                    excluindo
+                  }
+                >
+                  + Criar Questão
+                </button>
+              </div>
 
               <div
                 style={{
                   marginTop: '15px'
                 }}
               >
-
                 <span
                   className={`question-count-badge ${
-                    questoes.length < MIN_QUESTOES
+                    questoes.length <
+                    MIN_QUESTOES
                       ? 'incomplete'
                       : ''
                   }`}
                 >
-
-                  {questoes.length}
-
-                  {' '}
-
-                  questão(ões) adicionada(s)
-
+                  {questoes.length} questão(ões)
+                  adicionada(s)
                 </span>
 
-
                 <p className="modal-note">
-
                   É necessário no mínimo{' '}
-
-                  {MIN_QUESTOES}
-
-                  {' '}
-
-                  questões para postar um simulado.
-
+                  {MIN_QUESTOES} questões para
+                  postar um simulado.
                 </p>
-
               </div>
 
-
-              {/* =================================================
-                  LISTA DAS QUESTÕES
-              ================================================= */}
-
               {questoes.length > 0 && (
-
                 <div
                   style={{
                     marginTop: '15px',
-                    maxHeight: '180px',
+                    maxHeight: '220px',
                     overflowY: 'auto'
                   }}
                 >
-
                   {questoes.map(
                     (questao, index) => (
-
                       <div
-                        key={index}
+                        key={
+                          questao.id ||
+                          `nova-${index}`
+                        }
                         style={{
+                          display: 'flex',
+                          justifyContent:
+                            'space-between',
+                          alignItems:
+                            'center',
+                          gap: '10px',
                           padding: '10px',
                           marginBottom: '8px',
-                          border: '1px solid #ddd',
+                          border:
+                            '1px solid #ddd',
                           borderRadius: '8px'
                         }}
                       >
-
-                        <strong>
-                          Questão {index + 1}
-                        </strong>
+                        <span>
+                          Questão {index + 1}{' '}
+                          — correta:{' '}
+                          {questao.correta}
+                        </span>
 
                         <div
                           style={{
-                            marginTop: '4px',
-                            fontSize: '14px'
+                            display: 'flex',
+                            gap: '8px'
                           }}
                         >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              abrirEditarQuestao(
+                                index
+                              )
+                            }
+                            disabled={
+                              salvando ||
+                              excluindo
+                            }
+                            style={{
+                              border:
+                                'none',
+                              background:
+                                'transparent',
+                              cursor:
+                                'pointer',
+                              color:
+                                '#2563eb'
+                            }}
+                          >
+                            Editar
+                          </button>
 
-                          {questao.enunciado}
-
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removerQuestao(
+                                index
+                              )
+                            }
+                            disabled={
+                              salvando ||
+                              excluindo
+                            }
+                            style={{
+                              border:
+                                'none',
+                              background:
+                                'transparent',
+                              cursor:
+                                'pointer',
+                              color:
+                                '#dc2626'
+                            }}
+                          >
+                            Remover
+                          </button>
                         </div>
-
                       </div>
-
                     )
                   )}
-
                 </div>
-
               )}
-
-
-              {/* =================================================
-                  BOTÕES
-              ================================================= */}
 
               <div
                 className="modal-actions"
                 style={{
-                  marginTop: '20px'
+                  marginTop: '20px',
+                  display: 'flex',
+                  justifyContent:
+                    'space-between'
                 }}
               >
+                <div>
+                  {simuladoEditando && (
+                    <button
+                      type="button"
+                      className="mural-btn"
+                      onClick={
+                        excluirSimulado
+                      }
+                      disabled={
+                        salvando ||
+                        excluindo
+                      }
+                      style={{
+                        background:
+                          '#dc2626',
+                        color: '#fff'
+                      }}
+                    >
+                      {excluindo
+                        ? 'Excluindo...'
+                        : 'Excluir Simulado'}
+                    </button>
+                  )}
+                </div>
 
-                <button
-                  type="button"
-                  className="mural-btn ghost"
-                  onClick={fecharModal}
-                  disabled={postando}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px'
+                  }}
                 >
-                  Cancelar
-                </button>
+                  <button
+                    type="button"
+                    className="mural-btn ghost"
+                    disabled={
+                      salvando ||
+                      excluindo
+                    }
+                    onClick={() =>
+                      setShowModal(false)
+                    }
+                  >
+                    Cancelar
+                  </button>
 
-
-                <button
-                  type="submit"
-                  className="mural-btn primary"
-                  disabled={
-                    postando ||
-                    questoes.length < MIN_QUESTOES
-                  }
-                >
-
-                  {postando
-                    ? 'Publicando...'
-                    : 'Postar'}
-
-                </button>
-
+                  <button
+                    type="submit"
+                    className="mural-btn primary"
+                    disabled={
+                      salvando ||
+                      excluindo ||
+                      questoes.length <
+                        MIN_QUESTOES
+                    }
+                  >
+                    {salvando
+                      ? 'Salvando...'
+                      : simuladoEditando
+                      ? 'Salvar alterações'
+                      : 'Postar'}
+                  </button>
+                </div>
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
 
       {/* =================================================
           MODAL DA QUESTÃO
       ================================================= */}
 
       {showQuestaoModal && (
-
         <div
           className="modal-overlay"
           onClick={() =>
             setShowQuestaoModal(false)
           }
         >
-
           <div
             className="modal-card"
             onClick={(e) =>
               e.stopPropagation()
             }
           >
-
             <div className="modal-header">
-
               <h2>
-                Criar Questão
+                {questaoEditando !== null
+                  ? 'Editar Questão'
+                  : 'Criar Questão'}
               </h2>
-
             </div>
 
-
-            <form onSubmit={handleAddQuestao}>
-
+            <form
+              onSubmit={handleAddQuestao}
+            >
               <div className="modal-scroll">
-
-                {/* ======================================
-                    ENUNCIADO
-                ====================================== */}
-
                 <div className="modal-input-group">
-
                   <label>
                     Enunciado
                   </label>
@@ -984,204 +1338,115 @@ export default function AdminSimulados() {
                       questaoForm.enunciado
                     }
                     onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        enunciado:
-                          e.target.value
-                      })
+                      alterarQuestao(
+                        'enunciado',
+                        e.target.value
+                      )
                     }
                     autoFocus
                   />
-
                 </div>
 
+                {[
+                  ['A', 'a'],
+                  ['B', 'b'],
+                  ['C', 'c'],
+                  ['D', 'd'],
+                  ['E', 'e']
+                ].map(
+                  ([letra, campo]) => (
+                    <div
+                      className="modal-input-group"
+                      key={campo}
+                    >
+                      <label>
+                        Alternativa {letra}
+                      </label>
 
-                {/* ======================================
-                    ALTERNATIVAS
-                ====================================== */}
-
-                <div className="modal-input-group">
-
-                  <label>
-                    Alternativa A
-                  </label>
-
-                  <input
-                    type="text"
-                    value={questaoForm.a}
-                    onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        a: e.target.value
-                      })
-                    }
-                  />
-
-                </div>
-
-
-                <div className="modal-input-group">
-
-                  <label>
-                    Alternativa B
-                  </label>
-
-                  <input
-                    type="text"
-                    value={questaoForm.b}
-                    onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        b: e.target.value
-                      })
-                    }
-                  />
-
-                </div>
-
+                      <input
+                        type="text"
+                        value={
+                          questaoForm[campo]
+                        }
+                        onChange={(e) =>
+                          alterarQuestao(
+                            campo,
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  )
+                )}
 
                 <div className="modal-input-group">
-
                   <label>
-                    Alternativa C
-                  </label>
-
-                  <input
-                    type="text"
-                    value={questaoForm.c}
-                    onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        c: e.target.value
-                      })
-                    }
-                  />
-
-                </div>
-
-
-                <div className="modal-input-group">
-
-                  <label>
-                    Alternativa D
-                  </label>
-
-                  <input
-                    type="text"
-                    value={questaoForm.d}
-                    onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        d: e.target.value
-                      })
-                    }
-                  />
-
-                </div>
-
-
-                <div className="modal-input-group">
-
-                  <label>
-                    Alternativa E
-                  </label>
-
-                  <input
-                    type="text"
-                    value={questaoForm.e}
-                    onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        e: e.target.value
-                      })
-                    }
-                  />
-
-                </div>
-
-
-                {/* ======================================
-                    RESPOSTA CORRETA
-                ====================================== */}
-
-                <div className="modal-input-group">
-
-                  <label>
-                    Resposta correta
+                    Alternativa correta
                   </label>
 
                   <select
-                    value={questaoForm.correta}
+                    value={
+                      questaoForm.correta
+                    }
                     onChange={(e) =>
-                      setQuestaoForm({
-                        ...questaoForm,
-                        correta:
-                          e.target.value
-                      })
+                      alterarQuestao(
+                        'correta',
+                        e.target.value
+                      )
                     }
                   >
-
                     <option value="A">
-                      Alternativa A
+                      A
                     </option>
 
                     <option value="B">
-                      Alternativa B
+                      B
                     </option>
 
                     <option value="C">
-                      Alternativa C
+                      C
                     </option>
 
                     <option value="D">
-                      Alternativa D
+                      D
                     </option>
 
                     <option value="E">
-                      Alternativa E
+                      E
                     </option>
-
                   </select>
-
                 </div>
-
               </div>
 
-
-              {/* =================================================
-                  BOTÕES DA QUESTÃO
-              ================================================= */}
-
               <div className="modal-actions">
-
                 <button
                   type="button"
                   className="mural-btn ghost"
-                  onClick={() =>
-                    setShowQuestaoModal(false)
-                  }
+                  onClick={() => {
+                    setShowQuestaoModal(
+                      false
+                    );
+                    setQuestaoEditando(
+                      null
+                    );
+                  }}
                 >
                   Cancelar
                 </button>
-
 
                 <button
                   type="submit"
                   className="mural-btn primary"
                 >
-                  Criar
+                  {questaoEditando !== null
+                    ? 'Salvar questão'
+                    : 'Criar'}
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }

@@ -13,21 +13,31 @@ const router = express.Router();
 // SALVAR RESULTADO
 // ============================
 
-router.post("/", cadastrarResultado);
+router.post(
+    "/",
+    cadastrarResultado
+);
+
+
+// ============================
+// BUSCAR DESEMPENHO
+// IMPORTANTE: vem antes de /:usuarioId
+// ============================
+
+router.get(
+    "/:usuarioId/desempenho",
+    buscarDesempenho
+);
 
 
 // ============================
 // BUSCAR RESULTADOS
 // ============================
 
-router.get("/:usuarioId", listarResultados);
-
-
-// ============================
-// BUSCAR DESEMPENHO
-// ============================
-
-router.get("/:usuarioId/desempenho", buscarDesempenho);
+router.get(
+    "/:usuarioId",
+    listarResultados
+);
 
 
 module.exports = router;

@@ -19,7 +19,10 @@ function cadastrarResultado(req, res) {
     } = req.body;
 
 
-    // Verifica se todos os campos foram enviados
+    // ============================
+    // VALIDAÇÕES
+    // ============================
+
     if (
         usuarioId === undefined ||
         acertos === undefined ||
@@ -32,45 +35,115 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // Evita divisão por zero
-    if (totalQuestoes <= 0) {
+    const usuario = Number(usuarioId);
+    const acertosNumero = Number(acertos);
+    const errosNumero = Number(erros);
+    const totalNumero = Number(totalQuestoes);
+
+
+    if (!Number.isInteger(usuario) || usuario <= 0) {
         return res.status(400).json({
-            mensagem: "O total de questões deve ser maior que zero."
+            mensagem: "Usuário inválido."
         });
     }
 
 
-    // Calcula a porcentagem automaticamente
-    const porcentagem =
-        (acertos / totalQuestoes) * 100;
+    if (
+        !Number.isInteger(acertosNumero) ||
+        acertosNumero < 0
+    ) {
+        return res.status(400).json({
+            mensagem: "Quantidade de acertos inválida."
+        });
+    }
 
+
+    if (
+        !Number.isInteger(errosNumero) ||
+        errosNumero < 0
+    ) {
+        return res.status(400).json({
+            mensagem: "Quantidade de erros inválida."
+        });
+    }
+
+
+    if (
+        !Number.isInteger(totalNumero) ||
+        totalNumero <= 0
+    ) {
+        return res.status(400).json({
+            mensagem:
+                "O total de questões deve ser maior que zero."
+        });
+    }
+
+
+    if (
+        acertosNumero + errosNumero !== totalNumero
+    ) {
+        return res.status(400).json({
+            mensagem:
+                "A quantidade de acertos e erros não corresponde ao total de questões."
+        });
+    }
+
+
+    // ============================
+    // CALCULAR PORCENTAGEM
+    // ============================
+
+    const porcentagem =
+        (acertosNumero / totalNumero) * 100;
+
+
+    // ============================
+    // SALVAR NO BANCO
+    // ============================
 
     criarResultado(
-        usuarioId,
-        acertos,
-        erros,
-        totalQuestoes,
+        usuario,
+        acertosNumero,
+        errosNumero,
+        totalNumero,
         porcentagem,
         (erro, resultado) => {
 
             if (erro) {
-                console.error(erro);
+
+                console.error(
+                    "❌ Erro ao salvar resultado:",
+                    erro
+                );
 
                 return res.status(500).json({
-                    mensagem: "Erro ao salvar resultado."
+                    mensagem:
+                        "Erro ao salvar resultado."
                 });
             }
 
 
             return res.status(201).json({
-                mensagem: "Resultado salvo com sucesso!",
+
+                mensagem:
+                    "Resultado salvo com sucesso!",
+
                 resultado: {
-                    id: resultado.insertId,
-                    usuarioId,
-                    acertos,
-                    erros,
-                    totalQuestoes,
-                    porcentagem: porcentagem.toFixed(2)
+
+                    id: resultado.lastID,
+
+                    usuarioId: usuario,
+
+                    acertos: acertosNumero,
+
+                    erros: errosNumero,
+
+                    totalQuestoes: totalNumero,
+
+                    porcentagem:
+                        Number(
+                            porcentagem.toFixed(2)
+                        )
                 }
             });
         }
@@ -84,12 +157,16 @@ function cadastrarResultado(req, res) {
 
 function listarResultados(req, res) {
 
-    const { usuarioId } = req.params;
+    const {
+        usuarioId
+    } = req.params;
 
 
     if (!usuarioId) {
+
         return res.status(400).json({
-            mensagem: "Usuário não informado."
+            mensagem:
+                "Usuário não informado."
         });
     }
 
@@ -99,10 +176,15 @@ function listarResultados(req, res) {
         (erro, resultados) => {
 
             if (erro) {
-                console.error(erro);
+
+                console.error(
+                    "❌ Erro ao buscar resultados:",
+                    erro
+                );
 
                 return res.status(500).json({
-                    mensagem: "Erro ao buscar resultados."
+                    mensagem:
+                        "Erro ao buscar resultados."
                 });
             }
 
@@ -121,12 +203,16 @@ function listarResultados(req, res) {
 
 function buscarDesempenho(req, res) {
 
-    const { usuarioId } = req.params;
+    const {
+        usuarioId
+    } = req.params;
 
 
     if (!usuarioId) {
+
         return res.status(400).json({
-            mensagem: "Usuário não informado."
+            mensagem:
+                "Usuário não informado."
         });
     }
 
@@ -136,10 +222,15 @@ function buscarDesempenho(req, res) {
         (erro, resultado) => {
 
             if (erro) {
-                console.error(erro);
+
+                console.error(
+                    "❌ Erro ao buscar desempenho:",
+                    erro
+                );
 
                 return res.status(500).json({
-                    mensagem: "Erro ao buscar desempenho."
+                    mensagem:
+                        "Erro ao buscar desempenho."
                 });
             }
 
@@ -151,10 +242,6 @@ function buscarDesempenho(req, res) {
     );
 }
 
-
-// ============================
-// EXPORTAÇÕES
-// ============================
 
 module.exports = {
     cadastrarResultado,
