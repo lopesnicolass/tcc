@@ -1,13 +1,15 @@
 const db = require("../config/db");
 
 
-// ============================
+// =====================================================
 // CRIAR SIMULADO
-// ============================
+// =====================================================
 
 function criarSimulado(
     titulo,
     descricao,
+    materia,
+    dificuldade,
     tempoLimite,
     quantidadeQuestoes,
     callback
@@ -18,10 +20,12 @@ function criarSimulado(
         (
             titulo,
             descricao,
+            materia,
+            dificuldade,
             tempo_limite,
             quantidade_questoes
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     db.run(
@@ -29,6 +33,8 @@ function criarSimulado(
         [
             titulo,
             descricao,
+            materia,
+            dificuldade,
             tempoLimite,
             quantidadeQuestoes
         ],
@@ -44,15 +50,16 @@ function criarSimulado(
 }
 
 
-// ============================
-// LISTAR SIMULADOS
-// ============================
+// =====================================================
+// LISTAR TODOS OS SIMULADOS
+// =====================================================
 
 function listarSimulados(callback) {
 
     const sql = `
         SELECT *
         FROM simulados
+        WHERE ativo = 1
         ORDER BY id DESC
     `;
 
@@ -60,9 +67,9 @@ function listarSimulados(callback) {
 }
 
 
-// ============================
+// =====================================================
 // BUSCAR SIMULADO POR ID
-// ============================
+// =====================================================
 
 function buscarSimuladoPorId(id, callback) {
 
@@ -72,13 +79,17 @@ function buscarSimuladoPorId(id, callback) {
         WHERE id = ?
     `;
 
-    db.get(sql, [id], callback);
+    db.get(
+        sql,
+        [id],
+        callback
+    );
 }
 
 
-// ============================
+// =====================================================
 // ADICIONAR QUESTÃO AO SIMULADO
-// ============================
+// =====================================================
 
 function adicionarQuestao(
     simuladoId,
@@ -116,9 +127,9 @@ function adicionarQuestao(
 }
 
 
-// ============================
+// =====================================================
 // LISTAR QUESTÕES DO SIMULADO
-// ============================
+// =====================================================
 
 function listarQuestoesDoSimulado(
     simuladoId,
@@ -134,13 +145,14 @@ function listarQuestoesDoSimulado(
             q.alternativa_c,
             q.alternativa_d,
             q.alternativa_e,
+            q.correta,
             q.materia,
             sq.ordem
 
         FROM simulado_questoes sq
 
         INNER JOIN questoes q
-        ON q.id = sq.questao_id
+            ON q.id = sq.questao_id
 
         WHERE sq.simulado_id = ?
 
@@ -155,9 +167,9 @@ function listarQuestoesDoSimulado(
 }
 
 
-// ============================
+// =====================================================
 // REMOVER QUESTÃO DO SIMULADO
-// ============================
+// =====================================================
 
 function removerQuestao(
     simuladoId,
@@ -189,9 +201,9 @@ function removerQuestao(
 }
 
 
-// ============================
+// =====================================================
 // EXPORTAÇÕES
-// ============================
+// =====================================================
 
 module.exports = {
     criarSimulado,
