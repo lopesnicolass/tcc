@@ -7,13 +7,13 @@ const API_URL = 'http://localhost:3000';
 const STATUS_LABEL = {
   'nao-iniciado': 'Não iniciado',
   'em-progresso': 'Em progresso',
-  'concluido': 'Concluído'
+  concluido: 'Concluído'
 };
 
 const BTN_LABEL = {
   'nao-iniciado': 'Iniciar',
   'em-progresso': 'Continuar',
-  'concluido': 'Refazer'
+  concluido: 'Refazer'
 };
 
 export default function Simulados() {
@@ -50,8 +50,6 @@ export default function Simulados() {
     try {
       const usuario = JSON.parse(usuarioSalvo);
 
-      console.log('Usuário logado:', usuario);
-
       if (usuario.id) {
         return Number(usuario.id);
       }
@@ -67,6 +65,30 @@ export default function Simulados() {
       console.error('Erro ao ler etecamp_usuario:', error);
       return null;
     }
+  }
+
+  // ==========================================
+  // CHAVES DO LOCALSTORAGE
+  // ==========================================
+
+  function obterChaveStatus() {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) {
+      return null;
+    }
+
+    return `statusSimulados_${usuarioId}`;
+  }
+
+  function obterChaveRespostas(simuladoId) {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) {
+      return null;
+    }
+
+    return `respostasSimulado_${usuarioId}_${simuladoId}`;
   }
 
   // ==========================================
@@ -92,9 +114,20 @@ export default function Simulados() {
 
       const lista = dados.simulados || [];
 
-      const statusSalvos = JSON.parse(
-        localStorage.getItem('statusSimulados') || '{}'
-      );
+      const chaveStatus = obterChaveStatus();
+
+      let statusSalvos = {};
+
+      if (chaveStatus) {
+        try {
+          statusSalvos = JSON.parse(
+            localStorage.getItem(chaveStatus) || '{}'
+          );
+        } catch (error) {
+          console.error('Erro ao ler status dos simulados:', error);
+          statusSalvos = {};
+        }
+      }
 
       const simuladosComStatus = lista.map((simulado) => ({
         ...simulado,
@@ -118,14 +151,30 @@ export default function Simulados() {
   // ==========================================
 
   function salvarStatus(id, status) {
-    const statusSalvos = JSON.parse(
-      localStorage.getItem('statusSimulados') || '{}'
-    );
+    const chaveStatus = obterChaveStatus();
+
+    if (!chaveStatus) {
+      console.error(
+        'Não foi possível salvar o status: usuário não identificado.'
+      );
+      return;
+    }
+
+    let statusSalvos = {};
+
+    try {
+      statusSalvos = JSON.parse(
+        localStorage.getItem(chaveStatus) || '{}'
+      );
+    } catch (error) {
+      console.error('Erro ao ler status:', error);
+      statusSalvos = {};
+    }
 
     statusSalvos[id] = status;
 
     localStorage.setItem(
-      'statusSimulados',
+      chaveStatus,
       JSON.stringify(statusSalvos)
     );
   }
@@ -156,21 +205,34 @@ export default function Simulados() {
       setSimuladoSelecionado(simulado);
       setQuestoes(listaQuestoes);
 
-      if (simulado.status === 'em-progresso') {
-        const respostasSalvas = JSON.parse(
-          localStorage.getItem(
-            `respostasSimulado_${simulado.id}`
-          ) || '{}'
-        );
+      // ========================================
+      // CARREGAR RESPOSTAS DO USUÁRIO
+      // ========================================
 
-        setRespostas(respostasSalvas);
+      const chaveRespostas = obterChaveRespostas(simulado.id);
+
+      if (simulado.status === 'em-progresso' && chaveRespostas) {
+        try {
+          const respostasSalvas = JSON.parse(
+            localStorage.getItem(chaveRespostas) || '{}'
+          );
+
+          setRespostas(respostasSalvas);
+        } catch (error) {
+          console.error('Erro ao carregar respostas:', error);
+          setRespostas({});
+        }
       } else {
-        localStorage.removeItem(
-          `respostasSimulado_${simulado.id}`
-        );
+        if (chaveRespostas) {
+          localStorage.removeItem(chaveRespostas);
+        }
 
         setRespostas({});
       }
+
+      // ========================================
+      // INICIAR OU REINICIAR SIMULADO
+      // ========================================
 
       if (
         simulado.status === 'nao-iniciado' ||
@@ -188,6 +250,8 @@ export default function Simulados() {
               : item
           )
         );
+
+        setSimuladoSelecionado(atualizado);
 
         salvarStatus(
           simulado.id,
@@ -213,27 +277,31 @@ export default function Simulados() {
   }
 
   // ==========================================
-  // SELECIONAR RESPOSTA
+  // SELECIONAR / TROCAR RESPOSTA
   // ==========================================
 
   function selecionarResposta(questaoId, alternativa) {
-    if (respostas[questaoId]) {
-      return;
-    }
+    setRespostas((prev) => {
+      const novasRespostas = {
+        ...prev,
+        [questaoId]: alternativa
+      };
 
-    const novasRespostas = {
-      ...respostas,
-      [questaoId]: alternativa
-    };
+      if (simuladoSelecionado) {
+        const chaveRespostas = obterChaveRespostas(
+          simuladoSelecionado.id
+        );
 
-    setRespostas(novasRespostas);
+        if (chaveRespostas) {
+          localStorage.setItem(
+            chaveRespostas,
+            JSON.stringify(novasRespostas)
+          );
+        }
+      }
 
-    if (simuladoSelecionado) {
-      localStorage.setItem(
-        `respostasSimulado_${simuladoSelecionado.id}`,
-        JSON.stringify(novasRespostas)
-      );
-    }
+      return novasRespostas;
+    });
   }
 
   // ==========================================
@@ -247,22 +315,6 @@ export default function Simulados() {
         questao.respostaCorreta ||
         ''
     ).toUpperCase();
-  }
-
-  // ==========================================
-  // TEXTO DA ALTERNATIVA
-  // ==========================================
-
-  function obterTextoAlternativa(questao, letra) {
-    const alternativas = {
-      A: questao.alternativa_a,
-      B: questao.alternativa_b,
-      C: questao.alternativa_c,
-      D: questao.alternativa_d,
-      E: questao.alternativa_e
-    };
-
-    return alternativas[letra] || '';
   }
 
   // ==========================================
@@ -342,13 +394,9 @@ export default function Simulados() {
 
         body: JSON.stringify({
           usuarioId,
-
           acertos: resultado.acertos,
-
           erros: resultado.erros,
-
-          totalQuestoes:
-            resultado.totalQuestoes
+          totalQuestoes: resultado.totalQuestoes
         })
       }
     );
@@ -379,7 +427,11 @@ export default function Simulados() {
 
     if (respondeu < questoes.length) {
       const continuar = window.confirm(
-        `Você respondeu ${respondeu} de ${questoes.length} questões.\n\nAs questões não respondidas serão consideradas erradas.\n\nDeseja finalizar mesmo assim?`
+        `Você respondeu ${respondeu} de ${questoes.length} questões.
+
+As questões não respondidas serão consideradas erradas.
+
+Deseja finalizar mesmo assim?`
       );
 
       if (!continuar) {
@@ -408,14 +460,13 @@ export default function Simulados() {
       const resultado =
         dados.resultado || resultadoCalculado;
 
-      // ======================================
-      // ATUALIZAR STATUS
-      // ======================================
+      // ========================================
+      // ATUALIZAR STATUS PARA CONCLUÍDO
+      // ========================================
 
       setSimulados((prev) =>
         prev.map((simulado) =>
-          simulado.id ===
-          simuladoSelecionado.id
+          simulado.id === simuladoSelecionado.id
             ? {
                 ...simulado,
                 status: 'concluido'
@@ -424,52 +475,50 @@ export default function Simulados() {
         )
       );
 
+      const simuladoAtualizado = {
+        ...simuladoSelecionado,
+        status: 'concluido'
+      };
+
+      setSimuladoSelecionado(
+        simuladoAtualizado
+      );
+
       salvarStatus(
         simuladoSelecionado.id,
         'concluido'
       );
-
-      // ======================================
-      // XP
-      // ======================================
 
       addXP(
         50,
         'simulado concluído'
       );
 
-      // ======================================
-      // RESULTADO FINAL
-      // ======================================
-
       setResultadoFinal({
-        acertos:
-          resultado.acertos,
-
-        erros:
-          resultado.erros,
-
+        acertos: resultado.acertos,
+        erros: resultado.erros,
         totalQuestoes:
           resultado.totalQuestoes,
-
         porcentagem:
-          Number(
-            resultado.porcentagem
-          ),
-
+          Number(resultado.porcentagem),
         detalhes:
           resultadoCalculado.detalhes
       });
 
       setMostrarErros(false);
 
-      // ======================================
-      // APAGAR RESPOSTAS SALVAS
-      // ======================================
+      // Remove somente as respostas
+      // deste usuário e deste simulado.
+      const chaveRespostas =
+        obterChaveRespostas(
+          simuladoSelecionado.id
+        );
 
-      localStorage.removeItem(
-        `respostasSimulado_${simuladoSelecionado.id}`
-      );
+      if (chaveRespostas) {
+        localStorage.removeItem(
+          chaveRespostas
+        );
+      }
     } catch (error) {
       console.error(error);
 
@@ -496,24 +545,34 @@ export default function Simulados() {
       return;
     }
 
-    localStorage.removeItem(
-      `respostasSimulado_${simuladoSelecionado.id}`
-    );
+    const chaveRespostas =
+      obterChaveRespostas(
+        simuladoSelecionado.id
+      );
+
+    if (chaveRespostas) {
+      localStorage.removeItem(
+        chaveRespostas
+      );
+    }
 
     setRespostas({});
-
     setResultadoFinal(null);
-
     setMostrarErros(false);
+
+    const simuladoAtualizado = {
+      ...simuladoSelecionado,
+      status: 'em-progresso'
+    };
+
+    setSimuladoSelecionado(
+      simuladoAtualizado
+    );
 
     setSimulados((prev) =>
       prev.map((simulado) =>
-        simulado.id ===
-        simuladoSelecionado.id
-          ? {
-              ...simulado,
-              status: 'em-progresso'
-            }
+        simulado.id === simuladoSelecionado.id
+          ? simuladoAtualizado
           : simulado
       )
     );
@@ -574,14 +633,10 @@ export default function Simulados() {
 
   const materias = [
     'Todas',
-
     ...Array.from(
       new Set(
-        questoes
-          .map(
-            (questao) =>
-              questao.materia
-          )
+        simulados
+          .map((simulado) => simulado.materia)
           .filter(Boolean)
       )
     )
@@ -598,8 +653,7 @@ export default function Simulados() {
   const concluidos =
     simulados.filter(
       (simulado) =>
-        simulado.status ===
-        'concluido'
+        simulado.status === 'concluido'
     ).length;
 
   // ==========================================
@@ -607,14 +661,14 @@ export default function Simulados() {
   // ==========================================
 
   if (simuladoSelecionado) {
-
     // ========================================
     // RESULTADO FINAL
     // ========================================
 
-       if (resultadoFinal) {
+    if (resultadoFinal) {
       return createPortal(
         <div className="simulado-fullscreen">
+
           <div className="page-header">
             <div>
               <h1>
@@ -626,8 +680,6 @@ export default function Simulados() {
               </p>
             </div>
           </div>
-
-          {/* RESULTADO PRINCIPAL */}
 
           <div
             className="stat-card"
@@ -654,8 +706,6 @@ export default function Simulados() {
             >
               Confira seu desempenho:
             </p>
-
-            {/* ESTATÍSTICAS */}
 
             <div
               className="stats-row"
@@ -724,13 +774,10 @@ export default function Simulados() {
               questões.
             </p>
 
-            {/* BOTÕES */}
-
             <div
               style={{
                 display: 'flex',
-                justifyContent:
-                  'center',
+                justifyContent: 'center',
                 gap: '15px',
                 flexWrap: 'wrap'
               }}
@@ -768,17 +815,12 @@ export default function Simulados() {
             </div>
           </div>
 
-          {/* =====================================
-              QUESTÕES DO RESULTADO
-          ====================================== */}
-
           {mostrarErros && (
             <div
               style={{
                 marginTop: '30px',
                 display: 'flex',
-                flexDirection:
-                  'column',
+                flexDirection: 'column',
                 gap: '20px',
                 marginBottom: '50px'
               }}
@@ -817,46 +859,31 @@ export default function Simulados() {
                             : '2px solid #dc2626'
                       }}
                     >
-                      {/* CABEÇALHO */}
-
                       <div
                         style={{
-                          display:
-                            'flex',
-                          justifyContent:
-                            'space-between',
-                          alignItems:
-                            'center',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                           gap: '15px',
-                          marginBottom:
-                            '20px',
-                          flexWrap:
-                            'wrap'
+                          marginBottom: '20px',
+                          flexWrap: 'wrap'
                         }}
                       >
-                        <span
-                          className="simulado-subject"
-                        >
-                          Questão{' '}
-                          {index + 1}
+                        <span className="simulado-subject">
+                          Questão {index + 1}
                         </span>
 
                         <span
                           style={{
-                            padding:
-                              '7px 14px',
-                            borderRadius:
-                              '20px',
-                            fontWeight:
-                              '700',
-                            color:
-                              acertou
-                                ? '#166534'
-                                : '#991b1b',
-                            background:
-                              acertou
-                                ? '#dcfce7'
-                                : '#fee2e2'
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            fontWeight: '700',
+                            color: acertou
+                              ? '#166534'
+                              : '#991b1b',
+                            background: acertou
+                              ? '#dcfce7'
+                              : '#fee2e2'
                           }}
                         >
                           {acertou
@@ -865,54 +892,29 @@ export default function Simulados() {
                         </span>
                       </div>
 
-                      {/* PERGUNTA */}
-
                       <h2
                         style={{
-                          marginBottom:
-                            '25px'
+                          marginBottom: '25px'
                         }}
                       >
                         {questao.pergunta}
                       </h2>
 
-                      {/* ALTERNATIVAS */}
-
                       <div
                         style={{
-                          display:
-                            'flex',
-                          flexDirection:
-                            'column',
+                          display: 'flex',
+                          flexDirection: 'column',
                           gap: '10px'
                         }}
                       >
                         {[
-                          [
-                            'A',
-                            questao.alternativa_a
-                          ],
-                          [
-                            'B',
-                            questao.alternativa_b
-                          ],
-                          [
-                            'C',
-                            questao.alternativa_c
-                          ],
-                          [
-                            'D',
-                            questao.alternativa_d
-                          ],
-                          [
-                            'E',
-                            questao.alternativa_e
-                          ]
+                          ['A', questao.alternativa_a],
+                          ['B', questao.alternativa_b],
+                          ['C', questao.alternativa_c],
+                          ['D', questao.alternativa_d],
+                          ['E', questao.alternativa_e]
                         ].map(
-                          ([
-                            letra,
-                            texto
-                          ]) => {
+                          ([letra, texto]) => {
                             const ehCorreta =
                               letra ===
                               respostaCorreta;
@@ -927,9 +929,7 @@ export default function Simulados() {
                             let border =
                               '1px solid #d1d5db';
 
-                            if (
-                              ehCorreta
-                            ) {
+                            if (ehCorreta) {
                               background =
                                 '#dcfce7';
 
@@ -950,37 +950,25 @@ export default function Simulados() {
 
                             return (
                               <div
-                                key={
-                                  letra
-                                }
+                                key={letra}
                                 style={{
-                                  display:
-                                    'flex',
-                                  alignItems:
-                                    'center',
+                                  display: 'flex',
+                                  alignItems: 'center',
                                   gap: '12px',
-                                  padding:
-                                    '14px 16px',
-                                  borderRadius:
-                                    '10px',
+                                  padding: '14px 16px',
+                                  borderRadius: '10px',
                                   border,
                                   background
                                 }}
                               >
                                 <strong
                                   style={{
-                                    minWidth:
-                                      '32px',
-                                    height:
-                                      '32px',
-                                    display:
-                                      'flex',
-                                    alignItems:
-                                      'center',
-                                    justifyContent:
-                                      'center',
-                                    borderRadius:
-                                      '50%',
+                                    minWidth: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: '50%',
                                     background:
                                       ehCorreta
                                         ? '#16a34a'
@@ -1008,8 +996,7 @@ export default function Simulados() {
                                 {ehCorreta && (
                                   <strong
                                     style={{
-                                      color:
-                                        '#166534'
+                                      color: '#166534'
                                     }}
                                   >
                                     ✓ Correta
@@ -1020,8 +1007,7 @@ export default function Simulados() {
                                   !ehCorreta && (
                                     <strong
                                       style={{
-                                        color:
-                                          '#991b1b'
+                                        color: '#991b1b'
                                       }}
                                     >
                                       Sua resposta
@@ -1033,16 +1019,11 @@ export default function Simulados() {
                         )}
                       </div>
 
-                      {/* RESUMO DA QUESTÃO */}
-
                       <div
                         style={{
-                          marginTop:
-                            '20px',
-                          padding:
-                            '15px',
-                          borderRadius:
-                            '10px',
+                          marginTop: '20px',
+                          padding: '15px',
+                          borderRadius: '10px',
                           background:
                             acertou
                               ? '#f0fdf4'
@@ -1053,8 +1034,7 @@ export default function Simulados() {
                           <p
                             style={{
                               margin: 0,
-                              color:
-                                '#166534'
+                              color: '#166534'
                             }}
                           >
                             <strong>
@@ -1062,9 +1042,7 @@ export default function Simulados() {
                             </strong>{' '}
                             A alternativa{' '}
                             <strong>
-                              {
-                                respostaCorreta
-                              }
+                              {respostaCorreta}
                             </strong>{' '}
                             é a correta.
                           </p>
@@ -1072,8 +1050,7 @@ export default function Simulados() {
                           <p
                             style={{
                               margin: 0,
-                              color:
-                                '#991b1b'
+                              color: '#991b1b'
                             }}
                           >
                             <strong>
@@ -1087,9 +1064,7 @@ export default function Simulados() {
                             {' | '}
                             Resposta correta:{' '}
                             <strong>
-                              {
-                                respostaCorreta
-                              }
+                              {respostaCorreta}
                             </strong>
                           </p>
                         )}
@@ -1099,7 +1074,7 @@ export default function Simulados() {
                 }
               )}
             </div>
-                    )}
+          )}
         </div>,
         document.body
       );
@@ -1109,10 +1084,12 @@ export default function Simulados() {
     // TELA DAS QUESTÕES
     // ========================================
 
-       return createPortal(
+    return createPortal(
       <div className="simulado-fullscreen">
+
         <div className="page-header">
           <div>
+
             <button
               className="simulado-btn"
               onClick={
@@ -1122,8 +1099,7 @@ export default function Simulados() {
                 salvandoResultado
               }
               style={{
-                marginBottom:
-                  '15px'
+                marginBottom: '15px'
               }}
             >
               ← Voltar para simulados
@@ -1135,17 +1111,15 @@ export default function Simulados() {
 
             {simuladoSelecionado.descricao && (
               <p>
-                {
-                  simuladoSelecionado.descricao
-                }
+                {simuladoSelecionado.descricao}
               </p>
             )}
+
           </div>
         </div>
 
-        {/* INFORMAÇÕES */}
-
         <div className="stats-row">
+
           <div className="stat-card">
             <div className="stat-value">
               {questoes.length}
@@ -1158,9 +1132,7 @@ export default function Simulados() {
 
           <div className="stat-card">
             <div className="stat-value">
-              {
-                simuladoSelecionado.tempo_limite
-              }
+              {simuladoSelecionado.tempo_limite}
             </div>
 
             <div className="stat-label">
@@ -1170,20 +1142,15 @@ export default function Simulados() {
 
           <div className="stat-card">
             <div className="stat-value">
-              {
-                Object.keys(
-                  respostas
-                ).length
-              }
+              {Object.keys(respostas).length}
             </div>
 
             <div className="stat-label">
               Respondidas
             </div>
           </div>
-        </div>
 
-        {/* QUESTÕES */}
+        </div>
 
         <div
           style={{
@@ -1193,7 +1160,9 @@ export default function Simulados() {
             marginTop: '30px'
           }}
         >
+
           {questoes.length === 0 ? (
+
             <div className="stat-card">
               <h2>
                 Este simulado ainda
@@ -1208,13 +1177,14 @@ export default function Simulados() {
                 o simulado.
               </p>
             </div>
+
           ) : (
+
             questoes.map(
               (questao, index) => {
+
                 const respostaSelecionada =
-                  respostas[
-                    questao.id
-                  ];
+                  respostas[questao.id];
 
                 const respondeu =
                   Boolean(
@@ -1230,7 +1200,9 @@ export default function Simulados() {
                       padding: '25px'
                     }}
                   >
+
                     <div className="simulado-top">
+
                       <span className="simulado-subject">
                         Questão {index + 1}
                       </span>
@@ -1240,14 +1212,13 @@ export default function Simulados() {
                           {questao.materia}
                         </span>
                       )}
+
                     </div>
 
                     <h2
                       style={{
-                        marginTop:
-                          '20px',
-                        marginBottom:
-                          '25px'
+                        marginTop: '20px',
+                        marginBottom: '25px'
                       }}
                     >
                       {questao.pergunta}
@@ -1255,51 +1226,30 @@ export default function Simulados() {
 
                     <div
                       style={{
-                        display:
-                          'flex',
-                        flexDirection:
-                          'column',
+                        display: 'flex',
+                        flexDirection: 'column',
                         gap: '12px'
                       }}
                     >
+
                       {[
-                        [
-                          'A',
-                          questao.alternativa_a
-                        ],
-                        [
-                          'B',
-                          questao.alternativa_b
-                        ],
-                        [
-                          'C',
-                          questao.alternativa_c
-                        ],
-                        [
-                          'D',
-                          questao.alternativa_d
-                        ],
-                        [
-                          'E',
-                          questao.alternativa_e
-                        ]
+                        ['A', questao.alternativa_a],
+                        ['B', questao.alternativa_b],
+                        ['C', questao.alternativa_c],
+                        ['D', questao.alternativa_d],
+                        ['E', questao.alternativa_e]
                       ].map(
-                        ([
-                          letra,
-                          texto
-                        ]) => {
+                        ([letra, texto]) => {
+
                           const selecionada =
                             respostaSelecionada ===
                             letra;
 
                           return (
                             <button
-                              key={
-                                letra
-                              }
+                              key={letra}
                               type="button"
                               disabled={
-                                respondeu ||
                                 salvandoResultado
                               }
                               onClick={() =>
@@ -1309,53 +1259,47 @@ export default function Simulados() {
                                 )
                               }
                               style={{
-                                display:
-                                  'flex',
-                                alignItems:
-                                  'center',
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: '15px',
-                                width:
-                                  '100%',
-                                textAlign:
-                                  'left',
-                                padding:
-                                  '16px 18px',
-                                borderRadius:
-                                  '10px',
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '16px 18px',
+                                borderRadius: '10px',
+
                                 border:
                                   selecionada
                                     ? '2px solid #2563eb'
                                     : '1px solid #d1d5db',
+
                                 background:
                                   selecionada
                                     ? '#eff6ff'
                                     : '#ffffff',
+
                                 cursor:
-                                  respondeu
+                                  salvandoResultado
                                     ? 'default'
                                     : 'pointer',
-                                fontSize:
-                                  '16px'
+
+                                fontSize: '16px'
                               }}
                             >
+
                               <strong
                                 style={{
-                                  minWidth:
-                                    '32px',
-                                  height:
-                                    '32px',
-                                  display:
-                                    'flex',
-                                  alignItems:
-                                    'center',
-                                  justifyContent:
-                                    'center',
-                                  borderRadius:
-                                    '50%',
+                                  minWidth: '32px',
+                                  height: '32px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '50%',
+
                                   background:
                                     selecionada
                                       ? '#2563eb'
                                       : '#e5e7eb',
+
                                   color:
                                     selecionada
                                       ? '#ffffff'
@@ -1368,15 +1312,31 @@ export default function Simulados() {
                               <span>
                                 {texto}
                               </span>
+
                             </button>
                           );
                         }
                       )}
+
                     </div>
 
+                    {respondeu && (
+                      <p
+                        style={{
+                          marginTop: '12px',
+                          fontSize: '14px',
+                          opacity: 0.7
+                        }}
+                      >
+                        Você pode alterar sua
+                        resposta antes de
+                        finalizar o simulado.
+                      </p>
+                    )}
+
                     {index <
-                      questoes.length -
-                        1 && (
+                      questoes.length - 1 && (
+
                       <button
                         className="simulado-btn"
                         onClick={() =>
@@ -1385,23 +1345,25 @@ export default function Simulados() {
                           )
                         }
                         style={{
-                          marginTop:
-                            '25px'
+                          marginTop: '25px'
                         }}
                       >
                         Próxima questão →
                       </button>
+
                     )}
+
                   </div>
                 );
               }
             )
+
           )}
+
         </div>
 
-        {/* FINALIZAR */}
-
         {questoes.length > 0 && (
+
           <div
             style={{
               marginTop: '35px',
@@ -1410,6 +1372,7 @@ export default function Simulados() {
               textAlign: 'center'
             }}
           >
+
             <button
               className="simulado-btn"
               onClick={
@@ -1427,8 +1390,11 @@ export default function Simulados() {
                 ? 'Salvando resultado...'
                 : 'Finalizar simulado'}
             </button>
+
           </div>
-               )}
+
+        )}
+
       </div>,
       document.body
     );
@@ -1441,6 +1407,7 @@ export default function Simulados() {
   if (carregando) {
     return (
       <div>
+
         <div className="page-header">
           <h1>Simulados</h1>
         </div>
@@ -1450,6 +1417,7 @@ export default function Simulados() {
             Carregando simulados...
           </h2>
         </div>
+
       </div>
     );
   }
@@ -1460,10 +1428,13 @@ export default function Simulados() {
 
   return (
     <div>
+
       <div className="page-header">
+
         <h1>Simulados</h1>
 
         <div className="page-actions">
+
           <select
             className="mural-filter-select"
             value={filtro}
@@ -1473,6 +1444,7 @@ export default function Simulados() {
               )
             }
           >
+
             <option value="Todas">
               Todas as matérias
             </option>
@@ -1483,15 +1455,20 @@ export default function Simulados() {
                   materia !== 'Todas'
               )
               .map((materia) => (
+
                 <option
                   key={materia}
                   value={materia}
                 >
                   {materia}
                 </option>
+
               ))}
+
           </select>
+
         </div>
+
       </div>
 
       {erro && (
@@ -1506,7 +1483,9 @@ export default function Simulados() {
       )}
 
       <div className="stats-row">
+
         <div className="stat-card">
+
           <div className="stat-value">
             {String(
               concluidos
@@ -1516,9 +1495,11 @@ export default function Simulados() {
           <div className="stat-label">
             Simulados concluídos
           </div>
+
         </div>
 
         <div className="stat-card">
+
           <div className="stat-value">
             {simulados.length}
           </div>
@@ -1526,9 +1507,11 @@ export default function Simulados() {
           <div className="stat-label">
             Simulados disponíveis
           </div>
+
         </div>
 
         <div className="stat-card">
+
           <div className="stat-value">
             {simulados.reduce(
               (
@@ -1547,16 +1530,20 @@ export default function Simulados() {
           <div className="stat-label">
             Questões disponíveis
           </div>
+
         </div>
+
       </div>
 
       {simuladosVisiveis.length === 0 ? (
+
         <div
           className="stat-card"
           style={{
             marginTop: '25px'
           }}
         >
+
           <h2>
             Nenhum simulado encontrado.
           </h2>
@@ -1566,21 +1553,28 @@ export default function Simulados() {
             pelo administrador
             aparecerão aqui.
           </p>
+
         </div>
+
       ) : (
+
         <div
           className="simulado-grid"
           style={{
             marginTop: '25px'
           }}
         >
+
           {simuladosVisiveis.map(
             (simulado) => (
+
               <div
                 className="simulado-card"
                 key={simulado.id}
               >
+
                 <div className="simulado-top">
+
                   <span className="simulado-subject">
                     {simulado.materia ||
                       'Simulado'}
@@ -1595,13 +1589,13 @@ export default function Simulados() {
                       ]
                     }
                   </span>
+
                 </div>
 
                 <h2
                   style={{
                     marginTop: '15px',
-                    marginBottom:
-                      '10px'
+                    marginBottom: '10px'
                   }}
                 >
                   {simulado.titulo}
@@ -1610,8 +1604,7 @@ export default function Simulados() {
                 {simulado.descricao && (
                   <p
                     style={{
-                      marginBottom:
-                        '20px'
+                      marginBottom: '20px'
                     }}
                   >
                     {simulado.descricao}
@@ -1619,6 +1612,7 @@ export default function Simulados() {
                 )}
 
                 <div className="simulado-meta">
+
                   <span>
                     📝{' '}
                     {
@@ -1634,6 +1628,7 @@ export default function Simulados() {
                     }{' '}
                     minutos
                   </span>
+
                 </div>
 
                 <button
@@ -1656,11 +1651,16 @@ export default function Simulados() {
                         simulado.status
                       ]}
                 </button>
+
               </div>
+
             )
           )}
+
         </div>
+
       )}
+
     </div>
   );
 }

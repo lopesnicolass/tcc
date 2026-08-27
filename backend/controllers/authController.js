@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const {
     criarUsuario,
@@ -120,8 +121,26 @@ async function login(req, res) {
                 });
             }
 
+            // ============================
+            // GERAR TOKEN JWT
+            // ============================
+
+            const token = jwt.sign(
+                {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    tipo: usuario.tipo
+                },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: "1d"
+                }
+            );
+
             return res.status(200).json({
                 mensagem: "Login realizado com sucesso!",
+                token,
                 usuario: {
                     id: usuario.id,
                     nome: usuario.nome,
