@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useGamification } from '../context/GamificationContext.jsx';
 
 const API_URL = 'http://localhost:3000';
@@ -611,9 +612,9 @@ export default function Simulados() {
     // RESULTADO FINAL
     // ========================================
 
-    if (resultadoFinal) {
-      return (
-        <div>
+       if (resultadoFinal) {
+      return createPortal(
+        <div className="simulado-fullscreen">
           <div className="page-header">
             <div>
               <h1>
@@ -1098,8 +1099,9 @@ export default function Simulados() {
                 }
               )}
             </div>
-          )}
-        </div>
+                    )}
+        </div>,
+        document.body
       );
     }
 
@@ -1107,8 +1109,8 @@ export default function Simulados() {
     // TELA DAS QUESTÕES
     // ========================================
 
-    return (
-      <div>
+       return createPortal(
+      <div className="simulado-fullscreen">
         <div className="page-header">
           <div>
             <button
@@ -1426,8 +1428,9 @@ export default function Simulados() {
                 : 'Finalizar simulado'}
             </button>
           </div>
-        )}
-      </div>
+               )}
+      </div>,
+      document.body
     );
   }
 

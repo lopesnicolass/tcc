@@ -1,7 +1,7 @@
 :root{
-  --ink:#123524;
+  --ink:#1D2A62;
   --ink-soft:#4B6358;
-  --paper:#F5F8F0;
+  --paper:#AFD06E;
   --card:#FFFFFF;
   --accent:#38B85E;
   --accent-dark:#2E8A48;
@@ -42,27 +42,48 @@ h1,h2,h3,.brand{ font-family:'Space Grotesk', sans-serif; }
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
 .page{
-  height:100vh;
-  display:block;
-  padding:0;
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:var(--paper);
 }
 
 .app{
   width:100%;
-  height:100vh;
-  max-width:none;
+  max-width:1100px;
+  min-height:600px;
   background:var(--card);
-  border-radius:0;
-  box-shadow:none;
-  overflow:hidden;
+  border-radius:28px;
+  box-shadow:0 40px 80px -20px rgba(0,0,0,0.35);
+  overflow:visible;
   display:flex;
   flex-direction:column;
   position:relative;
 }
 
 .panel-visual{
-  background:linear-gradient(165deg, #0E2A1E 0%, #163B29 55%, #0E2A1E 100%);
-  position:relative;
+  overflow:hidden;
+  border-radius:28px 28px 0 0;
+}
+
+.panel-form{
+  border-radius:0 0 28px 28px;
+}
+
+@media (min-width:760px){
+  .panel-visual{
+    border-radius:28px 0 0 28px;
+  }
+  .panel-form{
+    border-radius:0 28px 28px 0;
+  }
+}
+
+.panel-visual{
+  background:var(--ink);
   padding:clamp(28px, 5vw, 48px);
   display:flex;
   flex-direction:column;
@@ -74,27 +95,12 @@ h1,h2,h3,.brand{ font-family:'Space Grotesk', sans-serif; }
 .panel-visual::before{
   content:"";
   position:absolute; inset:0;
-  background-image:
-    radial-gradient(circle at 85% 12%, rgba(255,201,60,0.16), transparent 40%),
-    radial-gradient(circle at 10% 90%, rgba(63,168,92,0.3), transparent 45%);
   pointer-events:none;
 }
 .panel-visual::after{
   content:"";
   position:absolute; inset:0;
-  background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
   background-size:18px 18px;
-  pointer-events:none;
-}
-
-.panel-visual .blob{
-  position:absolute;
-  width:150px; height:150px;
-  top:-40px; right:-30px;
-  background:var(--coral);
-  opacity:0.14;
-  border-radius:62% 38% 55% 45% / 45% 55% 45% 55%;
-  animation:floatBlob 9s ease-in-out infinite;
   pointer-events:none;
 }
 
