@@ -66,26 +66,51 @@ export default function Auth() {
 
     try {
       const resposta = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha }),
-      });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email,
+    senha
+  }),
+});
 
-      const dados = await resposta.json();
+const dados = await resposta.json();
 
-      if (!resposta.ok) {
-        setLoginServerError(dados.mensagem || 'Não foi possível entrar.');
-        setLoginLoading(false);
-        return;
-      }
+console.log("RESPOSTA DO LOGIN:", dados);
 
-      localStorage.setItem('etecamp_usuario', JSON.stringify(dados.usuario));
-      setLoginLoading(false);
-      fireToast(dados.mensagem || 'Login realizado! Redirecionando para o painel...');
+if (!resposta.ok) {
+  setLoginServerError(dados.mensagem || 'Não foi possível entrar.');
+  setLoginLoading(false);
+  return;
+}
 
-      setTimeout(() => {
-        navigate(dados.usuario?.tipo === 'admin' ? '/admin/usuarios' : '/home');
-      }, 900);
+localStorage.setItem(
+  'etecamp_usuario',
+  JSON.stringify(dados.usuario)
+);
+
+localStorage.setItem(
+  'etecamp_token',
+  dados.token
+);
+
+localStorage.setItem('token', dados.token);
+
+setLoginLoading(false);
+
+fireToast(
+  dados.mensagem || 'Login realizado! Redirecionando para o painel...'
+);
+
+setTimeout(() => {
+  navigate(
+    dados.usuario?.tipo === 'admin'
+      ? '/admin/usuarios'
+      : '/home'
+  );
+}, 900);
 
     } catch (erro) {
       console.error(erro);

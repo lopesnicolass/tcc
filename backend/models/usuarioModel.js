@@ -62,9 +62,31 @@ function listarUsuarios(callback) {
     db.all(sql, [], callback);
 }
 
+// ============================
+// EXCLUIR USUÁRIO
+// ============================
+
+function excluirUsuario(id, callback) {
+
+    const sql = `
+        DELETE FROM usuarios
+        WHERE id = ?
+    `;
+
+    db.run(sql, [id], function (erro) {
+
+        if (erro) {
+            console.error("❌ Erro ao excluir usuário:", erro);
+            return callback(erro);
+        }
+
+        callback(null, this.changes);
+    });
+}
 
 module.exports = {
     buscarUsuarioPorEmail,
     criarUsuario,
-    listarUsuarios
+    listarUsuarios,
+    excluirUsuario
 };

@@ -175,6 +175,42 @@ db.run(`
         REFERENCES usuarios(id)
     )
 `);
+// =====================================================
+// PROVAS ANTERIORES
+// =====================================================
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS provas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        ano INTEGER NOT NULL,
+
+        titulo TEXT NOT NULL,
+
+        arquivo_prova TEXT NOT NULL,
+
+        arquivo_gabarito TEXT NOT NULL,
+
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+`);
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS sessoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        usuario_id INTEGER NOT NULL,
+
+        login_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        logout_em DATETIME,
+
+        ativo INTEGER NOT NULL DEFAULT 1,
+
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+    )
+`);
 
 
     // =====================================================

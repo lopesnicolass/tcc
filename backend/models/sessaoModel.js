@@ -8,38 +8,27 @@ const db = require("../config/db");
 function criarSessao(usuarioId, callback) {
 
     const sql = `
-        INSERT INTO sessoes (
-            usuario_id,
-            ativo
-        )
-        VALUES (?, 1)
+        INSERT INTO sessoes (usuario_id)
+        VALUES (?)
     `;
 
-    db.run(
-        sql,
-        [usuarioId],
-        function (erro) {
+    db.run(sql, [usuarioId], function (erro) {
 
-            if (erro) {
-                console.error(
-                    "❌ Erro ao criar sessão:",
-                    erro
-                );
-
-                return callback(erro);
-            }
-
-            callback(null, this.lastID);
+        if (erro) {
+            console.error("❌ Erro ao criar sessão:", erro);
+            return callback(erro);
         }
-    );
+
+        callback(null, this.lastID);
+    });
 }
 
 
 // =====================================================
-// BUSCAR SESSÕES ATIVAS
+// LISTAR SESSÕES ATIVAS
 // =====================================================
 
-function buscarSessoesAtivas(callback) {
+function listarSessoesAtivas(callback) {
 
     const sql = `
         SELECT
@@ -59,11 +48,7 @@ function buscarSessoesAtivas(callback) {
     db.all(sql, [], (erro, resultados) => {
 
         if (erro) {
-            console.error(
-                "❌ Erro ao buscar sessões ativas:",
-                erro
-            );
-
+            console.error("❌ Erro ao listar sessões:", erro);
             return callback(erro);
         }
 
@@ -71,6 +56,10 @@ function buscarSessoesAtivas(callback) {
     });
 }
 
+
+// =====================================================
+// ENCERRAR SESSÃO
+// =====================================================
 
 // =====================================================
 // ENCERRAR SESSÃO
@@ -87,32 +76,24 @@ function encerrarSessao(usuarioId, callback) {
         AND ativo = 1
     `;
 
-    db.run(
-        sql,
-        [usuarioId],
-        function (erro) {
+    db.run(sql, [usuarioId], function (erro) {
 
-            if (erro) {
-                console.error(
-                    "❌ Erro ao encerrar sessão:",
-                    erro
-                );
-
-                return callback(erro);
-            }
-
-            callback(null);
+        if (erro) {
+            console.error("❌ Erro ao encerrar sessão:", erro);
+            return callback(erro);
         }
-    );
+
+        console.log(
+            `✅ Sessão encerrada para o usuário ${usuarioId}.`
+        );
+
+        callback(null);
+    });
 }
 
 
-// =====================================================
-// EXPORTAR
-// =====================================================
-
 module.exports = {
     criarSessao,
-    buscarSessoesAtivas,
+    listarSessoesAtivas,
     encerrarSessao
 };

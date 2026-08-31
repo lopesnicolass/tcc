@@ -1,7 +1,8 @@
 const express = require("express");
 
 const {
-    listarTodosUsuarios
+    listarTodosUsuarios,
+    excluir
 } = require("../controllers/usuarioController");
 
 const autenticarToken = require("../middleware/authMiddleware");
@@ -19,6 +20,18 @@ router.get(
     autenticarToken,
     verificarAdmin,
     listarTodosUsuarios
+);
+
+
+// ============================
+// EXCLUIR USUÁRIO
+// ============================
+
+router.delete(
+    "/:id",
+    autenticarToken,
+    verificarAdmin,
+    excluir
 );
 
 

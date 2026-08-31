@@ -1,5 +1,5 @@
 const {
-    buscarSessoesAtivas,
+    listarSessoesAtivas: buscarSessoesAtivas,
     encerrarSessao
 } = require("../models/sessaoModel");
 
@@ -13,20 +13,16 @@ function listarSessoesAtivas(req, res) {
     buscarSessoesAtivas((erro, sessoes) => {
 
         if (erro) {
-            console.error(
-                "❌ Erro ao buscar sessões ativas:",
-                erro
-            );
+            console.error("❌ Erro ao buscar sessões:", erro);
 
             return res.status(500).json({
-                mensagem: "Erro ao buscar usuários logados."
+                mensagem: "Erro ao buscar sessões ativas."
             });
         }
 
         return res.status(200).json({
             usuarios: sessoes
         });
-
     });
 }
 
@@ -37,21 +33,18 @@ function listarSessoesAtivas(req, res) {
 
 function sair(req, res) {
 
-    if (!req.usuario) {
-        return res.status(401).json({
-            mensagem: "Usuário não autenticado."
+    const usuarioId = Number(req.params.usuarioId);
+
+    if (!usuarioId) {
+        return res.status(400).json({
+            mensagem: "Usuário inválido."
         });
     }
-
-    const usuarioId = req.usuario.id;
 
     encerrarSessao(usuarioId, (erro) => {
 
         if (erro) {
-            console.error(
-                "❌ Erro ao encerrar sessão:",
-                erro
-            );
+            console.error("❌ Erro ao encerrar sessão:", erro);
 
             return res.status(500).json({
                 mensagem: "Erro ao encerrar sessão."
@@ -59,16 +52,11 @@ function sair(req, res) {
         }
 
         return res.status(200).json({
-            mensagem: "Logout realizado com sucesso!"
+            mensagem: "Sessão encerrada com sucesso."
         });
-
     });
 }
 
-
-// =====================================================
-// EXPORTAR
-// =====================================================
 
 module.exports = {
     listarSessoesAtivas,
