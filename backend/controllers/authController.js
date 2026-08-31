@@ -6,6 +6,10 @@ const {
     buscarUsuarioPorEmail
 } = require("../models/usuarioModel");
 
+const {
+    criarSessao
+} = require("../models/sessaoModel");
+
 
 // ============================
 // CADASTRO DE ALUNO
@@ -31,7 +35,6 @@ async function cadastrar(req, res) {
             });
         }
 
-        // SQLite retorna undefined quando não encontra
         if (resultado) {
             return res.status(409).json({
                 mensagem: "Este email já está cadastrado."
@@ -121,6 +124,7 @@ async function login(req, res) {
                 });
             }
 
+
             // ============================
             // GERAR TOKEN JWT
             // ============================
@@ -138,15 +142,40 @@ async function login(req, res) {
                 }
             );
 
-            return res.status(200).json({
-                mensagem: "Login realizado com sucesso!",
-                token,
-                usuario: {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    tipo: usuario.tipo
+
+            // ============================
+            // REGISTRAR SESSÃO
+            // ============================
+
+            criarSessao(usuario.id, (erro) => {
+
+                if (erro) {
+                    console.error(
+                        "❌ Erro ao registrar sessão:",
+                        erro
+                    );
+
+                    return res.status(500).json({
+                        mensagem: "Erro ao registrar sessão."
+                    });
                 }
+
+
+                // ============================
+                // RETORNAR LOGIN
+                // ============================
+
+                return res.status(200).json({
+                    mensagem: "Login realizado com sucesso!",
+                    token,
+                    usuario: {
+                        id: usuario.id,
+                        nome: usuario.nome,
+                        email: usuario.email,
+                        tipo: usuario.tipo
+                    }
+                });
+
             });
 
         } catch (erro) {
@@ -161,6 +190,10 @@ async function login(req, res) {
     });
 }
 
+
+// ============================
+// EXPORTAR
+// ============================
 
 module.exports = {
     cadastrar,

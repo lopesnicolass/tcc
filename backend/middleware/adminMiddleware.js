@@ -1,8 +1,12 @@
 function verificarAdmin(req, res, next) {
 
-    const tipo = req.headers["x-tipo-usuario"];
+    if (!req.usuario) {
+        return res.status(401).json({
+            mensagem: "Usuário não autenticado."
+        });
+    }
 
-    if (tipo !== "admin") {
+    if (req.usuario.tipo !== "admin") {
         return res.status(403).json({
             mensagem: "Acesso permitido somente para administradores."
         });

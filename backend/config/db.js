@@ -59,8 +59,24 @@ db.serialize(() => {
             REFERENCES usuarios(id)
         )
     `);
+// =====================================================
+// SESSÕES DOS USUÁRIOS
+db.run(`
+    CREATE TABLE IF NOT EXISTS sessoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+        usuario_id INTEGER NOT NULL,
 
+        login_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+        logout_em DATETIME,
+
+        ativo INTEGER NOT NULL DEFAULT 1,
+
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+    )
+`);
     // =====================================================
     // QUESTÕES
     // =====================================================

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
+import Landing from './pages/Landing.jsx';
 import Auth from './pages/Auth.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
@@ -27,107 +28,37 @@ export default function App() {
 
       <Routes>
 
-        {/* ============================
-            ROTA INICIAL
-        ============================ */}
+        {/* TELA INICIAL (antes do login) */}
+        <Route path="/" element={<Landing />} />
 
-        <Route
-          path="/"
-          element={<Navigate to="/login" replace />}
-        />
+        {/* LOGIN */}
+        <Route path="/login" element={<Auth />} />
 
-        {/* ============================
-            LOGIN
-        ============================ */}
-
-        <Route
-          path="/login"
-          element={<Auth />}
-        />
-
-        {/* ============================
-            ÁREA PROTEGIDA DO ALUNO
-        ============================ */}
-
+        {/* ÁREA PROTEGIDA DO ALUNO */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-
-            <Route
-              path="/home"
-              element={<Home />}
-            />
-
-            <Route
-              path="/mural"
-              element={<Mural />}
-            />
-
-            <Route
-              path="/cronograma"
-              element={<Cronograma />}
-            />
-
-            <Route
-              path="/simulados"
-              element={<Simulados />}
-            />
-
-            <Route
-              path="/provas"
-              element={<Provas />}
-            />
-
-            <Route
-              path="/desempenho"
-              element={<Desempenho />}
-            />
-
-            <Route
-              path="/flashcards"
-              element={<FlashCards />}
-            />
-
-            <Route
-              path="/perfil"
-              element={<Perfil />}
-            />
-
+            <Route path="/home" element={<Home />} />
+            <Route path="/mural" element={<Mural />} />
+            <Route path="/cronograma" element={<Cronograma />} />
+            <Route path="/simulados" element={<Simulados />} />
+            <Route path="/provas" element={<Provas />} />
+            <Route path="/desempenho" element={<Desempenho />} />
+            <Route path="/flashcards" element={<FlashCards />} />
+            <Route path="/perfil" element={<Perfil />} />
           </Route>
         </Route>
 
-        {/* ============================
-            ÁREA PROTEGIDA DO ADMIN
-        ============================ */}
-
+        {/* ÁREA PROTEGIDA DO ADMIN */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
-
-            <Route
-              path="/admin/usuarios"
-              element={<AdminUsuarios />}
-            />
-
-            <Route
-              path="/admin/simulados"
-              element={<AdminSimulados />}
-            />
-
-            <Route
-              path="/admin/flashcards"
-              element={<AdminFlashCards />}
-            />
-
+            <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+            <Route path="/admin/simulados" element={<AdminSimulados />} />
+            <Route path="/admin/flashcards" element={<AdminFlashCards />} />
           </Route>
         </Route>
 
-        {/* ============================
-            QUALQUER ROTA DESCONHECIDA
-        ============================ */}
-
-        <Route
-          path="*"
-          element={<Navigate to="/login" replace />}
-        />
+        {/* QUALQUER ROTA DESCONHECIDA */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
     </>
