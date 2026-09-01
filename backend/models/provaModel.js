@@ -157,7 +157,7 @@ function excluirProva(id, callback) {
 
 
 // =====================================================
-// EXPORTAR FUNÇÕES
+// EXPORTAR
 // =====================================================
 
 module.exports = {

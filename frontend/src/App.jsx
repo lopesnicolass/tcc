@@ -18,6 +18,7 @@ import Perfil from './pages/Perfil.jsx';
 import AdminUsuarios from './pages/AdminUsuarios.jsx';
 import AdminSimulados from './pages/AdminSimulados.jsx';
 import AdminFlashCards from './pages/AdminFlashCards.jsx';
+import AdminProvas from './pages/AdminProvas.jsx';
 
 import XPToast from './components/XPToast.jsx';
 
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/admin/usuarios" element={<AdminUsuarios />} />
             <Route path="/admin/simulados" element={<AdminSimulados />} />
             <Route path="/admin/flashcards" element={<AdminFlashCards />} />
+            <Route path="/admin/provas" element={<AdminProvas />} />
           </Route>
         </Route>
 
