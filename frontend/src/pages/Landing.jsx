@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import logoIcon from '../assets/logo.PNG';
@@ -57,12 +57,13 @@ const STEPS = [
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [barsReady, setBarsReady] = useState(false);
+  const [subjects, setSubjects] = useState(SUBJECTS);
 
-  useEffect(() => {
-    const t = setTimeout(() => setBarsReady(true), 300);
-    return () => clearTimeout(t);
-  }, []);
+  function toggleSubject(name) {
+    setSubjects((prev) =>
+      prev.map((s) => (s.name === name ? { ...s, done: !s.done } : s))
+    );
+  }
 
   function goToLogin() {
     navigate('/login');
@@ -82,55 +83,56 @@ export default function Landing() {
         <button className="landing-nav-btn" onClick={goToLogin}>Entrar</button>
       </header>
 
-      <section className="landing-hero">
-        <div className="landing-hero-copy">
-          <div className="countdown-badge landing-badge">
-            🔥 <span><strong>{getDaysUntilExam()}</strong> dias até o Vestibulinho</span>
-          </div>
-          <h1>
-            Organize seus estudos e conquiste sua vaga na <span className="accent-word">ETEC.</span>
-          </h1>
-          <p>
-            O Prepara ETECAMP reúne flashcards, simulados, cronograma e acompanhamento
-            de desempenho num só lugar, feito para quem está se preparando para o
-            Vestibulinho.
-          </p>
-          <div className="landing-cta-row">
-            <button className="btn-primary landing-cta" onClick={goToCadastro}>
-              <span className="btn-label">Criar conta grátis</span>
-            </button>
-            <button className="landing-cta-secondary" onClick={goToLogin}>
-              Já tenho conta
-            </button>
-          </div>
-        </div>
-
-        <div className="landing-hero-visual">
-          <div className="panel-visual landing-app-preview">
-            <div className="visual-top">
-              <div className="brand"><img src={logoIcon} alt="" className="brand-logo" />Prepara ETECAMP</div>
-              <div className="countdown-badge">
-                🔥 <span><strong>{getDaysUntilExam()}</strong> dias p/ prova</span>
-              </div>
+           <section className="landing-hero-full">
+        <div className="landing-hero-row">
+          <div className="landing-hero-copy">
+            <div className="countdown-badge landing-badge">
+              🔥 <span><strong>{getDaysUntilExam()}</strong> dias até o Vestibulinho</span>
             </div>
+            <h1>
+              Organize seus estudos e conquiste sua vaga na <span className="accent-word">ETEC.</span>
+            </h1>
+            <p>
+              O Prepara ETECAMP reúne flashcards, simulados, cronograma e acompanhamento
+              de desempenho num só lugar, feito para quem está se preparando para o
+              Vestibulinho.
+            </p>
+            <div className="landing-cta-row">
+              <button className="btn-primary landing-cta" onClick={goToCadastro}>
+                <span className="btn-label">Criar conta grátis</span>
+              </button>
+              <button className="landing-cta-secondary" onClick={goToLogin}>
+                Já tenho conta
+              </button>
+            </div>
+          </div>
 
-            <div className="board">
-              {SUBJECTS.map((s, i) => (
-                <div className={`subject-card ${i % 2 === 1 ? 'offset' : ''}`} key={s.name}>
-                  <div className={`subject-check ${s.done ? 'done' : 'pending'}`}>{s.done ? '✓' : ''}</div>
+                             <div className="landing-hero-subjects">
+            <span className="landing-hero-subjects-eyebrow">Veja como funciona</span>
+            <h3>Organize sua rotina de estudos<br /><span className="accent-word">matéria por matéria.</span></h3>
+            <p>Acompanhe seu progresso rumo à aprovação no Vestibulinho ETEC.</p>
+            <div className="landing-subjects-row">
+              {subjects.map((s) => (
+                <button
+                  type="button"
+                  key={s.name}
+                  className="landing-subject-card"
+                  onClick={() => toggleSubject(s.name)}
+                >
+                  <div className={`subject-check ${s.done ? 'done' : 'pending'}`}>
+                    {s.done ? '✓' : ''}
+                  </div>
                   <div className="subject-info">
-                    <div className="subject-name"><span>{s.name}</span><span className="pct">{s.pct}%</span></div>
+                    <div className="subject-name">
+                      <span>{s.name}</span>
+                      <span className="pct">{s.pct}%</span>
+                    </div>
                     <div className="subject-bar">
-                      <span style={{ width: barsReady ? `${s.pct}%` : '0%' }}></span>
+                      <span style={{ width: `${s.pct}%` }}></span>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
-            </div>
-
-            <div className="visual-copy">
-              <h3>Organize sua rotina de estudos <span className="accent-word">matéria por matéria.</span></h3>
-              <p>Acompanhe seu progresso rumo à aprovação no Vestibulinho ETEC.</p>
             </div>
           </div>
         </div>
