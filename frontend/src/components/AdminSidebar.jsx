@@ -5,6 +5,7 @@ const NAV_ITEMS = [
   { to: '/admin/simulados', label: 'Simulados', icon: 'check' },
   { to: '/admin/flashcards', label: 'FlashCards', icon: 'layers' },
   { to: '/admin/provas', label: 'Provas Anteriores', icon: 'file' },
+  
 ];
 
 const ICONS = {
