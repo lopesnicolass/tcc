@@ -6,9 +6,9 @@
   --accent:#2196F3;
   --accent-dark:#0D47A1;
   --accent-light:#90CAF9;
-  --coral:#FF8A65;
-  /* --sunshine:#FFC93C; */
-  --sky:#90CAF9;
+ --coral:#FF8A65;
+--sunshine:#FFC93C;
+--sky:#90CAF9;
   --line:rgba(13,71,161,0.16);
   --muted:rgba(13,71,161,0.55);
   --error:#C1462F;
@@ -382,14 +382,14 @@ form{display:flex; flex-direction:column; gap:18px;}
   display:flex;
   align-items:center;
   padding:clamp(36px, 8vw, 72px) clamp(20px, 6vw, 64px);
-  /* Fundo em degradê com as cores do site. Se você tiver uma foto própria,
-     troque a linha "background" abaixo por:
-     background:linear-gradient(180deg, rgba(13,71,161,0.78), rgba(13,71,161,0.88)), url('../assets/SEU_ARQUIVO.jpg') center/cover no-repeat;
-     (e importe a imagem no topo do Landing.jsx, como já é feito com o logo) */
-  background:linear-gradient(135deg, var(--ink), var(--accent));
+  background:
+    linear-gradient(90deg, var(--ink) 0%, rgba(13,71,161,0.55) 45%, rgba(13,71,161,0.15) 75%),
+    url('./assets/fundo.png') center/cover no-repeat,
+    var(--ink);
   overflow:hidden;
   text-align:left;
 }
+
 .landing-hero-full::after{
   content:"";
   position:absolute; inset:0;

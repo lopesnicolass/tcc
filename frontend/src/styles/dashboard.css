@@ -37,8 +37,7 @@
 .sidebar-brand{
   display:flex;
   align-items:center;
-  gap:12px;
-  padding:0 6px;
+  padding:4px 6px 8px;
 }
 .logo-mark{
   width:40px; height:40px;
@@ -51,7 +50,14 @@
   flex-shrink:0;
   transition:transform .25s var(--bouncy);
 }
-.sidebar-brand:hover .logo-mark{ transform:rotate(-8deg) scale(1.08); }
+.sidebar-brand:hover 
+.logo-mark{ transform:rotate(-8deg) scale(1.08); }
+.sidebar-logo-full{
+  max-width:100%;
+  height:auto;
+  display:block;
+}
+.logo-mark:has(.logo-mark-img){ background:#fff; }
 .sidebar-brand-text strong{
   display:block;
   font-size:14px;

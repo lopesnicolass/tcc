@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGamification } from '../context/GamificationContext.jsx';
+import logoIcon from '../assets/tenna_logo.png';
 
 const NAV_ITEMS = [
   { to: '/home', label: 'Início', icon: 'home' },
@@ -29,10 +30,8 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-brand-text">
-          <strong>TENNA</strong>
-        </div>
-      </div>
+  <img src={logoIcon} alt="Tenna" className="sidebar-logo-full" />
+</div>
 
       <nav className="sidebar-nav">
         {NAV_ITEMS.map((item) => (
