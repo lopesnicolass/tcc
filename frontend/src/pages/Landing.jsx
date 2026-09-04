@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
-import logoIcon from '../assets/logo.PNG';
+import logoIcon from '../assets/tenna_logo.png';
 
 function getDaysUntilExam() {
   const target = new Date('2026-11-08T00:00:00');
@@ -78,7 +78,6 @@ export default function Landing() {
       <header className="landing-nav">
         <div className="landing-brand">
           <img src={logoIcon} alt="Prepara ETECAMP" className="landing-brand-icon" />
-          <span>Prepara ETECAMP</span>
         </div>
         <button className="landing-nav-btn" onClick={goToLogin}>Entrar</button>
       </header>
@@ -108,7 +107,6 @@ export default function Landing() {
           </div>
 
                              <div className="landing-hero-subjects">
-            <span className="landing-hero-subjects-eyebrow">Veja como funciona</span>
             <h3>Organize sua rotina de estudos<br /><span className="accent-word">matéria por matéria.</span></h3>
             <p>Acompanhe seu progresso rumo à aprovação no Vestibulinho ETEC.</p>
             <div className="landing-subjects-row">

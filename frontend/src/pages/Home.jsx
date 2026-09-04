@@ -1,44 +1,36 @@
 import { useGamification } from '../context/GamificationContext.jsx';
 
 export default function Home() {
-  const { level, title, xp, xpIntoLevel, xpForNext, streak } = useGamification();
+  const { level, title, xp, xpIntoLevel, xpForNext } = useGamification();
 
   const usuarioSalvo = localStorage.getItem('etecamp_usuario');
   const usuario = usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
   const primeiroNome = usuario?.nome?.split(' ')[0] || 'Aluno';
 
   return (
-    
-    <div>
-      <div className="home-header">
-        <h1>Olá, {primeiroNome}!</h1>
-        <p>Continue seus estudos e alcance seus objetivos!</p>
-      </div>
 
-      <div className="gamify-card">
-        <div className="gamify-level">
-          <div className="gamify-level-badge">{level}</div>
-          <div className="gamify-level-text">
+    <div>
+      <div className="home-hero">
+        <div className="home-hero-text">
+          <h1>Olá, {primeiroNome}!</h1>
+          <p>Continue seus estudos e alcance seus objetivos!</p>
+        </div>
+
+        <div className="home-hero-level">
+          <div className="home-hero-level-badge">{level}</div>
+          <div className="home-hero-level-text">
             <strong>{title}</strong>
             <span>Nível {level}</span>
           </div>
         </div>
 
-        <div className="gamify-xp-bar-wrap">
-          <div className="gamify-xp-bar-label">
+        <div className="home-hero-xp">
+          <div className="home-hero-xp-label">
             <span>{xpIntoLevel} / {xpForNext} XP</span>
             <span>{xp} XP total</span>
           </div>
-          <div className="gamify-xp-track">
-            <div className="gamify-xp-fill" style={{ width: `${(xpIntoLevel / xpForNext) * 100}%` }}></div>
-          </div>
-        </div>
-
-        <div className="gamify-streak">
-          <span style={{ fontSize: '22px' }}>🔥</span>
-          <div>
-            <div className="gamify-streak-num">{streak}</div>
-            <div className="gamify-streak-label">dias seguidos</div>
+          <div className="home-hero-xp-track">
+            <div className="home-hero-xp-fill" style={{ width: `${(xpIntoLevel / xpForNext) * 100}%` }}></div>
           </div>
         </div>
       </div>

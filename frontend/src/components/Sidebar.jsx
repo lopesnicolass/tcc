@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
+import { useGamification } from '../context/GamificationContext.jsx';
 
 const NAV_ITEMS = [
   { to: '/home', label: 'Início', icon: 'home' },
@@ -23,13 +24,13 @@ const ICONS = {
 };
 
 export default function Sidebar() {
+  const { streak } = useGamification();
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="logo-mark">V</div>
         <div className="sidebar-brand-text">
-          <strong>VESTIBULINHO</strong>
-          <span>Campo Limpo Paulista</span>
+          <strong>TENNA</strong>
         </div>
       </div>
 
@@ -47,6 +48,15 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+<div className="sidebar-streak">
+        <span className="sidebar-streak-icon">🔥</span>
+        <div>
+          <div className="sidebar-streak-num">{streak}</div>
+          <div className="sidebar-streak-label">dias seguidos</div>
+        </div>
+      </div>
+
     </aside>
   );
 }

@@ -7,7 +7,7 @@
   --accent-dark:#0D47A1;
   --accent-light:#90CAF9;
   --coral:#FF8A65;
-  --sunshine:#FFC93C;
+  /* --sunshine:#FFC93C; */
   --sky:#90CAF9;
   --line:rgba(13,71,161,0.16);
   --muted:rgba(13,71,161,0.55);
@@ -113,7 +113,7 @@ h1,h2,h3,.brand{ font-family:'Space Grotesk', sans-serif; }
   color:#fff;
   gap:24px;
 }
-
+  
 .panel-visual-simple{
   align-items:center;
   justify-content:center;
@@ -125,7 +125,7 @@ h1,h2,h3,.brand{ font-family:'Space Grotesk', sans-serif; }
 }
 .panel-visual-logo-btn:hover{ transform:scale(1.04); }
 .panel-visual-logo{
-  width:min(75%, 300px);
+  width:min(100%, 480px);
   height:auto;
 }
 
@@ -358,7 +358,7 @@ form{display:flex; flex-direction:column; gap:18px;}
   display:flex; align-items:center; justify-content:space-between;
   padding:20px clamp(20px, 6vw, 64px);
   position:sticky; top:0; z-index:20;
-  background:var(--card);
+  background:var(--ink);
   border-bottom:1px solid var(--line);
 }
 .landing-brand{
@@ -367,15 +367,14 @@ form{display:flex; flex-direction:column; gap:18px;}
   font-weight:700; font-size:17px; letter-spacing:0.02em;
   color:var(--ink);
 }
-.landing-brand-icon{ width:30px; height:30px; object-fit:contain; }
-
+.landing-brand-icon{ height:48px; width:auto; object-fit:contain; }
 .landing-nav-btn{
-  background:var(--ink); color:#fff; border:none;
+  background:var(--accent); color:#fff; border:none;
   border-radius:100px; padding:10px 22px;
   font-family:'IBM Plex Sans'; font-size:14.5px; font-weight:600;
   cursor:pointer; transition:background .18s ease, transform .18s var(--bouncy);
 }
-.landing-nav-btn:hover{ background:var(--accent-dark); transform:translateY(-1px); }
+.landing-nav-btn:hover{ background:var(--accent-light); transform:translateY(-1px); }
 
 .landing-hero-full{
   position:relative;
