@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGamification } from '../context/GamificationContext.jsx';
 
 const WEEK_DAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
@@ -15,9 +15,139 @@ const INITIAL_ACTIVITIES = [
 
 const emptyForm = { nome: '', materia: MATERIAS[0], horario: '', dia: WEEK_DAYS[0] };
 
-export default function Cronograma() {
-const { addXP } = useGamification();
+// ============================================================
+// BANCO DE CONTEÚDOS — o que mais cai no Vestibulinho ETEC
+// ============================================================
+const TOPICS_BANK = {
+  'Português': [
+    'Interpretação de texto',
+    'Ortografia e acentuação',
+    'Classes gramaticais',
+    'Concordância verbal e nominal',
+    'Regência verbal e nominal',
+    'Crase',
+    'Figuras de linguagem',
+    'Gêneros textuais',
+    'Coesão e coerência textual',
+    'Pontuação',
+    'Redação dissertativo-argumentativa',
+  ],
+  'Matemática': [
+    'Operações com números naturais e inteiros',
+    'Frações e números decimais',
+    'Porcentagem e regra de três',
+    'Equações do 1º grau',
+    'Equações do 2º grau',
+    'Sistemas de equações',
+    'Geometria plana: áreas e perímetros',
+    'Geometria espacial: volumes',
+    'Razão e proporção',
+    'Funções e gráficos',
+    'Potenciação e radiciação',
+  ],
+  'Ciências': [
+    'Célula e organização dos seres vivos',
+    'Ecologia e meio ambiente',
+    'Corpo humano: sistemas',
+    'Física: movimento e velocidade',
+    'Química: matéria e transformações',
+    'Energia e suas formas',
+    'Reino animal e vegetal',
+    'Genética básica',
+    'Sustentabilidade e recursos naturais',
+  ],
+  'História': [
+    'Brasil Colônia',
+    'Brasil Império',
+    'Era Vargas',
+    'Ditadura Militar no Brasil',
+    'Revolução Industrial',
+    'Guerras Mundiais',
+    'Guerra Fria',
+    'Movimentos sociais brasileiros',
+    'Globalização',
+  ],
+  'Geografia': [
+    'Relevo e clima do Brasil',
+    'Urbanização brasileira',
+    'Globalização e economia',
+    'Meio ambiente e sustentabilidade',
+    'População e demografia',
+    'Fontes de energia',
+    'Geopolítica mundial',
+    'Agropecuária brasileira',
+  ],
+  'Atualidades': [
+    'Notícias e fatos recentes',
+    'Meio ambiente e mudanças climáticas',
+    'Tecnologia e sociedade',
+    'Economia brasileira',
+    'Cultura e diversidade',
+    'Direitos humanos',
+    'Educação no Brasil',
+    'Ciência e inovação',
+  ],
+};
 
+const SUBJECT_ORDER = Object.keys(TOPICS_BANK);
+
+// Distribui os dias de estudo de forma espalhada pela semana,
+// em vez de deixar tudo grudado no começo.
+const DAYS_BY_COUNT = {
+  1: ['Quarta'],
+  2: ['Terça', 'Quinta'],
+  3: ['Segunda', 'Quarta', 'Sexta'],
+  4: ['Segunda', 'Terça', 'Quinta', 'Sexta'],
+  5: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
+  6: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+  7: WEEK_DAYS,
+};
+
+// Gera o plano completo: um array de meses, cada um com 4 semanas,
+// cada semana com os dias de estudo escolhidos preenchidos com
+// matéria + tópico, intercalando as matérias e repetindo em modo
+// "revisão" quando o plano é mais longo que o banco de tópicos.
+function gerarPlanoDeEstudos(meses, diasPorSemana) {
+  const diasDaSemana = DAYS_BY_COUNT[diasPorSemana] || DAYS_BY_COUNT[3];
+  const contadorPorMateria = {};
+  SUBJECT_ORDER.forEach((m) => { contadorPorMateria[m] = 0; });
+
+  let indiceMateria = 0;
+
+  function proximoItem() {
+    const materia = SUBJECT_ORDER[indiceMateria % SUBJECT_ORDER.length];
+    indiceMateria += 1;
+
+    const topicos = TOPICS_BANK[materia];
+    const posicao = contadorPorMateria[materia] % topicos.length;
+    const volta = Math.floor(contadorPorMateria[materia] / topicos.length);
+    contadorPorMateria[materia] += 1;
+
+    const topico = topicos[posicao];
+    return {
+      materia,
+      topico: volta === 0 ? topico : `Revisão: ${topico}`,
+    };
+  }
+
+  const planoMeses = [];
+
+  for (let m = 1; m <= meses; m++) {
+    const semanas = [];
+    for (let s = 1; s <= 4; s++) {
+      const dias = diasDaSemana.map((dia) => ({ dia, ...proximoItem() }));
+      semanas.push({ numero: s, dias });
+    }
+    planoMeses.push({ numero: m, semanas });
+  }
+
+  return planoMeses;
+}
+
+export default function Cronograma() {
+  const { addXP } = useGamification();
+
+  // ---------- estado: cronograma manual (já existia) ----------
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [weekOffset, setWeekOffset] = useState(0);
   const weekLabel = weekOffset === 0 ? 'Semana Atual' : weekOffset > 0 ? `${weekOffset} semana(s) à frente` : `${Math.abs(weekOffset)} semana(s) atrás`;
@@ -28,6 +158,36 @@ const { addXP } = useGamification();
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
 
+  // ---------- estado: aba ativa ----------
+  const [tab, setTab] = useState('meu'); // 'meu' | 'auto'
+
+  // ---------- estado: plano automático ----------
+  const [meses, setMeses] = useState(6);
+  const [diasPorSemana, setDiasPorSemana] = useState(3);
+  const [plano, setPlano] = useState(null);
+  const [mesSelecionado, setMesSelecionado] = useState(1);
+
+  function handleGerarPlano() {
+    const novoPlano = gerarPlanoDeEstudos(meses, diasPorSemana);
+    setPlano(novoPlano);
+    setMesSelecionado(1);
+  }
+
+  function adicionarSemanaAoCronograma(semana) {
+    const novasAtividades = semana.dias.map((d) => ({
+      id: Date.now() + Math.random(),
+      dia: d.dia,
+      horario: 'A definir',
+      nome: d.topico,
+      materia: d.materia,
+      done: false,
+    }));
+    setActivities((prev) => [...prev, ...novasAtividades]);
+    addXP(10, 'semana adicionada ao cronograma');
+    setTab('meu');
+  }
+
+  // ---------- funções: cronograma manual ----------
   function openCreate() {
     setCreateForm(emptyForm);
     setShowCreate(true);
@@ -62,6 +222,38 @@ const { addXP } = useGamification();
     setEditing(null);
   }
 
+  // ---------- resumo calculado a partir das atividades reais ----------
+  function parseHoras(horario) {
+    const match = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/.exec((horario || '').trim());
+    if (!match) return 0;
+    const inicio = Number(match[1]) + Number(match[2]) / 60;
+    const fim = Number(match[3]) + Number(match[4]) / 60;
+    const diff = fim - inicio;
+    return diff > 0 ? diff : 0;
+  }
+
+  const resumo = useMemo(() => {
+    const totalHoras = activities.reduce((soma, a) => soma + parseHoras(a.horario), 0);
+    const totalSimulados = activities.filter((a) => a.materia === 'Simulado').length;
+
+    const porMateria = {};
+    activities.forEach((a) => {
+      if (!porMateria[a.materia]) porMateria[a.materia] = { total: 0, feitas: 0 };
+      porMateria[a.materia].total += 1;
+      if (a.done) porMateria[a.materia].feitas += 1;
+    });
+    const distribuicao = Object.entries(porMateria)
+      .map(([materia, v]) => ({ materia, pct: Math.round((v.feitas / v.total) * 100) }))
+      .sort((a, b) => b.pct - a.pct)
+      .slice(0, 4);
+
+    const concluidas = activities.filter((a) => a.done).length;
+    const metaPct = activities.length > 0 ? Math.round((concluidas / activities.length) * 100) : 0;
+    const horasFeitas = activities.filter((a) => a.done).reduce((soma, a) => soma + parseHoras(a.horario), 0);
+
+    return { totalHoras, totalSimulados, distribuicao, metaPct, horasFeitas };
+  }, [activities]);
+
   return (
     <div>
       <div className="page-header">
@@ -69,75 +261,170 @@ const { addXP } = useGamification();
           <h1>Cronograma de estudos</h1>
           <p>Organize seu tempo e maximize seu aprendizado</p>
         </div>
-        <div className="page-actions">
-          <button className="mural-btn primary" onClick={openCreate}>+ Adicionar Atividade</button>
-        </div>
+        {tab === 'meu' && (
+          <div className="page-actions">
+            <button className="mural-btn primary" onClick={openCreate}>+ Adicionar Atividade</button>
+          </div>
+        )}
       </div>
 
-      <div className="week-nav">
-        <button onClick={() => setWeekOffset((v) => v - 1)} aria-label="Semana anterior">‹</button>
-        <span className="week-label">{weekLabel}</span>
-        <button onClick={() => setWeekOffset((v) => v + 1)} aria-label="Próxima semana">›</button>
+      <div className="cronograma-tabs">
+        <button className={`cronograma-tab ${tab === 'meu' ? 'active' : ''}`} onClick={() => setTab('meu')}>
+          Meu cronograma
+        </button>
+        <button className={`cronograma-tab ${tab === 'auto' ? 'active' : ''}`} onClick={() => setTab('auto')}>
+          Plano automático
+        </button>
       </div>
 
-      <div className="week-grid">
-        {WEEK_DAYS.map((day) => {
-          const dayTasks = activities.filter((a) => a.dia === day);
-          return (
-            <div className="day-column" key={day}>
-              <span className="day-name">{day}</span>
-              {dayTasks.length === 0 ? (
-                <span className="day-task-empty">Sem atividades</span>
+      {tab === 'meu' && (
+        <>
+          <div className="week-nav">
+            <button onClick={() => setWeekOffset((v) => v - 1)} aria-label="Semana anterior">‹</button>
+            <span className="week-label">{weekLabel}</span>
+            <button onClick={() => setWeekOffset((v) => v + 1)} aria-label="Próxima semana">›</button>
+          </div>
+
+          <div className="week-grid">
+            {WEEK_DAYS.map((day) => {
+              const dayTasks = activities.filter((a) => a.dia === day);
+              return (
+                <div className="day-column" key={day}>
+                  <span className="day-name">{day}</span>
+                  {dayTasks.length === 0 ? (
+                    <span className="day-task-empty">Sem atividades</span>
+                  ) : (
+                    dayTasks.map((t) => (
+                      <div className={`day-task ${t.done ? 'done' : ''}`} key={t.id} onClick={() => openEdit(t)}>
+                        <span className="task-time">{t.horario}</span>
+                        <strong>{t.materia}</strong><br />
+                        {t.nome}
+                      </div>
+                    ))
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="cronograma-summary-grid">
+            <div className="panel-card">
+              <h3>Resumo da Semana</h3>
+              <div className="summary-list">
+                <div className="summary-row"><span>Total de horas</span><span>{resumo.totalHoras.toFixed(1)}h</span></div>
+                <div className="summary-row"><span>Atividades</span><span>{activities.length}</span></div>
+                <div className="summary-row"><span>Simulados</span><span>{resumo.totalSimulados}</span></div>
+              </div>
+            </div>
+
+            <div className="panel-card">
+              <h3>Distribuição</h3>
+              {resumo.distribuicao.length === 0 ? (
+                <span className="day-task-empty">Adicione atividades para ver a distribuição</span>
               ) : (
-                dayTasks.map((t) => (
-                  <div className={`day-task ${t.done ? 'done' : ''}`} key={t.id} onClick={() => openEdit(t)}>
-                    <span className="task-time">{t.horario}</span>
-                    <strong>{t.materia}</strong><br />
-                    {t.nome}
+                resumo.distribuicao.map((d) => (
+                  <div className="bar-row" key={d.materia}>
+                    <div className="bar-row-label"><span>{d.materia}</span><span>{d.pct}%</span></div>
+                    <div className="bar-track"><div className="bar-fill" style={{ width: `${d.pct}%` }}></div></div>
                   </div>
                 ))
               )}
             </div>
-          );
-        })}
-      </div>
 
-      <div className="cronograma-summary-grid">
-        <div className="panel-card">
-          <h3>Resumo da Semana</h3>
-          <div className="summary-list">
-            <div className="summary-row"><span>Total de horas</span><span>18h</span></div>
-            <div className="summary-row"><span>Atividades</span><span>{activities.length}</span></div>
-            <div className="summary-row"><span>Simulados</span><span>{activities.filter((a) => a.materia === 'Simulado').length}</span></div>
-          </div>
-        </div>
-
-        <div className="panel-card">
-          <h3>Distribuição</h3>
-          <div className="bar-row">
-            <div className="bar-row-label"><span>Matemática</span><span>87%</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{ width: '87%' }}></div></div>
-          </div>
-          <div className="bar-row">
-            <div className="bar-row-label"><span>Português</span><span>100%</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{ width: '100%' }}></div></div>
-          </div>
-          <div className="bar-row">
-            <div className="bar-row-label"><span>Outras</span><span>67%</span></div>
-            <div className="bar-track"><div className="bar-fill" style={{ width: '67%' }}></div></div>
-          </div>
-        </div>
-
-        <div className="panel-card">
-          <h3>Meta Semanal</h3>
-          <div className="meta-circle-wrap">
-            <div className="meta-circle" style={{ background: `conic-gradient(var(--accent) 0% 75%, var(--paper) 75% 100%)` }}>
-              <div style={{ background: '#fff', width: '100px', height: '100px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>75%</div>
+            <div className="panel-card">
+              <h3>Meta Semanal</h3>
+              <div className="meta-circle-wrap">
+                <div className="meta-circle" style={{ background: `conic-gradient(var(--accent) 0% ${resumo.metaPct}%, var(--paper) ${resumo.metaPct}% 100%)` }}>
+                  <div style={{ background: '#fff', width: '100px', height: '100px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{resumo.metaPct}%</div>
+                </div>
+                <span className="meta-circle-label">{resumo.horasFeitas.toFixed(1)}h de {resumo.totalHoras.toFixed(1)}h completas</span>
+              </div>
             </div>
-            <span className="meta-circle-label">13.5h de 18h completas</span>
           </div>
+        </>
+      )}
+
+      {tab === 'auto' && (
+        <div className="auto-plan">
+          <div className="panel-card auto-plan-config">
+            <h3>Monte seu plano</h3>
+            <p className="auto-plan-hint">Escolha quanto tempo falta para a sua prova e quantos dias por semana você consegue estudar. O plano se ajusta sozinho, intercalando as matérias mais cobradas no Vestibulinho.</p>
+
+            <span className="modal-materia-label">Meses até a prova</span>
+            <div className="pill-row">
+              {[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((m) => (
+                <button
+                  type="button"
+                  key={m}
+                  className={`materia-pill ${meses === m ? 'selected' : ''}`}
+                  onClick={() => setMeses(m)}
+                >
+                  {m} {m === 1 ? 'mês' : 'meses'}
+                </button>
+              ))}
+            </div>
+
+            <span className="modal-materia-label" style={{ marginTop: 18, display: 'block' }}>Dias por semana</span>
+            <div className="pill-row">
+              {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+                <button
+                  type="button"
+                  key={d}
+                  className={`materia-pill ${diasPorSemana === d ? 'selected' : ''}`}
+                  onClick={() => setDiasPorSemana(d)}
+                >
+                  {d}x por semana
+                </button>
+              ))}
+            </div>
+
+            <button className="mural-btn primary auto-plan-generate" onClick={handleGerarPlano}>
+              Gerar cronograma automático
+            </button>
+          </div>
+
+          {plano && (
+            <div className="auto-plan-result">
+              <div className="auto-plan-months">
+                {plano.map((mes) => (
+                  <button
+                    type="button"
+                    key={mes.numero}
+                    className={`auto-plan-month-tab ${mesSelecionado === mes.numero ? 'active' : ''}`}
+                    onClick={() => setMesSelecionado(mes.numero)}
+                  >
+                    Mês {mes.numero}
+                  </button>
+                ))}
+              </div>
+
+              {plano.filter((mes) => mes.numero === mesSelecionado).map((mes) => (
+                <div key={mes.numero}>
+                  {mes.semanas.map((semana) => (
+                    <div className="panel-card auto-plan-week" key={semana.numero}>
+                      <div className="auto-plan-week-header">
+                        <h3>Semana {semana.numero}</h3>
+                        <button className="mural-btn secondary" onClick={() => adicionarSemanaAoCronograma(semana)}>
+                          + Adicionar ao meu cronograma
+                        </button>
+                      </div>
+                      <div className="auto-plan-days">
+                        {semana.dias.map((d, i) => (
+                          <div className="auto-plan-day" key={i}>
+                            <span className="auto-plan-day-name">{d.dia}</span>
+                            <strong>{d.materia}</strong>
+                            <span>{d.topico}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {showCreate && (
         <div className="modal-overlay" onClick={() => setShowCreate(false)}>

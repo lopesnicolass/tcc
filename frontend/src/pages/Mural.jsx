@@ -22,6 +22,15 @@ const COLOR_CLASS = {
   Ciências: 'postit-ciencias',
 };
 
+const MATERIA_ICONS = {
+  Todas: '📚',
+  Português: '📖',
+  Matemática: '📐',
+  História: '🏛️',
+  Geografia: '🌎',
+  Ciências: '🔬',
+};
+
 const TILTS = [-3, 2, -1.5, 3, -2, 1.5];
 
 
@@ -567,36 +576,34 @@ export default function Mural() {
             + Adicionar post-it
           </button>
 
-          <select
-            className="mural-filter-select"
-            value={filtro}
-            onChange={(e) =>
-              setFiltro(
-                e.target.value
-              )
-            }
+                  </div>
+
+      </div>
+
+      <div className="materia-tabs">
+
+        <button
+          className={`materia-tab ${filtro === 'Todas' ? 'active' : ''}`}
+          onClick={() => setFiltro('Todas')}
+        >
+          <span className="materia-tab-icon">{MATERIA_ICONS['Todas']}</span>
+          Todas
+          <span className="materia-tab-count">{postits.length}</span>
+        </button>
+
+        {MATERIAS.map((materia) => (
+          <button
+            key={materia}
+            className={`materia-tab ${filtro === materia ? 'active' : ''}`}
+            onClick={() => setFiltro(materia)}
           >
-
-            <option value="Todas">
-              Filtrar por matéria
-            </option>
-
-            {MATERIAS.map(
-              (materia) => (
-
-                <option
-                  key={materia}
-                  value={materia}
-                >
-                  {materia}
-                </option>
-
-              )
-            )}
-
-          </select>
-
-        </div>
+            <span className="materia-tab-icon">{MATERIA_ICONS[materia] || '📌'}</span>
+            {materia}
+            <span className="materia-tab-count">
+              {postits.filter((p) => p.materia === materia).length}
+            </span>
+          </button>
+        ))}
 
       </div>
 

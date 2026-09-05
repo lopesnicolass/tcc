@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../App.css';
-import logoWordmark from '../assets/logo.png';
+import logoWordmark from '../assets/tenna_logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 

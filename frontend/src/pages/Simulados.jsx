@@ -16,6 +16,17 @@ const BTN_LABEL = {
   concluido: 'Refazer'
 };
 
+const MATERIA_ICONS = {
+  Todas: '📚',
+  Português: '📖',
+  Matemática: '📐',
+  História: '🏛️',
+  Geografia: '🌎',
+  Ciências: '🔬',
+  Simulado: '📝',
+  Atualidades: '📰',
+};
+
 export default function Simulados() {
   const { addXP } = useGamification();
 
@@ -1429,45 +1440,29 @@ Deseja finalizar mesmo assim?`
   return (
     <div>
 
-      <div className="page-header">
+            <div className="page-header">
 
         <h1>Simulados</h1>
 
-        <div className="page-actions">
+      </div>
 
-          <select
-            className="mural-filter-select"
-            value={filtro}
-            onChange={(e) =>
-              setFiltro(
-                e.target.value
-              )
-            }
+      <div className="materia-tabs">
+
+        {materias.map((materia) => (
+          <button
+            key={materia}
+            className={`materia-tab ${filtro === materia ? 'active' : ''}`}
+            onClick={() => setFiltro(materia)}
           >
-
-            <option value="Todas">
-              Todas as matérias
-            </option>
-
-            {materias
-              .filter(
-                (materia) =>
-                  materia !== 'Todas'
-              )
-              .map((materia) => (
-
-                <option
-                  key={materia}
-                  value={materia}
-                >
-                  {materia}
-                </option>
-
-              ))}
-
-          </select>
-
-        </div>
+            <span className="materia-tab-icon">{MATERIA_ICONS[materia] || '📌'}</span>
+            {materia}
+            <span className="materia-tab-count">
+              {materia === 'Todas'
+                ? simulados.length
+                : simulados.filter((s) => s.materia === materia).length}
+            </span>
+          </button>
+        ))}
 
       </div>
 

@@ -442,6 +442,63 @@
 .week-nav button:hover{ border-color:var(--accent); color:var(--ink); transform:scale(1.12); }
 .week-nav .week-label{ font-weight:600; font-size:16px; color:var(--ink); }
 
+/* ===== abas Meu cronograma / Plano automático ===== */
+.cronograma-tabs{
+  display:flex; gap:8px; margin-bottom:22px;
+  border-bottom:1.5px solid var(--line);
+}
+.cronograma-tab{
+  background:none; border:none; cursor:pointer;
+  padding:10px 4px; margin-bottom:-1.5px;
+  font-family:'IBM Plex Sans'; font-size:15px; font-weight:600;
+  color:var(--muted); border-bottom:2.5px solid transparent;
+  transition:color .15s ease, border-color .15s ease;
+  margin-right:22px;
+}
+.cronograma-tab:hover{ color:var(--ink); }
+.cronograma-tab.active{ color:var(--ink); border-bottom-color:var(--ink); }
+
+/* ===== plano automático ===== */
+.auto-plan{ display:flex; flex-direction:column; gap:22px; }
+.auto-plan-config h3{ margin-bottom:6px; }
+.auto-plan-hint{ font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 18px; max-width:640px; }
+
+.pill-row{ display:flex; flex-wrap:wrap; gap:8px; }
+
+.auto-plan-generate{ margin-top:22px; }
+
+.auto-plan-months{
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;
+}
+.auto-plan-month-tab{
+  background:#fff; border:1.5px solid var(--line); border-radius:100px;
+  padding:8px 16px; font-family:'IBM Plex Sans'; font-size:13.5px; font-weight:600;
+  color:var(--ink-soft); cursor:pointer;
+  transition:transform .18s var(--bouncy), border-color .15s ease, background .15s ease, color .15s ease;
+}
+.auto-plan-month-tab:hover{ border-color:var(--accent); color:var(--ink); }
+.auto-plan-month-tab.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+
+.auto-plan-week{ margin-bottom:16px; }
+.auto-plan-week-header{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  margin-bottom:14px;
+}
+.auto-plan-week-header h3{ margin:0; }
+
+.auto-plan-days{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(170px,1fr)); gap:12px;
+}
+.auto-plan-day{
+  background:var(--paper); border-radius:12px; padding:12px 14px;
+  display:flex; flex-direction:column; gap:4px;
+  font-size:13.5px; color:var(--ink);
+}
+.auto-plan-day-name{
+  font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
+  color:var(--accent-dark);
+}
+
 .week-grid{
   display:grid; grid-template-columns:repeat(7, 1fr); gap:12px; margin-bottom:28px;
   overflow-x:auto;
@@ -537,6 +594,29 @@
 .achievement-text span{ font-size:13px; color:var(--muted); }
 
 .flashcard-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:20px; }
+
+/* ===== abas de matéria (Flash Cards) ===== */
+.materia-tabs{
+  display:flex; flex-wrap:wrap; gap:8px; margin-bottom:26px;
+}
+.materia-tab{
+  background:#fff; border:1.5px solid var(--line); border-radius:100px;
+  padding:9px 16px; font-family:'IBM Plex Sans'; font-size:13.5px; font-weight:600;
+  color:var(--ink-soft); cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  transition:transform .18s var(--bouncy), border-color .15s ease, background .15s ease, color .15s ease;
+}
+.materia-tab:hover{ border-color:var(--accent); color:var(--ink); transform:translateY(-1px); }
+.materia-tab.active{ background:var(--ink); border-color:var(--ink); color:#fff; }
+.materia-tab-count{
+  background:rgba(0,0,0,0.08); border-radius:100px; padding:1px 8px; font-size:11.5px;
+}
+.materia-tab.active .materia-tab-count{ background:rgba(255,255,255,0.2); }
+
+.materia-section{ margin-bottom:34px; }
+.materia-section-title{
+  font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:700;
+  color:var(--ink); margin:0 0 14px;
+}
 .flashcard{ perspective:1000px; height:160px; cursor:pointer; }
 .flashcard-inner{
   position:relative; width:100%; height:100%;

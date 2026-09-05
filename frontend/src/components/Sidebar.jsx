@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useGamification } from '../context/GamificationContext.jsx';
 import logoIcon from '../assets/tenna_logo.png';
 
+
 const NAV_ITEMS = [
   { to: '/home', label: 'Início', icon: 'home' },
   { to: '/mural', label: 'Mural', icon: 'mural' },

@@ -15,12 +15,10 @@ const CARDS = [
 const MATERIAS = ['Matemática', 'Português', 'Ciências', 'História'];
 
 export default function FlashCards() {
-const { addXP } = useGamification();
+  const { addXP } = useGamification();
 
   const [flipped, setFlipped] = useState(new Set());
   const [filtro, setFiltro] = useState('Todas');
-
-  const visiveis = filtro === 'Todas' ? CARDS : CARDS.filter((c) => c.subject === filtro);
 
   function toggle(id) {
     setFlipped((prev) => {
@@ -35,23 +33,14 @@ const { addXP } = useGamification();
     });
   }
 
-  return (
-    <div>
-      <div className="page-header">
-        <div>
-          <h1>Flash Cards</h1>
-          <p>Revise os conteúdos de forma rápida com os Cards</p>
-        </div>
-        <div className="page-actions">
-          <select className="mural-filter-select" value={filtro} onChange={(e) => setFiltro(e.target.value)}>
-            <option value="Todas">Filtrar por matéria</option>
-            {MATERIAS.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
-      </div>
+  function contarPorMateria(materia) {
+    return CARDS.filter((c) => c.subject === materia).length;
+  }
 
+  function renderGrid(cards) {
+    return (
       <div className="flashcard-grid">
-        {visiveis.map((c) => (
+        {cards.map((c) => (
           <div className={`flashcard ${flipped.has(c.id) ? 'flipped' : ''}`} key={c.id} onClick={() => toggle(c.id)}>
             <div className="flashcard-inner">
               <div className="flashcard-face front">{c.front}</div>
@@ -60,6 +49,52 @@ const { addXP } = useGamification();
           </div>
         ))}
       </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1>Flash Cards</h1>
+          <p>Revise os conteúdos de forma rápida com os Cards</p>
+        </div>
+      </div>
+
+      <div className="materia-tabs">
+        <button
+          className={`materia-tab ${filtro === 'Todas' ? 'active' : ''}`}
+          onClick={() => setFiltro('Todas')}
+        >
+          Todas <span className="materia-tab-count">{CARDS.length}</span>
+        </button>
+        {MATERIAS.map((m) => (
+          <button
+            key={m}
+            className={`materia-tab ${filtro === m ? 'active' : ''}`}
+            onClick={() => setFiltro(m)}
+          >
+            {m} <span className="materia-tab-count">{contarPorMateria(m)}</span>
+          </button>
+        ))}
+      </div>
+
+      {filtro === 'Todas' ? (
+        MATERIAS.map((m) => {
+          const cards = CARDS.filter((c) => c.subject === m);
+          if (cards.length === 0) return null;
+          return (
+            <div className="materia-section" key={m}>
+              <h2 className="materia-section-title">{m}</h2>
+              {renderGrid(cards)}
+            </div>
+          );
+        })
+      ) : (
+        <div className="materia-section">
+          {renderGrid(CARDS.filter((c) => c.subject === filtro))}
+        </div>
+      )}
     </div>
   );
 }
