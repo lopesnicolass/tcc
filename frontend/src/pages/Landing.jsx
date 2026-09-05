@@ -83,58 +83,55 @@ export default function Landing() {
       </header>
 
            <section className="landing-hero-full">
-        <div className="landing-hero-row">
-          <div className="landing-hero-copy">
-            <div className="countdown-badge landing-badge">
-              🔥 <span><strong>{getDaysUntilExam()}</strong> dias até o Vestibulinho</span>
-            </div>
-            <h1>
-              Organize seus estudos e conquiste sua vaga na <span className="accent-word">ETEC.</span>
-            </h1>
-            <p>
-              O Prepara ETECAMP reúne flashcards, simulados, cronograma e acompanhamento
-              de desempenho num só lugar, feito para quem está se preparando para o
-              Vestibulinho.
-            </p>
-            <div className="landing-cta-row">
-              <button className="btn-primary landing-cta" onClick={goToCadastro}>
-                <span className="btn-label">Criar conta grátis</span>
-              </button>
-              <button className="landing-cta-secondary" onClick={goToLogin}>
-                Já tenho conta
-              </button>
-            </div>
-          </div>
+  <div className="landing-hero-row">
+    <div className="landing-hero-copy">
+      <div className="countdown-badge landing-badge">
+        🔥 <span><strong>{getDaysUntilExam()}</strong> dias até o Vestibulinho</span>
+      </div>
+      <h1>
+        Organize seus estudos e conquiste sua vaga na <span className="accent-word">ETECAMP.</span>
+      </h1>
+      <p>
+        O TENNA reúne flashcards, simulados, cronograma e acompanhamento
+        de desempenho num só lugar, feito para quem está se preparando para o
+        Vestibulinho.
+      </p>
 
-                             <div className="landing-hero-subjects">
-            <h3>Organize sua rotina de estudos<br /><span className="accent-word">matéria por matéria.</span></h3>
-            <p>Acompanhe seu progresso rumo à aprovação no Vestibulinho ETEC.</p>
-            <div className="landing-subjects-row">
-              {subjects.map((s) => (
-                <button
-                  type="button"
-                  key={s.name}
-                  className="landing-subject-card"
-                  onClick={() => toggleSubject(s.name)}
-                >
-                  <div className={`subject-check ${s.done ? 'done' : 'pending'}`}>
-                    {s.done ? '✓' : ''}
-                  </div>
-                  <div className="subject-info">
-                    <div className="subject-name">
-                      <span>{s.name}</span>
-                      <span className="pct">{s.pct}%</span>
-                    </div>
-                    <div className="subject-bar">
-                      <span style={{ width: `${s.pct}%` }}></span>
-                    </div>
-                  </div>
-                </button>
-              ))}
+      <div className="landing-subjects-row landing-subjects-row-compact">
+        {subjects.map((s) => (
+          <button
+            type="button"
+            key={s.name}
+            className="landing-subject-card landing-subject-card-compact"
+            onClick={() => toggleSubject(s.name)}
+          >
+            <div className={`subject-check ${s.done ? 'done' : 'pending'}`}>
+              {s.done ? '✓' : ''}
             </div>
-          </div>
-        </div>
-      </section>
+            <div className="subject-info">
+              <div className="subject-name">
+                <span>{s.name}</span>
+                <span className="pct">{s.pct}%</span>
+              </div>
+              <div className="subject-bar">
+                <span style={{ width: `${s.pct}%` }}></span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div className="landing-cta-row">
+        <button className="btn-primary landing-cta" onClick={goToCadastro}>
+          <span className="btn-label">Criar conta</span>
+        </button>
+        <button className="landing-cta-secondary" onClick={goToLogin}>
+          Já tenho conta
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
       <section className="landing-features">
         <h2>Tudo o que você precisa para estudar</h2>
@@ -171,7 +168,7 @@ export default function Landing() {
       </section>
 
       <footer className="landing-footer">
-        <span>© {new Date().getFullYear()} Prepara ETECAMP</span>
+        <span>© {new Date().getFullYear()} TENNA</span>
       </footer>
     </div>
   );

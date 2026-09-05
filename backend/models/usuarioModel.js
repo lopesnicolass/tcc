@@ -1,9 +1,9 @@
 const db = require("../config/db");
 
 
-// ============================
+// =====================================================
 // BUSCAR USUÁRIO POR EMAIL
-// ============================
+// =====================================================
 
 function buscarUsuarioPorEmail(email, callback) {
 
@@ -17,9 +17,30 @@ function buscarUsuarioPorEmail(email, callback) {
 }
 
 
-// ============================
+// =====================================================
+// BUSCAR USUÁRIO POR ID
+// =====================================================
+
+function buscarUsuarioPorId(id, callback) {
+
+    const sql = `
+        SELECT
+            id,
+            nome,
+            email,
+            tipo,
+            foto_perfil
+        FROM usuarios
+        WHERE id = ?
+    `;
+
+    db.get(sql, [id], callback);
+}
+
+
+// =====================================================
 // CRIAR USUÁRIO
-// ============================
+// =====================================================
 
 function criarUsuario(
     nome,
@@ -43,9 +64,9 @@ function criarUsuario(
 }
 
 
-// ============================
+// =====================================================
 // LISTAR TODOS OS USUÁRIOS
-// ============================
+// =====================================================
 
 function listarUsuarios(callback) {
 
@@ -54,7 +75,8 @@ function listarUsuarios(callback) {
             id,
             nome,
             email,
-            tipo
+            tipo,
+            foto_perfil
         FROM usuarios
         ORDER BY id DESC
     `;
@@ -62,9 +84,106 @@ function listarUsuarios(callback) {
     db.all(sql, [], callback);
 }
 
-// ============================
+
+// =====================================================
+// ATUALIZAR PERFIL
+// =====================================================
+
+function atualizarPerfil(
+    id,
+    nome,
+    email,
+    callback
+) {
+
+    const sql = `
+        UPDATE usuarios
+        SET
+            nome = ?,
+            email = ?
+        WHERE id = ?
+    `;
+
+    db.run(
+        sql,
+        [nome, email, id],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+
+// =====================================================
+// ATUALIZAR SENHA
+// =====================================================
+
+function atualizarSenha(
+    id,
+    senha,
+    callback
+) {
+
+    const sql = `
+        UPDATE usuarios
+        SET senha = ?
+        WHERE id = ?
+    `;
+
+    db.run(
+        sql,
+        [senha, id],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+
+// =====================================================
+// ATUALIZAR FOTO
+// =====================================================
+
+function atualizarFoto(
+    id,
+    fotoPerfil,
+    callback
+) {
+
+    const sql = `
+        UPDATE usuarios
+        SET foto_perfil = ?
+        WHERE id = ?
+    `;
+
+    db.run(
+        sql,
+        [fotoPerfil, id],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+
+// =====================================================
 // EXCLUIR USUÁRIO
-// ============================
+// =====================================================
 
 function excluirUsuario(id, callback) {
 
@@ -76,7 +195,11 @@ function excluirUsuario(id, callback) {
     db.run(sql, [id], function (erro) {
 
         if (erro) {
-            console.error("❌ Erro ao excluir usuário:", erro);
+            console.error(
+                "❌ Erro ao excluir usuário:",
+                erro
+            );
+
             return callback(erro);
         }
 
@@ -84,9 +207,20 @@ function excluirUsuario(id, callback) {
     });
 }
 
+
+// =====================================================
+// EXPORTAR
+// =====================================================
+
 module.exports = {
+
     buscarUsuarioPorEmail,
+    buscarUsuarioPorId,
     criarUsuario,
     listarUsuarios,
+    atualizarPerfil,
+    atualizarSenha,
+    atualizarFoto,
     excluirUsuario
+
 };

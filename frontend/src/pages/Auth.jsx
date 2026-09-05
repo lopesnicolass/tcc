@@ -187,7 +187,6 @@ setTimeout(() => {
 
         <div className="panel-form">
           <div className="tab-switch">
-            <div className="tab-indicator" ref={indicatorRef}></div>
             <button ref={loginBtnRef} className={`tab-btn ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
               Entrar
             </button>

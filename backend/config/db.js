@@ -212,6 +212,54 @@ db.run(`
     )
 `);
 
+// =====================================================
+// MIGRAÇÃO - FOTO DE PERFIL
+// =====================================================
+
+db.all(
+    `PRAGMA table_info(usuarios)`,
+    (erro, colunas) => {
+
+        if (erro) {
+            console.error(
+                "❌ Erro ao verificar tabela usuarios:",
+                erro.message
+            );
+
+            return;
+        }
+
+        const nomesColunas =
+            colunas.map((coluna) => coluna.name);
+
+        if (!nomesColunas.includes("foto_perfil")) {
+
+            db.run(`
+                ALTER TABLE usuarios
+                ADD COLUMN foto_perfil TEXT
+            `, (erro) => {
+
+                if (erro) {
+
+                    console.error(
+                        "❌ Erro ao adicionar foto_perfil:",
+                        erro.message
+                    );
+
+                } else {
+
+                    console.log(
+                        "✅ Coluna foto_perfil adicionada aos usuários."
+                    );
+
+                }
+
+            });
+
+        }
+
+    }
+);
 
     // =====================================================
     // MIGRAÇÃO DO BANCO EXISTENTE

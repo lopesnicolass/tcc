@@ -2,12 +2,12 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const GamificationContext = createContext(null);
 
-const LEVEL_TITLES = [
+export const LEVEL_TITLES = [
   'Iniciante', 'Aplicado', 'Focado', 'Dedicado',
   'Disciplinado', 'Avançado', 'Estrategista', 'Passei Direto', 'Mestre ETEC', 'Sou ETECAMP'
 ];
 
-function xpForLevel(level) {
+export function xpForLevel(level) {
   return level * 100;
 }
 

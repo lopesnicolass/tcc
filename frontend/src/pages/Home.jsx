@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useGamification } from '../context/GamificationContext.jsx';
+import { LEVEL_TITLES, xpForLevel } from '../context/GamificationContext.jsx';
 
 export default function Home() {
   const { level, title, xp, xpIntoLevel, xpForNext } = useGamification();
+  const [showLevels, setShowLevels] = useState(false);
 
   const usuarioSalvo = localStorage.getItem('etecamp_usuario');
   const usuario = usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
@@ -11,29 +14,34 @@ export default function Home() {
 
     <div>
       <div className="home-hero">
-        <div className="home-hero-text">
-          <h1>Olá, {primeiroNome}!</h1>
-          <p>Continue seus estudos e alcance seus objetivos!</p>
-        </div>
+  <div className="home-hero-text">
+    <h1>Olá, {primeiroNome}!</h1>
+    <p>Continue seus estudos e alcance seus objetivos!</p>
+  </div>
 
-        <div className="home-hero-level">
-          <div className="home-hero-level-badge">{level}</div>
-          <div className="home-hero-level-text">
-            <strong>{title}</strong>
-            <span>Nível {level}</span>
-          </div>
-        </div>
+  <div className="home-hero-progress">
+    <div
+  className="home-hero-level home-hero-level-clickable"
+  onClick={() => setShowLevels(true)}
+>
+  <div className="home-hero-level-badge">{level}</div>
+  <div className="home-hero-level-text">
+    <strong>{title}</strong>
+    <span>Nível {level}</span>
+  </div>
+</div>
 
-        <div className="home-hero-xp">
-          <div className="home-hero-xp-label">
-            <span>{xpIntoLevel} / {xpForNext} XP</span>
-            <span>{xp} XP total</span>
-          </div>
-          <div className="home-hero-xp-track">
-            <div className="home-hero-xp-fill" style={{ width: `${(xpIntoLevel / xpForNext) * 100}%` }}></div>
-          </div>
-        </div>
+    <div className="home-hero-xp">
+      <div className="home-hero-xp-label">
+        <span>{xpIntoLevel} / {xpForNext} XP</span>
+        <span>{xp} XP total</span>
       </div>
+      <div className="home-hero-xp-track">
+        <div className="home-hero-xp-fill" style={{ width: `${(xpIntoLevel / xpForNext) * 100}%` }}></div>
+      </div>
+    </div>
+  </div>
+</div>
 
       <div className="stats-row">
         <div className="stat-card">
@@ -75,8 +83,41 @@ export default function Home() {
             <div className="activity-item"><span>Atividade 3</span><span className="date">07/09</span></div>
             <div className="activity-item"><span>Atividade 4</span><span className="date">08/09</span></div>
           </div>
-        </div>
+               </div>
       </div>
+
+      {showLevels && (
+        <div className="modal-overlay" onClick={() => setShowLevels(false)}>
+          <div className="modal-card levels-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Níveis e XP</h2>
+              <p>Veja quanto XP falta pra subir de nível.</p>
+            </div>
+
+            <div className="levels-list">
+              {LEVEL_TITLES.map((t, i) => {
+                const lvl = i + 1;
+                return (
+                  <div key={lvl} className={`levels-row ${lvl === level ? 'current' : ''}`}>
+                    <div className="levels-row-badge">{lvl}</div>
+                    <div className="levels-row-info">
+                      <strong>{t}</strong>
+                      <span>Nível {lvl}</span>
+                    </div>
+                    <div className="levels-row-xp">{xpForLevel(lvl)} XP</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="modal-actions">
+              <button className="btn-primary landing-cta" onClick={() => setShowLevels(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
