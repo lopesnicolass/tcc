@@ -57,8 +57,9 @@
 .sidebar-brand:hover 
 .logo-mark{ transform:rotate(-8deg) scale(1.08); }
 .sidebar-logo-full{
-  max-width:100%;
-  height:auto;
+  height:46px;
+  width:auto;
+  max-width:170px;
   display:block;
 }
 .logo-mark:has(.logo-mark-img){ background:#fff; }
@@ -826,15 +827,17 @@
 
 @media (max-width:760px){
   .dashboard{ flex-direction:column; }
-  .sidebar{
+   .sidebar{
     width:100%;
+    height:auto;
     flex-direction:row;
     align-items:center;
     gap:16px;
     padding:14px 18px;
     overflow-x:auto;
   }
-  .sidebar-brand{ flex-shrink:0; }
+   .sidebar-brand{ flex-shrink:0; }
+  .sidebar-logo-full{ height:26px; max-width:110px; }
     .sidebar-streak{ flex-shrink:0; margin-top:0; margin-left:auto; }
   .sidebar-nav{
     flex-direction:row;
@@ -1513,4 +1516,606 @@
     width:100%;
   }
 
+}
+
+/* =========================================================
+   TERRÁRIO
+   ========================================================= */
+
+.terrario-page {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.terrario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 28px;
+}
+
+.terrario-kicker {
+  display: inline-block;
+  margin-bottom: 5px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+}
+
+.terrario-header h1 {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(30px, 4vw, 44px);
+  color: var(--ink);
+}
+
+.terrario-header p {
+  margin: 7px 0 0;
+  color: var(--ink-soft);
+}
+
+.terrario-level {
+  min-width: 150px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(18, 53, 36, .08);
+  text-align: center;
+}
+
+.terrario-level span,
+.terrario-level small {
+  display: block;
+  color: var(--muted);
+}
+
+.terrario-level strong {
+  display: block;
+  margin: 4px 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--accent-dark);
+}
+
+/* STATS */
+
+.terrario-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.terrario-stat {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(18, 53, 36, .06);
+}
+
+.terrario-stat > span {
+  display: grid;
+  place-items: center;
+  width: 45px;
+  height: 45px;
+  border-radius: 14px;
+  background: var(--paper);
+  font-size: 22px;
+}
+
+.terrario-stat strong,
+.terrario-stat small {
+  display: block;
+}
+
+.terrario-stat strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 21px;
+  color: var(--ink);
+}
+
+.terrario-stat small {
+  margin-top: 2px;
+  color: var(--muted);
+}
+
+/* GAME */
+
+.terrario-game-card {
+  overflow: hidden;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 15px 40px rgba(18, 53, 36, .10);
+}
+
+.terrario-game-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.terrario-game-top strong {
+  display: block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.terrario-game-top span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.terrario-live {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #e8f8ed;
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.terrario-live i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: terrarioLivePulse 1.3s infinite;
+}
+
+@keyframes terrarioLivePulse {
+  50% {
+    transform: scale(1.4);
+    opacity: .45;
+  }
+}
+
+/* WORLD */
+
+.terrario-canvas-wrap {
+  width: 100%;
+  height: 460px;
+  position: relative;
+  overflow: hidden;
+}
+
+.terrario-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .terrario-canvas-wrap { height: 340px; }
+}
+
+/* SOL */
+
+.terrario-sun {
+  fill: #ffc93c;
+  opacity: .95;
+  animation: terrarioSun 4s ease-in-out infinite;
+}
+
+@keyframes terrarioSun {
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* NUVENS */
+
+.terrario-cloud {
+  fill: white;
+  opacity: .75;
+  animation: terrarioCloud 16s linear infinite;
+}
+
+.cloud-two {
+  animation-delay: -7s;
+  animation-duration: 20s;
+}
+
+@keyframes terrarioCloud {
+  from {
+    transform: translateX(-50px);
+  }
+
+  to {
+    transform: translateX(60px);
+  }
+}
+
+/* PLANTAS */
+
+.terrario-plants {
+  fill: none;
+  stroke: #2e8a48;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.terrario-plants path {
+  animation: plantSway 3s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.plant-two path {
+  animation-delay: -1.5s;
+}
+
+@keyframes plantSway {
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* PEDRAS */
+
+.terrario-rocks ellipse {
+  fill: #78909c;
+  stroke: #546e7a;
+  stroke-width: 4;
+}
+
+/* COLÔNIA */
+
+.colony-chamber {
+  fill: #8d6e63;
+  stroke: #4e342e;
+  stroke-width: 5;
+}
+
+.colony-tunnel {
+  fill: none;
+  stroke: #4e342e;
+  stroke-width: 30;
+  stroke-linecap: round;
+}
+
+/* RAINHA */
+
+.terrario-queen {
+  fill: #263238;
+  stroke: #11191c;
+  stroke-width: 2;
+  animation: queenBreath 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes queenBreath {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+/* OVOS */
+
+.terrario-eggs ellipse {
+  fill: #fff8e1;
+  stroke: #d7ccc8;
+  stroke-width: 2;
+}
+
+/* COMIDA */
+
+.food-apple {
+  fill: #ff7043;
+  stroke: #c62828;
+  stroke-width: 2;
+}
+
+.food-stem {
+  stroke: #4e342e;
+  stroke-width: 2;
+}
+
+.food-leaf {
+  fill: #43a047;
+}
+
+/* =========================================================
+   FORMIGAS CARTOON
+   ========================================================= */
+
+.terrarium-ant {
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Sombra */
+
+.ant-shadow {
+  fill: rgba(0, 0, 0, .18);
+}
+
+/* Corpo */
+
+.ant-abdomen {
+  fill: #263238;
+  stroke: #11191c;
+  stroke-width: 1.5;
+}
+
+.ant-thorax {
+  fill: #263238;
+  stroke: #11191c;
+  stroke-width: 1.5;
+}
+
+.ant-head {
+  fill: #182125;
+  stroke: #11191c;
+  stroke-width: 1.5;
+}
+
+/* Listras */
+
+.ant-stripe {
+  fill: none;
+  stroke: #546e7a;
+  stroke-width: 1.4;
+  opacity: .8;
+}
+
+/* Olhos */
+
+.ant-eye {
+  fill: white;
+}
+
+.ant-eye-highlight {
+  fill: #263238;
+}
+
+/* Boca */
+
+.ant-mouth {
+  fill: none;
+  stroke: white;
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+/* Pernas */
+
+.ant-leg {
+  fill: none;
+  stroke: #11191c;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/*
+ * IMPORTANTE:
+ * a animação agora NÃO altera o transform
+ * do grupo principal da formiga.
+ */
+
+.ant-legs-moving .leg-1,
+.ant-legs-moving .leg-4,
+.ant-legs-moving .leg-3,
+.ant-legs-moving .leg-6 {
+  animation: antLegA .18s infinite alternate ease-in-out;
+}
+
+.ant-legs-moving .leg-2,
+.ant-legs-moving .leg-5 {
+  animation: antLegB .18s infinite alternate ease-in-out;
+}
+
+@keyframes antLegA {
+  from {
+    d: path("M-4 -1 L-16 -9");
+  }
+
+  to {
+    d: path("M-4 -1 L-13 -5");
+  }
+}
+
+@keyframes antLegB {
+  from {
+    d: path("M-5 2 L-18 2");
+  }
+
+  to {
+    d: path("M-5 2 L-14 5");
+  }
+}
+
+/* Antenas */
+
+.ant-antenna {
+  fill: none;
+  stroke: #11191c;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.ant-antenna-tip {
+  fill: #11191c;
+}
+
+/*
+ * Pequena animação apenas nas antenas.
+ * Não mexemos no transform da formiga inteira.
+ */
+
+.ant-antennae {
+  animation: antAntenna 1.2s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes antAntenna {
+  from {
+    opacity: .85;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Comida */
+
+.ant-food {
+  animation: antFoodBounce .45s ease-in-out infinite alternate;
+}
+
+.food-piece {
+  fill: #ff7043;
+  stroke: #c62828;
+  stroke-width: 1.5;
+}
+
+.food-highlight {
+  fill: #ffccbc;
+}
+
+@keyframes antFoodBounce {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-1.5px);
+  }
+}
+
+/* FOOTER */
+
+.terrario-game-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 20px;
+  background: #f8fbf7;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* INFO */
+
+.terrario-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.terrario-info > div {
+  display: flex;
+  gap: 12px;
+  padding: 18px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.terrario-info > div > span {
+  font-size: 24px;
+}
+
+.terrario-info strong {
+  color: var(--ink);
+}
+
+.terrario-info p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* RESPONSIVO */
+
+@media (max-width: 900px) {
+  .terrario-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .terrario-info {
+    grid-template-columns: 1fr;
+  }
+
+  .terrario-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .terrario-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .terrario-game-top {
+    padding: 16px;
+  }
+
+  .terrario-game-footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .terrario-world {
+    min-height: 420px;
+  }
+}
+
+/* =========================================================
+   TERRÁRIO — PHASER
+   ========================================================= */
+
+.terrarium-phaser-container {
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #e3f2fd 0%,
+      #d6edf9 100%
+    );
+
+  border-radius: 0 0 18px 18px;
+}
+
+.terrarium-phaser-container canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100%;
+  max-height: 100%;
+
+  border-radius: 0 0 18px 18px;
 }

@@ -14,6 +14,7 @@ import Provas from './pages/Provas.jsx';
 import Desempenho from './pages/Desempenho.jsx';
 import FlashCards from './pages/FlashCards.jsx';
 import Perfil from './pages/Perfil.jsx';
+import Terrario from './pages/Terrario.jsx';
 
 import AdminUsuarios from './pages/AdminUsuarios.jsx';
 import AdminSimulados from './pages/AdminSimulados.jsx';
@@ -46,7 +47,8 @@ export default function App() {
             <Route path="/provas" element={<Provas />} />
             <Route path="/desempenho" element={<Desempenho />} />
             <Route path="/flashcards" element={<FlashCards />} />
-            <Route path="/perfil" element={<Perfil />} />
+<Route path="/terrario" element={<Terrario />} />
+<Route path="/perfil" element={<Perfil />} />
           </Route>
         </Route>
 
