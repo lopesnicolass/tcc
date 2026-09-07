@@ -1,5 +1,8 @@
 import '../styles/dashboard.css';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getSubjectStyle } from '../utils/subjects.js';
+import SubjectIcon from '../components/cu.jsx';
+import Icon from '../components/Icon.jsx';
 
 export const TOPICS_BANK = {
   'Língua Portuguesa': [
@@ -173,17 +176,6 @@ export const TOPICS_BANK = {
   ],
 };
 
-const SUBJECT_ICONS = {
-  'Língua Portuguesa': '📝',
-  Matemática: '➗',
-  História: '🏛️',
-  Geografia: '🌎',
-  Biologia: '🧬',
-  Química: '⚗️',
-  Física: '⚡',
-  'Raciocínio e interpretação': '🧠',
-};
-
 const STORAGE_KEY = 'conteudosEstudados';
 
 function getUserKey() {
@@ -206,24 +198,84 @@ function loadProgress() {
 }
 
 export default function Conteudos() {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('Todas');
-  const [abertos, setAbertos] = useState(() => new Set(Object.keys(TOPICS_BANK)));
+  const [materiasData, setMateriasData] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+  const [abertos, setAbertos] = useState(new Set());
   const [estudados, setEstudados] = useState(loadProgress);
 
-  const total = Object.values(TOPICS_BANK).reduce((sum, topics) => sum + topics.length, 0);
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarConteudos() {
+      try {
+        setCarregando(true);
+        setErro('');
+
+        const resposta = await fetch(`${API_URL}/conteudos/publico`);
+        const dados = await resposta.json().catch(() => ({}));
+
+        if (!resposta.ok) {
+          throw new Error(dados.erro || dados.mensagem || 'Não foi possível carregar os conteúdos.');
+        }
+
+        const materias = Array.isArray(dados) ? dados : (dados.materias || []);
+
+        if (!ativo) return;
+
+        setMateriasData(materias);
+        setAbertos((prev) => {
+          const nomesAtuais = new Set(materias.map((materia) => materia.nome));
+          const next = new Set([...prev].filter((nome) => nomesAtuais.has(nome)));
+
+          materias.forEach((materia) => {
+            if (prev.size === 0) next.add(materia.nome);
+          });
+
+          return next;
+        });
+      } catch (error) {
+        console.error('Erro ao carregar conteúdos:', error);
+        if (ativo) setErro(error.message || 'Não foi possível carregar os conteúdos.');
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    }
+
+    carregarConteudos();
+    return () => { ativo = false; };
+  }, [API_URL]);
+
+  const total = materiasData.reduce(
+    (sum, materia) => sum + (Array.isArray(materia.topicos) ? materia.topicos.length : 0),
+    0
+  );
   const totalEstudados = Object.values(estudados).filter(Boolean).length;
   const progresso = total ? Math.round((totalEstudados / total) * 100) : 0;
 
-  const materias = filtro === 'Todas' ? Object.keys(TOPICS_BANK) : [filtro];
+  const materias = filtro === 'Todas'
+    ? materiasData.map((materia) => materia.nome)
+    : [filtro];
+
   const conteudosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    return materias.reduce((acc, materia) => {
-      const topics = TOPICS_BANK[materia].filter((topic) => !termo || topic.toLowerCase().includes(termo));
-      if (topics.length) acc[materia] = topics;
+
+    return materias.reduce((acc, nomeMateria) => {
+      const materia = materiasData.find((item) => item.nome === nomeMateria);
+      if (!materia) return acc;
+
+      const topics = (materia.topicos || [])
+        .map((topico) => typeof topico === 'string' ? topico : topico.nome)
+        .filter(Boolean)
+        .filter((topic) => !termo || topic.toLowerCase().includes(termo));
+
+      if (topics.length) acc[nomeMateria] = topics;
       return acc;
     }, {});
-  }, [busca, filtro, materias]);
+  }, [busca, filtro, materiasData]);
 
   function toggleMateria(materia) {
     setAbertos((prev) => {
@@ -250,16 +302,21 @@ export default function Conteudos() {
 
   return (
     <div className="conteudos-page">
-      <div className="page-header">
-        <div>
-          <h1>Conteúdos do Vestibulinho</h1>
-          <p>Consulte o que estudar e acompanhe o que você já revisou.</p>
+      <section className="tenna-auto-intro">
+        <div className="tenna-auto-intro-copy">
+          <span className="tenna-auto-kicker">BASE DE CONTEÚDOS</span>
+          <h2>Tudo que cai no <span>Vestibulinho</span></h2>
+          <p>Consulte o que estudar em cada matéria e marque o que você já revisou.</p>
         </div>
-      </div>
+        <div className="tenna-auto-intro-badge">
+          <Icon name="book" size={26} color="#fff" />
+          <small>Conteúdos</small>
+        </div>
+      </section>
 
       <section className="content-progress-card">
         <div className="content-progress-main">
-          <div className="content-progress-icon">📚</div>
+          <div className="content-progress-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="book" size={24} /></div>
           <div>
             <span className="content-eyebrow">Seu progresso</span>
             <h2>{totalEstudados} de {total} conteúdos estudados</h2>
@@ -282,26 +339,47 @@ export default function Conteudos() {
         </div>
         <select value={filtro} onChange={(e) => setFiltro(e.target.value)}>
           <option>Todas</option>
-          {Object.keys(TOPICS_BANK).map((materia) => <option key={materia}>{materia}</option>)}
+          {materiasData.map((materia) => <option key={materia.id || materia.nome} value={materia.nome}>{materia.nome}</option>)}
         </select>
         <button className="content-reset-btn" onClick={marcarTodosComoNaoEstudados}>Limpar progresso</button>
       </div>
 
-      <div className="content-subject-list">
+      {erro && (
+        <div className="content-empty">
+          <strong>Não foi possível carregar os conteúdos.</strong>
+          <span>{erro}</span>
+        </div>
+      )}
+
+      {!erro && carregando && (
+        <div className="content-empty">
+          <strong>Carregando conteúdos...</strong>
+          <span>Buscando a lista atualizada no sistema.</span>
+        </div>
+      )}
+
+      {!erro && !carregando && <div className="content-subject-list">
         {Object.entries(conteudosFiltrados).map(([materia, topics]) => {
           const studiedCount = topics.filter((topic) => estudados[`${materia}::${topic}`]).length;
           const aberto = abertos.has(materia);
+          const style = getSubjectStyle(materia);
+          const materiaProgresso = topics.length ? Math.round((studiedCount / topics.length) * 100) : 0;
           return (
-            <section className="content-subject-card" key={materia}>
+            <section className="content-subject-card" key={materia} style={{ borderLeftColor: style.color }}>
               <button className="content-subject-header" onClick={() => toggleMateria(materia)}>
                 <div className="content-subject-title">
-                  <span className="content-subject-icon">{SUBJECT_ICONS[materia]}</span>
+                  <span className="content-subject-icon" style={{ background: style.bg, color: style.color }}>
+                    <SubjectIcon materia={materia} size={20} />
+                  </span>
                   <div>
                     <h2>{materia}</h2>
                     <span>{topics.length} conteúdos • {studiedCount} estudados</span>
                   </div>
                 </div>
-                <span className={`content-chevron ${aberto ? 'open' : ''}`}>›</span>
+                <div className="content-subject-progress">
+                  <span style={{ color: style.color }}>{materiaProgresso}%</span>
+                  <span className={`content-chevron ${aberto ? 'open' : ''}`}>›</span>
+                </div>
               </button>
 
               {aberto && (
@@ -314,11 +392,12 @@ export default function Conteudos() {
                         className={`content-topic ${done ? 'studied' : ''}`}
                         key={topic}
                         onClick={() => toggleEstudado(materia, topic)}
+                        style={done ? { borderColor: style.color, background: style.bg } : undefined}
                       >
-                        <span className="content-topic-check">{done ? '✓' : ''}</span>
+                        <span className="content-topic-check" style={done ? { background: style.color, borderColor: style.color } : undefined}>{done ? '✓' : ''}</span>
                         <span className="content-topic-number">{String(index + 1).padStart(2, '0')}</span>
                         <span className="content-topic-name">{topic}</span>
-                        <span className="content-topic-status">{done ? 'Estudado' : 'Marcar'}</span>
+                        <span className="content-topic-status" style={done ? { color: style.color } : undefined}>{done ? 'Estudado' : 'Marcar'}</span>
                       </button>
                     );
                   })}
@@ -334,7 +413,7 @@ export default function Conteudos() {
             <span>Tente outra palavra ou selecione outra matéria.</span>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

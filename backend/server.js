@@ -12,8 +12,8 @@ const simuladoRoutes = require("./routes/simuladoRoutes");
 const muralRoutes = require("./routes/muralRoutes");
 const sessaoRoutes = require("./routes/sessaoRoutes");
 const provaRoutes = require("./routes/provaRoutes");
-const gamificacaoRoutes =
-    require("./routes/gamificacaoRoutes");
+const gamificacaoRoutes = require("./routes/gamificacaoRoutes");
+const conteudoRoutes = require('./routes/conteudoRoutes');
 
 const app = express();
 
@@ -42,25 +42,16 @@ app.use(
 // ============================
 
 app.use("/auth", authRoutes);
-
 app.use("/usuarios", usuarioRoutes);
-
 app.use("/resultados", resultadoRoutes);
-
 app.use("/questoes", questaoRoutes);
-
 app.use("/simulados", simuladoRoutes);
-
 app.use("/mural", muralRoutes);
-
 app.use("/sessoes", sessaoRoutes);
-
 app.use("/provas", provaRoutes);
+app.use("/gamificacao", gamificacaoRoutes);
 
-app.use(
-    "/gamificacao",
-    gamificacaoRoutes
-);
+app.use("/conteudos", conteudoRoutes);
 
 // ============================
 // ROTA INICIAL

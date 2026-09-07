@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useGamification } from '../context/GamificationContext.jsx';
+import { getSubjectStyle } from '../utils/subjects.js';
+import SubjectIcon from '../components/cu.jsx';
+import Icon from '../components/Icon.jsx';
 
 const STORAGE_KEY = 'tenna_calendario_atividades';
 const WEEK_DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -118,22 +121,40 @@ export default function Cronograma() {
 
   return (
     <div className="calendar-page">
-      <div className="page-header">
-        <div>
-          <span className="calendar-kicker">MINHA ROTINA</span>
-          <h1>Meu calendário</h1>
-          <p>Organize seus estudos, acompanhe sua rotina e não deixe o conteúdo acumular.</p>
+      <section className="tenna-auto-intro">
+        <div className="tenna-auto-intro-copy">
+          <span className="tenna-auto-kicker">MINHA ROTINA</span>
+          <h2>Organize seu <span>calendário de estudos</span></h2>
+          <p>Veja o que estudar em cada dia, acompanhe sua constância e não deixe o conteúdo acumular.</p>
         </div>
-        <div className="page-actions">
-          <button className="mural-btn primary" onClick={() => openCreate()}>+ Nova atividade</button>
+        <div className="tenna-auto-intro-badge">
+          <Icon name="calendar" size={26} color="#fff" />
+          <small>Sua rotina</small>
         </div>
+      </section>
+
+      <div className="calendar-actions-row">
+        <p>Toque em um dia do calendário para ver ou adicionar atividades.</p>
+        <button className="mural-btn primary" onClick={() => openCreate()}>+ Nova atividade</button>
       </div>
 
       <section className="calendar-overview">
-        <div><span>Atividades no mês</span><strong>{monthActivities.length}</strong></div>
-        <div><span>Concluídas</span><strong>{doneCount}</strong></div>
-        <div><span>Horas planejadas</span><strong>{totalHours.toFixed(1)}h</strong></div>
-        <div className="calendar-overview-tip"><span>💡</span><p>Use o <strong>Plano automático</strong> para receber uma sugestão de rotina e depois trazer as semanas para cá.</p></div>
+        <div>
+          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="pin" size={18} /></span>
+          <div><span>Atividades no mês</span><strong>{monthActivities.length}</strong></div>
+        </div>
+        <div>
+          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="check" size={18} /></span>
+          <div><span>Concluídas</span><strong>{doneCount}</strong></div>
+        </div>
+        <div>
+          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="clock" size={18} /></span>
+          <div><span>Horas planejadas</span><strong>{totalHours.toFixed(1)}h</strong></div>
+        </div>
+        <div className="calendar-overview-tip">
+          <span style={{ color: 'var(--accent-dark)' }}><Icon name="bulb" size={22} /></span>
+          <p>Use o <strong>Plano automático</strong> para receber uma sugestão de rotina e depois trazer as semanas para cá.</p>
+        </div>
       </section>
 
       <div className="calendar-layout">
@@ -161,7 +182,18 @@ export default function Cronograma() {
               return (
                 <button key={key} className={`calendar-day ${!inMonth ? 'outside' : ''} ${selected ? 'selected' : ''} ${isToday ? 'today' : ''}`} onClick={() => setSelectedDate(key)}>
                   <span className="calendar-day-number">{day.getDate()}</span>
-                  {dayActivities.slice(0, 3).map((a) => <span key={a.id} className={`calendar-event ${a.done ? 'done' : ''}`}>{a.materia} · {a.nome}</span>)}
+                  {dayActivities.slice(0, 3).map((a) => {
+                    const style = getSubjectStyle(a.materia);
+                    return (
+                      <span
+                        key={a.id}
+                        className={`calendar-event ${a.done ? 'done' : ''}`}
+                        style={{ background: style.bg, borderLeftColor: style.color, color: style.color }}
+                      >
+                        <span className="calendar-event-icon"><SubjectIcon materia={a.materia} size={11} /></span>{a.nome}
+                      </span>
+                    );
+                  })}
                   {dayActivities.length > 3 && <span className="calendar-more">+{dayActivities.length - 3} mais</span>}
                 </button>
               );
@@ -181,21 +213,27 @@ export default function Cronograma() {
           <div className="calendar-task-list">
             {selectedActivities.length === 0 ? (
               <div className="calendar-empty-day">
-                <span>📚</span>
+                <span style={{ color: 'var(--muted)', display: 'flex', justifyContent: 'center' }}><Icon name="calendar" size={30} /></span>
                 <strong>Nada planejado ainda</strong>
                 <p>Adicione uma atividade para organizar este dia.</p>
                 <button onClick={() => openCreate()}>Adicionar atividade</button>
               </div>
-            ) : selectedActivities.map((activity) => (
-              <article className={`calendar-task ${activity.done ? 'done' : ''}`} key={activity.id} onClick={() => openEdit(activity)}>
-                <button className="calendar-check" onClick={(e) => { e.stopPropagation(); toggleDone(activity); }}>{activity.done ? '✓' : ''}</button>
-                <div className="calendar-task-info">
-                  <span>{activity.horario} · {activity.materia}</span>
-                  <strong>{activity.nome}</strong>
-                </div>
-                <span className="calendar-task-arrow">›</span>
-              </article>
-            ))}
+            ) : selectedActivities.map((activity) => {
+              const style = getSubjectStyle(activity.materia);
+              return (
+                <article className={`calendar-task ${activity.done ? 'done' : ''}`} key={activity.id} onClick={() => openEdit(activity)}>
+                  <button className="calendar-check" onClick={(e) => { e.stopPropagation(); toggleDone(activity); }}>{activity.done ? '✓' : ''}</button>
+                  <span className="calendar-task-subject-icon" style={{ background: style.bg, color: style.color }}>
+                    <SubjectIcon materia={activity.materia} size={15} />
+                  </span>
+                  <div className="calendar-task-info">
+                    <span>{activity.horario} · {activity.materia}</span>
+                    <strong>{activity.nome}</strong>
+                  </div>
+                  <span className="calendar-task-arrow">›</span>
+                </article>
+              );
+            })}
           </div>
 
           <button className="calendar-full-add" onClick={() => openCreate()}>+ Adicionar atividade neste dia</button>

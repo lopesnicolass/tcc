@@ -5,7 +5,6 @@ import Auth from './pages/Auth.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-
 import Home from './pages/Home.jsx';
 import Mural from './pages/Mural.jsx';
 import Cronograma from './pages/Cronograma.jsx';
@@ -59,20 +58,17 @@ export default function App() {
         </Route>
 
         {/* ÁREA PROTEGIDA DO ADMIN */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<AdminLayout />}>
-  <Route path="/admin" element={<AdminDashboard />} />
-  <Route path="/admin/conteudos" element={<AdminConteudos />} />
-  <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-  <Route path="/admin/simulados" element={<AdminSimulados />} />
-  <Route path="/admin/flashcards" element={<AdminFlashCards />} />
-  <Route path="/admin/provas" element={<AdminProvas />} />
-         <Route
-  // path="/admin/cronogramas"
-  // element={<AdminCronogramas />}
-/>
-          </Route>
-        </Route>
+       {/* ÁREA PROTEGIDA DO ADMIN */}
+<Route element={<ProtectedRoute />}>
+  <Route element={<AdminLayout />}>
+    <Route path="/admin" element={<AdminDashboard />} />
+    <Route path="/admin/conteudos" element={<AdminConteudos />} />
+    <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+    <Route path="/admin/simulados" element={<AdminSimulados />} />
+    <Route path="/admin/flashcards" element={<AdminFlashCards />} />
+    <Route path="/admin/provas" element={<AdminProvas />} />
+  </Route>
+</Route>
 
         {/* QUALQUER ROTA DESCONHECIDA */}
         <Route path="*" element={<Navigate to="/login" replace />} />

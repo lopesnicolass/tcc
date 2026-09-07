@@ -1,257 +1,1533 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-const INITIAL_DATA = [
-  { id: 1, nome: 'Língua Portuguesa', slug: 'lingua-portuguesa', icone: '📝', ativa: true, cor: 'blue', descricao: 'Leitura, interpretação, gramática e produção de sentidos.', topicos: [
-    { id: 101, nome: 'Interpretação e compreensão de textos', ordem: 1, ativo: true },
-    { id: 102, nome: 'Gêneros e tipos textuais', ordem: 2, ativo: true },
-    { id: 103, nome: 'Coesão e coerência', ordem: 3, ativo: true },
-    { id: 104, nome: 'Classes gramaticais', ordem: 4, ativo: true },
-    { id: 105, nome: 'Pontuação e acentuação', ordem: 5, ativo: true },
-  ]},
-  { id: 2, nome: 'Matemática', slug: 'matematica', icone: '➗', ativa: true, cor: 'green', descricao: 'Números, álgebra, geometria, estatística e resolução de problemas.', topicos: [
-    { id: 201, nome: 'Números e operações', ordem: 1, ativo: true },
-    { id: 202, nome: 'Frações, razão e proporção', ordem: 2, ativo: true },
-    { id: 203, nome: 'Porcentagem', ordem: 3, ativo: true },
-    { id: 204, nome: 'Equações e expressões algébricas', ordem: 4, ativo: true },
-    { id: 205, nome: 'Geometria e medidas', ordem: 5, ativo: true },
-    { id: 206, nome: 'Gráficos, média e probabilidade', ordem: 6, ativo: true },
-  ]},
-  { id: 3, nome: 'História', slug: 'historia', icone: '🏛️', ativa: true, cor: 'orange', descricao: 'Principais períodos e processos históricos do Brasil e do mundo.', topicos: [
-    { id: 301, nome: 'Antiguidade e Idade Média', ordem: 1, ativo: true },
-    { id: 302, nome: 'Grandes Navegações e colonização', ordem: 2, ativo: true },
-    { id: 303, nome: 'Brasil Império e Independência', ordem: 3, ativo: true },
-    { id: 304, nome: 'República e Era Vargas', ordem: 4, ativo: true },
-    { id: 305, nome: 'Guerras Mundiais e Guerra Fria', ordem: 5, ativo: true },
-  ]},
-  { id: 4, nome: 'Geografia', slug: 'geografia', icone: '🌎', ativa: true, cor: 'cyan', descricao: 'Espaço geográfico, população, economia, ambiente e cartografia.', topicos: [
-    { id: 401, nome: 'Cartografia e leitura de mapas', ordem: 1, ativo: true },
-    { id: 402, nome: 'Climas e biomas brasileiros', ordem: 2, ativo: true },
-    { id: 403, nome: 'População e urbanização', ordem: 3, ativo: true },
-    { id: 404, nome: 'Globalização e economia', ordem: 4, ativo: true },
-  ]},
-  { id: 5, nome: 'Ciências da Natureza', slug: 'ciencias-da-natureza', icone: '🧪', ativa: true, cor: 'purple', descricao: 'Biologia, Química e Física aplicadas ao cotidiano.', topicos: [
-    { id: 501, nome: 'Célula e organização dos seres vivos', ordem: 1, ativo: true },
-    { id: 502, nome: 'Ecossistemas e sustentabilidade', ordem: 2, ativo: true },
-    { id: 503, nome: 'Matéria e transformações químicas', ordem: 3, ativo: true },
-    { id: 504, nome: 'Movimento, energia e forças', ordem: 4, ativo: true },
-  ]},
-  { id: 6, nome: 'Raciocínio e interpretação', slug: 'raciocinio-e-interpretacao', icone: '🧠', ativa: true, cor: 'pink', descricao: 'Estratégias de análise, lógica e resolução de situações-problema.', topicos: [
-    { id: 601, nome: 'Sequências e padrões', ordem: 1, ativo: true },
-    { id: 602, nome: 'Interpretação de tabelas e gráficos', ordem: 2, ativo: true },
-    { id: 603, nome: 'Problemas lógicos', ordem: 3, ativo: true },
-  ]},
+const API_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const EMPTY_MATERIA = {
+  nome: '',
+  slug: '',
+  icone: 'book',
+  cor: '#2196F3',
+  descricao: '',
+  ativa: true,
+  ordem: 0,
+};
+
+const EMPTY_TOPICO = {
+  nome: '',
+  descricao: '',
+  ordem: 0,
+  ativo: true,
+};
+
+const ICONES = [
+  'book',
+  'calculator',
+  'globe',
+  'flask',
+  'target',
 ];
 
-const EMPTY_SUBJECT = { nome: '', descricao: '', icone: '📚', cor: 'blue' };
-const EMPTY_TOPIC = { nome: '', descricao: '', ativo: true };
+function obterToken() {
+  return localStorage.getItem('etecamp_token');
+}
 
-function nextId(items) {
-  return items.reduce((maior, item) => Math.max(maior, item.id), 0) + 1;
+async function request(url, options = {}) {
+  const token = obterToken();
+
+  const resposta = await fetch(`${API_URL}${url}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {}),
+      ...(options.headers || {}),
+    },
+  });
+
+  const texto = await resposta.text();
+
+  let dados = {};
+
+  try {
+    dados = texto ? JSON.parse(texto) : {};
+  } catch {
+    dados = {};
+  }
+
+  if (!resposta.ok) {
+    throw new Error(
+      dados.erro ||
+        dados.message ||
+        'Não foi possível realizar a operação.'
+    );
+  }
+
+  return dados;
+}
+
+function gerarSlug(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function Icon({ name, size = 20 }) {
+  const paths = {
+    book: (
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22V5.5Zm0 0V22m4-15h8m-8 4h8" />
+    ),
+
+    calculator: (
+      <path d="M6 3h12v18H6V3Zm3 4h6M9 11h1m4 0h1M9 15h1m4 0h1M9 19h6" />
+    ),
+
+    globe: (
+      <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c2.2-2.3 3.3-5.3 3.3-9S14.2 5.3 12 3m0 18c-2.2-2.3-3.3-5.3-3.3-9S9.8 5.3 12 3M3 12h18" />
+    ),
+
+    flask: (
+      <path d="M9 3h6m-5 0v6l-5.2 8.7A2.2 2.2 0 0 0 6.7 21h10.6a2.2 2.2 0 0 0 1.9-3.3L14 9V3m-5 10h6" />
+    ),
+
+    target: (
+      <path d="M12 21a9 9 0 1 0-9-9m9 5a5 5 0 1 0-5-5m5 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm0 0 6-6" />
+    ),
+
+    plus: (
+      <path d="M12 5v14M5 12h14" />
+    ),
+
+    edit: (
+      <path d="m4 20 4-.9L19 8.1a2.1 2.1 0 0 0-3-3L5 16.1 4 20Zm10.5-13.5 3 3" />
+    ),
+
+    trash: (
+      <path d="M4 7h16M10 11v5m4-5v5M9 7V4h6v3m-9 0 1 14h10l1-14" />
+    ),
+
+    chevron: (
+      <path d="m6 9 6 6 6-6" />
+    ),
+
+    check: (
+      <path d="m5 12 4 4L19 6" />
+    ),
+
+    close: (
+      <path d="M6 6l12 12M18 6 6 18" />
+    ),
+
+    refresh: (
+      <path d="M20 11a8 8 0 0 0-14.8-3L3 11m0-5v5h5M4 13a8 8 0 0 0 14.8 3L21 13m0 5v-5h-5" />
+    ),
+  };
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+function Modal({
+  titulo,
+  children,
+  onClose,
+  onSave,
+  salvando,
+}) {
+  return (
+    <div className="admin-modal-backdrop">
+      <div className="admin-modal">
+        <div className="admin-modal-head">
+          <div>
+            <span className="admin-section-kicker">
+              ADMINISTRAÇÃO
+            </span>
+
+            <h2>{titulo}</h2>
+          </div>
+
+          <button
+            type="button"
+            className="admin-modal-close"
+            onClick={onClose}
+            disabled={salvando}
+          >
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+
+        {children}
+
+        <div className="admin-modal-actions">
+          <button
+            type="button"
+            className="mural-btn secondary"
+            onClick={onClose}
+            disabled={salvando}
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            className="mural-btn"
+            onClick={onSave}
+            disabled={salvando}
+          >
+            {salvando ? 'Salvando...' : 'Salvar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function AdminConteudos() {
-  const [materias, setMaterias] = useState(INITIAL_DATA);
+  const [materias, setMaterias] = useState([]);
+
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+
+  const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
+
   const [busca, setBusca] = useState('');
-  const [filtroStatus, setFiltroStatus] = useState('todas');
-  const [materiaAberta, setMateriaAberta] = useState(1);
-  const [modal, setModal] = useState(null);
-  const [formMateria, setFormMateria] = useState(EMPTY_SUBJECT);
-  const [formTopico, setFormTopico] = useState(EMPTY_TOPIC);
+  const [filtro, setFiltro] = useState('todas');
 
-  const totalTopicos = materias.reduce((total, materia) => total + materia.topicos.length, 0);
-  const topicosAtivos = materias.reduce((total, materia) => total + materia.topicos.filter((topico) => topico.ativo).length, 0);
-  const materiasAtivas = materias.filter((materia) => materia.ativa).length;
+  const [materiaAberta, setMateriaAberta] =
+    useState(null);
 
-  const materiasFiltradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    return materias.filter((materia) => {
-      const bateBusca = !termo || materia.nome.toLowerCase().includes(termo) || materia.topicos.some((topico) => topico.nome.toLowerCase().includes(termo));
-      const bateStatus = filtroStatus === 'todas' || (filtroStatus === 'ativas' && materia.ativa) || (filtroStatus === 'inativas' && !materia.ativa);
-      return bateBusca && bateStatus;
-    });
-  }, [materias, busca, filtroStatus]);
+  const [modalMateria, setModalMateria] =
+    useState(null);
+
+  const [modalTopico, setModalTopico] =
+    useState(null);
+
+  const [formMateria, setFormMateria] =
+    useState(EMPTY_MATERIA);
+
+  const [formTopico, setFormTopico] =
+    useState(EMPTY_TOPICO);
+
+  async function carregarMaterias() {
+    try {
+      setCarregando(true);
+      setErro('');
+
+      const dados = await request('/conteudos');
+
+      setMaterias(
+        Array.isArray(dados.materias)
+          ? dados.materias
+          : []
+      );
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.message ||
+          'Não foi possível carregar os conteúdos.'
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    carregarMaterias();
+  }, []);
+
+  function mostrarSucesso(mensagem) {
+    setSucesso(mensagem);
+
+    window.setTimeout(() => {
+      setSucesso('');
+    }, 3500);
+  }
 
   function abrirNovaMateria() {
-    setFormMateria(EMPTY_SUBJECT);
-    setModal({ tipo: 'materia', modo: 'novo' });
+    setFormMateria({
+      ...EMPTY_MATERIA,
+      ordem: materias.length + 1,
+    });
+
+    setModalMateria({
+      modo: 'criar',
+    });
   }
 
   function abrirEditarMateria(materia) {
-    setFormMateria({ nome: materia.nome, descricao: materia.descricao, icone: materia.icone, cor: materia.cor });
-    setModal({ tipo: 'materia', modo: 'editar', id: materia.id });
-  }
+    setFormMateria({
+      nome: materia.nome || '',
+      slug: materia.slug || '',
+      icone: materia.icone || 'book',
+      cor: materia.cor || '#2196F3',
+      descricao: materia.descricao || '',
+      ativa: Boolean(materia.ativa),
+      ordem: materia.ordem || 0,
+    });
 
-  function salvarMateria(event) {
-    event.preventDefault();
-    if (!formMateria.nome.trim()) return;
-
-    if (modal.modo === 'novo') {
-      const id = nextId(materias);
-      const slug = formMateria.nome.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      setMaterias((atual) => [...atual, { ...formMateria, id, slug, ativa: true, topicos: [] }]);
-      setMateriaAberta(id);
-    } else {
-      setMaterias((atual) => atual.map((materia) => materia.id === modal.id ? { ...materia, ...formMateria } : materia));
-    }
-    setModal(null);
-  }
-
-  function excluirMateria(materia) {
-    if (!window.confirm(`Excluir a matéria "${materia.nome}"? Os tópicos dela também serão removidos.`)) return;
-    setMaterias((atual) => atual.filter((item) => item.id !== materia.id));
-    if (materiaAberta === materia.id) setMateriaAberta(null);
-  }
-
-  function alternarMateria(id) {
-    setMaterias((atual) => atual.map((materia) => materia.id === id ? { ...materia, ativa: !materia.ativa } : materia));
+    setModalMateria({
+      modo: 'editar',
+      id: materia.id,
+    });
   }
 
   function abrirNovoTopico(materia) {
-    setFormTopico(EMPTY_TOPIC);
-    setModal({ tipo: 'topico', modo: 'novo', materiaId: materia.id });
+    setFormTopico({
+      ...EMPTY_TOPICO,
+      ordem: (materia.topicos?.length || 0) + 1,
+    });
+
+    setModalTopico({
+      modo: 'criar',
+      materiaId: materia.id,
+    });
   }
 
-  function abrirEditarTopico(materia, topico) {
-    setFormTopico({ nome: topico.nome, descricao: topico.descricao || '', ativo: topico.ativo });
-    setModal({ tipo: 'topico', modo: 'editar', materiaId: materia.id, id: topico.id });
+  function abrirEditarTopico(topico) {
+    setFormTopico({
+      nome: topico.nome || '',
+      descricao: topico.descricao || '',
+      ordem: topico.ordem || 0,
+      ativo: Boolean(topico.ativo),
+    });
+
+    setModalTopico({
+      modo: 'editar',
+      id: topico.id,
+      materiaId: topico.materia_id,
+    });
   }
 
-  function salvarTopico(event) {
-    event.preventDefault();
-    if (!formTopico.nome.trim()) return;
+  async function salvarMateria() {
+    if (!formMateria.nome.trim()) {
+      setErro('Informe o nome da matéria.');
+      return;
+    }
 
-    setMaterias((atual) => atual.map((materia) => {
-      if (materia.id !== modal.materiaId) return materia;
-      if (modal.modo === 'novo') {
-        const id = nextId(materia.topicos);
-        const ordem = materia.topicos.length + 1;
-        return { ...materia, topicos: [...materia.topicos, { ...formTopico, id, ordem }] };
+    try {
+      setSalvando(true);
+      setErro('');
+
+      const payload = {
+        ...formMateria,
+        nome: formMateria.nome.trim(),
+        slug: formMateria.slug
+          ? gerarSlug(formMateria.slug)
+          : gerarSlug(formMateria.nome),
+        ordem: Number(formMateria.ordem) || 0,
+      };
+
+      if (modalMateria.modo === 'criar') {
+        await request('/conteudos/materias', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+
+        mostrarSucesso(
+          'Matéria criada com sucesso.'
+        );
+      } else {
+        await request(
+          `/conteudos/materias/${modalMateria.id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+          }
+        );
+
+        mostrarSucesso(
+          'Matéria atualizada com sucesso.'
+        );
       }
-      return { ...materia, topicos: materia.topicos.map((topico) => topico.id === modal.id ? { ...topico, ...formTopico } : topico) };
-    }));
-    setModal(null);
+
+      setModalMateria(null);
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  function excluirTopico(materiaId, topico) {
-    if (!window.confirm(`Excluir o tópico "${topico.nome}"?`)) return;
-    setMaterias((atual) => atual.map((materia) => {
-      if (materia.id !== materiaId) return materia;
-      const topicos = materia.topicos.filter((item) => item.id !== topico.id).map((item, index) => ({ ...item, ordem: index + 1 }));
-      return { ...materia, topicos };
-    }));
+  async function salvarTopico() {
+    if (!formTopico.nome.trim()) {
+      setErro('Informe o nome do tópico.');
+      return;
+    }
+
+    try {
+      setSalvando(true);
+      setErro('');
+
+      const payload = {
+        ...formTopico,
+        nome: formTopico.nome.trim(),
+        ordem: Number(formTopico.ordem) || 0,
+      };
+
+      if (modalTopico.modo === 'criar') {
+        await request(
+          `/conteudos/materias/${modalTopico.materiaId}/topicos`,
+          {
+            method: 'POST',
+            body: JSON.stringify(payload),
+          }
+        );
+
+        mostrarSucesso(
+          'Tópico criado com sucesso.'
+        );
+      } else {
+        await request(
+          `/conteudos/topicos/${modalTopico.id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+          }
+        );
+
+        mostrarSucesso(
+          'Tópico atualizado com sucesso.'
+        );
+      }
+
+      setModalTopico(null);
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  function alternarTopico(materiaId, topicoId) {
-    setMaterias((atual) => atual.map((materia) => materia.id === materiaId
-      ? { ...materia, topicos: materia.topicos.map((topico) => topico.id === topicoId ? { ...topico, ativo: !topico.ativo } : topico) }
-      : materia));
+  async function excluirMateria(materia) {
+    const confirmar = window.confirm(
+      `Tem certeza que deseja excluir "${materia.nome}"?\n\nTodos os tópicos dessa matéria também serão excluídos.`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setErro('');
+
+      await request(
+        `/conteudos/materias/${materia.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (materiaAberta === materia.id) {
+        setMateriaAberta(null);
+      }
+
+      mostrarSucesso(
+        'Matéria excluída com sucesso.'
+      );
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    }
   }
+
+  async function excluirTopico(topico) {
+    const confirmar = window.confirm(
+      `Excluir o tópico "${topico.nome}"?`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setErro('');
+
+      await request(
+        `/conteudos/topicos/${topico.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      mostrarSucesso(
+        'Tópico excluído com sucesso.'
+      );
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    }
+  }
+
+  async function alternarMateria(materia) {
+    try {
+      setErro('');
+
+      await request(
+        `/conteudos/materias/${materia.id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            ativa: !Boolean(materia.ativa),
+          }),
+        }
+      );
+
+      mostrarSucesso(
+        materia.ativa
+          ? 'Matéria desativada.'
+          : 'Matéria ativada.'
+      );
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    }
+  }
+
+  async function alternarTopico(topico) {
+    try {
+      setErro('');
+
+      await request(
+        `/conteudos/topicos/${topico.id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            ativo: !Boolean(topico.ativo),
+          }),
+        }
+      );
+
+      mostrarSucesso(
+        topico.ativo
+          ? 'Tópico desativado.'
+          : 'Tópico ativado.'
+      );
+
+      await carregarMaterias();
+    } catch (error) {
+      console.error(error);
+      setErro(error.message);
+    }
+  }
+
+  const materiasFiltradas = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+
+    return materias.filter((materia) => {
+      const correspondeBusca =
+        !termo ||
+        materia.nome
+          ?.toLowerCase()
+          .includes(termo) ||
+        materia.descricao
+          ?.toLowerCase()
+          .includes(termo) ||
+        materia.topicos?.some((topico) =>
+          topico.nome
+            ?.toLowerCase()
+            .includes(termo)
+        );
+
+      const correspondeFiltro =
+        filtro === 'todas' ||
+        (filtro === 'ativas' &&
+          Boolean(materia.ativa)) ||
+        (filtro === 'inativas' &&
+          !Boolean(materia.ativa));
+
+      return (
+        correspondeBusca &&
+        correspondeFiltro
+      );
+    });
+  }, [materias, busca, filtro]);
+
+  const totalTopicos = materias.reduce(
+    (total, materia) =>
+      total + (materia.topicos?.length || 0),
+    0
+  );
+
+  const totalAtivas = materias.filter(
+    (materia) => Boolean(materia.ativa)
+  ).length;
 
   return (
-    <div className="admin-content-page">
-      <div className="page-header admin-page-header">
+    <div className="admin-page">
+      <header className="page-header">
         <div>
-          <span className="admin-eyebrow">BASE DE ESTUDOS</span>
+          <span className="admin-section-kicker">
+            CMS / CONTEÚDO
+          </span>
+
           <h1>Conteúdos</h1>
-          <p>Organize as matérias e os tópicos que estarão disponíveis para os alunos.</p>
+
+          <p>
+            Gerencie as matérias e os tópicos
+            disponíveis para os alunos.
+          </p>
         </div>
-        <button type="button" className="mural-btn primary" onClick={abrirNovaMateria}>+ Nova matéria</button>
-      </div>
 
-      <div className="admin-content-stats">
-        <div className="admin-content-stat"><span className="admin-content-stat-icon">📚</span><div><strong>{materias.length}</strong><span>Matérias</span></div></div>
-        <div className="admin-content-stat"><span className="admin-content-stat-icon">📖</span><div><strong>{totalTopicos}</strong><span>Tópicos cadastrados</span></div></div>
-        <div className="admin-content-stat"><span className="admin-content-stat-icon">✓</span><div><strong>{topicosAtivos}</strong><span>Tópicos ativos</span></div></div>
-        <div className="admin-content-stat"><span className="admin-content-stat-icon">●</span><div><strong>{materiasAtivas}</strong><span>Matérias ativas</span></div></div>
-      </div>
+        <div className="page-header-actions">
+          <button
+            type="button"
+            className="mural-btn secondary"
+            onClick={carregarMaterias}
+            disabled={carregando}
+          >
+            <Icon name="refresh" size={17} />
+            Atualizar
+          </button>
 
-      <section className="panel-card admin-panel-card admin-content-manager">
-        <div className="admin-content-toolbar">
-          <div className="admin-content-search">
-            <span>⌕</span>
-            <input value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Buscar matéria ou tópico..." />
+          <button
+            type="button"
+            className="mural-btn"
+            onClick={abrirNovaMateria}
+          >
+            <Icon name="plus" size={17} />
+            Nova matéria
+          </button>
+        </div>
+      </header>
+
+      {erro && (
+        <div
+          className="admin-alert"
+          style={{
+            marginBottom: '16px',
+            padding: '12px 15px',
+            borderRadius: '12px',
+            background: '#fff1f0',
+            border: '1px solid #ffc9c5',
+            color: '#b42318',
+            fontSize: '13px',
+            fontWeight: 700,
+          }}
+        >
+          {erro}
+        </div>
+      )}
+
+      {sucesso && (
+        <div
+          className="admin-alert"
+          style={{
+            marginBottom: '16px',
+            padding: '12px 15px',
+            borderRadius: '12px',
+            background: '#edf9f1',
+            border: '1px solid #b8e6c5',
+            color: '#16733a',
+            fontSize: '13px',
+            fontWeight: 700,
+          }}
+        >
+          {sucesso}
+        </div>
+      )}
+
+      <section className="admin-content-stats">
+        <article className="stat-card">
+          <div className="stat-value">
+            {materias.length}
           </div>
-          <select value={filtroStatus} onChange={(event) => setFiltroStatus(event.target.value)}>
-            <option value="todas">Todas</option>
-            <option value="ativas">Ativas</option>
-            <option value="inativas">Inativas</option>
+
+          <div className="stat-label">
+            Matérias cadastradas
+          </div>
+        </article>
+
+        <article className="stat-card">
+          <div className="stat-value">
+            {totalAtivas}
+          </div>
+
+          <div className="stat-label">
+            Matérias ativas
+          </div>
+        </article>
+
+        <article className="stat-card">
+          <div className="stat-value">
+            {totalTopicos}
+          </div>
+
+          <div className="stat-label">
+            Tópicos cadastrados
+          </div>
+        </article>
+
+        <article className="stat-card">
+          <div className="stat-value">
+            {materias.reduce(
+              (total, materia) =>
+                total +
+                (materia.topicos || []).filter(
+                  (topico) =>
+                    Boolean(topico.ativo)
+                ).length,
+              0
+            )}
+          </div>
+
+          <div className="stat-label">
+            Tópicos ativos
+          </div>
+        </article>
+      </section>
+
+      <section className="panel-card">
+        <div
+          className="admin-content-toolbar"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap',
+          }}
+        >
+          <div
+            style={{
+              flex: '1 1 280px',
+            }}
+          >
+            <input
+              type="text"
+              value={busca}
+              onChange={(event) =>
+                setBusca(event.target.value)
+              }
+              placeholder="Buscar matéria ou tópico..."
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                border: '1px solid var(--line)',
+                borderRadius: '11px',
+                padding: '11px 13px',
+                font: 'inherit',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <select
+            value={filtro}
+            onChange={(event) =>
+              setFiltro(event.target.value)
+            }
+            style={{
+              minWidth: '150px',
+              border: '1px solid var(--line)',
+              borderRadius: '11px',
+              padding: '11px 13px',
+              background: '#fff',
+              color: 'var(--ink)',
+              font: 'inherit',
+            }}
+          >
+            <option value="todas">
+              Todas
+            </option>
+
+            <option value="ativas">
+              Ativas
+            </option>
+
+            <option value="inativas">
+              Inativas
+            </option>
           </select>
         </div>
+      </section>
 
-        <div className="admin-content-info-bar">
-          <span><strong>{materiasFiltradas.length}</strong> matérias exibidas</span>
-          <span>Os dados desta tela estão simulados e já seguem o formato pensado para a futura API.</span>
+      {carregando ? (
+        <div className="admin-content-empty large">
+          <strong>
+            Carregando conteúdos...
+          </strong>
+
+          <span>
+            Buscando matérias e tópicos no banco.
+          </span>
         </div>
+      ) : materiasFiltradas.length === 0 ? (
+        <div className="admin-content-empty large">
+          <strong>
+            Nenhuma matéria encontrada
+          </strong>
 
-        <div className="admin-subject-list">
+          <span>
+            Tente alterar sua busca ou cadastre
+            uma nova matéria.
+          </span>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            marginTop: '18px',
+          }}
+        >
           {materiasFiltradas.map((materia) => {
-            const aberta = materiaAberta === materia.id;
-            const topicosOrdenados = [...materia.topicos].sort((a, b) => a.ordem - b.ordem);
+            const aberta =
+              materiaAberta === materia.id;
+
+            const topicosAtivos =
+              materia.topicos?.filter(
+                (topico) =>
+                  Boolean(topico.ativo)
+              ).length || 0;
+
             return (
-              <article className={`admin-subject-card ${aberta ? 'open' : ''} ${!materia.ativa ? 'inactive' : ''}`} key={materia.id}>
-                <div className="admin-subject-head" onClick={() => setMateriaAberta(aberta ? null : materia.id)}>
-                  <div className={`admin-subject-icon ${materia.cor}`}>{materia.icone}</div>
-                  <div className="admin-subject-main">
-                    <div className="admin-subject-title-row"><h2>{materia.nome}</h2><span className={`admin-status ${materia.ativa ? 'active' : 'inactive'}`}>{materia.ativa ? 'Ativa' : 'Inativa'}</span></div>
-                    <p>{materia.descricao}</p>
-                    <span className="admin-subject-count">{materia.topicos.length} {materia.topicos.length === 1 ? 'tópico' : 'tópicos'}</span>
+              <article
+                className="content-subject-card"
+                key={materia.id}
+              >
+                <div
+                  className="content-subject-header"
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                  onClick={() =>
+                    setMateriaAberta(
+                      aberta ? null : materia.id
+                    )
+                  }
+                >
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background:
+                        materia.cor ||
+                        'var(--accent)',
+                      color: '#fff',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon
+                      name={
+                        ICONES.includes(
+                          materia.icone
+                        )
+                          ? materia.icone
+                          : 'book'
+                      }
+                      size={21}
+                    />
                   </div>
-                  <div className="admin-subject-actions" onClick={(event) => event.stopPropagation()}>
-                    <button type="button" className="admin-icon-btn" title="Editar matéria" onClick={() => abrirEditarMateria(materia)}>✎</button>
-                    <button type="button" className="admin-icon-btn" title={materia.ativa ? 'Desativar' : 'Ativar'} onClick={() => alternarMateria(materia.id)}>{materia.ativa ? '◉' : '○'}</button>
-                    <button type="button" className="admin-icon-btn danger" title="Excluir matéria" onClick={() => excluirMateria(materia)}>×</button>
+
+                  <div
+                    className="admin-subject-main"
+                    style={{
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <h3>
+                        {materia.nome}
+                      </h3>
+
+                      <span
+                        className="admin-status"
+                        style={{
+                          padding:
+                            '4px 8px',
+                          borderRadius:
+                            '999px',
+                          background:
+                            materia.ativa
+                              ? '#e9f8ed'
+                              : '#f1f3f2',
+                          color:
+                            materia.ativa
+                              ? 'var(--accent-dark)'
+                              : 'var(--muted)',
+                          fontSize:
+                            '10px',
+                          fontWeight: 800,
+                        }}
+                      >
+                        {materia.ativa
+                          ? 'ATIVA'
+                          : 'INATIVA'}
+                      </span>
+                    </div>
+
+                    <p>
+                      {materia.descricao ||
+                        'Sem descrição cadastrada.'}
+                    </p>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '14px',
+                        marginTop: '6px',
+                        color: 'var(--muted)',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                      }}
+                    >
+                      <span>
+                        {materia.topicos
+                          ?.length || 0}{' '}
+                        tópicos
+                      </span>
+
+                      <span>
+                        {topicosAtivos}{' '}
+                        ativos
+                      </span>
+
+                      <span>
+                        Ordem {materia.ordem}
+                      </span>
+                    </div>
                   </div>
-                  <span className="admin-chevron">{aberta ? '⌃' : '⌄'}</span>
+
+                  <div
+                    className="admin-subject-actions"
+                    onClick={(event) =>
+                      event.stopPropagation()
+                    }
+                    style={{
+                      display: 'flex',
+                      gap: '6px',
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="mural-btn secondary"
+                      onClick={() =>
+                        abrirEditarMateria(
+                          materia
+                        )
+                      }
+                    >
+                      <Icon
+                        name="edit"
+                        size={15}
+                      />
+                      Editar
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mural-btn secondary"
+                      onClick={() =>
+                        alternarMateria(
+                          materia
+                        )
+                      }
+                    >
+                      {materia.ativa
+                        ? 'Desativar'
+                        : 'Ativar'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="mural-btn danger"
+                      onClick={() =>
+                        excluirMateria(
+                          materia
+                        )
+                      }
+                    >
+                      <Icon
+                        name="trash"
+                        size={15}
+                      />
+                    </button>
+                  </div>
+
+                  <div
+                    className="admin-chevron"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent:
+                        'center',
+                      transition:
+                        'transform .2s ease',
+                      transform: aberta
+                        ? 'rotate(180deg)'
+                        : 'rotate(0deg)',
+                    }}
+                  >
+                    <Icon
+                      name="chevron"
+                      size={18}
+                    />
+                  </div>
                 </div>
 
                 {aberta && (
-                  <div className="admin-topic-area">
-                    <div className="admin-topic-heading"><div><strong>Tópicos de estudo</strong><span>Ordenados na sequência em que serão apresentados.</span></div><button type="button" className="mural-btn ghost small" onClick={() => abrirNovoTopico(materia)}>+ Adicionar tópico</button></div>
-                    {topicosOrdenados.length ? (
-                      <div className="admin-topic-list">
-                        {topicosOrdenados.map((topico) => (
-                          <div className={`admin-topic-row ${!topico.ativo ? 'inactive' : ''}`} key={topico.id}>
-                            <span className="admin-topic-order">{String(topico.ordem).padStart(2, '0')}</span>
-                            <span className="admin-topic-grip">⋮⋮</span>
-                            <div className="admin-topic-name"><strong>{topico.nome}</strong>{topico.descricao && <span>{topico.descricao}</span>}</div>
-                            <span className={`admin-status ${topico.ativo ? 'active' : 'inactive'}`}>{topico.ativo ? 'Ativo' : 'Inativo'}</span>
-                            <button type="button" className="admin-topic-action" onClick={() => alternarTopico(materia.id, topico.id)}>{topico.ativo ? 'Desativar' : 'Ativar'}</button>
-                            <button type="button" className="admin-topic-action" onClick={() => abrirEditarTopico(materia, topico)}>Editar</button>
-                            <button type="button" className="admin-topic-action danger" onClick={() => excluirTopico(materia.id, topico)}>Excluir</button>
-                          </div>
-                        ))}
+                  <div
+                    className="admin-topic-area"
+                    style={{
+                      borderTop:
+                        '1px solid var(--line)',
+                      padding:
+                        '18px 20px 20px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems:
+                          'center',
+                        justifyContent:
+                          'space-between',
+                        gap: '12px',
+                        marginBottom:
+                          '12px',
+                      }}
+                    >
+                      <div>
+                        <strong>
+                          Tópicos da matéria
+                        </strong>
+
+                        <p
+                          style={{
+                            margin:
+                              '4px 0 0',
+                            color:
+                              'var(--muted)',
+                            fontSize:
+                              '11px',
+                          }}
+                        >
+                          Organize os assuntos
+                          que serão utilizados
+                          pelo sistema.
+                        </p>
                       </div>
-                    ) : <div className="admin-content-empty">Nenhum tópico cadastrado nesta matéria.</div>}
+
+                      <button
+                        type="button"
+                        className="mural-btn"
+                        onClick={() =>
+                          abrirNovoTopico(
+                            materia
+                          )
+                        }
+                      >
+                        <Icon
+                          name="plus"
+                          size={15}
+                        />
+                        Novo tópico
+                      </button>
+                    </div>
+
+                    {materia.topicos?.length ? (
+                      <div
+                        style={{
+                          display:
+                            'flex',
+                          flexDirection:
+                            'column',
+                          gap: '7px',
+                        }}
+                      >
+                        {materia.topicos.map(
+                          (
+                            topico,
+                            index
+                          ) => (
+                            <div
+                              className="admin-topic-row"
+                              key={
+                                topico.id
+                              }
+                              style={{
+                                display:
+                                  'grid',
+                                gridTemplateColumns:
+                                  '35px 1fr auto',
+                                alignItems:
+                                  'center',
+                                gap: '10px',
+                                padding:
+                                  '10px 11px',
+                                border:
+                                  '1px solid var(--line)',
+                                borderRadius:
+                                  '11px',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  color:
+                                    'var(--muted)',
+                                  fontSize:
+                                    '11px',
+                                  fontWeight:
+                                    800,
+                                }}
+                              >
+                                {String(
+                                  topico.ordem ||
+                                    index +
+                                      1
+                                ).padStart(
+                                  2,
+                                  '0'
+                                )}
+                              </span>
+
+                              <div>
+                                <strong
+                                  style={{
+                                    color:
+                                      'var(--ink)',
+                                    fontSize:
+                                      '13px',
+                                  }}
+                                >
+                                  {
+                                    topico.nome
+                                  }
+                                </strong>
+
+                                {topico.descricao && (
+                                  <small
+                                    style={{
+                                      display:
+                                        'block',
+                                      marginTop:
+                                        '3px',
+                                      color:
+                                        'var(--muted)',
+                                    }}
+                                  >
+                                    {
+                                      topico.descricao
+                                    }
+                                  </small>
+                                )}
+                              </div>
+
+                              <div
+                                style={{
+                                  display:
+                                    'flex',
+                                  alignItems:
+                                    'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                <span
+                                  className="admin-status"
+                                  style={{
+                                    padding:
+                                      '4px 7px',
+                                    borderRadius:
+                                      '999px',
+                                    background:
+                                      topico.ativo
+                                        ? '#e9f8ed'
+                                        : '#f1f3f2',
+                                    color:
+                                      topico.ativo
+                                        ? 'var(--accent-dark)'
+                                        : 'var(--muted)',
+                                    fontSize:
+                                      '9px',
+                                    fontWeight:
+                                      800,
+                                  }}
+                                >
+                                  {topico.ativo
+                                    ? 'ATIVO'
+                                    : 'INATIVO'}
+                                </span>
+
+                                <button
+                                  type="button"
+                                  className="mural-btn secondary"
+                                  onClick={() =>
+                                    abrirEditarTopico(
+                                      topico
+                                    )
+                                  }
+                                >
+                                  <Icon
+                                    name="edit"
+                                    size={
+                                      14
+                                    }
+                                  />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="mural-btn secondary"
+                                  onClick={() =>
+                                    alternarTopico(
+                                      topico
+                                    )
+                                  }
+                                >
+                                  {topico.ativo
+                                    ? 'Desativar'
+                                    : 'Ativar'}
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="mural-btn danger"
+                                  onClick={() =>
+                                    excluirTopico(
+                                      topico
+                                    )
+                                  }
+                                >
+                                  <Icon
+                                    name="trash"
+                                    size={
+                                      14
+                                    }
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        className="admin-content-empty"
+                      >
+                        <strong>
+                          Nenhum tópico
+                          cadastrado.
+                        </strong>
+
+                        <span>
+                          Adicione o primeiro
+                          tópico desta matéria.
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </article>
             );
           })}
-          {!materiasFiltradas.length && <div className="admin-content-empty large"><strong>Nenhuma matéria encontrada</strong><span>Tente outro termo de busca ou altere o filtro.</span></div>}
         </div>
-      </section>
+      )}
 
-      {modal && (
-        <div className="admin-modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && setModal(null)}>
-          <div className="admin-modal" role="dialog" aria-modal="true">
-            <div className="admin-modal-head"><div><span className="admin-eyebrow">{modal.tipo === 'materia' ? 'MATÉRIA' : 'TÓPICO'}</span><h2>{modal.modo === 'novo' ? 'Adicionar' : 'Editar'} {modal.tipo === 'materia' ? 'matéria' : 'tópico'}</h2></div><button type="button" className="admin-modal-close" onClick={() => setModal(null)}>×</button></div>
-            {modal.tipo === 'materia' ? (
-              <form onSubmit={salvarMateria}>
-                <label className="admin-field"><span>Nome da matéria</span><input autoFocus value={formMateria.nome} onChange={(event) => setFormMateria({ ...formMateria, nome: event.target.value })} placeholder="Ex.: Matemática" required /></label>
-                <label className="admin-field"><span>Descrição</span><textarea value={formMateria.descricao} onChange={(event) => setFormMateria({ ...formMateria, descricao: event.target.value })} placeholder="Explique o que será estudado nesta matéria." rows={4} /></label>
-                <div className="admin-field-row"><label className="admin-field"><span>Ícone</span><input value={formMateria.icone} onChange={(event) => setFormMateria({ ...formMateria, icone: event.target.value })} placeholder="📚" maxLength={4} /></label><label className="admin-field"><span>Cor visual</span><select value={formMateria.cor} onChange={(event) => setFormMateria({ ...formMateria, cor: event.target.value })}><option value="blue">Azul</option><option value="green">Verde</option><option value="orange">Laranja</option><option value="cyan">Ciano</option><option value="purple">Roxo</option><option value="pink">Rosa</option></select></label></div>
-                <div className="admin-modal-actions"><button type="button" className="mural-btn ghost" onClick={() => setModal(null)}>Cancelar</button><button type="submit" className="mural-btn primary">Salvar matéria</button></div>
-              </form>
-            ) : (
-              <form onSubmit={salvarTopico}>
-                <label className="admin-field"><span>Nome do tópico</span><input autoFocus value={formTopico.nome} onChange={(event) => setFormTopico({ ...formTopico, nome: event.target.value })} placeholder="Ex.: Porcentagem" required /></label>
-                <label className="admin-field"><span>Descrição <small>(opcional)</small></span><textarea value={formTopico.descricao} onChange={(event) => setFormTopico({ ...formTopico, descricao: event.target.value })} placeholder="Breve descrição do conteúdo." rows={4} /></label>
-                <label className="admin-check"><input type="checkbox" checked={formTopico.ativo} onChange={(event) => setFormTopico({ ...formTopico, ativo: event.target.checked })} /><span>Disponível para os alunos</span></label>
-                <div className="admin-modal-actions"><button type="button" className="mural-btn ghost" onClick={() => setModal(null)}>Cancelar</button><button type="submit" className="mural-btn primary">Salvar tópico</button></div>
-              </form>
-            )}
+      {modalMateria && (
+        <Modal
+          titulo={
+            modalMateria.modo === 'criar'
+              ? 'Nova matéria'
+              : 'Editar matéria'
+          }
+          onClose={() =>
+            setModalMateria(null)
+          }
+          onSave={salvarMateria}
+          salvando={salvando}
+        >
+          <label className="admin-field">
+            <span>Nome da matéria</span>
+
+            <input
+              value={formMateria.nome}
+              onChange={(event) =>
+                setFormMateria(
+                  (atual) => ({
+                    ...atual,
+                    nome: event.target
+                      .value,
+                  })
+                )
+              }
+              placeholder="Ex.: Língua Portuguesa"
+            />
+          </label>
+
+          <label className="admin-field">
+            <span>Slug</span>
+
+            <input
+              value={formMateria.slug}
+              onChange={(event) =>
+                setFormMateria(
+                  (atual) => ({
+                    ...atual,
+                    slug: event.target
+                      .value,
+                  })
+                )
+              }
+              placeholder="lingua-portuguesa"
+            />
+
+            <small>
+              Pode deixar vazio para o sistema
+              gerar automaticamente.
+            </small>
+          </label>
+
+          <div className="admin-field-row">
+            <label className="admin-field">
+              <span>Ícone</span>
+
+              <select
+                value={formMateria.icone}
+                onChange={(event) =>
+                  setFormMateria(
+                    (atual) => ({
+                      ...atual,
+                      icone:
+                        event.target.value,
+                    })
+                  )
+                }
+              >
+                {ICONES.map((icone) => (
+                  <option
+                    key={icone}
+                    value={icone}
+                  >
+                    {icone}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="admin-field">
+              <span>Cor</span>
+
+              <input
+                type="text"
+                value={formMateria.cor}
+                onChange={(event) =>
+                  setFormMateria(
+                    (atual) => ({
+                      ...atual,
+                      cor: event.target
+                        .value,
+                    })
+                  )
+                }
+                placeholder="#2196F3"
+              />
+            </label>
           </div>
-        </div>
+
+          <div className="admin-field-row">
+            <label className="admin-field">
+              <span>Ordem</span>
+
+              <input
+                type="number"
+                min="0"
+                value={formMateria.ordem}
+                onChange={(event) =>
+                  setFormMateria(
+                    (atual) => ({
+                      ...atual,
+                      ordem:
+                        event.target
+                          .value,
+                    })
+                  )
+                }
+              />
+            </label>
+
+            <label className="admin-check">
+              <input
+                type="checkbox"
+                checked={Boolean(
+                  formMateria.ativa
+                )}
+                onChange={(event) =>
+                  setFormMateria(
+                    (atual) => ({
+                      ...atual,
+                      ativa:
+                        event.target
+                          .checked,
+                    })
+                  )
+                }
+              />
+
+              Matéria ativa
+            </label>
+          </div>
+
+          <label className="admin-field">
+            <span>Descrição</span>
+
+            <textarea
+              rows="4"
+              value={formMateria.descricao}
+              onChange={(event) =>
+                setFormMateria(
+                  (atual) => ({
+                    ...atual,
+                    descricao:
+                      event.target.value,
+                  })
+                )
+              }
+              placeholder="Explique brevemente o conteúdo desta matéria."
+            />
+          </label>
+        </Modal>
+      )}
+
+      {modalTopico && (
+        <Modal
+          titulo={
+            modalTopico.modo === 'criar'
+              ? 'Novo tópico'
+              : 'Editar tópico'
+          }
+          onClose={() =>
+            setModalTopico(null)
+          }
+          onSave={salvarTopico}
+          salvando={salvando}
+        >
+          <label className="admin-field">
+            <span>Nome do tópico</span>
+
+            <input
+              value={formTopico.nome}
+              onChange={(event) =>
+                setFormTopico(
+                  (atual) => ({
+                    ...atual,
+                    nome: event.target
+                      .value,
+                  })
+                )
+              }
+              placeholder="Ex.: Interpretação de texto"
+            />
+          </label>
+
+          <div className="admin-field-row">
+            <label className="admin-field">
+              <span>Ordem</span>
+
+              <input
+                type="number"
+                min="0"
+                value={formTopico.ordem}
+                onChange={(event) =>
+                  setFormTopico(
+                    (atual) => ({
+                      ...atual,
+                      ordem:
+                        event.target
+                          .value,
+                    })
+                  )
+                }
+              />
+            </label>
+
+            <label className="admin-check">
+              <input
+                type="checkbox"
+                checked={Boolean(
+                  formTopico.ativo
+                )}
+                onChange={(event) =>
+                  setFormTopico(
+                    (atual) => ({
+                      ...atual,
+                      ativo:
+                        event.target
+                          .checked,
+                    })
+                  )
+                }
+              />
+
+              Tópico ativo
+            </label>
+          </div>
+
+          <label className="admin-field">
+            <span>Descrição</span>
+
+            <textarea
+              rows="4"
+              value={formTopico.descricao}
+              onChange={(event) =>
+                setFormTopico(
+                  (atual) => ({
+                    ...atual,
+                    descricao:
+                      event.target.value,
+                  })
+                )
+              }
+              placeholder="Descrição opcional do tópico."
+            />
+          </label>
+        </Modal>
       )}
     </div>
   );
