@@ -1,0 +1,83 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+import Landing from './pages/Landing.jsx';
+import Auth from './pages/Auth.jsx';
+import DashboardLayout from './layouts/DashboardLayout.jsx';
+import AdminLayout from './layouts/AdminLayout.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+
+import Home from './pages/Home.jsx';
+import Mural from './pages/Mural.jsx';
+import Cronograma from './pages/Cronograma.jsx';
+import PlanoAutomatico from './pages/PlanoAutomatico.jsx';
+import Conteudos from './pages/Conteudos.jsx';
+import Simulados from './pages/Simulados.jsx';
+import Provas from './pages/Provas.jsx';
+import Desempenho from './pages/Desempenho.jsx';
+import FlashCards from './pages/FlashCards.jsx';
+import Perfil from './pages/Perfil.jsx';
+import Terrario from './pages/Terrario.jsx';
+
+import AdminDashboard from './pages/AdminDashboard.jsx';
+import AdminUsuarios from './pages/AdminUsuarios.jsx';
+import AdminSimulados from './pages/AdminSimulados.jsx';
+import AdminFlashCards from './pages/AdminFlashCards.jsx';
+import AdminProvas from './pages/AdminProvas.jsx';
+import AdminConteudos from './pages/AdminConteudos.jsx';
+// import AdminCronogramas from './pages/AdminCronogramas.jsx';
+
+import XPToast from './components/XPToast.jsx';
+
+export default function App() {
+  return (
+    <>
+      <XPToast />
+
+      <Routes>
+
+        {/* TELA INICIAL (antes do login) */}
+        <Route path="/" element={<Landing />} />
+
+        {/* LOGIN */}
+        <Route path="/login" element={<Auth />} />
+
+        {/* ÁREA PROTEGIDA DO ALUNO */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/mural" element={<Mural />} />
+            <Route path="/conteudos" element={<Conteudos />} />
+            <Route path="/cronograma" element={<Cronograma />} />
+            <Route path="/plano-automatico" element={<PlanoAutomatico />} />
+            <Route path="/simulados" element={<Simulados />} />
+            <Route path="/provas" element={<Provas />} />
+            <Route path="/desempenho" element={<Desempenho />} />
+            <Route path="/flashcards" element={<FlashCards />} />
+<Route path="/terrario" element={<Terrario />} />
+<Route path="/perfil" element={<Perfil />} />
+          </Route>
+        </Route>
+
+        {/* ÁREA PROTEGIDA DO ADMIN */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+  <Route path="/admin" element={<AdminDashboard />} />
+  <Route path="/admin/conteudos" element={<AdminConteudos />} />
+  <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+  <Route path="/admin/simulados" element={<AdminSimulados />} />
+  <Route path="/admin/flashcards" element={<AdminFlashCards />} />
+  <Route path="/admin/provas" element={<AdminProvas />} />
+         <Route
+  // path="/admin/cronogramas"
+  // element={<AdminCronogramas />}
+/>
+          </Route>
+        </Route>
+
+        {/* QUALQUER ROTA DESCONHECIDA */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
+      </Routes>
+    </>
+  );
+}

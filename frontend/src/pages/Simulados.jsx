@@ -1,0 +1,1884 @@
+import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useGamification } from '../context/GamificationContext.jsx';
+
+const API_URL = 'http://localhost:3000';
+
+const STATUS_LABEL = {
+  'nao-iniciado': 'Não iniciado',
+  'em-progresso': 'Em progresso',
+  concluido: 'Concluído'
+};
+
+const BTN_LABEL = {
+  'nao-iniciado': 'Iniciar',
+  'em-progresso': 'Continuar',
+  concluido: 'Refazer'
+};
+
+const MATERIA_ICONS = {
+  Todas: '📚',
+  Português: '📖',
+  Matemática: '📐',
+  História: '🏛️',
+  Geografia: '🌎',
+  Ciências: '🔬',
+  Simulado: '📝',
+  Atualidades: '📰',
+};
+
+export default function Simulados() {
+  const { addXP } = useGamification();
+
+  const [simulados, setSimulados] = useState([]);
+  const [filtro, setFiltro] = useState('Todas');
+
+  const [simuladoSelecionado, setSimuladoSelecionado] = useState(null);
+  const [questoes, setQuestoes] = useState([]);
+  const [respostas, setRespostas] = useState({});
+
+  const [resultadoFinal, setResultadoFinal] = useState(null);
+  const [mostrarErros, setMostrarErros] = useState(false);
+
+  const [carregando, setCarregando] = useState(true);
+  const [carregandoQuestoes, setCarregandoQuestoes] = useState(false);
+  const [salvandoResultado, setSalvandoResultado] = useState(false);
+
+  const [erro, setErro] = useState('');
+
+  // Cronômetro do simulado
+  const [tempoRestante, setTempoRestante] = useState(null);
+  const [tempoGasto, setTempoGasto] = useState(null);
+  const finalizandoPorTempo = useRef(false);
+
+  // ==========================================
+  // PEGAR ID DO USUÁRIO
+  // ==========================================
+
+  function obterUsuarioId() {
+    const usuarioSalvo = localStorage.getItem('etecamp_usuario');
+
+    if (!usuarioSalvo) {
+      console.error('Usuário não encontrado no localStorage.');
+      return null;
+    }
+
+    try {
+      const usuario = JSON.parse(usuarioSalvo);
+
+      if (usuario.id) {
+        return Number(usuario.id);
+      }
+
+      if (usuario.usuarioId) {
+        return Number(usuario.usuarioId);
+      }
+
+      console.error('ID do usuário não encontrado:', usuario);
+
+      return null;
+    } catch (error) {
+      console.error('Erro ao ler etecamp_usuario:', error);
+      return null;
+    }
+  }
+
+  // ==========================================
+  // CHAVES DO LOCALSTORAGE
+  // ==========================================
+
+  function obterChaveStatus() {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) {
+      return null;
+    }
+
+    return `statusSimulados_${usuarioId}`;
+  }
+
+  function obterChaveRespostas(simuladoId) {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) {
+      return null;
+    }
+
+    return `respostasSimulado_${usuarioId}_${simuladoId}`;
+  }
+
+  // ==========================================
+  // CRONÔMETRO
+  // ==========================================
+
+  function obterChavePrazo(simuladoId) {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) return null;
+
+    return `prazoSimulado_${usuarioId}_${simuladoId}`;
+  }
+
+  function obterChaveInicio(simuladoId) {
+    const usuarioId = obterUsuarioId();
+    if (!usuarioId) return null;
+
+    return `inicioSimulado_${usuarioId}_${simuladoId}`;
+  }
+
+  function registrarInicioSimulado(simulado) {
+    const chaveInicio = obterChaveInicio(simulado.id);
+    if (!chaveInicio) return;
+
+    localStorage.setItem(chaveInicio, String(Date.now()));
+  }
+
+  function obterTempoGasto(simulado) {
+    const chaveInicio = obterChaveInicio(simulado.id);
+    const inicio = chaveInicio
+      ? Number(localStorage.getItem(chaveInicio))
+      : NaN;
+
+    if (Number.isFinite(inicio)) {
+      const segundos = Math.max(0, Math.floor((Date.now() - inicio) / 1000));
+      const limite = Number(simulado.tempo_limite);
+
+      if (Number.isFinite(limite) && limite > 0) {
+        return Math.min(segundos, limite * 60);
+      }
+
+      return segundos;
+    }
+
+    return 0;
+  }
+
+  function limparInicioSimulado(simuladoId) {
+    const chaveInicio = obterChaveInicio(simuladoId);
+    if (chaveInicio) {
+      localStorage.removeItem(chaveInicio);
+    }
+  }
+
+  function formatarTempo(segundos) {
+    if (segundos === null || segundos === undefined) return '--:--';
+
+    const total = Math.max(0, Number(segundos));
+    const minutos = Math.floor(total / 60);
+    const segundosRestantes = total % 60;
+
+    return `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
+  }
+
+  function limparCronometro(simuladoId) {
+    const chave = obterChavePrazo(simuladoId);
+
+    if (chave) {
+      localStorage.removeItem(chave);
+    }
+  }
+
+  function iniciarCronometro(simulado) {
+    const chave = obterChavePrazo(simulado.id);
+    if (!chave) return;
+
+    const minutos = Number(simulado.tempo_limite);
+
+    if (!Number.isFinite(minutos) || minutos <= 0) {
+      setTempoRestante(null);
+      return;
+    }
+
+    const agora = Date.now();
+    const prazo = agora + minutos * 60 * 1000;
+    localStorage.setItem(chave, String(prazo));
+    registrarInicioSimulado(simulado);
+    setTempoGasto(0);
+    setTempoRestante(minutos * 60);
+  }
+
+  function carregarCronometro(simulado) {
+    const chave = obterChavePrazo(simulado.id);
+    const minutos = Number(simulado.tempo_limite);
+
+    if (!chave || !Number.isFinite(minutos) || minutos <= 0) {
+      setTempoRestante(null);
+      return;
+    }
+
+    const prazoSalvo = Number(localStorage.getItem(chave));
+
+    if (!Number.isFinite(prazoSalvo)) {
+      iniciarCronometro(simulado);
+      return;
+    }
+
+    const restante = Math.max(0, Math.ceil((prazoSalvo - Date.now()) / 1000));
+
+    const chaveInicio = obterChaveInicio(simulado.id);
+    if (chaveInicio && !Number.isFinite(Number(localStorage.getItem(chaveInicio)))) {
+      const inicioCalculado = prazoSalvo - minutos * 60 * 1000;
+      localStorage.setItem(chaveInicio, String(inicioCalculado));
+    }
+
+    setTempoRestante(restante);
+  }
+
+  // ==========================================
+  // ATUALIZAR CRONÔMETRO A CADA SEGUNDO
+  // ==========================================
+
+  useEffect(() => {
+    if (!simuladoSelecionado || resultadoFinal) {
+      return;
+    }
+
+    carregarCronometro(simuladoSelecionado);
+
+    const intervalo = setInterval(() => {
+      const chave = obterChavePrazo(simuladoSelecionado.id);
+      const prazo = chave ? Number(localStorage.getItem(chave)) : NaN;
+
+      if (!Number.isFinite(prazo)) {
+        return;
+      }
+
+      const restante = Math.max(0, Math.ceil((prazo - Date.now()) / 1000));
+      setTempoRestante(restante);
+
+      if (restante <= 0 && !finalizandoPorTempo.current) {
+        finalizandoPorTempo.current = true;
+        clearInterval(intervalo);
+        finalizarSimulado(true);
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalo);
+  }, [simuladoSelecionado, resultadoFinal, questoes.length]);
+
+  // ==========================================
+  // CARREGAR SIMULADOS
+  // ==========================================
+
+  useEffect(() => {
+    carregarSimulados();
+  }, []);
+
+  async function carregarSimulados() {
+    try {
+      setCarregando(true);
+      setErro('');
+
+      const resposta = await fetch(`${API_URL}/simulados`);
+
+      if (!resposta.ok) {
+        throw new Error('Erro ao buscar simulados.');
+      }
+
+      const dados = await resposta.json();
+
+      const lista = dados.simulados || [];
+
+      const chaveStatus = obterChaveStatus();
+
+      let statusSalvos = {};
+
+      if (chaveStatus) {
+        try {
+          statusSalvos = JSON.parse(
+            localStorage.getItem(chaveStatus) || '{}'
+          );
+        } catch (error) {
+          console.error('Erro ao ler status dos simulados:', error);
+          statusSalvos = {};
+        }
+      }
+
+      const simuladosComStatus = lista.map((simulado) => ({
+        ...simulado,
+        status: statusSalvos[simulado.id] || 'nao-iniciado'
+      }));
+
+      setSimulados(simuladosComStatus);
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        'Não foi possível carregar os simulados. Verifique se o backend está rodando.'
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  // ==========================================
+  // SALVAR STATUS
+  // ==========================================
+
+  function salvarStatus(id, status) {
+    const chaveStatus = obterChaveStatus();
+
+    if (!chaveStatus) {
+      console.error(
+        'Não foi possível salvar o status: usuário não identificado.'
+      );
+      return;
+    }
+
+    let statusSalvos = {};
+
+    try {
+      statusSalvos = JSON.parse(
+        localStorage.getItem(chaveStatus) || '{}'
+      );
+    } catch (error) {
+      console.error('Erro ao ler status:', error);
+      statusSalvos = {};
+    }
+
+    statusSalvos[id] = status;
+
+    localStorage.setItem(
+      chaveStatus,
+      JSON.stringify(statusSalvos)
+    );
+  }
+
+  // ==========================================
+  // ABRIR SIMULADO
+  // ==========================================
+
+  async function abrirSimulado(simulado) {
+    try {
+      setCarregandoQuestoes(true);
+      setErro('');
+      setResultadoFinal(null);
+      setMostrarErros(false);
+
+      const resposta = await fetch(
+        `${API_URL}/simulados/${simulado.id}`
+      );
+
+      if (!resposta.ok) {
+        throw new Error('Erro ao buscar o simulado.');
+      }
+
+      const dados = await resposta.json();
+
+      const listaQuestoes = dados.questoes || [];
+
+      setSimuladoSelecionado(simulado);
+      setQuestoes(listaQuestoes);
+
+      // ========================================
+      // CARREGAR RESPOSTAS DO USUÁRIO
+      // ========================================
+
+      const chaveRespostas = obterChaveRespostas(simulado.id);
+
+      if (simulado.status === 'em-progresso' && chaveRespostas) {
+        try {
+          const respostasSalvas = JSON.parse(
+            localStorage.getItem(chaveRespostas) || '{}'
+          );
+
+          setRespostas(respostasSalvas);
+        } catch (error) {
+          console.error('Erro ao carregar respostas:', error);
+          setRespostas({});
+        }
+      } else {
+        if (chaveRespostas) {
+          localStorage.removeItem(chaveRespostas);
+        }
+
+        setRespostas({});
+      }
+
+      // ========================================
+      // INICIAR OU REINICIAR SIMULADO
+      // ========================================
+
+      if (
+        simulado.status === 'nao-iniciado' ||
+        simulado.status === 'concluido'
+      ) {
+        const atualizado = {
+          ...simulado,
+          status: 'em-progresso'
+        };
+
+        setSimulados((prev) =>
+          prev.map((item) =>
+            item.id === simulado.id
+              ? atualizado
+              : item
+          )
+        );
+
+        setSimuladoSelecionado(atualizado);
+
+        salvarStatus(
+          simulado.id,
+          'em-progresso'
+        );
+
+        addXP(10, 'simulado iniciado');
+      }
+
+      // Inicia ou recupera o cronômetro deste simulado.
+      if (simulado.status === 'em-progresso') {
+        carregarCronometro(simulado);
+      } else {
+        iniciarCronometro(simulado);
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        'Não foi possível carregar as questões deste simulado.'
+      );
+    } finally {
+      setCarregandoQuestoes(false);
+    }
+  }
+
+  // ==========================================
+  // SELECIONAR / TROCAR RESPOSTA
+  // ==========================================
+
+  function selecionarResposta(questaoId, alternativa) {
+    setRespostas((prev) => {
+      const novasRespostas = {
+        ...prev,
+        [questaoId]: alternativa
+      };
+
+      if (simuladoSelecionado) {
+        const chaveRespostas = obterChaveRespostas(
+          simuladoSelecionado.id
+        );
+
+        if (chaveRespostas) {
+          localStorage.setItem(
+            chaveRespostas,
+            JSON.stringify(novasRespostas)
+          );
+        }
+      }
+
+      return novasRespostas;
+    });
+  }
+
+  // ==========================================
+  // RESPOSTA CORRETA
+  // ==========================================
+
+  function obterRespostaCorreta(questao) {
+    return String(
+      questao.correta ||
+        questao.resposta_correta ||
+        questao.respostaCorreta ||
+        ''
+    ).toUpperCase();
+  }
+
+  // ==========================================
+  // CALCULAR RESULTADO
+  // ==========================================
+
+  function calcularResultado() {
+    let acertos = 0;
+    let erros = 0;
+
+    const detalhes = questoes.map((questao, index) => {
+      const respostaUsuario =
+        respostas[questao.id] || null;
+
+      const respostaCorreta =
+        obterRespostaCorreta(questao);
+
+      const acertou =
+        respostaUsuario &&
+        String(respostaUsuario).toUpperCase() ===
+          respostaCorreta;
+
+      if (acertou) {
+        acertos++;
+      } else {
+        erros++;
+      }
+
+      return {
+        questao,
+        index,
+        respostaUsuario,
+        respostaCorreta,
+        acertou: Boolean(acertou)
+      };
+    });
+
+    const totalQuestoes = questoes.length;
+
+    const porcentagem =
+      totalQuestoes > 0
+        ? (acertos / totalQuestoes) * 100
+        : 0;
+
+    return {
+      acertos,
+      erros,
+      totalQuestoes,
+      porcentagem,
+      detalhes
+    };
+  }
+
+  // ==========================================
+  // SALVAR RESULTADO
+  // ==========================================
+
+  async function salvarResultado() {
+    const usuarioId = obterUsuarioId();
+
+    if (!usuarioId) {
+      throw new Error(
+        'Não foi possível identificar o usuário logado.'
+      );
+    }
+
+    const resultado = calcularResultado();
+
+    const resposta = await fetch(
+      `${API_URL}/resultados`,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+          usuarioId,
+          acertos: resultado.acertos,
+          erros: resultado.erros,
+          totalQuestoes: resultado.totalQuestoes
+        })
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(
+        dados.mensagem ||
+          'Erro ao salvar resultado.'
+      );
+    }
+
+    return dados;
+  }
+
+  // ==========================================
+  // FINALIZAR SIMULADO
+  // ==========================================
+
+  async function finalizarSimulado(tempoEsgotado = false) {
+    if (!simuladoSelecionado) {
+      return;
+    }
+
+    const tempoTotalGasto = obterTempoGasto(simuladoSelecionado);
+    setTempoGasto(tempoTotalGasto);
+
+    const respondeu =
+      Object.keys(respostas).length;
+
+    if (!tempoEsgotado) {
+      if (respondeu < questoes.length) {
+        const continuar = window.confirm(
+          `Você respondeu ${respondeu} de ${questoes.length} questões.\n\nAs questões não respondidas serão consideradas erradas.\n\nDeseja finalizar mesmo assim?`
+        );
+
+        if (!continuar) {
+          return;
+        }
+      }
+
+      const confirmar = window.confirm(
+        'Deseja finalizar o simulado?'
+      );
+
+      if (!confirmar) {
+        return;
+      }
+    }
+
+    try {
+      setSalvandoResultado(true);
+      setErro('');
+
+      if (tempoEsgotado) {
+        setTempoRestante(0);
+      }
+
+      const resultadoCalculado =
+        calcularResultado();
+
+      const dados =
+        await salvarResultado();
+
+      const resultado =
+        dados.resultado || resultadoCalculado;
+
+      // ========================================
+      // ATUALIZAR STATUS PARA CONCLUÍDO
+      // ========================================
+
+      setSimulados((prev) =>
+        prev.map((simulado) =>
+          simulado.id === simuladoSelecionado.id
+            ? {
+                ...simulado,
+                status: 'concluido'
+              }
+            : simulado
+        )
+      );
+
+      const simuladoAtualizado = {
+        ...simuladoSelecionado,
+        status: 'concluido'
+      };
+
+      setSimuladoSelecionado(
+        simuladoAtualizado
+      );
+
+      salvarStatus(
+        simuladoSelecionado.id,
+        'concluido'
+      );
+
+      limparCronometro(simuladoSelecionado.id);
+      limparInicioSimulado(simuladoSelecionado.id);
+      finalizandoPorTempo.current = false;
+
+      if (tempoEsgotado) {
+        setErro('O tempo acabou. O simulado foi finalizado automaticamente.');
+      }
+
+      addXP(
+        50,
+        'simulado concluído'
+      );
+
+      setResultadoFinal({
+        acertos: resultado.acertos,
+        erros: resultado.erros,
+        totalQuestoes:
+          resultado.totalQuestoes,
+        porcentagem:
+          Number(resultado.porcentagem),
+        detalhes:
+          resultadoCalculado.detalhes
+      });
+
+      setMostrarErros(false);
+
+      // Remove somente as respostas
+      // deste usuário e deste simulado.
+      const chaveRespostas =
+        obterChaveRespostas(
+          simuladoSelecionado.id
+        );
+
+      if (chaveRespostas) {
+        localStorage.removeItem(
+          chaveRespostas
+        );
+      }
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        error.message ||
+          'Não foi possível salvar o resultado.'
+      );
+
+      alert(
+        error.message ||
+          'Não foi possível salvar o resultado.'
+      );
+    } finally {
+      setSalvandoResultado(false);
+    }
+  }
+
+  // ==========================================
+  // REFAZER SIMULADO
+  // ==========================================
+
+  function refazerSimulado() {
+    if (!simuladoSelecionado) {
+      return;
+    }
+
+    const chaveRespostas =
+      obterChaveRespostas(
+        simuladoSelecionado.id
+      );
+
+    if (chaveRespostas) {
+      localStorage.removeItem(
+        chaveRespostas
+      );
+    }
+
+    setRespostas({});
+    setResultadoFinal(null);
+    setMostrarErros(false);
+    setTempoGasto(null);
+
+    const simuladoAtualizado = {
+      ...simuladoSelecionado,
+      status: 'em-progresso'
+    };
+
+    setSimuladoSelecionado(
+      simuladoAtualizado
+    );
+
+    setSimulados((prev) =>
+      prev.map((simulado) =>
+        simulado.id === simuladoSelecionado.id
+          ? simuladoAtualizado
+          : simulado
+      )
+    );
+
+    salvarStatus(
+      simuladoSelecionado.id,
+      'em-progresso'
+    );
+
+    iniciarCronometro(simuladoSelecionado);
+    finalizandoPorTempo.current = false;
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  // ==========================================
+  // PRÓXIMA QUESTÃO
+  // ==========================================
+
+  function proximaQuestao(index) {
+    const proxima =
+      document.getElementById(
+        `questao-${index + 1}`
+      );
+
+    if (proxima) {
+      proxima.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }
+
+  // ==========================================
+  // VOLTAR
+  // ==========================================
+
+  function voltarParaSimulados() {
+    if (salvandoResultado) {
+      return;
+    }
+
+    setSimuladoSelecionado(null);
+    setQuestoes([]);
+    setRespostas({});
+    setResultadoFinal(null);
+    setMostrarErros(false);
+    setTempoRestante(null);
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  // ==========================================
+  // FILTRO
+  // ==========================================
+
+  const materias = [
+    'Todas',
+    ...Array.from(
+      new Set(
+        simulados
+          .map((simulado) => simulado.materia)
+          .filter(Boolean)
+      )
+    )
+  ];
+
+  const simuladosVisiveis =
+    filtro === 'Todas'
+      ? simulados
+      : simulados.filter(
+          (simulado) =>
+            simulado.materia === filtro
+        );
+
+  const concluidos =
+    simulados.filter(
+      (simulado) =>
+        simulado.status === 'concluido'
+    ).length;
+
+  // ==========================================
+  // TELA DO SIMULADO
+  // ==========================================
+
+  if (simuladoSelecionado) {
+    // ========================================
+    // RESULTADO FINAL
+    // ========================================
+
+    if (resultadoFinal) {
+      return createPortal(
+        <div className="simulado-fullscreen">
+
+          <div className="page-header">
+            <div>
+              <h1>
+                Resultado do simulado
+              </h1>
+
+              <p>
+                {simuladoSelecionado.titulo}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="stat-card"
+            style={{
+              textAlign: 'center',
+              marginTop: '30px',
+              padding: '40px'
+            }}
+          >
+            <h2
+              style={{
+                fontSize: '28px',
+                marginBottom: '10px'
+              }}
+            >
+              🎉 Simulado concluído!
+            </h2>
+
+            <p
+              style={{
+                fontSize: '18px',
+                marginBottom: '35px'
+              }}
+            >
+              Confira seu desempenho:
+            </p>
+
+            <div
+              className="stats-row"
+              style={{
+                marginBottom: '30px'
+              }}
+            >
+              <div className="stat-card">
+                <div
+                  className="stat-value"
+                  style={{
+                    color: '#16a34a'
+                  }}
+                >
+                  {resultadoFinal.acertos}
+                </div>
+
+                <div className="stat-label">
+                  Acertos
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div
+                  className="stat-value"
+                  style={{
+                    color: '#dc2626'
+                  }}
+                >
+                  {resultadoFinal.erros}
+                </div>
+
+                <div className="stat-label">
+                  Erros
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div className="stat-value">
+                  {Number(
+                    resultadoFinal.porcentagem
+                  ).toFixed(2)}
+                  %
+                </div>
+
+                <div className="stat-label">
+                  Aproveitamento
+                </div>
+              </div>
+
+              <div className="stat-card">
+                <div
+                  className="stat-value"
+                  style={{
+                    color: '#0D47A1',
+                    fontVariantNumeric: 'tabular-nums'
+                  }}
+                >
+                  ⏱ {formatarTempo(tempoGasto)}
+                </div>
+
+                <div className="stat-label">
+                  Tempo gasto
+                </div>
+              </div>
+            </div>
+
+            <p
+              style={{
+                fontSize: '16px',
+                marginBottom: '30px'
+              }}
+            >
+              Você acertou{' '}
+              <strong>
+                {resultadoFinal.acertos}
+              </strong>{' '}
+              de{' '}
+              <strong>
+                {resultadoFinal.totalQuestoes}
+              </strong>{' '}
+              questões.
+            </p>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '15px',
+                flexWrap: 'wrap'
+              }}
+            >
+              <button
+                className="simulado-btn"
+                onClick={() =>
+                  setMostrarErros(
+                    !mostrarErros
+                  )
+                }
+              >
+                {mostrarErros
+                  ? 'Ocultar questões'
+                  : 'Ver questões'}
+              </button>
+
+              <button
+                className="simulado-btn"
+                onClick={
+                  refazerSimulado
+                }
+              >
+                Refazer simulado
+              </button>
+
+              <button
+                className="simulado-btn"
+                onClick={
+                  voltarParaSimulados
+                }
+              >
+                Voltar para simulados
+              </button>
+            </div>
+          </div>
+
+          {mostrarErros && (
+            <div
+              style={{
+                marginTop: '30px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                marginBottom: '50px'
+              }}
+            >
+              <div className="stat-card">
+                <h2>
+                  Correção das questões
+                </h2>
+
+                <p>
+                  Confira quais questões
+                  você acertou e quais
+                  errou.
+                </p>
+              </div>
+
+              {resultadoFinal.detalhes.map(
+                (item) => {
+                  const {
+                    questao,
+                    index,
+                    respostaUsuario,
+                    respostaCorreta,
+                    acertou
+                  } = item;
+
+                  return (
+                    <div
+                      key={questao.id}
+                      className="simulado-card"
+                      style={{
+                        padding: '25px',
+                        border:
+                          acertou
+                            ? '2px solid #16a34a'
+                            : '2px solid #dc2626'
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          gap: '15px',
+                          marginBottom: '20px',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        <span className="simulado-subject">
+                          Questão {index + 1}
+                        </span>
+
+                        <span
+                          style={{
+                            padding: '7px 14px',
+                            borderRadius: '20px',
+                            fontWeight: '700',
+                            color: acertou
+                              ? '#166534'
+                              : '#991b1b',
+                            background: acertou
+                              ? '#dcfce7'
+                              : '#fee2e2'
+                          }}
+                        >
+                          {acertou
+                            ? '✓ Acertou'
+                            : '✕ Errou'}
+                        </span>
+                      </div>
+
+                      <h2
+                        style={{
+                          marginBottom: '25px'
+                        }}
+                      >
+                        {questao.pergunta}
+                      </h2>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '10px'
+                        }}
+                      >
+                        {[
+                          ['A', questao.alternativa_a],
+                          ['B', questao.alternativa_b],
+                          ['C', questao.alternativa_c],
+                          ['D', questao.alternativa_d],
+                          ['E', questao.alternativa_e]
+                        ].map(
+                          ([letra, texto]) => {
+                            const ehCorreta =
+                              letra ===
+                              respostaCorreta;
+
+                            const foiSelecionada =
+                              letra ===
+                              respostaUsuario;
+
+                            let background =
+                              '#ffffff';
+
+                            let border =
+                              '1px solid #d1d5db';
+
+                            if (ehCorreta) {
+                              background =
+                                '#dcfce7';
+
+                              border =
+                                '2px solid #16a34a';
+                            }
+
+                            if (
+                              foiSelecionada &&
+                              !ehCorreta
+                            ) {
+                              background =
+                                '#fee2e2';
+
+                              border =
+                                '2px solid #dc2626';
+                            }
+
+                            return (
+                              <div
+                                key={letra}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  padding: '14px 16px',
+                                  borderRadius: '10px',
+                                  border,
+                                  background
+                                }}
+                              >
+                                <strong
+                                  style={{
+                                    minWidth: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: '50%',
+                                    background:
+                                      ehCorreta
+                                        ? '#16a34a'
+                                        : foiSelecionada
+                                        ? '#dc2626'
+                                        : '#e5e7eb',
+                                    color:
+                                      ehCorreta ||
+                                      foiSelecionada
+                                        ? '#ffffff'
+                                        : '#111827'
+                                  }}
+                                >
+                                  {letra}
+                                </strong>
+
+                                <span
+                                  style={{
+                                    flex: 1
+                                  }}
+                                >
+                                  {texto}
+                                </span>
+
+                                {ehCorreta && (
+                                  <strong
+                                    style={{
+                                      color: '#166534'
+                                    }}
+                                  >
+                                    ✓ Correta
+                                  </strong>
+                                )}
+
+                                {foiSelecionada &&
+                                  !ehCorreta && (
+                                    <strong
+                                      style={{
+                                        color: '#991b1b'
+                                      }}
+                                    >
+                                      Sua resposta
+                                    </strong>
+                                  )}
+                              </div>
+                            );
+                          }
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: '20px',
+                          padding: '15px',
+                          borderRadius: '10px',
+                          background:
+                            acertou
+                              ? '#f0fdf4'
+                              : '#fef2f2'
+                        }}
+                      >
+                        {acertou ? (
+                          <p
+                            style={{
+                              margin: 0,
+                              color: '#166534'
+                            }}
+                          >
+                            <strong>
+                              Você acertou!
+                            </strong>{' '}
+                            A alternativa{' '}
+                            <strong>
+                              {respostaCorreta}
+                            </strong>{' '}
+                            é a correta.
+                          </p>
+                        ) : (
+                          <p
+                            style={{
+                              margin: 0,
+                              color: '#991b1b'
+                            }}
+                          >
+                            <strong>
+                              Você errou.
+                            </strong>{' '}
+                            Sua resposta:{' '}
+                            <strong>
+                              {respostaUsuario ||
+                                'Não respondida'}
+                            </strong>
+                            {' | '}
+                            Resposta correta:{' '}
+                            <strong>
+                              {respostaCorreta}
+                            </strong>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
+        </div>,
+        document.body
+      );
+    }
+
+    // ========================================
+    // TELA DAS QUESTÕES
+    // ========================================
+
+    return createPortal(
+      <div className="simulado-fullscreen">
+
+        <div className="page-header">
+          <div>
+
+            <button
+              className="simulado-btn"
+              onClick={
+                voltarParaSimulados
+              }
+              disabled={
+                salvandoResultado
+              }
+              style={{
+                marginBottom: '15px'
+              }}
+            >
+              ← Voltar para simulados
+            </button>
+
+            <h1>
+              {simuladoSelecionado.titulo}
+            </h1>
+
+            {simuladoSelecionado.descricao && (
+              <p>
+                {simuladoSelecionado.descricao}
+              </p>
+            )}
+
+          </div>
+        </div>
+
+        <div className="stats-row">
+
+          <div className="stat-card">
+            <div className="stat-value">
+              {questoes.length}
+            </div>
+
+            <div className="stat-label">
+              Questões
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-value">
+              {simuladoSelecionado.tempo_limite}
+            </div>
+
+            <div className="stat-label">
+              Minutos
+            </div>
+          </div>
+
+          <div
+            className="stat-card"
+            style={{
+              border: tempoRestante !== null && tempoRestante <= 60
+                ? '2px solid #dc2626'
+                : '2px solid #90CAF9',
+              background: tempoRestante !== null && tempoRestante <= 60
+                ? '#fef2f2'
+                : '#ffffff'
+            }}
+          >
+            <div
+              className="stat-value"
+              style={{
+                color: tempoRestante !== null && tempoRestante <= 60
+                  ? '#dc2626'
+                  : '#0D47A1',
+                fontVariantNumeric: 'tabular-nums'
+              }}
+            >
+              ⏱ {formatarTempo(tempoRestante)}
+            </div>
+
+            <div className="stat-label">
+              Tempo restante
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-value">
+              {Object.keys(respostas).length}
+            </div>
+
+            <div className="stat-label">
+              Respondidas
+            </div>
+          </div>
+
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '25px',
+            marginTop: '30px'
+          }}
+        >
+
+          {questoes.length === 0 ? (
+
+            <div className="stat-card">
+              <h2>
+                Este simulado ainda
+                não possui questões.
+              </h2>
+
+              <p>
+                O administrador
+                precisa adicionar
+                questões antes de
+                você poder realizar
+                o simulado.
+              </p>
+            </div>
+
+          ) : (
+
+            questoes.map(
+              (questao, index) => {
+
+                const respostaSelecionada =
+                  respostas[questao.id];
+
+                const respondeu =
+                  Boolean(
+                    respostaSelecionada
+                  );
+
+                return (
+                  <div
+                    className="simulado-card"
+                    id={`questao-${index}`}
+                    key={questao.id}
+                    style={{
+                      padding: '25px'
+                    }}
+                  >
+
+                    <div className="simulado-top">
+
+                      <span className="simulado-subject">
+                        Questão {index + 1}
+                      </span>
+
+                      {questao.materia && (
+                        <span className="status-badge concluido">
+                          {questao.materia}
+                        </span>
+                      )}
+
+                    </div>
+
+                    <h2
+                      style={{
+                        marginTop: '20px',
+                        marginBottom: '25px'
+                      }}
+                    >
+                      {questao.pergunta}
+                    </h2>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px'
+                      }}
+                    >
+
+                      {[
+                        ['A', questao.alternativa_a],
+                        ['B', questao.alternativa_b],
+                        ['C', questao.alternativa_c],
+                        ['D', questao.alternativa_d],
+                        ['E', questao.alternativa_e]
+                      ].map(
+                        ([letra, texto]) => {
+
+                          const selecionada =
+                            respostaSelecionada ===
+                            letra;
+
+                          return (
+                            <button
+                              key={letra}
+                              type="button"
+                              disabled={
+                                salvandoResultado
+                              }
+                              onClick={() =>
+                                selecionarResposta(
+                                  questao.id,
+                                  letra
+                                )
+                              }
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '15px',
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '16px 18px',
+                                borderRadius: '10px',
+
+                                border:
+                                  selecionada
+                                    ? '2px solid #2563eb'
+                                    : '1px solid #d1d5db',
+
+                                background:
+                                  selecionada
+                                    ? '#eff6ff'
+                                    : '#ffffff',
+
+                                cursor:
+                                  salvandoResultado
+                                    ? 'default'
+                                    : 'pointer',
+
+                                fontSize: '16px'
+                              }}
+                            >
+
+                              <strong
+                                style={{
+                                  minWidth: '32px',
+                                  height: '32px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '50%',
+
+                                  background:
+                                    selecionada
+                                      ? '#2563eb'
+                                      : '#e5e7eb',
+
+                                  color:
+                                    selecionada
+                                      ? '#ffffff'
+                                      : '#111827'
+                                }}
+                              >
+                                {letra}
+                              </strong>
+
+                              <span>
+                                {texto}
+                              </span>
+
+                            </button>
+                          );
+                        }
+                      )}
+
+                    </div>
+
+                    {respondeu && (
+                      <p
+                        style={{
+                          marginTop: '12px',
+                          fontSize: '14px',
+                          opacity: 0.7
+                        }}
+                      >
+                        Você pode alterar sua
+                        resposta antes de
+                        finalizar o simulado.
+                      </p>
+                    )}
+
+                    {index <
+                      questoes.length - 1 && (
+
+                      <button
+                        className="simulado-btn"
+                        onClick={() =>
+                          proximaQuestao(
+                            index
+                          )
+                        }
+                        style={{
+                          marginTop: '25px'
+                        }}
+                      >
+                        Próxima questão →
+                      </button>
+
+                    )}
+
+                  </div>
+                );
+              }
+            )
+
+          )}
+
+        </div>
+
+        {questoes.length > 0 && (
+
+          <div
+            style={{
+              marginTop: '35px',
+              marginBottom: '50px',
+              padding: '25px',
+              textAlign: 'center'
+            }}
+          >
+
+            <button
+              className="simulado-btn"
+              onClick={
+                finalizarSimulado
+              }
+              disabled={
+                salvandoResultado
+              }
+              style={{
+                padding: '14px 35px',
+                fontSize: '16px'
+              }}
+            >
+              {salvandoResultado
+                ? 'Salvando resultado...'
+                : 'Finalizar simulado'}
+            </button>
+
+          </div>
+
+        )}
+
+      </div>,
+      document.body
+    );
+  }
+
+  // ==========================================
+  // CARREGANDO
+  // ==========================================
+
+  if (carregando) {
+    return (
+      <div>
+
+        <div className="page-header">
+          <h1>Simulados</h1>
+        </div>
+
+        <div className="stat-card">
+          <h2>
+            Carregando simulados...
+          </h2>
+        </div>
+
+      </div>
+    );
+  }
+
+  // ==========================================
+  // LISTAGEM
+  // ==========================================
+
+  return (
+    <div>
+
+            <div className="page-header">
+
+        <h1>Simulados</h1>
+
+      </div>
+
+      <div className="materia-tabs">
+
+        {materias.map((materia) => (
+          <button
+            key={materia}
+            className={`materia-tab ${filtro === materia ? 'active' : ''}`}
+            onClick={() => setFiltro(materia)}
+          >
+            <span className="materia-tab-icon">{MATERIA_ICONS[materia] || '📌'}</span>
+            {materia}
+            <span className="materia-tab-count">
+              {materia === 'Todas'
+                ? simulados.length
+                : simulados.filter((s) => s.materia === materia).length}
+            </span>
+          </button>
+        ))}
+
+      </div>
+
+      {erro && (
+        <div
+          className="stat-card"
+          style={{
+            marginBottom: '20px'
+          }}
+        >
+          <p>{erro}</p>
+        </div>
+      )}
+
+      <div className="stats-row">
+
+        <div className="stat-card">
+
+          <div className="stat-value">
+            {String(
+              concluidos
+            ).padStart(2, '0')}
+          </div>
+
+          <div className="stat-label">
+            Simulados concluídos
+          </div>
+
+        </div>
+
+        <div className="stat-card">
+
+          <div className="stat-value">
+            {simulados.length}
+          </div>
+
+          <div className="stat-label">
+            Simulados disponíveis
+          </div>
+
+        </div>
+
+        <div className="stat-card">
+
+          <div className="stat-value">
+            {simulados.reduce(
+              (
+                total,
+                simulado
+              ) =>
+                total +
+                Number(
+                  simulado.quantidade_questoes ||
+                    0
+                ),
+              0
+            )}
+          </div>
+
+          <div className="stat-label">
+            Questões disponíveis
+          </div>
+
+        </div>
+
+      </div>
+
+      {simuladosVisiveis.length === 0 ? (
+
+        <div
+          className="stat-card"
+          style={{
+            marginTop: '25px'
+          }}
+        >
+
+          <h2>
+            Nenhum simulado encontrado.
+          </h2>
+
+          <p>
+            Os simulados cadastrados
+            pelo administrador
+            aparecerão aqui.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <div
+          className="simulado-grid"
+          style={{
+            marginTop: '25px'
+          }}
+        >
+
+          {simuladosVisiveis.map(
+            (simulado) => (
+
+              <div
+                className="simulado-card"
+                key={simulado.id}
+              >
+
+                <div className="simulado-top">
+
+                  <span className="simulado-subject">
+                    {simulado.materia ||
+                      'Simulado'}
+                  </span>
+
+                  <span
+                    className={`status-badge ${simulado.status}`}
+                  >
+                    {
+                      STATUS_LABEL[
+                        simulado.status
+                      ]
+                    }
+                  </span>
+
+                </div>
+
+                <h2
+                  style={{
+                    marginTop: '15px',
+                    marginBottom: '10px'
+                  }}
+                >
+                  {simulado.titulo}
+                </h2>
+
+                {simulado.descricao && (
+                  <p
+                    style={{
+                      marginBottom: '20px'
+                    }}
+                  >
+                    {simulado.descricao}
+                  </p>
+                )}
+
+                <div className="simulado-meta">
+
+                  <span>
+                    📝{' '}
+                    {
+                      simulado.quantidade_questoes
+                    }{' '}
+                    questões
+                  </span>
+
+                  <span>
+                    ⏱{' '}
+                    {
+                      simulado.tempo_limite
+                    }{' '}
+                    minutos
+                  </span>
+
+                </div>
+
+                <button
+                  className="simulado-btn"
+                  onClick={() =>
+                    abrirSimulado(
+                      simulado
+                    )
+                  }
+                  disabled={
+                    carregandoQuestoes
+                  }
+                  style={{
+                    marginTop: '20px'
+                  }}
+                >
+                  {carregandoQuestoes
+                    ? 'Carregando...'
+                    : BTN_LABEL[
+                        simulado.status
+                      ]}
+                </button>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      )}
+
+    </div>
+  );
+}
