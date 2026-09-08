@@ -229,13 +229,7 @@ export default function Conteudos() {
         setMateriasData(materias);
         setAbertos((prev) => {
           const nomesAtuais = new Set(materias.map((materia) => materia.nome));
-          const next = new Set([...prev].filter((nome) => nomesAtuais.has(nome)));
-
-          materias.forEach((materia) => {
-            if (prev.size === 0) next.add(materia.nome);
-          });
-
-          return next;
+          return new Set([...prev].filter((nome) => nomesAtuais.has(nome)));
         });
       } catch (error) {
         console.error('Erro ao carregar conteúdos:', error);

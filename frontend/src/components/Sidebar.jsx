@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { useState } from "react";
 import { useGamification } from '../context/GamificationContext.jsx';
 import logoIcon from '../assets/tenna_logo.png';
 
@@ -39,12 +40,24 @@ const ICONS = {
 
 export default function Sidebar() {
   const { streak } = useGamification();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
       <div className="sidebar-brand">
-  <img src={logoIcon} alt="Tenna" className="sidebar-logo-full" />
-</div>
+        <img src={logoIcon} alt="Tenna" className="sidebar-logo-full" />
+        <button
+          type="button"
+          className="sidebar-collapse-btn"
+          onClick={() => setCollapsed((value) => !value)}
+          aria-label={collapsed ? 'Expandir menu' : 'Diminuir menu'}
+          title={collapsed ? 'Expandir menu' : 'Diminuir menu'}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d={collapsed ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'} />
+          </svg>
+        </button>
+      </div>
 
       <nav className="sidebar-nav">
         {NAV_ITEMS.map((item) => (
