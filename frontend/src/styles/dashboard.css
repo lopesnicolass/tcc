@@ -3218,3 +3218,252 @@
     display:none;
   }
 }
+
+
+/* =========================================================
+   SEQUÊNCIA — CARD GAMIFICADO
+   ========================================================= */
+
+@keyframes streakFlameFloat{
+  0%,100%{ transform:translateY(0) rotate(-2deg) scale(1); }
+  50%{ transform:translateY(-3px) rotate(2deg) scale(1.04); }
+}
+
+@keyframes streakGlowPulse{
+  0%,100%{ opacity:.55; transform:scale(.92); }
+  50%{ opacity:.9; transform:scale(1.06); }
+}
+
+@keyframes streakSpark{
+  0%,100%{ opacity:.25; transform:scale(.7) translateY(2px); }
+  50%{ opacity:1; transform:scale(1) translateY(-2px); }
+}
+
+.sidebar-streak{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:76px;
+  padding:10px 10px 10px 8px;
+  margin-top:auto;
+  overflow:hidden;
+  border:1px solid rgba(90,200,232,.22);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 16% 50%, rgba(255,201,60,.10), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,.105), rgba(255,255,255,.045));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.08);
+  transition:
+    transform .18s var(--bouncy),
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.sidebar-streak::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg, transparent 0%, rgba(255,255,255,.06) 42%, transparent 68%);
+  transform:translateX(-120%);
+  transition:transform .55s ease;
+}
+
+.sidebar-streak:hover{
+  transform:translateY(-2px);
+  border-color:rgba(90,200,232,.38);
+  background:
+    radial-gradient(circle at 16% 50%, rgba(255,201,60,.15), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.055));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.1),
+    0 12px 28px rgba(0,0,0,.12);
+}
+
+.sidebar-streak:hover::after{ transform:translateX(120%); }
+
+.sidebar-streak-visual{
+  position:relative;
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.sidebar-streak-glow{
+  position:absolute;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:rgba(255,201,60,.28);
+  filter:blur(8px);
+  animation:streakGlowPulse 2.1s ease-in-out infinite;
+}
+
+.sidebar-streak-flame{
+  position:relative;
+  z-index:2;
+  width:40px;
+  height:46px;
+  color:#FF9F1C;
+  filter:drop-shadow(0 5px 7px rgba(255,159,28,.28)) drop-shadow(0 0 9px rgba(255,201,60,.18));
+  animation:streakFlameFloat 1.8s ease-in-out infinite;
+}
+
+.sidebar-streak-spark{
+  position:absolute;
+  z-index:3;
+  color:#FFC93C;
+  font-size:10px;
+  line-height:1;
+  animation:streakSpark 1.7s ease-in-out infinite;
+}
+.sidebar-streak-spark.spark-1{ top:2px; left:6px; }
+.sidebar-streak-spark.spark-2{ top:10px; right:1px; font-size:7px; animation-delay:.45s; }
+.sidebar-streak-spark.spark-3{ bottom:5px; left:2px; font-size:7px; animation-delay:.8s; }
+
+.sidebar-streak-content{ min-width:0; flex:1; }
+
+.sidebar-streak-heading{
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+  line-height:1;
+}
+
+.sidebar-streak-heading strong{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:24px;
+  font-weight:750;
+  letter-spacing:-.03em;
+  color:#fff;
+}
+
+.sidebar-streak-heading span{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:12px;
+  font-weight:650;
+  color:rgba(255,255,255,.84);
+}
+
+.sidebar-streak-label{
+  margin-top:2px;
+  color:rgba(255,255,255,.72);
+  font-size:10.5px;
+  font-weight:500;
+  line-height:1.2;
+}
+.sidebar-streak-label span{ margin-left:2px; }
+
+.sidebar-streak-progress{
+  position:relative;
+  height:7px;
+  margin-top:8px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.11);
+}
+
+.sidebar-streak-progress-fill{
+  position:absolute;
+  inset:0 auto 0 0;
+  z-index:1;
+  border-radius:inherit;
+  background:linear-gradient(90deg, #38D9B1, #5AC8E8);
+  box-shadow:0 0 10px rgba(90,200,232,.3);
+  transition:width .45s ease;
+}
+
+.sidebar-streak-dots{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  align-items:center;
+  gap:3px;
+  padding:0 2px;
+}
+
+.sidebar-streak-dots span{
+  width:5px;
+  height:5px;
+  justify-self:center;
+  border-radius:50%;
+  background:rgba(255,255,255,.16);
+  transition:background .25s ease, transform .25s ease;
+}
+.sidebar-streak-dots span.is-complete{
+  background:rgba(255,255,255,.75);
+  transform:scale(1.08);
+}
+
+.sidebar-streak-message{
+  margin-top:5px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:rgba(255,255,255,.62);
+  font-size:9.5px;
+  font-weight:500;
+}
+
+.sidebar-streak-arrow{
+  flex:0 0 auto;
+  margin-left:1px;
+  color:rgba(255,255,255,.55);
+  font-size:28px;
+  font-weight:300;
+  line-height:1;
+  transform:translateY(-1px);
+  transition:color .18s ease, transform .18s var(--bouncy);
+}
+.sidebar-streak:hover .sidebar-streak-arrow{
+  color:#fff;
+  transform:translate(2px,-1px);
+}
+
+.sidebar-streak-complete{
+  border-color:rgba(255,201,60,.34);
+  background:
+    radial-gradient(circle at 16% 50%, rgba(255,201,60,.18), transparent 28%),
+    linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+}
+.sidebar-streak-complete .sidebar-streak-progress-fill{
+  background:linear-gradient(90deg, #FFC93C, #FF9F1C);
+  box-shadow:0 0 12px rgba(255,201,60,.34);
+}
+.sidebar-streak-complete .sidebar-streak-flame{ color:#FFC93C; }
+
+.sidebar-collapsed .sidebar-streak{
+  width:100%;
+  min-height:54px;
+  height:54px;
+  padding:0;
+  justify-content:center;
+  border-radius:14px;
+}
+.sidebar-collapsed .sidebar-streak-visual{
+  width:38px;
+  height:38px;
+  flex-basis:38px;
+}
+.sidebar-collapsed .sidebar-streak-flame{ width:29px; height:34px; }
+.sidebar-collapsed .sidebar-streak-glow{ width:30px; height:30px; }
+.sidebar-collapsed .sidebar-streak-content,
+.sidebar-collapsed .sidebar-streak-arrow,
+.sidebar-collapsed .sidebar-streak-spark{ display:none; }
+
+@media (max-width:760px){
+  .sidebar-streak{
+    min-width:230px;
+    margin-top:0;
+    margin-left:auto;
+  }
+}

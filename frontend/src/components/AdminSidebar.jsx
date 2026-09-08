@@ -1,4 +1,5 @@
 import { NavLink, Link } from 'react-router-dom';
+import logoIcon from '../assets/tenna_logo.png';
 
 const NAV_SECTIONS = [
   {
@@ -110,19 +111,17 @@ export default function AdminSidebar() {
           ===================================================== */}
 
       <div className="sidebar-brand admin-sidebar-brand">
-
-        <div
-          className="logo-mark admin-logo-mark"
-          aria-hidden="true"
-        >
-          A
-        </div>
-
-        <div className="sidebar-brand-text">
-          <strong>VESTIBULINHO</strong>
-          <span>Painel do Administrador</span>
-        </div>
-
+        <img
+          src={logoIcon}
+          alt="Tenna"
+          className="admin-sidebar-logo"
+          style={{
+            width: '145px',
+            height: 'auto',
+            display: 'block',
+            objectFit: 'contain',
+          }}
+        />
       </div>
 
 

@@ -74,13 +74,76 @@ export default function Sidebar() {
         ))}
       </nav>
 
-<div className="sidebar-streak">
-        <span className="sidebar-streak-icon">🔥</span>
-        <div>
-          <div className="sidebar-streak-num">{streak}</div>
-          <div className="sidebar-streak-label">dias seguidos</div>
-        </div>
-      </div>
+{(() => {
+        const streakValue = Math.max(0, Number(streak) || 0);
+        const streakProgress = Math.min(streakValue, 7);
+        const streakRemaining = Math.max(7 - streakValue, 0);
+        const progressPercent = (streakProgress / 7) * 100;
+
+        return (
+          <div
+            className={`sidebar-streak ${streakValue >= 7 ? 'sidebar-streak-complete' : ''}`}
+            title={streakValue >= 7
+              ? 'Meta de 7 dias alcançada!'
+              : `Faltam ${streakRemaining} dias para 7`}
+          >
+            <div className="sidebar-streak-visual" aria-hidden="true">
+              <span className="sidebar-streak-spark spark-1">✦</span>
+              <span className="sidebar-streak-spark spark-2">✦</span>
+              <span className="sidebar-streak-spark spark-3">✦</span>
+              <span className="sidebar-streak-glow" />
+
+              <svg className="sidebar-streak-flame" viewBox="0 0 48 56" fill="none">
+                <path
+                  d="M25.8 2.8c1.8 9.1-5.4 13.1-9.1 18.3-2.7 3.8-3.4 7.4-1.5 10.7 1.2-3.9 3.6-6.4 6.7-8.4-.4 6.1 3.9 8.2 5.6 12.1 1.1 2.5 1 5.2-.1 7.6 4.6-2.8 7.1-7.1 6.5-12.5-.6-5.6-4.7-9.1-5.5-13.7-.5-3.1.4-7.2-2.6-14.1Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M18.2 31.9c-3.7 4.5-4.2 9.4-1.1 13.7 2.2 3.1 5.8 4.7 9.2 4.7 5.9 0 10.7-4.8 10.7-10.7 0-2.9-1.2-5.6-3.2-7.5.3 5.3-2.4 8.8-6.4 9.9 1.1-4.2-.8-7.2-3.4-9.7-1.7-1.6-3.1-3.4-3.1-5.8-1.1 1.6-1.9 3.3-2.7 5.4Z"
+                  fill="currentColor"
+                  opacity=".7"
+                />
+                <circle cx="24" cy="43" r="1.8" fill="#FFC93C" />
+                <circle cx="31" cy="39" r="1.3" fill="#FFC93C" />
+              </svg>
+            </div>
+
+            <div className="sidebar-streak-content">
+              <div className="sidebar-streak-heading">
+                <strong>{streakValue}</strong>
+                <span>{streakValue === 1 ? 'dia' : 'dias'}</span>
+              </div>
+
+              <div className="sidebar-streak-label">
+                de sequência <span aria-hidden="true">🔥</span>
+              </div>
+
+              <div className="sidebar-streak-progress" aria-label={`${streakProgress} de 7 dias`}>
+                <div
+                  className="sidebar-streak-progress-fill"
+                  style={{ width: `${progressPercent}%` }}
+                />
+                <div className="sidebar-streak-dots">
+                  {Array.from({ length: 7 }, (_, index) => (
+                    <span
+                      key={index}
+                      className={index < streakProgress ? 'is-complete' : ''}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="sidebar-streak-message">
+                {streakValue >= 7
+                  ? 'Meta de 7 dias alcançada! 🔥'
+                  : `Faltam ${streakRemaining} dias para 7 🔥`}
+              </div>
+            </div>
+
+            <span className="sidebar-streak-arrow" aria-hidden="true">›</span>
+          </div>
+        );
+      })()}
 
     </aside>
   );
