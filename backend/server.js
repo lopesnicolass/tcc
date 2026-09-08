@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./seeds/flashcardSeed");
 
 const express = require("express");
 const cors = require("cors");
@@ -14,6 +15,8 @@ const sessaoRoutes = require("./routes/sessaoRoutes");
 const provaRoutes = require("./routes/provaRoutes");
 const gamificacaoRoutes = require("./routes/gamificacaoRoutes");
 const conteudoRoutes = require('./routes/conteudoRoutes');
+const flashcardRoutes = require("./routes/flashcardRoutes");
+
 
 const app = express();
 
@@ -50,6 +53,7 @@ app.use("/mural", muralRoutes);
 app.use("/sessoes", sessaoRoutes);
 app.use("/provas", provaRoutes);
 app.use("/gamificacao", gamificacaoRoutes);
+app.use("/flashcards", flashcardRoutes);
 
 app.use("/conteudos", conteudoRoutes);
 

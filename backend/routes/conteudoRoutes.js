@@ -11,84 +11,63 @@ const autenticarToken =
 const verificarAdmin =
     require("../middleware/adminMiddleware");
 
-
-// =====================================================
-// CONTEÚDOS PÚBLICOS PARA ALUNOS
-// =====================================================
-//
-// Não exige login de administrador.
-// Retorna somente matérias e tópicos ativos.
-//
+router.get(
+    "/",
+    autenticarToken,
+    conteudoController.listar
+);
 
 router.get(
     "/publico",
     conteudoController.listarPublico
 );
 
-
-// =====================================================
-// PROTEÇÃO ADMINISTRATIVA
-// =====================================================
-
-router.use(
-    autenticarToken,
-    verificarAdmin
-);
-
-
-// =====================================================
-// ADMIN — LEITURA
-// =====================================================
-
-router.get(
-    "/",
-    conteudoController.listar
-);
-
 router.get(
     "/materias/:id",
+    autenticarToken,
     conteudoController.buscarMateria
 );
 
-
-// =====================================================
-// ADMIN — MATÉRIAS
-// =====================================================
-
 router.post(
     "/materias",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.criarMateria
 );
 
 router.put(
     "/materias/:id",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.atualizarMateria
 );
 
 router.delete(
     "/materias/:id",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.excluirMateria
 );
 
-
-// =====================================================
-// ADMIN — TÓPICOS
-// =====================================================
-
 router.post(
     "/materias/:materiaId/topicos",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.criarTopico
 );
 
 router.put(
     "/topicos/:id",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.atualizarTopico
 );
 
 router.delete(
     "/topicos/:id",
+    autenticarToken,
+    verificarAdmin,
     conteudoController.excluirTopico
 );
-
 
 module.exports = router;
