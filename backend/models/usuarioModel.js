@@ -160,18 +160,21 @@ function atualizarSenha(
 function atualizarFoto(
     id,
     fotoPerfil,
+    tipoFoto,
     callback
 ) {
 
     const sql = `
         UPDATE usuarios
-        SET foto_perfil = ?
+        SET
+            foto_perfil = ?,
+            foto_perfil_tipo = ?
         WHERE id = ?
     `;
 
     db.run(
         sql,
-        [fotoPerfil, id],
+        [fotoPerfil, tipoFoto, id],
         function (erro) {
 
             if (erro) {
@@ -182,7 +185,6 @@ function atualizarFoto(
         }
     );
 }
-
 
 // =====================================================
 // EXCLUIR USUÁRIO

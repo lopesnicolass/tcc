@@ -344,7 +344,8 @@ function editarFoto(req, res) {
 
     atualizarFoto(
         usuarioId,
-        req.file.filename,
+        req.file.buffer,
+        req.file.mimetype,
         (erro, alterados) => {
 
             if (erro) {

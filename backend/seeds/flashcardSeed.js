@@ -33,74 +33,55 @@ const flashcardsIniciais = [
     }
 ];
 
-db.get(
-    `SELECT COUNT(*) AS total FROM flashcards`,
-    [],
-    (erro, resultado) => {
+let index = 0;
 
-        if (erro) {
-            console.error(
-                "Erro ao verificar flashcards:",
-                erro.message
-            );
-            return;
-        }
+function inserirProximo() {
 
-        if (resultado.total > 0) {
-            return;
-        }
+    if (index >= flashcardsIniciais.length) {
+        console.log("Flashcards iniciais verificados.");
+        return;
+    }
 
-        let index = 0;
+    const card = flashcardsIniciais[index];
 
-        function inserirProximo() {
+    db.run(
+        `
+            INSERT INTO flashcards
+            (
+                primario,
+                secundario,
+                materia,
+                ativo
+            )
+            SELECT ?, ?, ?, 1
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM flashcards
+                WHERE primario = ?
+                AND materia = ?
+            )
+        `,
+        [
+            card.primario,
+            card.secundario,
+            card.materia,
+            card.primario,
+            card.materia
+        ],
+        (erro) => {
 
-            if (index >= flashcardsIniciais.length) {
-                console.log("Flashcards iniciais cadastrados.");
+            if (erro) {
+                console.error(
+                    "Erro ao cadastrar flashcard:",
+                    erro.message
+                );
                 return;
             }
 
-            const card = flashcardsIniciais[index];
-
-            db.run(
-                `
-                    INSERT INTO flashcards
-                    (
-                        primario,
-                        secundario,
-                        materia,
-                        ativo
-                    )
-                    SELECT ?, ?, ?, 1
-                    WHERE NOT EXISTS (
-                        SELECT 1
-                        FROM flashcards
-                        WHERE primario = ?
-                        AND materia = ?
-                    )
-                `,
-                [
-                    card.primario,
-                    card.secundario,
-                    card.materia,
-                    card.primario,
-                    card.materia
-                ],
-                (erroInsert) => {
-
-                    if (erroInsert) {
-                        console.error(
-                            "Erro ao cadastrar flashcard:",
-                            erroInsert.message
-                        );
-                        return;
-                    }
-
-                    index++;
-                    inserirProximo();
-                }
-            );
+            index++;
+            inserirProximo();
         }
+    );
+}
 
-        inserirProximo();
-    }
-);
+inserirProximo();

@@ -18,6 +18,7 @@ const conteudoRoutes = require('./routes/conteudoRoutes');
 const flashcardRoutes = require("./routes/flashcardRoutes");
 
 
+
 const app = express();
 
 

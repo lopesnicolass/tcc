@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
+
 const {
     listarTodosUsuarios,
     buscarMeuPerfil,
@@ -23,38 +24,12 @@ const router = express.Router();
 // CONFIGURAÇÃO DAS FOTOS DE PERFIL
 // =====================================================
 
-const storage =
-    multer.diskStorage({
+const storage = multer.memoryStorage();
 
-        destination: function (req, file, cb) {
 
-            cb(
-                null,
-                path.join(
-                    __dirname,
-                    "..",
-                    "uploads",
-                    "perfis"
-                )
-            );
+       
 
-        },
-
-        filename: function (req, file, cb) {
-
-            const extensao =
-                path.extname(
-                    file.originalname
-                ).toLowerCase();
-
-            const nome =
-                `perfil-${req.usuario.id}-${Date.now()}${extensao}`;
-
-            cb(null, nome);
-
-        }
-
-    });
+   
 
 
 // =====================================================
