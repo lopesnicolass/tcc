@@ -5,15 +5,11 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:3000';
 
-const UPLOADS_URL =
-  `${API_URL}/uploads/perfis`;
-
 export default function Perfil() {
 
   const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
-
 
   // =====================================================
   // USUÁRIO
@@ -27,61 +23,111 @@ export default function Perfil() {
       ? JSON.parse(usuarioSalvo)
       : null;
 
-
   // =====================================================
   // ESTADOS
   // =====================================================
 
   const [values, setValues] = useState({
-
-    nome:
-      usuarioInicial?.nome || '',
-
-    email:
-      usuarioInicial?.email || '',
-
+    nome: usuarioInicial?.nome || '',
+    email: usuarioInicial?.email || '',
     senhaAtual: '',
-
     novaSenha: ''
-
   });
 
-
-  const [foto, setFoto] = useState(
-    usuarioInicial?.foto_perfil || null
-  );
-
+  const [foto, setFoto] = useState(null);
 
   const [previewFoto, setPreviewFoto] =
     useState(null);
 
-
   const [editing, setEditing] = useState({
-
     nome: false,
-
     email: false,
-
     senha: false
-
   });
-
 
   const [salvando, setSalvando] =
     useState(false);
 
-
   const [salvandoFoto, setSalvandoFoto] =
     useState(false);
-
 
   const [mensagem, setMensagem] =
     useState('');
 
-
   const [erro, setErro] =
     useState('');
 
+  // =====================================================
+  // CONVERTER BLOB DO SQLITE PARA IMAGEM
+  // =====================================================
+
+  function criarImagemBase64(dados, tipo) {
+
+    if (!dados || !tipo) {
+      return null;
+    }
+
+    let dadosArray = null;
+
+    // Caso venha diretamente como array
+    if (Array.isArray(dados)) {
+      dadosArray = dados;
+    }
+
+    // Caso venha como Buffer serializado pelo Express
+    else if (
+      dados &&
+      Array.isArray(dados.data)
+    ) {
+      dadosArray = dados.data;
+    }
+
+    // Caso venha como Uint8Array / ArrayBuffer
+    else if (
+      dados instanceof Uint8Array
+    ) {
+      dadosArray = Array.from(dados);
+    }
+
+    if (!dadosArray || dadosArray.length === 0) {
+      return null;
+    }
+
+    const bytes =
+      new Uint8Array(dadosArray);
+
+    let binario = '';
+
+    const tamanhoBloco = 8192;
+
+    for (
+      let inicio = 0;
+      inicio < bytes.length;
+      inicio += tamanhoBloco
+    ) {
+
+      const fim =
+        Math.min(
+          inicio + tamanhoBloco,
+          bytes.length
+        );
+
+      const bloco =
+        bytes.subarray(
+          inicio,
+          fim
+        );
+
+      binario += String.fromCharCode(
+        ...bloco
+      );
+    }
+
+    return (
+      `data:${tipo};base64,` +
+      btoa(binario)
+    );
+  }
 
   // =====================================================
   // CARREGAR PERFIL
@@ -98,7 +144,6 @@ export default function Perfil() {
             'etecamp_token'
           );
 
-
         if (!token) {
 
           navigate('/login');
@@ -107,26 +152,19 @@ export default function Perfil() {
 
         }
 
-
         const resposta =
           await fetch(
             `${API_URL}/usuarios/meu-perfil`,
             {
-
               headers: {
-
                 Authorization:
                   `Bearer ${token}`
-
               }
-
             }
           );
 
-
         const dados =
           await resposta.json();
-
 
         if (!resposta.ok) {
 
@@ -137,13 +175,14 @@ export default function Perfil() {
 
         }
 
-
         const usuario =
           dados.usuario;
 
+        // =================================================
+        // DADOS DO USUÁRIO
+        // =================================================
 
         setValues({
-
           nome:
             usuario.nome || '',
 
@@ -153,20 +192,31 @@ export default function Perfil() {
           senhaAtual: '',
 
           novaSenha: ''
-
         });
 
+        // =================================================
+        // FOTO VINDO DO SQLITE
+        // =================================================
 
-        setFoto(
-          usuario.foto_perfil || null
-        );
+        const imagem =
+          criarImagemBase64(
+            usuario.foto_perfil_dados,
+            usuario.foto_perfil_tipo
+          );
 
+        setFoto(imagem);
+
+        // =================================================
+        // ATUALIZAR LOCALSTORAGE
+        // =================================================
 
         localStorage.setItem(
           'etecamp_usuario',
-          JSON.stringify(usuario)
+          JSON.stringify({
+            ...usuario,
+            foto_perfil: null
+          })
         );
-
 
       } catch (erro) {
 
@@ -181,11 +231,9 @@ export default function Perfil() {
 
     }
 
-
     carregarPerfil();
 
   }, [navigate]);
-
 
   // =====================================================
   // ALTERAR CAMPO
@@ -197,35 +245,25 @@ export default function Perfil() {
   ) {
 
     setValues((prev) => ({
-
       ...prev,
-
       [campo]: valor
-
     }));
 
   }
-
 
   // =====================================================
   // EDITAR CAMPO
   // =====================================================
 
-  function toggleEdit(
-    campo
-  ) {
+  function toggleEdit(campo) {
 
     setEditing((prev) => ({
-
       ...prev,
-
       [campo]:
         !prev[campo]
-
     }));
 
   }
-
 
   // =====================================================
   // SALVAR PERFIL
@@ -235,13 +273,9 @@ export default function Perfil() {
 
     e.preventDefault();
 
-
     setMensagem('');
-
     setErro('');
-
     setSalvando(true);
-
 
     try {
 
@@ -249,7 +283,6 @@ export default function Perfil() {
         localStorage.getItem(
           'etecamp_token'
         );
-
 
       if (!token) {
 
@@ -259,27 +292,22 @@ export default function Perfil() {
 
       }
 
-
       const resposta =
         await fetch(
           `${API_URL}/usuarios/meu-perfil`,
           {
-
             method: 'PUT',
 
             headers: {
-
               'Content-Type':
                 'application/json',
 
               Authorization:
                 `Bearer ${token}`
-
             },
 
             body:
               JSON.stringify({
-
                 nome:
                   values.nome,
 
@@ -291,16 +319,12 @@ export default function Perfil() {
 
                 novaSenha:
                   values.novaSenha
-
               })
-
           }
         );
 
-
       const dados =
         await resposta.json();
-
 
       if (!resposta.ok) {
 
@@ -311,45 +335,29 @@ export default function Perfil() {
 
       }
 
-
-      // =================================================
-      // ATUALIZAR LOCALSTORAGE
-      // =================================================
-
       localStorage.setItem(
         'etecamp_usuario',
-        JSON.stringify(
-          dados.usuario
-        )
+        JSON.stringify({
+          ...dados.usuario,
+          foto_perfil: null
+        })
       );
 
-
       setValues((prev) => ({
-
         ...prev,
-
         senhaAtual: '',
-
         novaSenha: ''
-
       }));
 
-
       setEditing({
-
         nome: false,
-
         email: false,
-
         senha: false
-
       });
-
 
       setMensagem(
         'Perfil atualizado com sucesso!'
       );
-
 
     } catch (erro) {
 
@@ -368,36 +376,24 @@ export default function Perfil() {
 
   }
 
-
   // =====================================================
   // SELECIONAR FOTO
   // =====================================================
 
-  function handleSelecionarFoto(
-    e
-  ) {
+  function handleSelecionarFoto(e) {
 
     const arquivo =
       e.target.files?.[0];
 
-
     if (!arquivo) {
-
       return;
-
     }
 
-
     const tiposPermitidos = [
-
       'image/jpeg',
-
       'image/png',
-
       'image/webp'
-
     ];
-
 
     if (
       !tiposPermitidos.includes(
@@ -413,7 +409,6 @@ export default function Perfil() {
 
     }
 
-
     if (
       arquivo.size >
       5 * 1024 * 1024
@@ -427,28 +422,29 @@ export default function Perfil() {
 
     }
 
-
     setErro('');
-
     setMensagem('');
 
+    // Libera URL anterior, caso exista
+    if (previewFoto?.url) {
+
+      URL.revokeObjectURL(
+        previewFoto.url
+      );
+
+    }
 
     const url =
       URL.createObjectURL(
         arquivo
       );
 
-
     setPreviewFoto({
-
       arquivo,
-
       url
-
     });
 
   }
-
 
   // =====================================================
   // SALVAR FOTO
@@ -457,18 +453,12 @@ export default function Perfil() {
   async function handleSalvarFoto() {
 
     if (!previewFoto) {
-
       return;
-
     }
 
-
     setSalvandoFoto(true);
-
     setErro('');
-
     setMensagem('');
-
 
     try {
 
@@ -477,40 +467,39 @@ export default function Perfil() {
           'etecamp_token'
         );
 
+      if (!token) {
+
+        navigate('/login');
+
+        return;
+
+      }
 
       const formData =
         new FormData();
-
 
       formData.append(
         'foto',
         previewFoto.arquivo
       );
 
-
       const resposta =
         await fetch(
           `${API_URL}/usuarios/meu-perfil/foto`,
           {
-
             method: 'POST',
 
             headers: {
-
               Authorization:
                 `Bearer ${token}`
-
             },
 
             body: formData
-
           }
         );
 
-
       const dados =
         await resposta.json();
-
 
       if (!resposta.ok) {
 
@@ -521,14 +510,30 @@ export default function Perfil() {
 
       }
 
+      // =================================================
+      // MOSTRAR A FOTO IMEDIATAMENTE
+      // =================================================
 
-      setFoto(
-        dados.foto_perfil
+      const arrayBuffer =
+        await previewFoto.arquivo.arrayBuffer();
+
+      const imagem =
+        criarImagemBase64(
+          new Uint8Array(arrayBuffer),
+          previewFoto.arquivo.type
+        );
+
+      setFoto(imagem);
+
+      // =================================================
+      // LIMPAR PREVIEW
+      // =================================================
+
+      URL.revokeObjectURL(
+        previewFoto.url
       );
 
-
       setPreviewFoto(null);
-
 
       // =================================================
       // ATUALIZAR LOCALSTORAGE
@@ -539,18 +544,12 @@ export default function Perfil() {
           localStorage.getItem(
             'etecamp_usuario'
           )
-        );
-
+        ) || {};
 
       const usuarioAtualizado = {
-
         ...usuarioAtual,
-
-        foto_perfil:
-          dados.foto_perfil
-
+        foto_perfil: null
       };
-
 
       localStorage.setItem(
         'etecamp_usuario',
@@ -559,11 +558,9 @@ export default function Perfil() {
         )
       );
 
-
       setMensagem(
         'Foto atualizada com sucesso!'
       );
-
 
     } catch (erro) {
 
@@ -581,7 +578,6 @@ export default function Perfil() {
     }
 
   }
-
 
   // =====================================================
   // CANCELAR FOTO
@@ -601,7 +597,6 @@ export default function Perfil() {
 
   }
 
-
   // =====================================================
   // LOGOUT
   // =====================================================
@@ -615,18 +610,15 @@ export default function Perfil() {
           'etecamp_token'
         );
 
-
       const usuarioSalvo =
         localStorage.getItem(
           'etecamp_usuario'
         );
 
-
       const usuario =
         usuarioSalvo
           ? JSON.parse(usuarioSalvo)
           : null;
-
 
       if (
         usuario &&
@@ -634,22 +626,15 @@ export default function Perfil() {
       ) {
 
         await fetch(
-
           `${API_URL}/sessoes/sair/${usuario.id}`,
-
           {
-
             method: 'PUT',
 
             headers: {
-
               Authorization:
                 `Bearer ${token}`
-
             }
-
           }
-
         );
 
       }
@@ -675,13 +660,11 @@ export default function Perfil() {
         'token'
       );
 
-
       navigate('/login');
 
     }
 
   }
-
 
   // =====================================================
   // AVATAR
@@ -689,18 +672,13 @@ export default function Perfil() {
 
   const imagemAvatar =
     previewFoto?.url ||
-    (
-      foto
-        ? `${UPLOADS_URL}/${foto}`
-        : null
-    );
-
+    foto ||
+    null;
 
   const primeiraLetra =
     values.nome
       ?.charAt(0)
       ?.toUpperCase() || '?';
-
 
   // =====================================================
   // RENDER
@@ -726,7 +704,6 @@ export default function Perfil() {
 
       </div>
 
-
       {mensagem && (
 
         <div
@@ -739,13 +716,10 @@ export default function Perfil() {
             fontWeight: 600
           }}
         >
-
           {mensagem}
-
         </div>
 
       )}
-
 
       {erro && (
 
@@ -759,28 +733,17 @@ export default function Perfil() {
             fontWeight: 600
           }}
         >
-
           {erro}
-
         </div>
 
       )}
 
-
       <div className="perfil-grid">
-
-
-        {/* =============================================
-            DADOS
-        ============================================= */}
 
         <form
           className="panel-card"
           onSubmit={handleSave}
         >
-
-
-          {/* NOME */}
 
           <div className="perfil-field">
 
@@ -788,51 +751,34 @@ export default function Perfil() {
               Nome
             </label>
 
-
             <div className="perfil-input-wrap">
 
               <input
-
                 type="text"
-
                 value={values.nome}
-
                 disabled={!editing.nome}
-
                 onChange={(e) =>
                   handleChange(
                     'nome',
                     e.target.value
                   )
                 }
-
               />
 
-
               <button
-
                 type="button"
-
                 className="perfil-edit-btn"
-
                 onClick={() =>
                   toggleEdit('nome')
                 }
-
                 aria-label="Editar nome"
-
               >
-
                 ✎
-
               </button>
 
             </div>
 
           </div>
-
-
-          {/* EMAIL */}
 
           <div className="perfil-field">
 
@@ -840,51 +786,34 @@ export default function Perfil() {
               E-mail
             </label>
 
-
             <div className="perfil-input-wrap">
 
               <input
-
                 type="email"
-
                 value={values.email}
-
                 disabled={!editing.email}
-
                 onChange={(e) =>
                   handleChange(
                     'email',
                     e.target.value
                   )
                 }
-
               />
 
-
               <button
-
                 type="button"
-
                 className="perfil-edit-btn"
-
                 onClick={() =>
                   toggleEdit('email')
                 }
-
                 aria-label="Editar e-mail"
-
               >
-
                 ✎
-
               </button>
 
             </div>
 
           </div>
-
-
-          {/* SENHA */}
 
           <div className="perfil-field">
 
@@ -892,55 +821,39 @@ export default function Perfil() {
               Senha atual
             </label>
 
-
             <div className="perfil-input-wrap">
 
               <input
-
                 type="password"
-
                 value={values.senhaAtual}
-
                 disabled={!editing.senha}
-
                 placeholder={
                   editing.senha
                     ? 'Digite sua senha atual'
                     : '••••••••'
                 }
-
                 onChange={(e) =>
                   handleChange(
                     'senhaAtual',
                     e.target.value
                   )
                 }
-
               />
 
-
               <button
-
                 type="button"
-
                 className="perfil-edit-btn"
-
                 onClick={() =>
                   toggleEdit('senha')
                 }
-
                 aria-label="Editar senha"
-
               >
-
                 ✎
-
               </button>
 
             </div>
 
           </div>
-
 
           {editing.senha && (
 
@@ -950,24 +863,18 @@ export default function Perfil() {
                 Nova senha
               </label>
 
-
               <div className="perfil-input-wrap">
 
                 <input
-
                   type="password"
-
                   value={values.novaSenha}
-
                   placeholder="Digite a nova senha"
-
                   onChange={(e) =>
                     handleChange(
                       'novaSenha',
                       e.target.value
                     )
                   }
-
                 />
 
               </div>
@@ -976,30 +883,17 @@ export default function Perfil() {
 
           )}
 
-
           <button
-
             type="submit"
-
             className="mural-btn primary"
-
             disabled={salvando}
-
           >
-
             {salvando
               ? 'Salvando...'
               : 'Salvar Alterações'}
-
           </button>
 
-
         </form>
-
-
-        {/* =============================================
-            LADO DIREITO
-        ============================================= */}
 
         <div
           style={{
@@ -1009,11 +903,7 @@ export default function Perfil() {
           }}
         >
 
-
-          {/* FOTO */}
-
           <div className="perfil-avatar-card">
-
 
             <div
               className="avatar-circle"
@@ -1043,49 +933,33 @@ export default function Perfil() {
 
             </div>
 
-
             <strong>
               {values.nome}
             </strong>
 
-
             <input
-
               ref={fileInputRef}
-
               type="file"
-
               accept="image/jpeg,image/png,image/webp"
-
               onChange={
                 handleSelecionarFoto
               }
-
               style={{
                 display: 'none'
               }}
-
             />
 
-
             <button
-
               type="button"
-
               className="mural-btn"
-
               onClick={() =>
                 fileInputRef.current?.click()
               }
-
             >
-
               {foto
                 ? 'Alterar foto'
                 : 'Adicionar foto'}
-
             </button>
-
 
             {previewFoto && (
 
@@ -1099,57 +973,38 @@ export default function Perfil() {
               >
 
                 <button
-
                   type="button"
-
                   className="mural-btn primary"
-
                   onClick={
                     handleSalvarFoto
                   }
-
                   disabled={salvandoFoto}
-
                 >
-
                   {salvandoFoto
                     ? 'Salvando...'
                     : 'Salvar foto'}
-
                 </button>
 
-
                 <button
-
                   type="button"
-
                   className="mural-btn"
-
                   onClick={
                     cancelarFoto
                   }
-
                 >
-
                   Cancelar
-
                 </button>
 
               </div>
 
             )}
 
-
             <button
-
               type="button"
-
               className="btn-logout"
-
               onClick={
                 handleLogout
               }
-
             >
 
               <svg
@@ -1171,18 +1026,13 @@ export default function Perfil() {
 
           </div>
 
-
-          {/* CONQUISTAS */}
-
           <div className="panel-card">
 
             <h3>
               Conquistas
             </h3>
 
-
             <div className="achievement-list">
-
 
               <div className="achievement-item">
 
@@ -1204,7 +1054,6 @@ export default function Perfil() {
 
               </div>
 
-
               <div className="achievement-item">
 
                 <div className="achievement-icon">
@@ -1225,7 +1074,6 @@ export default function Perfil() {
 
               </div>
 
-
             </div>
 
           </div>
@@ -1237,5 +1085,4 @@ export default function Perfil() {
     </div>
 
   );
-
 }

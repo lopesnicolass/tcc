@@ -1,35 +1,91 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGamification } from '../context/GamificationContext.jsx';
 
-const CARDS = [
-  { id: 1, subject: 'Matemática', front: 'Qual a fórmula de Bhaskara?', back: 'x = (-b ± √Δ) / 2a' },
-  { id: 2, subject: 'Português', front: 'O que é um adjetivo?', back: 'Palavra que caracteriza o substantivo.' },
-  { id: 3, subject: 'História', front: 'Quem chegou ao Brasil em 1500?', back: 'Pedro Álvares Cabral.' },
-  { id: 4, subject: 'Português', front: 'O que é um advérbio?', back: 'Palavra que modifica verbo, adjetivo ou outro advérbio.' },
-  { id: 5, subject: 'História', front: 'Em que ano começou a 2ª Guerra Mundial?', back: '1939.' },
-  { id: 6, subject: 'Ciências', front: 'O que é urbanização?', back: 'Processo de crescimento e expansão das cidades.' },
-  { id: 7, subject: 'Matemática', front: 'Quantas faces tem um cubo?', back: '6 faces.' },
-  { id: 8, subject: 'Português', front: 'O que é um substantivo?', back: 'Palavra que nomeia seres, objetos, lugares ou sentimentos.' },
-];
+const API_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const MATERIAS = ['Matemática', 'Português', 'Ciências', 'História'];
+const MATERIAS = [
+  'Matemática',
+  'Português',
+  'Ciências',
+  'História',
+  'Geografia',
+];
 
 export default function FlashCards() {
   const { addXP } = useGamification();
 
+  const [cards, setCards] = useState([]);
   const [flipped, setFlipped] = useState(new Set());
   const [filtro, setFiltro] = useState('Todas');
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    carregarFlashcards();
+  }, []);
+
+  async function carregarFlashcards() {
+    try {
+      setCarregando(true);
+      setErro('');
+
+      const token =
+        localStorage.getItem('etecamp_token');
+
+      const resposta = await fetch(
+        `${API_URL}/flashcards`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro || 'Erro ao carregar flashcards.'
+        );
+      }
+
+      const flashcards = Array.isArray(dados)
+        ? dados
+        : dados.flashcards || [];
+
+      const cardsFormatados = flashcards
+        .filter((card) => card.ativo === 1 || card.ativo === true)
+        .map((card) => ({
+          id: card.id,
+          subject: card.materia,
+          front: card.primario,
+          back: card.secundario,
+        }));
+
+      setCards(cardsFormatados);
+    } catch (erro) {
+      console.error(
+        'Erro ao carregar flashcards:',
+        erro
+      );
+
+      setErro(
+        'Não foi possível carregar os flashcards.'
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
 
   function toggle(id) {
-    // IMPORTANTE: não fazemos efeitos colaterais (como addXP)
-    // dentro do callback de setState. Em modo StrictMode o React
-    // pode executar esse callback mais de uma vez em desenvolvimento.
     if (flipped.has(id)) {
       setFlipped((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
+
       return;
     }
 
@@ -43,20 +99,75 @@ export default function FlashCards() {
   }
 
   function contarPorMateria(materia) {
-    return CARDS.filter((c) => c.subject === materia).length;
+    return cards.filter(
+      (card) => card.subject === materia
+    ).length;
   }
 
-  function renderGrid(cards) {
+  function renderGrid(cardsParaExibir) {
+    if (cardsParaExibir.length === 0) {
+      return (
+        <p className="flashcards-vazio">
+          Nenhum flashcard encontrado.
+        </p>
+      );
+    }
+
     return (
       <div className="flashcard-grid">
-        {cards.map((c) => (
-          <div className={`flashcard ${flipped.has(c.id) ? 'flipped' : ''}`} key={c.id} onClick={() => toggle(c.id)}>
+        {cardsParaExibir.map((card) => (
+          <div
+            className={`flashcard ${
+              flipped.has(card.id) ? 'flipped' : ''
+            }`}
+            key={card.id}
+            onClick={() => toggle(card.id)}
+          >
             <div className="flashcard-inner">
-              <div className="flashcard-face front">{c.front}</div>
-              <div className="flashcard-face back">{c.back}</div>
+              <div className="flashcard-face front">
+                {card.front}
+              </div>
+
+              <div className="flashcard-face back">
+                {card.back}
+              </div>
             </div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (carregando) {
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1>Flash Cards</h1>
+            <p>
+              Revise os conteúdos de forma rápida com os Cards
+            </p>
+          </div>
+        </div>
+
+        <p>Carregando flashcards...</p>
+      </div>
+    );
+  }
+
+  if (erro) {
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1>Flash Cards</h1>
+            <p>
+              Revise os conteúdos de forma rápida com os Cards
+            </p>
+          </div>
+        </div>
+
+        <p>{erro}</p>
       </div>
     );
   }
@@ -66,42 +177,72 @@ export default function FlashCards() {
       <div className="page-header">
         <div>
           <h1>Flash Cards</h1>
-          <p>Revise os conteúdos de forma rápida com os Cards</p>
+
+          <p>
+            Revise os conteúdos de forma rápida com os Cards
+          </p>
         </div>
       </div>
 
       <div className="materia-tabs">
         <button
-          className={`materia-tab ${filtro === 'Todas' ? 'active' : ''}`}
+          className={`materia-tab ${
+            filtro === 'Todas' ? 'active' : ''
+          }`}
           onClick={() => setFiltro('Todas')}
         >
-          Todas <span className="materia-tab-count">{CARDS.length}</span>
+          Todas{' '}
+          <span className="materia-tab-count">
+            {cards.length}
+          </span>
         </button>
-        {MATERIAS.map((m) => (
+
+        {MATERIAS.map((materia) => (
           <button
-            key={m}
-            className={`materia-tab ${filtro === m ? 'active' : ''}`}
-            onClick={() => setFiltro(m)}
+            key={materia}
+            className={`materia-tab ${
+              filtro === materia ? 'active' : ''
+            }`}
+            onClick={() => setFiltro(materia)}
           >
-            {m} <span className="materia-tab-count">{contarPorMateria(m)}</span>
+            {materia}{' '}
+            <span className="materia-tab-count">
+              {contarPorMateria(materia)}
+            </span>
           </button>
         ))}
       </div>
 
       {filtro === 'Todas' ? (
-        MATERIAS.map((m) => {
-          const cards = CARDS.filter((c) => c.subject === m);
-          if (cards.length === 0) return null;
+        MATERIAS.map((materia) => {
+          const cardsDaMateria = cards.filter(
+            (card) => card.subject === materia
+          );
+
+          if (cardsDaMateria.length === 0) {
+            return null;
+          }
+
           return (
-            <div className="materia-section" key={m}>
-              <h2 className="materia-section-title">{m}</h2>
-              {renderGrid(cards)}
+            <div
+              className="materia-section"
+              key={materia}
+            >
+              <h2 className="materia-section-title">
+                {materia}
+              </h2>
+
+              {renderGrid(cardsDaMateria)}
             </div>
           );
         })
       ) : (
         <div className="materia-section">
-          {renderGrid(CARDS.filter((c) => c.subject === filtro))}
+          {renderGrid(
+            cards.filter(
+              (card) => card.subject === filtro
+            )
+          )}
         </div>
       )}
     </div>

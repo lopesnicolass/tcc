@@ -51,8 +51,75 @@ db.serialize(() => {
             last_active_date TEXT DEFAULT NULL,
 
             foto_perfil TEXT DEFAULT NULL
+
         )
     `);
+
+
+    // =====================================================
+    // MIGRAÇÃO — FOTO DE PERFIL
+    // =====================================================
+
+    db.all(
+        `PRAGMA table_info(usuarios)`,
+        (erro, colunas) => {
+
+            if (erro) {
+                console.error(
+                    "Erro ao verificar tabela usuarios:",
+                    erro.message
+                );
+                return;
+            }
+
+            const nomesColunas = colunas.map(
+                coluna => coluna.name
+            );
+
+            if (!nomesColunas.includes("foto_perfil_dados")) {
+
+                db.run(`
+                    ALTER TABLE usuarios
+                    ADD COLUMN foto_perfil_dados BLOB
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar foto_perfil_dados:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        console.log(
+                            "Coluna foto_perfil_dados adicionada com sucesso."
+                        );
+                    }
+
+                });
+            }
+
+            if (!nomesColunas.includes("foto_perfil_tipo")) {
+
+                db.run(`
+                    ALTER TABLE usuarios
+                    ADD COLUMN foto_perfil_tipo TEXT
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar foto_perfil_tipo:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        console.log(
+                            "Coluna foto_perfil_tipo adicionada com sucesso."
+                        );
+                    }
+
+                });
+            }
+
+        }
+    );
 
 
     // =====================================================
@@ -349,38 +416,6 @@ db.serialize(() => {
 
 
     // =====================================================
-    // MIGRAÇÃO — FOTO DE PERFIL
-    // =====================================================
-
-    db.all(
-        `PRAGMA table_info(usuarios)`,
-        (erro, colunas) => {
-
-            if (erro) {
-                console.error(
-                    "Erro ao verificar tabela usuarios:",
-                    erro.message
-                );
-
-                return;
-            }
-
-            const nomesColunas = colunas.map(
-                coluna => coluna.name
-            );
-
-            if (!nomesColunas.includes("foto_perfil")) {
-
-                db.run(`
-                    ALTER TABLE usuarios
-                    ADD COLUMN foto_perfil TEXT
-                `);
-            }
-        }
-    );
-
-
-    // =====================================================
     // MIGRAÇÃO — XP / STREAK
     // =====================================================
 
@@ -393,7 +428,6 @@ db.serialize(() => {
                     "Erro ao verificar colunas de gamificação:",
                     erro.message
                 );
-
                 return;
             }
 
@@ -427,6 +461,7 @@ db.serialize(() => {
                     DEFAULT NULL
                 `);
             }
+
         }
     );
 
@@ -444,7 +479,6 @@ db.serialize(() => {
                     "Erro ao verificar tabela simulados:",
                     erro.message
                 );
-
                 return;
             }
 
@@ -469,10 +503,10 @@ db.serialize(() => {
                     NOT NULL DEFAULT 'Média'
                 `);
             }
+
         }
     );
 
 });
-
 
 module.exports = db;

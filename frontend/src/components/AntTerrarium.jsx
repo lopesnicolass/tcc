@@ -42,7 +42,7 @@ class Ant {
     this.state = 'wander';
     this.wanderTimer = rand(1, 3);
     this.walkPhase = rand(0, 10);
-    this.scale = rand(0.85, 1.15);
+    this.scale = rand(0.8, 1.15);
     this.targetFood = null;
   }
 

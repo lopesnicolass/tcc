@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("./seeds/flashcardSeed");
+
 
 const express = require("express");
 const cors = require("cors");

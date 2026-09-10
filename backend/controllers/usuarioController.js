@@ -328,19 +328,17 @@ async function editarPerfil(req, res) {
 // =====================================================
 // ATUALIZAR FOTO
 // =====================================================
-
 function editarFoto(req, res) {
 
-    const usuarioId = Number(req.usuario.id);
+    const usuarioId =
+        Number(req.usuario.id);
 
     if (!req.file) {
-
         return res.status(400).json({
-            mensagem: "Nenhuma imagem foi enviada."
+            mensagem:
+                "Nenhuma imagem foi enviada."
         });
-
     }
-
 
     atualizarFoto(
         usuarioId,
@@ -349,42 +347,31 @@ function editarFoto(req, res) {
         (erro, alterados) => {
 
             if (erro) {
-
                 console.error(
-                    "❌ Erro ao atualizar foto:",
+                    "Erro ao atualizar foto:",
                     erro
                 );
 
                 return res.status(500).json({
-                    mensagem: "Erro ao salvar foto."
+                    mensagem:
+                        "Erro ao salvar foto."
                 });
-
             }
-
 
             if (alterados === 0) {
-
                 return res.status(404).json({
-                    mensagem: "Usuário não encontrado."
+                    mensagem:
+                        "Usuário não encontrado."
                 });
-
             }
 
-
             return res.status(200).json({
-
                 mensagem:
-                    "Foto atualizada com sucesso!",
-
-                foto_perfil:
-                    req.file.filename
-
+                    "Foto atualizada com sucesso!"
             });
-
         }
     );
 }
-
 
 // =====================================================
 // EXCLUIR USUÁRIO

@@ -20,26 +20,25 @@ function buscarUsuarioPorEmail(email, callback) {
 // =====================================================
 // BUSCAR USUÁRIO POR ID
 // =====================================================
-
 function buscarUsuarioPorId(id, callback) {
 
     const sql = `
         SELECT
-    id,
-    nome,
-    email,
-    tipo,
-    foto_perfil,
-    xp,
-    streak,
-    last_active_date
-FROM usuarios
-WHERE id = ?
+            id,
+            nome,
+            email,
+            tipo,
+            foto_perfil_dados,
+            foto_perfil_tipo,
+            xp,
+            streak,
+            last_active_date
+        FROM usuarios
+        WHERE id = ?
     `;
 
     db.get(sql, [id], callback);
 }
-
 
 // =====================================================
 // CRIAR USUÁRIO
@@ -159,7 +158,7 @@ function atualizarSenha(
 
 function atualizarFoto(
     id,
-    fotoPerfil,
+    fotoDados,
     tipoFoto,
     callback
 ) {
@@ -167,25 +166,32 @@ function atualizarFoto(
     const sql = `
         UPDATE usuarios
         SET
-            foto_perfil = ?,
-            foto_perfil_tipo = ?
+            foto_perfil_dados = ?,
+            foto_perfil_tipo = ?,
+            foto_perfil = NULL
         WHERE id = ?
     `;
 
     db.run(
         sql,
-        [fotoPerfil, tipoFoto, id],
+        [
+            fotoDados,
+            tipoFoto,
+            id
+        ],
         function (erro) {
 
             if (erro) {
                 return callback(erro);
             }
 
-            callback(null, this.changes);
+            callback(
+                null,
+                this.changes
+            );
         }
     );
 }
-
 // =====================================================
 // EXCLUIR USUÁRIO
 // =====================================================
