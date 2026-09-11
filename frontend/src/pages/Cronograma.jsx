@@ -5,262 +5,1073 @@ import SubjectIcon from '../components/cu.jsx';
 import Icon from '../components/Icon.jsx';
 
 const STORAGE_KEY = 'tenna_calendario_atividades';
-const WEEK_DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-const MATERIAS = ['Português', 'Matemática', 'História', 'Geografia', 'Ciências', 'Simulado', 'Prova Anterior', 'Outro'];
 
-const pad = (n) => String(n).padStart(2, '0');
-const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+const WEEK_DAYS = [
+  'Domingo',
+  'Segunda',
+  'Terça',
+  'Quarta',
+  'Quinta',
+  'Sexta',
+  'Sábado'
+];
+
+const MATERIAS = [
+  'Português',
+  'Matemática',
+  'História',
+  'Geografia',
+  'Ciências',
+  'Simulado',
+  'Prova Anterior',
+  'Outro'
+];
+
+const pad = (n) =>
+  String(n).padStart(2, '0');
+
+const dateKey = (date) =>
+  `${date.getFullYear()}-${pad(
+    date.getMonth() + 1
+  )}-${pad(date.getDate())}`;
+
 const todayKey = dateKey(new Date());
 
 function getUserKey() {
   try {
-    const raw = localStorage.getItem('etecamp_usuario');
-    if (!raw) return 'anonimo';
+    const raw =
+      localStorage.getItem(
+        'etecamp_usuario'
+      );
+
+    if (!raw) {
+      return 'anonimo';
+    }
+
     const user = JSON.parse(raw);
-    return String(user.id || user.usuarioId || 'anonimo');
-  } catch { return 'anonimo'; }
+
+    return String(
+      user.id ||
+      user.usuarioId ||
+      'anonimo'
+    );
+  } catch {
+    return 'anonimo';
+  }
 }
 
 function loadActivities() {
   try {
-    const raw = localStorage.getItem(`${STORAGE_KEY}_${getUserKey()}`);
-    if (raw) return JSON.parse(raw);
-  } catch { /* fallback */ }
+    const raw =
+      localStorage.getItem(
+        `${STORAGE_KEY}_${getUserKey()}`
+      );
+
+    if (raw) {
+      return JSON.parse(raw);
+    }
+  } catch {
+    // fallback
+  }
+
   return [
-    { id: 1, data: todayKey, horario: '08:00', nome: 'Revisar conteúdo', materia: 'Matemática', done: false },
-    { id: 2, data: todayKey, horario: '14:00', nome: 'Interpretação de texto', materia: 'Português', done: false },
+    {
+      id: 1,
+      data: todayKey,
+      horario: '08:00',
+      nome: 'Revisar conteúdo',
+      materia: 'Matemática',
+      done: false
+    },
+    {
+      id: 2,
+      data: todayKey,
+      horario: '14:00',
+      nome: 'Interpretação de texto',
+      materia: 'Português',
+      done: false
+    }
   ];
 }
 
-const emptyForm = { nome: '', materia: 'Matemática', data: todayKey, horario: '08:00' };
+const emptyForm = {
+  nome: '',
+  materia: 'Matemática',
+  data: todayKey,
+  horario: '08:00'
+};
 
 export default function Cronograma() {
-  const { addXP } = useGamification();
-  const [activities, setActivities] = useState(loadActivities);
-  const [currentMonth, setCurrentMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-  const [selectedDate, setSelectedDate] = useState(todayKey);
-  const [showCreate, setShowCreate] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(emptyForm);
+  const { addXP } =
+    useGamification();
+
+  const [activities, setActivities] =
+    useState(loadActivities);
+
+  const [currentMonth, setCurrentMonth] =
+    useState(
+      () =>
+        new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          1
+        )
+    );
+
+  const [selectedDate, setSelectedDate] =
+    useState(todayKey);
+
+  const [showCreate, setShowCreate] =
+    useState(false);
+
+  const [editing, setEditing] =
+    useState(null);
+
+  const [form, setForm] =
+    useState(emptyForm);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify(activities));
+    localStorage.setItem(
+      `${STORAGE_KEY}_${getUserKey()}`,
+      JSON.stringify(activities)
+    );
   }, [activities]);
 
-  const monthTitle = currentMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  const monthLabel = monthTitle.charAt(0).toUpperCase() + monthTitle.slice(1);
+  const monthTitle =
+    currentMonth.toLocaleDateString(
+      'pt-BR',
+      {
+        month: 'long',
+        year: 'numeric'
+      }
+    );
 
-  const calendarDays = useMemo(() => {
-    const first = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-    const start = new Date(first);
-    start.setDate(1 - first.getDay());
-    return Array.from({ length: 42 }, (_, i) => {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      return d;
-    });
-  }, [currentMonth]);
+  const monthLabel =
+    monthTitle.charAt(0).toUpperCase() +
+    monthTitle.slice(1);
 
-  const selectedActivities = activities
-    .filter((a) => a.data === selectedDate)
-    .sort((a, b) => (a.horario || '').localeCompare(b.horario || ''));
+  const calendarDays =
+    useMemo(() => {
+      const first = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+        1
+      );
 
-  const monthActivities = activities.filter((a) => a.data?.startsWith(`${currentMonth.getFullYear()}-${pad(currentMonth.getMonth() + 1)}`));
-  const doneCount = monthActivities.filter((a) => a.done).length;
-  const totalHours = monthActivities.reduce((sum, a) => {
-    const [h, m] = (a.horario || '0:00').split(':').map(Number);
-    return sum + (Number.isFinite(h) ? h : 0) + (Number.isFinite(m) ? m / 60 : 0);
-  }, 0);
+      const start = new Date(first);
+
+      start.setDate(
+        1 - first.getDay()
+      );
+
+      return Array.from(
+        { length: 42 },
+        (_, i) => {
+          const d = new Date(start);
+
+          d.setDate(
+            start.getDate() + i
+          );
+
+          return d;
+        }
+      );
+    }, [currentMonth]);
+
+  const selectedActivities =
+    activities
+      .filter(
+        (a) =>
+          a.data === selectedDate
+      )
+      .sort((a, b) =>
+        (a.horario || '').localeCompare(
+          b.horario || ''
+        )
+      );
+
+  const monthActivities =
+    activities.filter(
+      (a) =>
+        a.data?.startsWith(
+          `${currentMonth.getFullYear()}-${pad(
+            currentMonth.getMonth() + 1
+          )}`
+        )
+    );
+
+  const doneCount =
+    monthActivities.filter(
+      (a) => a.done
+    ).length;
+
+  const totalHours =
+    monthActivities.reduce(
+      (sum, a) => {
+        const [h, m] =
+          (
+            a.horario ||
+            '0:00'
+          )
+            .split(':')
+            .map(Number);
+
+        return (
+          sum +
+          (Number.isFinite(h)
+            ? h
+            : 0) +
+          (Number.isFinite(m)
+            ? m / 60
+            : 0)
+        );
+      },
+      0
+    );
 
   function changeMonth(delta) {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
+    setCurrentMonth(
+      (prev) =>
+        new Date(
+          prev.getFullYear(),
+          prev.getMonth() + delta,
+          1
+        )
+    );
   }
 
   function goToday() {
-    const today = new Date();
-    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-    setSelectedDate(dateKey(today));
+    const today =
+      new Date();
+
+    setCurrentMonth(
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1
+      )
+    );
+
+    setSelectedDate(
+      dateKey(today)
+    );
   }
 
-  function openCreate(date = selectedDate) {
+  function openCreate(
+    date = selectedDate
+  ) {
     setEditing(null);
-    setForm({ ...emptyForm, data: date });
+
+    setForm({
+      ...emptyForm,
+      data: date
+    });
+
     setShowCreate(true);
   }
 
   function openEdit(activity) {
     setEditing(activity);
-    setForm({ nome: activity.nome, materia: activity.materia, data: activity.data, horario: activity.horario });
+
+    setForm({
+      nome: activity.nome,
+      materia: activity.materia,
+      data: activity.data,
+      horario: activity.horario
+    });
+
     setShowCreate(true);
   }
 
   function saveActivity(e) {
     e.preventDefault();
-    if (!form.nome.trim()) return;
-    if (editing) {
-      setActivities((prev) => prev.map((a) => a.id === editing.id ? { ...a, ...form, nome: form.nome.trim() } : a));
-    } else {
-      setActivities((prev) => [...prev, { id: Date.now(), ...form, nome: form.nome.trim(), done: false }]);
-      addXP(5, 'atividade adicionada ao calendário');
+
+    if (!form.nome.trim()) {
+      return;
     }
+
+    if (editing) {
+      setActivities((prev) =>
+        prev.map((a) =>
+          a.id === editing.id
+            ? {
+                ...a,
+                ...form,
+                nome:
+                  form.nome.trim()
+              }
+            : a
+        )
+      );
+    } else {
+      setActivities((prev) => [
+        ...prev,
+        {
+          id:
+            Date.now(),
+          ...form,
+          nome:
+            form.nome.trim(),
+          done: false
+        }
+      ]);
+
+      addXP(
+        5,
+        'atividade adicionada ao calendário'
+      );
+    }
+
     setSelectedDate(form.data);
-    const d = new Date(`${form.data}T12:00:00`);
-    setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+
+    const d =
+      new Date(
+        `${form.data}T12:00:00`
+      );
+
+    setCurrentMonth(
+      new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        1
+      )
+    );
+
     setShowCreate(false);
   }
 
   function deleteActivity() {
-    if (!editing) return;
-    setActivities((prev) => prev.filter((a) => a.id !== editing.id));
+    if (!editing) {
+      return;
+    }
+
+    setActivities((prev) =>
+      prev.filter(
+        (a) =>
+          a.id !== editing.id
+      )
+    );
+
     setShowCreate(false);
   }
 
   function toggleDone(activity) {
-    setActivities((prev) => prev.map((a) => a.id === activity.id ? { ...a, done: !a.done } : a));
+    setActivities((prev) =>
+      prev.map((a) =>
+        a.id === activity.id
+          ? {
+              ...a,
+              done: !a.done
+            }
+          : a
+      )
+    );
   }
 
   return (
     <div className="calendar-page">
+
       <section className="tenna-auto-intro">
+
         <div className="tenna-auto-intro-copy">
-          <span className="tenna-auto-kicker">MINHA ROTINA</span>
-          <h2>Organize seu <span>calendário de estudos</span></h2>
-          <p>Veja o que estudar em cada dia, acompanhe sua constância e não deixe o conteúdo acumular.</p>
+
+          <span className="tenna-auto-kicker">
+            MINHA ROTINA
+          </span>
+
+          <h2>
+            Organize seu{' '}
+            <span>
+              calendário de estudos
+            </span>
+          </h2>
+
+          <p>
+            Veja o que estudar em cada dia,
+            acompanhe sua constância e não
+            deixe o conteúdo acumular.
+          </p>
+
         </div>
+
         <div className="tenna-auto-intro-badge">
-          <Icon name="calendar" size={26} color="#fff" />
-          <small>Sua rotina</small>
+
+          <Icon
+            name="calendar"
+            size={26}
+            color="#fff"
+          />
+
+          <small>
+            Sua rotina
+          </small>
+
         </div>
+
       </section>
 
       <div className="calendar-actions-row">
-        <p>Toque em um dia do calendário para ver ou adicionar atividades.</p>
-        <button className="mural-btn primary" onClick={() => openCreate()}>+ Nova atividade</button>
+
+        <p>
+          Toque em um dia do calendário
+          para ver ou adicionar atividades.
+        </p>
+
+        <button
+          className="mural-btn primary"
+          onClick={() =>
+            openCreate()
+          }
+        >
+          + Nova atividade
+        </button>
+
       </div>
 
       <section className="calendar-overview">
+
         <div>
-          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="pin" size={18} /></span>
-          <div><span>Atividades no mês</span><strong>{monthActivities.length}</strong></div>
+
+          <span
+            className="calendar-stat-icon"
+            style={{
+              color:
+                'var(--accent-dark)'
+            }}
+          >
+            <Icon
+              name="pin"
+              size={18}
+            />
+          </span>
+
+          <div>
+
+            <span>
+              Atividades no mês
+            </span>
+
+            <strong>
+              {monthActivities.length}
+            </strong>
+
+          </div>
+
         </div>
+
         <div>
-          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="check" size={18} /></span>
-          <div><span>Concluídas</span><strong>{doneCount}</strong></div>
+
+          <span
+            className="calendar-stat-icon"
+            style={{
+              color:
+                'var(--accent-dark)'
+            }}
+          >
+            <Icon
+              name="check"
+              size={18}
+            />
+          </span>
+
+          <div>
+
+            <span>
+              Concluídas
+            </span>
+
+            <strong>
+              {doneCount}
+            </strong>
+
+          </div>
+
         </div>
+
         <div>
-          <span className="calendar-stat-icon" style={{ color: 'var(--accent-dark)' }}><Icon name="clock" size={18} /></span>
-          <div><span>Horas planejadas</span><strong>{totalHours.toFixed(1)}h</strong></div>
+
+          <span
+            className="calendar-stat-icon"
+            style={{
+              color:
+                'var(--accent-dark)'
+            }}
+          >
+            <Icon
+              name="clock"
+              size={18}
+            />
+          </span>
+
+          <div>
+
+            <span>
+              Horas planejadas
+            </span>
+
+            <strong>
+              {totalHours.toFixed(1)}h
+            </strong>
+
+          </div>
+
         </div>
+
         <div className="calendar-overview-tip">
-          <span style={{ color: 'var(--accent-dark)' }}><Icon name="bulb" size={22} /></span>
-          <p>Use o <strong>Plano automático</strong> para receber uma sugestão de rotina e depois trazer as semanas para cá.</p>
+
+          <span
+            style={{
+              color:
+                'var(--accent-dark)'
+            }}
+          >
+            <Icon
+              name="bulb"
+              size={22}
+            />
+          </span>
+
+          <p>
+            Use o{' '}
+            <strong>
+              Plano automático
+            </strong>{' '}
+            para receber uma sugestão
+            de rotina e trazer o plano
+            completo para cá.
+          </p>
+
         </div>
+
       </section>
 
       <div className="calendar-layout">
+
         <section className="calendar-card">
+
           <div className="calendar-toolbar">
+
             <div className="calendar-month-nav">
-              <button onClick={() => changeMonth(-1)} aria-label="Mês anterior">‹</button>
-              <h2>{monthLabel}</h2>
-              <button onClick={() => changeMonth(1)} aria-label="Próximo mês">›</button>
+
+              <button
+                onClick={() =>
+                  changeMonth(-1)
+                }
+                aria-label="Mês anterior"
+              >
+                ‹
+              </button>
+
+              <h2>
+                {monthLabel}
+              </h2>
+
+              <button
+                onClick={() =>
+                  changeMonth(1)
+                }
+                aria-label="Próximo mês"
+              >
+                ›
+              </button>
+
             </div>
-            <button className="calendar-today" onClick={goToday}>Hoje</button>
+
+            <button
+              className="calendar-today"
+              onClick={goToday}
+            >
+              Hoje
+            </button>
+
           </div>
 
           <div className="calendar-weekdays">
-            {WEEK_DAYS.map((day) => <span key={day}>{day.slice(0, 3)}</span>)}
+
+            {WEEK_DAYS.map(
+              (day) => (
+                <span key={day}>
+                  {day.slice(0, 3)}
+                </span>
+              )
+            )}
+
           </div>
 
           <div className="calendar-grid">
-            {calendarDays.map((day) => {
-              const key = dateKey(day);
-              const dayActivities = activities.filter((a) => a.data === key);
-              const inMonth = day.getMonth() === currentMonth.getMonth();
-              const selected = key === selectedDate;
-              const isToday = key === todayKey;
-              return (
-                <button key={key} className={`calendar-day ${!inMonth ? 'outside' : ''} ${selected ? 'selected' : ''} ${isToday ? 'today' : ''}`} onClick={() => setSelectedDate(key)}>
-                  <span className="calendar-day-number">{day.getDate()}</span>
-                  {dayActivities.slice(0, 3).map((a) => {
-                    const style = getSubjectStyle(a.materia);
-                    return (
-                      <span
-                        key={a.id}
-                        className={`calendar-event ${a.done ? 'done' : ''}`}
-                        style={{ background: style.bg, borderLeftColor: style.color, color: style.color }}
-                      >
-                        <span className="calendar-event-icon"><SubjectIcon materia={a.materia} size={11} /></span>{a.nome}
+
+            {calendarDays.map(
+              (day) => {
+
+                const key =
+                  dateKey(day);
+
+                const dayActivities =
+                  activities.filter(
+                    (a) =>
+                      a.data === key
+                  );
+
+                const inMonth =
+                  day.getMonth() ===
+                  currentMonth.getMonth();
+
+                const selected =
+                  key === selectedDate;
+
+                const isToday =
+                  key === todayKey;
+
+                return (
+
+                  <button
+                    key={key}
+                    className={
+                      `calendar-day ${
+                        !inMonth
+                          ? 'outside'
+                          : ''
+                      } ${
+                        selected
+                          ? 'selected'
+                          : ''
+                      } ${
+                        isToday
+                          ? 'today'
+                          : ''
+                      }`
+                    }
+                    onClick={() =>
+                      setSelectedDate(
+                        key
+                      )
+                    }
+                  >
+
+                    <span className="calendar-day-number">
+                      {day.getDate()}
+                    </span>
+
+                    {dayActivities
+                      .slice(0, 3)
+                      .map((a) => {
+
+                        const style =
+                          getSubjectStyle(
+                            a.materia
+                          );
+
+                        return (
+
+                          <span
+                            key={a.id}
+                            className={
+                              `calendar-event ${
+                                a.done
+                                  ? 'done'
+                                  : ''
+                              }`
+                            }
+                            style={{
+                              background:
+                                style.bg,
+                              borderLeftColor:
+                                style.color,
+                              color:
+                                style.color
+                            }}
+                          >
+
+                            <span className="calendar-event-icon">
+
+                              <SubjectIcon
+                                materia={
+                                  a.materia
+                                }
+                                size={11}
+                              />
+
+                            </span>
+
+                            {a.nome}
+
+                          </span>
+
+                        );
+                      })}
+
+                    {dayActivities.length >
+                      3 && (
+
+                      <span className="calendar-more">
+                        +
+                        {dayActivities.length -
+                          3}{' '}
+                        mais
                       </span>
-                    );
-                  })}
-                  {dayActivities.length > 3 && <span className="calendar-more">+{dayActivities.length - 3} mais</span>}
-                </button>
-              );
-            })}
+
+                    )}
+
+                  </button>
+
+                );
+              }
+            )}
+
           </div>
+
         </section>
 
         <aside className="calendar-sidebar-card">
+
           <div className="calendar-selected-head">
+
             <div>
-              <span>ATIVIDADES DO DIA</span>
-              <h2>{new Date(`${selectedDate}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
+
+              <span>
+                ATIVIDADES DO DIA
+              </span>
+
+              <h2>
+                {new Date(
+                  `${selectedDate}T12:00:00`
+                ).toLocaleDateString(
+                  'pt-BR',
+                  {
+                    weekday:
+                      'long',
+                    day: 'numeric',
+                    month:
+                      'long'
+                  }
+                )}
+              </h2>
+
             </div>
-            <button className="calendar-add-small" onClick={() => openCreate()}>+</button>
+
+            <button
+              className="calendar-add-small"
+              onClick={() =>
+                openCreate()
+              }
+            >
+              +
+            </button>
+
           </div>
 
           <div className="calendar-task-list">
-            {selectedActivities.length === 0 ? (
+
+            {selectedActivities.length ===
+            0 ? (
+
               <div className="calendar-empty-day">
-                <span style={{ color: 'var(--muted)', display: 'flex', justifyContent: 'center' }}><Icon name="calendar" size={30} /></span>
-                <strong>Nada planejado ainda</strong>
-                <p>Adicione uma atividade para organizar este dia.</p>
-                <button onClick={() => openCreate()}>Adicionar atividade</button>
+
+                <span
+                  style={{
+                    color:
+                      'var(--muted)',
+                    display:
+                      'flex',
+                    justifyContent:
+                      'center'
+                  }}
+                >
+                  <Icon
+                    name="calendar"
+                    size={30}
+                  />
+                </span>
+
+                <strong>
+                  Nada planejado ainda
+                </strong>
+
+                <p>
+                  Adicione uma atividade
+                  para organizar este dia.
+                </p>
+
+                <button
+                  onClick={() =>
+                    openCreate()
+                  }
+                >
+                  Adicionar atividade
+                </button>
+
               </div>
-            ) : selectedActivities.map((activity) => {
-              const style = getSubjectStyle(activity.materia);
-              return (
-                <article className={`calendar-task ${activity.done ? 'done' : ''}`} key={activity.id} onClick={() => openEdit(activity)}>
-                  <button className="calendar-check" onClick={(e) => { e.stopPropagation(); toggleDone(activity); }}>{activity.done ? '✓' : ''}</button>
-                  <span className="calendar-task-subject-icon" style={{ background: style.bg, color: style.color }}>
-                    <SubjectIcon materia={activity.materia} size={15} />
-                  </span>
-                  <div className="calendar-task-info">
-                    <span>{activity.horario} · {activity.materia}</span>
-                    <strong>{activity.nome}</strong>
-                  </div>
-                  <span className="calendar-task-arrow">›</span>
-                </article>
-              );
-            })}
+
+            ) : (
+
+              selectedActivities.map(
+                (activity) => {
+
+                  const style =
+                    getSubjectStyle(
+                      activity.materia
+                    );
+
+                  return (
+
+                    <article
+                      className={
+                        `calendar-task ${
+                          activity.done
+                            ? 'done'
+                            : ''
+                        }`
+                      }
+                      key={activity.id}
+                      onClick={() =>
+                        openEdit(
+                          activity
+                        )
+                      }
+                    >
+
+                      <button
+                        className="calendar-check"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDone(
+                            activity
+                          );
+                        }}
+                      >
+                        {activity.done
+                          ? '✓'
+                          : ''}
+                      </button>
+
+                      <span
+                        className="calendar-task-subject-icon"
+                        style={{
+                          background:
+                            style.bg,
+                          color:
+                            style.color
+                        }}
+                      >
+                        <SubjectIcon
+                          materia={
+                            activity.materia
+                          }
+                          size={15}
+                        />
+                      </span>
+
+                      <div className="calendar-task-info">
+
+                        <span>
+                          {activity.horario}{' '}
+                          ·{' '}
+                          {activity.materia}
+                        </span>
+
+                        <strong>
+                          {activity.nome}
+                        </strong>
+
+                      </div>
+
+                      <span className="calendar-task-arrow">
+                        ›
+                      </span>
+
+                    </article>
+
+                  );
+                }
+              )
+
+            )}
+
           </div>
 
-          <button className="calendar-full-add" onClick={() => openCreate()}>+ Adicionar atividade neste dia</button>
+          <button
+            className="calendar-full-add"
+            onClick={() =>
+              openCreate()
+            }
+          >
+            + Adicionar atividade neste dia
+          </button>
+
         </aside>
+
       </div>
 
       {showCreate && (
-        <div className="modal-overlay" onMouseDown={(e) => e.target === e.currentTarget && setShowCreate(false)}>
-          <form className="modal-card calendar-modal" onSubmit={saveActivity}>
+
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) =>
+            e.target ===
+              e.currentTarget &&
+            setShowCreate(false)
+          }
+        >
+
+          <form
+            className="modal-card calendar-modal"
+            onSubmit={saveActivity}
+          >
+
             <div className="modal-header">
-              <h2>{editing ? 'Editar atividade' : 'Nova atividade'}</h2>
-              <p>Defina quando e o que você pretende estudar.</p>
+
+              <h2>
+                {editing
+                  ? 'Editar atividade'
+                  : 'Nova atividade'}
+              </h2>
+
+              <p>
+                Defina quando e o que
+                você pretende estudar.
+              </p>
+
             </div>
-            <div className="modal-input-group"><label>Atividade</label><input autoFocus value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex.: Equação do 2º grau" /></div>
+
+            <div className="modal-input-group">
+
+              <label>
+                Atividade
+              </label>
+
+              <input
+                autoFocus
+                value={form.nome}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    nome:
+                      e.target.value
+                  })
+                }
+                placeholder="Ex.: Equação do 2º grau"
+              />
+
+            </div>
+
             <div className="modal-two-col">
-              <div className="modal-input-group"><label>Matéria</label><select value={form.materia} onChange={(e) => setForm({ ...form, materia: e.target.value })}>{MATERIAS.map((m) => <option key={m}>{m}</option>)}</select></div>
-              <div className="modal-input-group"><label>Data</label><input type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} /></div>
+
+              <div className="modal-input-group">
+
+                <label>
+                  Matéria
+                </label>
+
+                <select
+                  value={form.materia}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      materia:
+                        e.target.value
+                    })
+                  }
+                >
+
+                  {MATERIAS.map(
+                    (m) => (
+                      <option
+                        key={m}
+                      >
+                        {m}
+                      </option>
+                    )
+                  )}
+
+                </select>
+
+              </div>
+
+              <div className="modal-input-group">
+
+                <label>
+                  Data
+                </label>
+
+                <input
+                  type="date"
+                  value={form.data}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      data:
+                        e.target.value
+                    })
+                  }
+                />
+
+              </div>
+
             </div>
-            <div className="modal-input-group"><label>Horário</label><input type="time" value={form.horario} onChange={(e) => setForm({ ...form, horario: e.target.value })} /></div>
+
+            <div className="modal-input-group">
+
+              <label>
+                Horário
+              </label>
+
+              <input
+                type="time"
+                value={form.horario}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    horario:
+                      e.target.value
+                  })
+                }
+              />
+
+            </div>
+
             <div className="modal-actions">
-              {editing && <button type="button" className="modal-delete" onClick={deleteActivity}>Excluir</button>}
-              <button type="button" className="mural-btn secondary" onClick={() => setShowCreate(false)}>Cancelar</button>
-              <button className="mural-btn primary" type="submit">{editing ? 'Salvar alterações' : 'Adicionar'}</button>
+
+              {editing && (
+
+                <button
+                  type="button"
+                  className="modal-delete"
+                  onClick={
+                    deleteActivity
+                  }
+                >
+                  Excluir
+                </button>
+
+              )}
+
+              <button
+                type="button"
+                className="mural-btn secondary"
+                onClick={() =>
+                  setShowCreate(false)
+                }
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="mural-btn primary"
+                type="submit"
+              >
+                {editing
+                  ? 'Salvar alterações'
+                  : 'Adicionar'}
+              </button>
+
             </div>
+
           </form>
+
         </div>
+
       )}
+
     </div>
   );
 }

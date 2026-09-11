@@ -182,6 +182,39 @@ db.serialize(() => {
     `);
 
 
+// =====================================================
+// CONTEÚDOS ESTUDADOS PELOS USUÁRIOS
+// =====================================================
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS conteudos_estudados (
+
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        usuario_id INTEGER NOT NULL,
+
+        topico_id INTEGER NOT NULL,
+
+        estudado INTEGER NOT NULL DEFAULT 1,
+
+        data_estudo DATETIME
+            DEFAULT CURRENT_TIMESTAMP,
+
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuarios(id)
+            ON DELETE CASCADE,
+
+        FOREIGN KEY (topico_id)
+            REFERENCES topicos(id)
+            ON DELETE CASCADE,
+
+        UNIQUE (
+            usuario_id,
+            topico_id
+        )
+    )
+`);
+
     // =====================================================
     // RESULTADOS
     // =====================================================
@@ -208,6 +241,11 @@ db.serialize(() => {
                 REFERENCES usuarios(id)
         )
     `);
+
+    db.run(`
+    CREATE INDEX IF NOT EXISTS idx_conteudos_estudados_usuario
+    ON conteudos_estudados(usuario_id)
+`);
 
 
     // =====================================================

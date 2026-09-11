@@ -11,6 +11,10 @@ const autenticarToken =
 const verificarAdmin =
     require("../middleware/adminMiddleware");
 
+// =====================================================
+// CONTEÚDOS
+// =====================================================
+
 router.get(
     "/",
     autenticarToken,
@@ -21,6 +25,32 @@ router.get(
     "/publico",
     conteudoController.listarPublico
 );
+
+// =====================================================
+// PROGRESSO DO ALUNO
+// =====================================================
+
+router.get(
+    "/progresso",
+    autenticarToken,
+    conteudoController.listarProgresso
+);
+
+router.put(
+    "/progresso/:topicoId",
+    autenticarToken,
+    conteudoController.atualizarProgresso
+);
+
+router.delete(
+    "/progresso",
+    autenticarToken,
+    conteudoController.limparProgresso
+);
+
+// =====================================================
+// MATÉRIAS
+// =====================================================
 
 router.get(
     "/materias/:id",
@@ -48,6 +78,10 @@ router.delete(
     verificarAdmin,
     conteudoController.excluirMateria
 );
+
+// =====================================================
+// TÓPICOS
+// =====================================================
 
 router.post(
     "/materias/:materiaId/topicos",
