@@ -1,0 +1,451 @@
+/* Estilos da página AdminProvas */
+
+.admin-provas-page{
+  width:100%;
+  max-width:1200px;
+  margin:0 auto;
+  animation:popIn .35s var(--bouncy);
+}
+
+.admin-provas-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:28px;
+}
+
+.admin-provas-tag{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 12px;
+  border-radius:100px;
+
+  background:rgba(33,150,243,0.10);
+  color:var(--accent-dark);
+
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.06em;
+}
+
+.admin-provas-header h1{
+  margin:10px 0 6px;
+
+  font-family:"Space Grotesk", sans-serif;
+  font-size:clamp(28px,3vw,38px);
+  line-height:1.05;
+  letter-spacing:-.03em;
+
+  color:var(--ink);
+}
+
+.admin-provas-header p{
+  margin:0;
+
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.5;
+}
+
+.admin-provas-card{
+  background:#fff;
+
+  border:1px solid rgba(13,71,161,0.06);
+  border-radius:22px;
+
+  padding:26px 28px;
+  margin-bottom:22px;
+
+  box-shadow:
+    0 2px 5px rgba(13,71,161,0.04),
+    0 12px 30px rgba(13,71,161,0.05);
+
+  transition:
+    transform .2s var(--bouncy),
+    box-shadow .2s ease;
+}
+
+.admin-provas-card:hover{
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 4px 8px rgba(13,71,161,0.05),
+    0 16px 34px rgba(13,71,161,0.08);
+}
+
+.admin-provas-card-header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+
+  margin-bottom:24px;
+}
+
+.admin-provas-icon{
+  width:46px;
+  height:46px;
+
+  flex-shrink:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:14px;
+
+  background:#E3F2FD;
+
+  font-size:21px;
+}
+
+.admin-provas-card-header h2{
+  margin:0 0 4px;
+
+  font-family:"Space Grotesk", sans-serif;
+  font-size:19px;
+
+  color:var(--ink);
+}
+
+.admin-provas-card-header p{
+  margin:0;
+
+  color:var(--muted);
+  font-size:13.5px;
+}
+
+.admin-provas-form{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+
+.admin-provas-row{
+  display:grid;
+  grid-template-columns:180px minmax(0,1fr);
+  gap:18px;
+}
+
+.admin-provas-field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.admin-provas-field label{
+  color:var(--ink);
+
+  font-size:13.5px;
+  font-weight:600;
+}
+
+.admin-provas-field input{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+
+  padding:12px 14px;
+
+  border:1.5px solid var(--line);
+  border-radius:13px;
+
+  background:#fff;
+  color:var(--ink);
+
+  font-family:"IBM Plex Sans", sans-serif;
+  font-size:14px;
+
+  outline:none;
+
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    background .15s ease;
+}
+
+.admin-provas-field input::placeholder{
+  color:rgba(13,71,161,0.38);
+}
+
+.admin-provas-field input:hover{
+  border-color:rgba(33,150,243,0.45);
+}
+
+.admin-provas-field input:focus{
+  border-color:var(--accent);
+
+  background:#fff;
+
+  box-shadow:
+    0 0 0 4px rgba(33,150,243,0.12);
+}
+
+.admin-provas-files{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+
+.admin-provas-file{
+  min-width:0;
+
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:14px;
+
+  padding:17px;
+
+  border:1.5px dashed rgba(13,71,161,0.20);
+  border-radius:16px;
+
+  background:#F8FCFF;
+
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    transform .18s var(--bouncy);
+}
+
+.admin-provas-file:hover{
+  border-color:var(--accent);
+  background:#F1F9FF;
+  transform:translateY(-2px);
+}
+
+.file-info{
+  display:flex;
+  align-items:center;
+  gap:11px;
+
+  flex:1 1 180px;
+  min-width:0;
+}
+
+.file-icon{
+  width:40px;
+  height:40px;
+
+  flex-shrink:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:12px;
+
+  background:#E3F2FD;
+
+  font-size:18px;
+}
+
+.file-info strong{
+  display:block;
+
+  margin-bottom:2px;
+
+  color:var(--ink);
+  font-size:14px;
+}
+
+.file-info span{
+  display:block;
+
+  color:var(--muted);
+  font-size:12.5px;
+}
+
+.file-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:9px 13px;
+
+  border-radius:11px;
+
+  background:#fff;
+  border:1.5px solid var(--line);
+
+  color:var(--ink);
+
+  font-family:"IBM Plex Sans", sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease,
+    transform .18s var(--bouncy);
+}
+
+.file-button:hover{
+  background:var(--ink);
+  border-color:var(--ink);
+  color:#fff;
+
+  transform:translateY(-1px);
+}
+
+.admin-provas-file input[type="file"]{
+  display:none;
+}
+
+.file-selected{
+  width:100%;
+
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+
+  padding:8px 10px;
+
+  border-radius:9px;
+
+  background:#E8F5E9;
+
+  color:#2E7D32;
+
+  font-size:12px;
+  font-weight:600;
+}
+
+.admin-provas-message{
+  padding:12px 14px;
+
+  border-radius:12px;
+
+  font-size:13.5px;
+  font-weight:600;
+}
+
+.admin-provas-message.success{
+  background:#E8F5E9;
+  color:#2E7D32;
+}
+
+.admin-provas-message.error{
+  background:#FDECEC;
+  color:var(--error);
+}
+
+.admin-provas-footer{
+  display:flex;
+  justify-content:flex-end;
+
+  padding-top:2px;
+}
+
+.admin-provas-submit{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  border:none;
+  border-radius:13px;
+
+  padding:12px 20px;
+
+  background:var(--ink);
+  color:#fff;
+
+  font-family:"IBM Plex Sans", sans-serif;
+  font-size:14px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:
+    background .15s ease,
+    transform .18s var(--bouncy),
+    box-shadow .18s ease;
+}
+
+.admin-provas-submit:hover{
+  background:var(--accent);
+
+  transform:translateY(-2px);
+
+  box-shadow:
+    0 8px 18px rgba(33,150,243,0.25);
+}
+
+.admin-provas-submit:active{
+  transform:scale(.97);
+}
+
+.admin-provas-submit:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+.prova-admin-ano{
+  margin-top:4px;
+
+  color:var(--muted);
+
+  font-size:13px;
+}
+
+.admin-delete-prova{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:8px 12px;
+
+  border:1.5px solid rgba(193,70,47,0.25);
+  border-radius:10px;
+
+  background:#fff;
+  color:var(--error);
+
+  font-family:"IBM Plex Sans", sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:
+    background .15s ease,
+    color .15s ease,
+    border-color .15s ease,
+    transform .18s var(--bouncy);
+}
+
+.admin-delete-prova:hover{
+  background:var(--error);
+  border-color:var(--error);
+  color:#fff;
+
+  transform:translateY(-1px);
+}
+
+@media(max-width:900px){
+.admin-provas-row{
+    grid-template-columns:1fr;
+  }.admin-provas-files{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:650px){
+.admin-provas-card{
+    padding:20px;
+    border-radius:18px;
+  }.admin-provas-header h1{
+    font-size:28px;
+  }.admin-provas-page .prova-links a,
+  .admin-delete-prova{
+    flex:1;
+  }.admin-provas-footer{
+    justify-content:stretch;
+  }.admin-provas-submit{
+    width:100%;
+  }
+}

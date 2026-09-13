@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
-import TerrariumScene from './game/TerrariumScene.js';
+import TerrariumScene from './TerrariumScene.js';
 
 export default function TerrariumGame() {
   const containerRef = useRef(null);

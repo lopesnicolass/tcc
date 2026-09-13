@@ -1,0 +1,128 @@
+/* Estilos da página Simulados */
+
+.simulado-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:20px; }
+
+.simulado-card{
+  background:#fff; border-radius:20px; padding:22px 24px;
+  box-shadow:0 1px 2px rgba(13,71,161,0.05);
+  display:flex; flex-direction:column; gap:14px;
+  transition:transform .2s var(--bouncy), box-shadow .2s ease;
+}
+
+.simulado-card:hover{ transform:translateY(-5px) rotate(-0.4deg); box-shadow:0 14px 24px -10px rgba(13,71,161,0.22); }
+
+.simulado-top{ display:flex; justify-content:space-between; align-items:center; }
+
+.simulado-subject{ font-weight:700; color:var(--ink); font-size:17px; }
+
+.status-badge{ font-size:11.5px; font-weight:700; text-transform:uppercase; padding:4px 11px; border-radius:100px; }
+
+.status-badge.nao-iniciado{ background:var(--paper); color:var(--muted); }
+
+.status-badge.em-progresso{ background:#FCEBD1; color:#A9660B; }
+
+.status-badge.concluido{ background:var(--accent-light); color:var(--accent-dark); }
+
+.simulado-meta{ display:flex; gap:16px; font-size:14px; color:var(--muted); flex-wrap:wrap; }
+
+.simulado-btn{
+  margin-top:auto; border:none; border-radius:14px; padding:12px;
+  font-weight:600; font-size:15px; cursor:pointer;
+  background:var(--ink); color:#fff; transition:background .15s ease, transform .18s var(--bouncy);
+}
+
+.simulado-btn:hover{ background:var(--accent-dark); transform:scale(1.03); }
+
+.simulado-btn:active{ transform:scale(0.95); }
+
+.simulado-fullscreen{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:var(--paper, #E3F2FD);
+  overflow-y:auto;
+  padding:32px clamp(20px, 5vw, 60px) 60px;
+}
+
+.simulado-prova-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.simulado-cronometro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 170px;
+
+  padding: 12px 18px;
+
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  border: 2px solid #dbeafe;
+
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.08);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.simulado-cronometro > span {
+  font-size: 25px;
+}
+
+.simulado-cronometro div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.simulado-cronometro small {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.simulado-cronometro strong {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+  color: #1d4ed8;
+  font-variant-numeric: tabular-nums;
+}
+
+.simulado-cronometro.tempo-critico {
+  border-color: #ef4444;
+  background: #fef2f2;
+
+  animation: cronometroPulso 1s infinite;
+}
+
+.simulado-cronometro.tempo-critico strong {
+  color: #dc2626;
+}
+
+.simulado-cronometro.tempo-critico small {
+  color: #b91c1c;
+}
+
+@media(max-width: 700px){
+.simulado-prova-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }.simulado-cronometro {
+    width: 100%;
+    justify-content: center;
+  }
+}

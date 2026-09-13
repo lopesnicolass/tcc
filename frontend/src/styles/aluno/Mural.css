@@ -1,0 +1,104 @@
+/* Estilos da página Mural */
+
+.mural-btn{
+  display:flex; align-items:center; gap:9px;
+  border:none; border-radius:14px; padding:12px 18px;
+  font-family:"IBM Plex Sans"; font-size:15px; font-weight:600;
+  cursor:pointer; transition:background .15s ease, transform .18s var(--bouncy), box-shadow .18s ease;
+}
+
+.mural-btn:hover{ transform:translateY(-2px) scale(1.03); }
+
+.mural-btn:active{ transform:scale(0.95); }
+
+.mural-btn.primary{ background:var(--ink); color:#fff; }
+
+.mural-btn.primary:hover{ background:var(--accent-dark); box-shadow:0 10px 18px -8px rgba(13,71,161,0.45); }
+
+.mural-btn.secondary{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
+
+.mural-btn.secondary:hover{ border-color:var(--accent); color:var(--ink); }
+
+.mural-btn.ghost{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
+
+.mural-btn.ghost:hover{ border-color:var(--accent); color:var(--ink); }
+
+.mural-filter-select{
+  border:1.5px solid var(--line);
+  border-radius:14px;
+  padding:12px 16px;
+  font-family:"IBM Plex Sans";
+  font-size:15px;
+  color:var(--ink);
+  background:#fff;
+  cursor:pointer;
+  transition:border-color .15s ease;
+}
+
+.mural-filter-select:hover{ border-color:var(--accent); }
+
+.mural-header{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:16px; margin-bottom:28px;
+}
+
+.mural-header h1{ font-size:clamp(26px, 3vw, 34px); margin:0; color:var(--ink); }
+
+.mural-actions{ display:flex; gap:12px; flex-wrap:wrap; }
+
+.mural-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:34px 24px;
+  padding-top:10px;
+}
+
+.postit-tag{
+  display:block;
+  font-family:"Kalam", cursive;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.03em;
+  color:rgba(0,0,0,0.45);
+  margin-bottom:10px;
+}
+
+.postit-text{
+  font-family:"Kalam", cursive;
+  font-size:18px;
+  line-height:1.45;
+  color:rgba(0,0,0,0.78);
+  flex:1;
+}
+
+.postit-portugues{ background:#BFE3FA; }
+
+.postit-matematica{ background:#F7B8B4; }
+
+.postit-historia{ background:#D8B98A; }
+
+.postit-geografia{ background:#BEE3B4; }
+
+.postit-ciencias{ background:#D6BEF0; }
+
+.mural-empty{
+  text-align:center;
+  color:var(--muted);
+  padding:70px 20px;
+  font-size:15px;
+}
+
+.auto-week-footer-v2 .mural-btn{font-size:12px;padding:9px 13px;}
+
+.admin-next-card .mural-btn{font-size:12px;padding:9px 12px;white-space:nowrap;}
+
+@media(max-width:600px){
+.admin-page-header .mural-btn{width:100%;}.admin-next-card .mural-btn{margin-left:55px;}
+}
+
+.mural-btn.small{padding:8px 11px;font-size:11px;}
+
+@media(max-width:600px){
+.admin-modal-actions .mural-btn{flex:1;}
+}

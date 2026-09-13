@@ -1,29 +1,29 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Landing from './pages/Landing.jsx';
-import Auth from './pages/Auth.jsx';
+import Landing from './pages/public/Landing.jsx';
+import Auth from './pages/public/Auth.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import Home from './pages/Home.jsx';
-import Mural from './pages/Mural.jsx';
-import Cronograma from './pages/Cronograma.jsx';
-import PlanoAutomatico from './pages/PlanoAutomatico.jsx';
-import Conteudos from './pages/Conteudos.jsx';
-import Simulados from './pages/Simulados.jsx';
-import Provas from './pages/Provas.jsx';
-import Desempenho from './pages/Desempenho.jsx';
-import FlashCards from './pages/FlashCards.jsx';
-import Perfil from './pages/Perfil.jsx';
-import Terrario from './pages/Terrario.jsx';
+import Home from './pages/aluno/Home.jsx';
+import Mural from './pages/aluno/Mural.jsx';
+import Cronograma from './pages/aluno/Cronograma.jsx';
+import PlanoAutomatico from './pages/aluno/PlanoAutomatico.jsx';
+import Conteudos from './pages/aluno/Conteudos.jsx';
+import Simulados from './pages/aluno/Simulados.jsx';
+import Provas from './pages/aluno/Provas.jsx';
+import Desempenho from './pages/aluno/Desempenho.jsx';
+import FlashCards from './pages/aluno/FlashCards.jsx';
+import Perfil from './pages/aluno/Perfil.jsx';
+import Terrario from './terrario/Terrario.jsx';
 
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import AdminUsuarios from './pages/AdminUsuarios.jsx';
-import AdminSimulados from './pages/AdminSimulados.jsx';
-import AdminFlashCards from './pages/AdminFlashCards.jsx';
-import AdminProvas from './pages/AdminProvas.jsx';
-import AdminConteudos from './pages/AdminConteudos.jsx';
-// import AdminCronogramas from './pages/AdminCronogramas.jsx';
+import AdminDashboard from './pages/adm/AdminDashboard.jsx';
+import AdminUsuarios from './pages/adm/AdminUsuarios.jsx';
+import AdminSimulados from './pages/adm/AdminSimulados.jsx';
+import AdminFlashCards from './pages/adm/AdminFlashCards.jsx';
+import AdminProvas from './pages/adm/AdminProvas.jsx';
+import AdminConteudos from './pages/adm/AdminConteudos.jsx';
+// import AdminCronogramas from './pages/adm/AdminCronogramas.jsx';
 
 import XPToast from './components/XPToast.jsx';
 
