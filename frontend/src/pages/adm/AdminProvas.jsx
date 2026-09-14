@@ -1,6 +1,16 @@
 import '../../styles/adm/AdminProvas.css';
 import { useEffect, useState } from "react";
 
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+function obterToken() {
+    return (
+        localStorage.getItem("etecamp_token") ||
+        localStorage.getItem("token")
+    );
+}
+
 export default function AdminProvas() {
     const [ano, setAno] = useState("");
     const [titulo, setTitulo] = useState("");
@@ -12,7 +22,11 @@ export default function AdminProvas() {
 
     async function carregarProvas() {
         try {
-            const resposta = await fetch("http://localhost:3000/provas");
+            const resposta = await fetch(`${API_URL}/provas`, {
+                headers: {
+                    Authorization: `Bearer ${obterToken()}`
+                }
+            });
             const dados = await resposta.json();
 
             if (resposta.ok) {
@@ -47,9 +61,12 @@ export default function AdminProvas() {
 
         try {
             const resposta = await fetch(
-                "http://localhost:3000/provas",
+                `${API_URL}/provas`,
                 {
                     method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${obterToken()}`
+                    },
                     body: formData
                 }
             );
@@ -98,9 +115,12 @@ export default function AdminProvas() {
 
         try {
             const resposta = await fetch(
-                `http://localhost:3000/provas/${id}`,
+                `${API_URL}/provas/${id}`,
                 {
-                    method: "DELETE"
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${obterToken()}`
+                    }
                 }
             );
 
@@ -389,7 +409,7 @@ export default function AdminProvas() {
                                 <div className="prova-links">
 
                                     <a
-                                        href={`http://localhost:3000/uploads/provas/${prova.arquivo_prova}`}
+                                        href={`${API_URL}/uploads/provas/${prova.arquivo_prova}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
@@ -397,7 +417,7 @@ export default function AdminProvas() {
                                     </a>
 
                                     <a
-                                        href={`http://localhost:3000/uploads/provas/${prova.arquivo_gabarito}`}
+                                        href={`${API_URL}/uploads/provas/${prova.arquivo_gabarito}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >

@@ -1,9 +1,16 @@
+const fs = require("fs");
+const path = require("path");
+
 const {
     criarProva,
     listarProvas,
     buscarProvaPorId,
     excluirProva
 } = require("../models/provaModel");
+
+
+const PASTA_UPLOADS_PROVAS =
+    path.join(__dirname, "..", "uploads", "provas");
 
 
 // =====================================================
@@ -115,7 +122,36 @@ function buscarUmaProva(req, res) {
 
 
 // =====================================================
+// APAGAR UM ARQUIVO FÍSICO DE FORMA SEGURA
+// (nunca derruba a requisição por causa disso —
+// só registra no log se der erro)
+// =====================================================
+
+function apagarArquivoFisico(nomeArquivo) {
+
+    if (!nomeArquivo) {
+        return;
+    }
+
+    const caminhoCompleto =
+        path.join(PASTA_UPLOADS_PROVAS, nomeArquivo);
+
+    fs.unlink(caminhoCompleto, (erro) => {
+
+        if (erro && erro.code !== "ENOENT") {
+            console.error(
+                `⚠️ Não foi possível apagar o arquivo ${nomeArquivo}:`,
+                erro.message
+            );
+        }
+    });
+}
+
+
+// =====================================================
 // EXCLUIR PROVA
+// (agora também remove os PDFs físicos da pasta uploads,
+// evitando acumular arquivos órfãos)
 // =====================================================
 
 function deletarProva(req, res) {
@@ -128,24 +164,44 @@ function deletarProva(req, res) {
         });
     }
 
-    excluirProva(id, (erro, alterados) => {
+    buscarProvaPorId(id, (erroBusca, prova) => {
 
-        if (erro) {
-            console.error(erro);
+        if (erroBusca) {
+            console.error(erroBusca);
 
             return res.status(500).json({
                 mensagem: "Erro ao excluir prova."
             });
         }
 
-        if (alterados === 0) {
+        if (!prova) {
             return res.status(404).json({
                 mensagem: "Prova não encontrada."
             });
         }
 
-        return res.status(200).json({
-            mensagem: "Prova excluída com sucesso!"
+        excluirProva(id, (erro, alterados) => {
+
+            if (erro) {
+                console.error(erro);
+
+                return res.status(500).json({
+                    mensagem: "Erro ao excluir prova."
+                });
+            }
+
+            if (alterados === 0) {
+                return res.status(404).json({
+                    mensagem: "Prova não encontrada."
+                });
+            }
+
+            apagarArquivoFisico(prova.arquivo_prova);
+            apagarArquivoFisico(prova.arquivo_gabarito);
+
+            return res.status(200).json({
+                mensagem: "Prova excluída com sucesso!"
+            });
         });
     });
 }

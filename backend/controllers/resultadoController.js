@@ -5,6 +5,25 @@ const {
 } = require("../models/resultadoModel");
 
 
+// ==========================================
+// VERIFICAR SE O USUÁRIO PODE ACESSAR
+// OS DADOS DE :usuarioId (DONO OU ADMIN)
+// ==========================================
+
+function usuarioPodeAcessar(req, usuarioId) {
+
+    if (!req.usuario) {
+        return false;
+    }
+
+    if (req.usuario.tipo === "admin") {
+        return true;
+    }
+
+    return Number(req.usuario.id) === usuarioId;
+}
+
+
 // ============================
 // CRIAR RESULTADO
 // ============================
@@ -12,11 +31,15 @@ const {
 function cadastrarResultado(req, res) {
 
     const {
-        usuarioId,
         acertos,
         erros,
         totalQuestoes
     } = req.body;
+
+    // O usuário do resultado é sempre o dono do token logado,
+    // nunca o que vier (ou não) no corpo da requisição — isso
+    // evita que alguém registre resultados em nome de outra pessoa.
+    const usuario = Number(req.usuario.id);
 
 
     // ============================
@@ -24,7 +47,6 @@ function cadastrarResultado(req, res) {
     // ============================
 
     if (
-        usuarioId === undefined ||
         acertos === undefined ||
         erros === undefined ||
         totalQuestoes === undefined
@@ -35,7 +57,6 @@ function cadastrarResultado(req, res) {
     }
 
 
-    const usuario = Number(usuarioId);
     const acertosNumero = Number(acertos);
     const errosNumero = Number(erros);
     const totalNumero = Number(totalQuestoes);
@@ -157,16 +178,19 @@ function cadastrarResultado(req, res) {
 
 function listarResultados(req, res) {
 
-    const {
-        usuarioId
-    } = req.params;
-
+    const usuarioId = Number(req.params.usuarioId);
 
     if (!usuarioId) {
 
         return res.status(400).json({
             mensagem:
                 "Usuário não informado."
+        });
+    }
+
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para ver esses resultados."
         });
     }
 
@@ -203,16 +227,19 @@ function listarResultados(req, res) {
 
 function buscarDesempenho(req, res) {
 
-    const {
-        usuarioId
-    } = req.params;
-
+    const usuarioId = Number(req.params.usuarioId);
 
     if (!usuarioId) {
 
         return res.status(400).json({
             mensagem:
                 "Usuário não informado."
+        });
+    }
+
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para ver esse desempenho."
         });
     }
 

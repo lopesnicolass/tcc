@@ -51,15 +51,29 @@ export default function Desempenho() {
           );
         }
 
+        const token =
+          localStorage.getItem('etecamp_token') ||
+          localStorage.getItem('token');
+
         const [
           respostaDesempenho,
           respostaResultados
         ] = await Promise.all([
           fetch(
-            `${API_URL}/resultados/${usuarioId}/desempenho`
+            `${API_URL}/resultados/${usuarioId}/desempenho`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
           ),
           fetch(
-            `${API_URL}/resultados/${usuarioId}`
+            `${API_URL}/resultados/${usuarioId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            }
           )
         ]);
 

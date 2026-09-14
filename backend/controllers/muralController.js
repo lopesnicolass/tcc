@@ -7,6 +7,25 @@ const {
 
 
 // ==========================================
+// VERIFICAR SE O USUÁRIO PODE MEXER
+// NESSE MURAL (DONO OU ADMIN)
+// ==========================================
+
+function usuarioPodeAcessar(req, usuarioId) {
+
+    if (!req.usuario) {
+        return false;
+    }
+
+    if (req.usuario.tipo === "admin") {
+        return true;
+    }
+
+    return Number(req.usuario.id) === usuarioId;
+}
+
+
+// ==========================================
 // LISTAR POST-ITS
 // ==========================================
 
@@ -17,6 +36,12 @@ function listar(req, res) {
     if (!usuarioId) {
         return res.status(400).json({
             mensagem: "Usuário inválido."
+        });
+    }
+
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para ver este mural."
         });
     }
 
@@ -61,6 +86,12 @@ function criar(req, res) {
     if (!usuarioId) {
         return res.status(400).json({
             mensagem: "Usuário inválido."
+        });
+    }
+
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para criar post-its neste mural."
         });
     }
 
@@ -144,6 +175,12 @@ function atualizar(req, res) {
         });
     }
 
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para editar este post-it."
+        });
+    }
+
 
     if (
         !materia ||
@@ -219,6 +256,12 @@ function excluir(req, res) {
         return res.status(400).json({
             mensagem:
                 "Dados inválidos."
+        });
+    }
+
+    if (!usuarioPodeAcessar(req, usuarioId)) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para excluir este post-it."
         });
     }
 

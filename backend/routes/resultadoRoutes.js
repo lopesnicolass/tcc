@@ -6,15 +6,21 @@ const {
     buscarDesempenho
 } = require("../controllers/resultadoController");
 
+const autenticarToken =
+    require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 
 // ============================
 // SALVAR RESULTADO
+// (o usuário é sempre o dono do token,
+// não é mais aceito no corpo da requisição)
 // ============================
 
 router.post(
     "/",
+    autenticarToken,
     cadastrarResultado
 );
 
@@ -26,6 +32,7 @@ router.post(
 
 router.get(
     "/:usuarioId/desempenho",
+    autenticarToken,
     buscarDesempenho
 );
 
@@ -36,6 +43,7 @@ router.get(
 
 router.get(
     "/:usuarioId",
+    autenticarToken,
     listarResultados
 );
 

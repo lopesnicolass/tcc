@@ -9,6 +9,12 @@ const {
     deletarProva
 } = require("../controllers/provaController");
 
+const autenticarToken =
+    require("../middleware/authMiddleware");
+
+const verificarAdmin =
+    require("../middleware/adminMiddleware");
+
 const router = express.Router();
 
 
@@ -81,11 +87,13 @@ const upload = multer({
 
 
 // =====================================================
-// CADASTRAR PROVA
+// CADASTRAR PROVA — ADMIN
 // =====================================================
 
 router.post(
     "/",
+    autenticarToken,
+    verificarAdmin,
     upload.fields([
         {
             name: "arquivo_prova",
@@ -101,7 +109,8 @@ router.post(
 
 
 // =====================================================
-// LISTAR PROVAS
+// LISTAR PROVAS — PÚBLICO
+// (provas de vestibulinhos anteriores, não é dado sensível)
 // =====================================================
 
 router.get(
@@ -111,7 +120,7 @@ router.get(
 
 
 // =====================================================
-// BUSCAR PROVA
+// BUSCAR PROVA — PÚBLICO
 // =====================================================
 
 router.get(
@@ -121,11 +130,13 @@ router.get(
 
 
 // =====================================================
-// EXCLUIR PROVA
+// EXCLUIR PROVA — ADMIN
 // =====================================================
 
 router.delete(
     "/:id",
+    autenticarToken,
+    verificarAdmin,
     deletarProva
 );
 

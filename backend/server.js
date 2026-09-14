@@ -1,6 +1,21 @@
 require("dotenv").config();
 
 
+// ============================
+// VALIDAÇÃO DAS VARIÁVEIS DE AMBIENTE
+// ============================
+
+if (!process.env.JWT_SECRET) {
+
+    console.error(
+        "❌ A variável de ambiente JWT_SECRET não foi definida. " +
+        "Crie um arquivo .env na pasta backend/ com base no .env.example."
+    );
+
+    process.exit(1);
+}
+
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");

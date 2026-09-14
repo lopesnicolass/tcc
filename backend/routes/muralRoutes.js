@@ -7,6 +7,9 @@ const {
     excluir
 } = require("../controllers/muralController");
 
+const autenticarToken =
+    require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 
@@ -16,6 +19,7 @@ const router = express.Router();
 
 router.get(
     "/:usuarioId",
+    autenticarToken,
     listar
 );
 
@@ -26,6 +30,7 @@ router.get(
 
 router.post(
     "/:usuarioId",
+    autenticarToken,
     criar
 );
 
@@ -36,6 +41,7 @@ router.post(
 
 router.put(
     "/:usuarioId/:id",
+    autenticarToken,
     atualizar
 );
 
@@ -46,6 +52,7 @@ router.put(
 
 router.delete(
     "/:usuarioId/:id",
+    autenticarToken,
     excluir
 );
 

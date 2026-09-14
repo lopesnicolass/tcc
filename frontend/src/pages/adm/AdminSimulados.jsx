@@ -1,7 +1,27 @@
 import '../../styles/adm/AdminSimulados.css';
 import { useEffect, useState } from 'react';
 
-const API_URL = 'http://localhost:3000';
+const API_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token')
+  );
+}
+
+function headerAuth(comJson = false) {
+  const headers = {
+    Authorization: `Bearer ${obterToken()}`
+  };
+
+  if (comJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
+}
 
 const MATERIAS = [
   'Português',
@@ -65,7 +85,9 @@ export default function AdminSimulados() {
       setCarregando(true);
       setErro('');
 
-      const resposta = await fetch(`${API_URL}/simulados`);
+      const resposta = await fetch(`${API_URL}/simulados`, {
+        headers: headerAuth()
+      });
 
       if (!resposta.ok) {
         throw new Error('Erro ao carregar simulados.');
@@ -118,7 +140,8 @@ export default function AdminSimulados() {
       setErro('');
 
       const resposta = await fetch(
-        `${API_URL}/simulados/${simulado.id}`
+        `${API_URL}/simulados/${simulado.id}`,
+        { headers: headerAuth() }
       );
 
       if (!resposta.ok) {
@@ -130,8 +153,22 @@ export default function AdminSimulados() {
       const dadosSimulado =
         dados.simulado || simulado;
 
+      // Aqui usamos a rota de admin (/simulados/:id/questoes),
+      // que inclui o gabarito — a rota /simulados/:id (usada
+      // pelo aluno) nunca traz o campo "correta".
+      const respostaQuestoes = await fetch(
+        `${API_URL}/simulados/${simulado.id}/questoes`,
+        { headers: headerAuth() }
+      );
+
+      if (!respostaQuestoes.ok) {
+        throw new Error('Não foi possível carregar as questões do simulado.');
+      }
+
+      const dadosQuestoes = await respostaQuestoes.json();
+
       const listaQuestoes =
-        dados.questoes || [];
+        dadosQuestoes.questoes || [];
 
       setSimuladoEditando(simulado.id);
 
@@ -332,7 +369,8 @@ export default function AdminSimulados() {
       const resposta = await fetch(
         `${API_URL}/simulados/${simuladoEditando}`,
         {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: headerAuth()
         }
       );
 
@@ -433,9 +471,7 @@ export default function AdminSimulados() {
       `${API_URL}/simulados`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: headerAuth(true),
         body: JSON.stringify({
           titulo: form.nome.trim(),
           descricao: '',
@@ -481,9 +517,7 @@ export default function AdminSimulados() {
         `${API_URL}/questoes`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: headerAuth(true),
           body: JSON.stringify({
             pergunta:
               questao.enunciado.trim(),
@@ -542,9 +576,7 @@ export default function AdminSimulados() {
         `${API_URL}/simulados/${simuladoId}/questoes`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: headerAuth(true),
           body: JSON.stringify({
             questaoId: questaoId,
             ordem: i + 1
@@ -583,9 +615,7 @@ export default function AdminSimulados() {
       `${API_URL}/simulados/${simuladoId}`,
       {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: headerAuth(true),
         body: JSON.stringify({
           titulo: form.nome.trim(),
           descricao: '',
@@ -620,9 +650,7 @@ export default function AdminSimulados() {
             `${API_URL}/questoes/${questao.id}`,
             {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: headerAuth(true),
               body: JSON.stringify({
                 pergunta:
                   questao.enunciado.trim(),
@@ -668,9 +696,7 @@ export default function AdminSimulados() {
             `${API_URL}/simulados/${simuladoId}/questoes/${questao.id}`,
             {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: headerAuth(true),
               body: JSON.stringify({
                 ordem: i + 1
               })
@@ -695,9 +721,7 @@ export default function AdminSimulados() {
             `${API_URL}/questoes`,
             {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: headerAuth(true),
               body: JSON.stringify({
                 pergunta:
                   questao.enunciado.trim(),
@@ -756,9 +780,7 @@ export default function AdminSimulados() {
             `${API_URL}/simulados/${simuladoId}/questoes`,
             {
               method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
+              headers: headerAuth(true),
               body: JSON.stringify({
                 questaoId: questaoId,
                 ordem: i + 1

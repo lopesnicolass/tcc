@@ -215,6 +215,106 @@ db.run(`
     )
 `);
 
+
+
+
+    // =====================================================
+    // PLANOS AUTOMÁTICOS
+    // =====================================================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS planos_automaticos (
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            usuario_id INTEGER NOT NULL,
+
+            meses INTEGER NOT NULL,
+
+            dias_semana INTEGER NOT NULL,
+
+            data_criacao DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            atualizado_em DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (usuario_id)
+                REFERENCES usuarios(id)
+                ON DELETE CASCADE
+        )
+    `);
+
+
+    // =====================================================
+    // ATIVIDADES DOS PLANOS AUTOMÁTICOS
+    // =====================================================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS plano_atividades (
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            plano_id INTEGER NOT NULL,
+
+            mes_numero INTEGER NOT NULL,
+
+            semana_numero INTEGER NOT NULL,
+
+            dia_semana TEXT NOT NULL,
+
+            data_estudo TEXT,
+
+            materia_id INTEGER,
+
+            materia TEXT NOT NULL,
+
+            topico_id INTEGER,
+
+            topico TEXT NOT NULL,
+
+            descricao TEXT DEFAULT '',
+
+            horario TEXT DEFAULT '08:00',
+
+            concluida INTEGER NOT NULL DEFAULT 0,
+
+            FOREIGN KEY (plano_id)
+                REFERENCES planos_automaticos(id)
+                ON DELETE CASCADE,
+
+            FOREIGN KEY (materia_id)
+                REFERENCES materias(id)
+                ON DELETE SET NULL,
+
+            FOREIGN KEY (topico_id)
+                REFERENCES topicos(id)
+                ON DELETE SET NULL
+        )
+    `);
+
+
+    // =====================================================
+    // ÍNDICES — PLANOS AUTOMÁTICOS
+    // =====================================================
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_planos_automaticos_usuario
+        ON planos_automaticos(usuario_id)
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_plano_atividades_plano
+        ON plano_atividades(plano_id)
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_plano_atividades_data
+        ON plano_atividades(data_estudo)
+    `);
+
+    
+
     // =====================================================
     // RESULTADOS
     // =====================================================
@@ -239,6 +339,7 @@ db.run(`
 
             FOREIGN KEY (usuario_id)
                 REFERENCES usuarios(id)
+                ON DELETE CASCADE
         )
     `);
 
@@ -268,6 +369,7 @@ db.run(`
 
             FOREIGN KEY (usuario_id)
                 REFERENCES usuarios(id)
+                ON DELETE CASCADE
         )
     `);
 
@@ -347,10 +449,12 @@ db.run(`
             ordem INTEGER NOT NULL,
 
             FOREIGN KEY (simulado_id)
-                REFERENCES simulados(id),
+                REFERENCES simulados(id)
+                ON DELETE CASCADE,
 
             FOREIGN KEY (questao_id)
-                REFERENCES questoes(id),
+                REFERENCES questoes(id)
+                ON DELETE CASCADE,
 
             UNIQUE (
                 simulado_id,
@@ -380,6 +484,7 @@ db.run(`
 
             FOREIGN KEY (usuario_id)
                 REFERENCES usuarios(id)
+                ON DELETE CASCADE
         )
     `);
 
@@ -543,6 +648,154 @@ db.run(`
             }
 
         }
+    );
+
+
+    // =====================================================
+    // MIGRAÇÃO — ON DELETE CASCADE
+    // (bancos criados antes desta correção não tinham
+    // cascade nas FKs para usuarios/simulados/questoes,
+    // o que impedia excluir usuário/questão que já
+    // possuísse resultados, sessões, post-its ou vínculos
+    // em simulados)
+    // =====================================================
+
+    function garantirCascade(
+        nomeTabela,
+        tabelaReferenciada,
+        sqlCriarTabelaComCascade,
+        colunas
+    ) {
+
+        db.all(
+            `PRAGMA foreign_key_list(${nomeTabela})`,
+            (erro, fks) => {
+
+                if (erro) {
+                    console.error(
+                        `Erro ao verificar FKs de ${nomeTabela}:`,
+                        erro.message
+                    );
+                    return;
+                }
+
+                const fkAlvo = fks.find(
+                    (fk) => fk.table === tabelaReferenciada
+                );
+
+                if (fkAlvo && fkAlvo.on_delete === "CASCADE") {
+                    // já está correto, nada a fazer
+                    return;
+                }
+
+                console.log(
+                    `⏳ Migrando tabela ${nomeTabela} para ON DELETE CASCADE...`
+                );
+
+                db.exec(
+                    `
+                    PRAGMA foreign_keys = OFF;
+
+                    BEGIN TRANSACTION;
+
+                    ALTER TABLE ${nomeTabela}
+                        RENAME TO ${nomeTabela}_old;
+
+                    ${sqlCriarTabelaComCascade}
+
+                    INSERT INTO ${nomeTabela} (${colunas})
+                        SELECT ${colunas} FROM ${nomeTabela}_old;
+
+                    DROP TABLE ${nomeTabela}_old;
+
+                    COMMIT;
+
+                    PRAGMA foreign_keys = ON;
+                    `,
+                    (erroMigracao) => {
+
+                        if (erroMigracao) {
+                            console.error(
+                                `❌ Erro ao migrar ${nomeTabela}:`,
+                                erroMigracao.message
+                            );
+                            return;
+                        }
+
+                        console.log(
+                            `✅ Tabela ${nomeTabela} migrada com sucesso (ON DELETE CASCADE).`
+                        );
+                    }
+                );
+            }
+        );
+    }
+
+    garantirCascade(
+        "resultados",
+        "usuarios",
+        `
+        CREATE TABLE resultados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            acertos INTEGER NOT NULL,
+            erros INTEGER NOT NULL,
+            total_questoes INTEGER NOT NULL,
+            porcentagem REAL NOT NULL,
+            data_realizacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+        );
+        `,
+        "id, usuario_id, acertos, erros, total_questoes, porcentagem, data_realizacao"
+    );
+
+    garantirCascade(
+        "sessoes",
+        "usuarios",
+        `
+        CREATE TABLE sessoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            login_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            logout_em DATETIME,
+            ativo INTEGER NOT NULL DEFAULT 1,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+        );
+        `,
+        "id, usuario_id, login_em, logout_em, ativo"
+    );
+
+    garantirCascade(
+        "mural_postits",
+        "usuarios",
+        `
+        CREATE TABLE mural_postits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            materia TEXT NOT NULL,
+            texto TEXT NOT NULL,
+            data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+        );
+        `,
+        "id, usuario_id, materia, texto, data_criacao"
+    );
+
+    garantirCascade(
+        "simulado_questoes",
+        "questoes",
+        `
+        CREATE TABLE simulado_questoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            simulado_id INTEGER NOT NULL,
+            questao_id INTEGER NOT NULL,
+            ordem INTEGER NOT NULL,
+            FOREIGN KEY (simulado_id) REFERENCES simulados(id) ON DELETE CASCADE,
+            FOREIGN KEY (questao_id) REFERENCES questoes(id) ON DELETE CASCADE,
+            UNIQUE (simulado_id, questao_id)
+        );
+        `,
+        "id, simulado_id, questao_id, ordem"
     );
 
 });

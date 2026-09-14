@@ -8,42 +8,75 @@ const {
     deletarQuestao
 } = require("../controllers/questaoController");
 
+const autenticarToken =
+    require("../middleware/authMiddleware");
+
+const verificarAdmin =
+    require("../middleware/adminMiddleware");
+
 const router = express.Router();
 
 
 // ============================
-// CADASTRAR QUESTÃO
+// CADASTRAR QUESTÃO — ADMIN
 // ============================
 
-router.post("/", cadastrarQuestao);
-
-
-// ============================
-// LISTAR QUESTÕES
-// ============================
-
-router.get("/", listarTodasQuestoes);
+router.post(
+    "/",
+    autenticarToken,
+    verificarAdmin,
+    cadastrarQuestao
+);
 
 
 // ============================
-// BUSCAR QUESTÃO POR ID
+// LISTAR QUESTÕES — ADMIN
+// (o banco de questões só é usado nas telas
+// administrativas de montagem de simulados)
 // ============================
 
-router.get("/:id", buscarQuestao);
+router.get(
+    "/",
+    autenticarToken,
+    verificarAdmin,
+    listarTodasQuestoes
+);
 
 
 // ============================
-// EDITAR QUESTÃO
+// BUSCAR QUESTÃO POR ID — ADMIN
 // ============================
 
-router.put("/:id", editarQuestao);
+router.get(
+    "/:id",
+    autenticarToken,
+    verificarAdmin,
+    buscarQuestao
+);
 
 
 // ============================
-// EXCLUIR QUESTÃO
+// EDITAR QUESTÃO — ADMIN
 // ============================
 
-router.delete("/:id", deletarQuestao);
+router.put(
+    "/:id",
+    autenticarToken,
+    verificarAdmin,
+    editarQuestao
+);
+
+
+// ============================
+// EXCLUIR QUESTÃO — ADMIN
+// ============================
+
+router.delete(
+    "/:id",
+    autenticarToken,
+    verificarAdmin,
+    deletarQuestao
+);
 
 
 module.exports = router;

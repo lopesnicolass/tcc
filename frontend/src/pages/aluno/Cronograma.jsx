@@ -355,6 +355,15 @@ export default function Cronograma() {
 
     setShowCreate(false);
   }
+  
+  function deleteAutomaticPlan() {
+  setActivities((prev) =>
+    prev.filter(
+      (activity) =>
+        activity.origem !== 'plano-automatico'
+    )
+  );
+}
 
   function toggleDone(activity) {
     setActivities((prev) =>

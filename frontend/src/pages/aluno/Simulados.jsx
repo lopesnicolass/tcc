@@ -3,7 +3,15 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useGamification } from '../../context/GamificationContext.jsx';
 
-const API_URL = 'http://localhost:3000';
+const API_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token')
+  );
+}
 
 const STATUS_LABEL = {
   'nao-iniciado': 'Não iniciado',
@@ -270,7 +278,11 @@ export default function Simulados() {
       setCarregando(true);
       setErro('');
 
-      const resposta = await fetch(`${API_URL}/simulados`);
+      const resposta = await fetch(`${API_URL}/simulados`, {
+        headers: {
+          Authorization: `Bearer ${obterToken()}`
+        }
+      });
 
       if (!resposta.ok) {
         throw new Error('Erro ao buscar simulados.');
@@ -357,7 +369,12 @@ export default function Simulados() {
       setMostrarErros(false);
 
       const resposta = await fetch(
-        `${API_URL}/simulados/${simulado.id}`
+        `${API_URL}/simulados/${simulado.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${obterToken()}`
+          }
+        }
       );
 
       if (!resposta.ok) {
@@ -478,66 +495,57 @@ export default function Simulados() {
   }
 
   // ==========================================
-  // RESPOSTA CORRETA
+  // CORRIGIR SIMULADO NO SERVIDOR
+  // (o gabarito nunca fica disponível no
+  // navegador antes de finalizar a prova)
   // ==========================================
 
-  function obterRespostaCorreta(questao) {
-    return String(
-      questao.correta ||
-        questao.resposta_correta ||
-        questao.respostaCorreta ||
-        ''
-    ).toUpperCase();
-  }
+  async function corrigirNoServidor() {
+    const resposta = await fetch(
+      `${API_URL}/simulados/${simuladoSelecionado.id}/corrigir`,
+      {
+        method: 'POST',
 
-  // ==========================================
-  // CALCULAR RESULTADO
-  // ==========================================
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${obterToken()}`
+        },
 
-  function calcularResultado() {
-    let acertos = 0;
-    let erros = 0;
-
-    const detalhes = questoes.map((questao, index) => {
-      const respostaUsuario =
-        respostas[questao.id] || null;
-
-      const respostaCorreta =
-        obterRespostaCorreta(questao);
-
-      const acertou =
-        respostaUsuario &&
-        String(respostaUsuario).toUpperCase() ===
-          respostaCorreta;
-
-      if (acertou) {
-        acertos++;
-      } else {
-        erros++;
+        body: JSON.stringify({ respostas })
       }
+    );
 
-      return {
-        questao,
-        index,
-        respostaUsuario,
-        respostaCorreta,
-        acertou: Boolean(acertou)
-      };
-    });
+    const dados = await resposta.json();
 
-    const totalQuestoes = questoes.length;
+    if (!resposta.ok) {
+      throw new Error(
+        dados.mensagem ||
+          'Erro ao corrigir o simulado.'
+      );
+    }
 
-    const porcentagem =
-      totalQuestoes > 0
-        ? (acertos / totalQuestoes) * 100
-        : 0;
+    const detalhesComQuestao = dados.detalhes.map(
+      (item) => {
+        const index = questoes.findIndex(
+          (questao) => questao.id === item.questaoId
+        );
+
+        return {
+          questao: questoes[index] || { id: item.questaoId },
+          index: index >= 0 ? index : 0,
+          respostaUsuario: item.respostaUsuario,
+          respostaCorreta: item.respostaCorreta,
+          acertou: item.acertou
+        };
+      }
+    );
 
     return {
-      acertos,
-      erros,
-      totalQuestoes,
-      porcentagem,
-      detalhes
+      acertos: dados.resultado.acertos,
+      erros: dados.resultado.erros,
+      totalQuestoes: dados.resultado.totalQuestoes,
+      porcentagem: dados.resultado.porcentagem,
+      detalhes: detalhesComQuestao
     };
   }
 
@@ -545,7 +553,7 @@ export default function Simulados() {
   // SALVAR RESULTADO
   // ==========================================
 
-  async function salvarResultado() {
+  async function salvarResultado(resultado) {
     const usuarioId = obterUsuarioId();
 
     if (!usuarioId) {
@@ -554,15 +562,14 @@ export default function Simulados() {
       );
     }
 
-    const resultado = calcularResultado();
-
     const resposta = await fetch(
       `${API_URL}/resultados`,
       {
         method: 'POST',
 
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${obterToken()}`
         },
 
         body: JSON.stringify({
@@ -630,10 +637,10 @@ export default function Simulados() {
       }
 
       const resultadoCalculado =
-        calcularResultado();
+        await corrigirNoServidor();
 
       const dados =
-        await salvarResultado();
+        await salvarResultado(resultadoCalculado);
 
       const resultado =
         dados.resultado || resultadoCalculado;

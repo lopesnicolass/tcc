@@ -217,6 +217,75 @@ function listarQuestoesDoSimulado(
 }
 
 // =====================================================
+// LISTAR QUESTÕES DO SIMULADO — PARA O ALUNO RESPONDER
+// (sem o campo "correta" — o gabarito NUNCA pode ser
+// enviado para quem ainda está fazendo a prova)
+// =====================================================
+
+function listarQuestoesDoSimuladoParaResponder(
+    simuladoId,
+    callback
+) {
+    const sql = `
+        SELECT
+            q.id,
+            q.pergunta,
+            q.alternativa_a,
+            q.alternativa_b,
+            q.alternativa_c,
+            q.alternativa_d,
+            q.alternativa_e,
+            q.materia,
+            sq.ordem
+
+        FROM simulado_questoes sq
+
+        INNER JOIN questoes q
+            ON q.id = sq.questao_id
+
+        WHERE sq.simulado_id = ?
+
+        ORDER BY sq.ordem ASC
+    `;
+
+    db.all(
+        sql,
+        [simuladoId],
+        callback
+    );
+}
+
+// =====================================================
+// BUSCAR GABARITO DO SIMULADO (uso interno do servidor,
+// para corrigir as respostas do aluno — nunca é exposto
+// diretamente numa rota pública)
+// =====================================================
+
+function buscarGabaritoDoSimulado(
+    simuladoId,
+    callback
+) {
+    const sql = `
+        SELECT
+            q.id,
+            q.correta
+
+        FROM simulado_questoes sq
+
+        INNER JOIN questoes q
+            ON q.id = sq.questao_id
+
+        WHERE sq.simulado_id = ?
+    `;
+
+    db.all(
+        sql,
+        [simuladoId],
+        callback
+    );
+}
+
+// =====================================================
 // REMOVER QUESTÃO DO SIMULADO
 // =====================================================
 
@@ -319,6 +388,8 @@ module.exports = {
     excluirSimulado,
     adicionarQuestao,
     listarQuestoesDoSimulado,
+    listarQuestoesDoSimuladoParaResponder,
+    buscarGabaritoDoSimulado,
     removerQuestao,
     atualizarOrdemQuestao,
     removerTodasQuestoesDoSimulado

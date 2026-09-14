@@ -41,6 +41,19 @@ function sair(req, res) {
         });
     }
 
+    const podeEncerrar =
+        req.usuario &&
+        (
+            req.usuario.tipo === "admin" ||
+            Number(req.usuario.id) === usuarioId
+        );
+
+    if (!podeEncerrar) {
+        return res.status(403).json({
+            mensagem: "Você não tem permissão para encerrar esta sessão."
+        });
+    }
+
     encerrarSessao(usuarioId, (erro) => {
 
         if (erro) {

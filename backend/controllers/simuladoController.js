@@ -6,6 +6,8 @@ const {
     excluirSimulado,
     adicionarQuestao,
     listarQuestoesDoSimulado,
+    listarQuestoesDoSimuladoParaResponder,
+    buscarGabaritoDoSimulado,
     removerQuestao,
     atualizarOrdemQuestao,
     removerTodasQuestoesDoSimulado
@@ -157,7 +159,9 @@ function buscarSimulado(req, res) {
                 });
             }
 
-            listarQuestoesDoSimulado(
+            // Aqui é a rota que o aluno usa para ABRIR o simulado
+            // e responder — por isso NUNCA inclui o gabarito.
+            listarQuestoesDoSimuladoParaResponder(
                 id,
                 (erro, questoes) => {
                     if (erro) {
@@ -512,6 +516,101 @@ function editarOrdemQuestao(
 }
 
 // =====================================================
+// CORRIGIR SIMULADO
+// (recebe as respostas do aluno e devolve o resultado
+// já corrigido no servidor — o gabarito nunca é enviado
+// antes desse momento)
+// =====================================================
+
+function corrigirSimulado(req, res) {
+    const { id } = req.params;
+    const { respostas } = req.body || {};
+
+    if (
+        !respostas ||
+        typeof respostas !== "object" ||
+        Array.isArray(respostas)
+    ) {
+        return res.status(400).json({
+            mensagem:
+                "Informe as respostas no formato { questaoId: alternativa }."
+        });
+    }
+
+    buscarGabaritoDoSimulado(
+        id,
+        (erro, gabarito) => {
+            if (erro) {
+                console.error(
+                    "❌ Erro ao corrigir simulado:",
+                    erro
+                );
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao corrigir o simulado."
+                });
+            }
+
+            if (!gabarito || gabarito.length === 0) {
+                return res.status(404).json({
+                    mensagem:
+                        "Simulado não encontrado ou sem questões."
+                });
+            }
+
+            let acertos = 0;
+            let erros = 0;
+
+            const detalhes = gabarito.map((questao) => {
+                const respostaUsuario =
+                    respostas[questao.id] != null
+                        ? String(respostas[questao.id]).toUpperCase()
+                        : null;
+
+                const respostaCorreta =
+                    String(questao.correta).toUpperCase();
+
+                const acertou =
+                    respostaUsuario === respostaCorreta;
+
+                if (acertou) {
+                    acertos++;
+                } else {
+                    erros++;
+                }
+
+                return {
+                    questaoId: questao.id,
+                    respostaUsuario,
+                    respostaCorreta,
+                    acertou
+                };
+            });
+
+            const totalQuestoes = gabarito.length;
+
+            const porcentagem =
+                totalQuestoes > 0
+                    ? Number(
+                        ((acertos / totalQuestoes) * 100).toFixed(2)
+                    )
+                    : 0;
+
+            return res.status(200).json({
+                resultado: {
+                    acertos,
+                    erros,
+                    totalQuestoes,
+                    porcentagem
+                },
+                detalhes
+            });
+        }
+    );
+}
+
+// =====================================================
 // EXPORTAÇÕES
 // =====================================================
 
@@ -530,5 +629,7 @@ module.exports = {
     removerQuestao:
         removerQuestaoDoSimulado,
 
-    editarOrdemQuestao
+    editarOrdemQuestao,
+
+    corrigirSimulado
 };

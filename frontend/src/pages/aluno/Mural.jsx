@@ -90,6 +90,18 @@ function obterUsuarioId() {
 
 
 // =====================================================
+// PEGAR TOKEN DE AUTENTICAÇÃO
+// =====================================================
+
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token')
+  );
+}
+
+
+// =====================================================
 // COMPONENTE
 // =====================================================
 
@@ -179,7 +191,12 @@ export default function Mural() {
 
       const resposta =
         await fetch(
-          `${API_URL}/mural/${usuarioId}`
+          `${API_URL}/mural/${usuarioId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${obterToken()}`
+            }
+          }
         );
 
       const dados =
@@ -264,7 +281,8 @@ export default function Mural() {
 
             headers: {
               'Content-Type':
-                'application/json'
+                'application/json',
+              Authorization: `Bearer ${obterToken()}`
             },
 
             body: JSON.stringify({
@@ -373,7 +391,8 @@ export default function Mural() {
 
             headers: {
               'Content-Type':
-                'application/json'
+                'application/json',
+              Authorization: `Bearer ${obterToken()}`
             },
 
             body: JSON.stringify({
@@ -466,7 +485,11 @@ export default function Mural() {
         await fetch(
           `${API_URL}/mural/${usuarioId}/${editingPostit.id}`,
           {
-            method: 'DELETE'
+            method: 'DELETE',
+
+            headers: {
+              Authorization: `Bearer ${obterToken()}`
+            }
           }
         );
 

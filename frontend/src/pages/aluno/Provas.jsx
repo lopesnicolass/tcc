@@ -1,6 +1,9 @@
 import '../../styles/aluno/Provas.css';
 import { useEffect, useState } from "react";
 
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 export default function Provas() {
 
     const [provas, setProvas] = useState([]);
@@ -8,7 +11,7 @@ export default function Provas() {
 
     useEffect(() => {
 
-        fetch("http://localhost:3000/provas")
+        fetch(`${API_URL}/provas`)
             .then((res) => res.json())
             .then((dados) => {
 
@@ -84,8 +87,7 @@ export default function Provas() {
 
                                 <a
                                     href={
-                                        "http://localhost:3000/uploads/provas/" +
-                                        prova.arquivo_prova
+                                        `${API_URL}/uploads/provas/${prova.arquivo_prova}`
                                     }
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -96,8 +98,7 @@ export default function Provas() {
 
                                 <a
                                     href={
-                                        "http://localhost:3000/uploads/provas/" +
-                                        prova.arquivo_gabarito
+                                        `${API_URL}/uploads/provas/${prova.arquivo_gabarito}`
                                     }
                                     target="_blank"
                                     rel="noopener noreferrer"

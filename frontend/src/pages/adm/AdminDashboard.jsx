@@ -121,9 +121,9 @@ export default function AdminDashboard() {
 
     const endpoints = [
       ['usuarios', `${API_URL}/usuarios`, headers],
-      ['simulados', `${API_URL}/simulados`, {}],
-      ['questoes', `${API_URL}/questoes`, {}],
-      ['provas', `${API_URL}/provas`, {}],
+      ['simulados', `${API_URL}/simulados`, headers],
+      ['questoes', `${API_URL}/questoes`, headers],
+      ['provas', `${API_URL}/provas`, headers],
     ];
 
     try {
