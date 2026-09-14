@@ -128,6 +128,9 @@ export default function Cronograma() {
   const [editing, setEditing] =
     useState(null);
 
+  const [showDeletePlanConfirm, setShowDeletePlanConfirm] =
+    useState(false);
+
   const [form, setForm] =
     useState(emptyForm);
 
@@ -355,15 +358,30 @@ export default function Cronograma() {
 
     setShowCreate(false);
   }
-  
+
   function deleteAutomaticPlan() {
-  setActivities((prev) =>
-    prev.filter(
-      (activity) =>
-        activity.origem !== 'plano-automatico'
-    )
-  );
-}
+    const hasAutomaticPlan =
+      activities.some(
+        (activity) =>
+          activity.origem ===
+          'plano-automatico'
+      );
+
+    if (!hasAutomaticPlan) {
+      setShowDeletePlanConfirm(false);
+      return;
+    }
+
+    setActivities((prev) =>
+      prev.filter(
+        (activity) =>
+          activity.origem !==
+          'plano-automatico'
+      )
+    );
+
+    setShowDeletePlanConfirm(false);
+  }
 
   function toggleDone(activity) {
     setActivities((prev) =>
@@ -427,14 +445,27 @@ export default function Cronograma() {
           para ver ou adicionar atividades.
         </p>
 
-        <button
-          className="mural-btn primary"
-          onClick={() =>
-            openCreate()
-          }
-        >
-          + Nova atividade
-        </button>
+        <div className="calendar-actions-buttons">
+
+          <button
+            className="calendar-delete-plan"
+            onClick={() =>
+              setShowDeletePlanConfirm(true)
+            }
+          >
+            Apagar plano automático
+          </button>
+
+          <button
+            className="mural-btn primary"
+            onClick={() =>
+              openCreate()
+            }
+          >
+            + Nova atividade
+          </button>
+
+        </div>
 
       </div>
 
@@ -1077,6 +1108,73 @@ export default function Cronograma() {
             </div>
 
           </form>
+
+        </div>
+
+      )}
+
+      {showDeletePlanConfirm && (
+
+        <div
+          className="modal-overlay"
+          onMouseDown={(e) => {
+            if (
+              e.target ===
+              e.currentTarget
+            ) {
+              setShowDeletePlanConfirm(false);
+            }
+          }}
+        >
+
+          <div className="modal-card calendar-delete-modal">
+
+            <div className="modal-header">
+
+              <div className="calendar-delete-icon">
+                <Icon
+                  name="calendar"
+                  size={26}
+                />
+              </div>
+
+              <h2>
+                Apagar plano automático?
+              </h2>
+
+              <p>
+                Todas as atividades geradas pelo
+                plano automático serão removidas
+                do seu calendário.
+              </p>
+
+            </div>
+
+            <div className="modal-actions">
+
+              <button
+                type="button"
+                className="mural-btn secondary"
+                onClick={() =>
+                  setShowDeletePlanConfirm(false)
+                }
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="calendar-confirm-delete"
+                onClick={
+                  deleteAutomaticPlan
+                }
+              >
+                Sim, apagar plano
+              </button>
+
+            </div>
+
+          </div>
 
         </div>
 
