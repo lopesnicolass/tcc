@@ -13,12 +13,18 @@ const NAV_SECTIONS = [
       },
     ],
   },
+
   {
     title: 'CONTEÚDO',
     items: [
       {
         to: '/admin/conteudos',
         label: 'Conteúdos',
+        icon: 'book',
+      },
+      {
+        to: '/admin/conteudos/construir',
+        label: 'Construir conteúdos',
         icon: 'book',
       },
       {
@@ -43,6 +49,7 @@ const NAV_SECTIONS = [
       },
     ],
   },
+
   {
     title: 'USUÁRIOS',
     items: [
@@ -115,10 +122,6 @@ export default function AdminSidebar() {
   return (
     <aside className="sidebar admin-sidebar">
 
-      {/* =====================================================
-          MARCA
-          ===================================================== */}
-
       <div className="sidebar-brand admin-sidebar-brand">
         <img
           src={logoIcon}
@@ -133,11 +136,6 @@ export default function AdminSidebar() {
         />
       </div>
 
-
-      {/* =====================================================
-          IDENTIFICAÇÃO DO ADMINISTRADOR
-          ===================================================== */}
-
       <div
         className="admin-sidebar-status"
         style={{
@@ -150,7 +148,6 @@ export default function AdminSidebar() {
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-
         <div
           style={{
             width: '30px',
@@ -194,13 +191,7 @@ export default function AdminSidebar() {
             Acesso autorizado
           </span>
         </div>
-
       </div>
-
-
-      {/* =====================================================
-          NAVEGAÇÃO
-          ===================================================== */}
 
       <div
         className="admin-sidebar-navigation"
@@ -211,16 +202,11 @@ export default function AdminSidebar() {
           flex: 1,
         }}
       >
-
         {NAV_SECTIONS.map((section) => (
-
           <div
             className="admin-nav-section"
             key={section.title}
           >
-
-            {/* Título da seção */}
-
             <div
               className="admin-nav-section-title"
               style={{
@@ -235,9 +221,6 @@ export default function AdminSidebar() {
               {section.title}
             </div>
 
-
-            {/* Itens */}
-
             <nav
               className="sidebar-nav admin-sidebar-nav"
               aria-label={section.title}
@@ -245,9 +228,7 @@ export default function AdminSidebar() {
                 gap: '4px',
               }}
             >
-
               {section.items.map((item) => (
-
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -258,7 +239,6 @@ export default function AdminSidebar() {
                     }`
                   }
                 >
-
                   <span
                     className="admin-sidebar-icon"
                     style={{
@@ -270,32 +250,18 @@ export default function AdminSidebar() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon
-                      name={item.icon}
-                      size={19}
-                    />
+                    <Icon name={item.icon} size={19} />
                   </span>
 
                   <span className="label">
                     {item.label}
                   </span>
-
                 </NavLink>
-
               ))}
-
             </nav>
-
           </div>
-
         ))}
-
       </div>
-
-
-      {/* =====================================================
-          RODAPÉ DA SIDEBAR
-          ===================================================== */}
 
       <div
         className="admin-sidebar-footer"
@@ -307,12 +273,10 @@ export default function AdminSidebar() {
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-
         <Link
           to="/home"
           className="sidebar-link admin-back-link"
         >
-
           <span
             style={{
               display: 'flex',
@@ -323,20 +287,14 @@ export default function AdminSidebar() {
               flexShrink: 0,
             }}
           >
-            <Icon
-              name="arrowLeft"
-              size={19}
-            />
+            <Icon name="arrowLeft" size={19} />
           </span>
 
           <span className="label">
             Voltar ao sistema
           </span>
-
         </Link>
-
       </div>
-
     </aside>
   );
 }

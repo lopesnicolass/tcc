@@ -1,8 +1,7 @@
-import '../../styles/adm/AdminConteudos.css';
 import { useEffect, useMemo, useState } from 'react';
+import '../../styles/adm/AdminConteudos.css';
 
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = 'http://localhost:3000';
 
 const EMPTY_MATERIA = {
   nome: '',
@@ -36,25 +35,30 @@ function obterToken() {
 async function request(url, options = {}) {
   const token = obterToken();
 
-  const resposta = await fetch(`${API_URL}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {}),
-      ...(options.headers || {}),
-    },
-  });
+  const resposta = await fetch(
+    `${API_URL}${url}`,
+    {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {}),
+        ...(options.headers || {}),
+      },
+    }
+  );
 
   const texto = await resposta.text();
 
   let dados = {};
 
   try {
-    dados = texto ? JSON.parse(texto) : {};
+    dados = texto
+      ? JSON.parse(texto)
+      : {};
   } catch {
     dados = {};
   }
@@ -63,6 +67,7 @@ async function request(url, options = {}) {
     throw new Error(
       dados.erro ||
         dados.message ||
+        dados.mensagem ||
         'Não foi possível realizar a operação.'
     );
   }
@@ -118,10 +123,6 @@ function Icon({ name, size = 20 }) {
       <path d="m6 9 6 6 6-6" />
     ),
 
-    check: (
-      <path d="m5 12 4 4L19 6" />
-    ),
-
     close: (
       <path d="M6 6l12 12M18 6 6 18" />
     ),
@@ -158,6 +159,7 @@ function Modal({
   return (
     <div className="admin-modal-backdrop">
       <div className="admin-modal">
+
         <div className="admin-modal-head">
           <div>
             <span className="admin-section-kicker">
@@ -173,7 +175,10 @@ function Modal({
             onClick={onClose}
             disabled={salvando}
           >
-            <Icon name="close" size={18} />
+            <Icon
+              name="close"
+              size={18}
+            />
           </button>
         </div>
 
@@ -195,25 +200,38 @@ function Modal({
             onClick={onSave}
             disabled={salvando}
           >
-            {salvando ? 'Salvando...' : 'Salvar'}
+            {salvando
+              ? 'Salvando...'
+              : 'Salvar'}
           </button>
         </div>
+
       </div>
     </div>
   );
 }
 
 export default function AdminConteudos() {
-  const [materias, setMaterias] = useState([]);
+  const [materias, setMaterias] =
+    useState([]);
 
-  const [carregando, setCarregando] = useState(true);
-  const [salvando, setSalvando] = useState(false);
+  const [carregando, setCarregando] =
+    useState(true);
 
-  const [erro, setErro] = useState('');
-  const [sucesso, setSucesso] = useState('');
+  const [salvando, setSalvando] =
+    useState(false);
 
-  const [busca, setBusca] = useState('');
-  const [filtro, setFiltro] = useState('todas');
+  const [erro, setErro] =
+    useState('');
+
+  const [sucesso, setSucesso] =
+    useState('');
+
+  const [busca, setBusca] =
+    useState('');
+
+  const [filtro, setFiltro] =
+    useState('todas');
 
   const [materiaAberta, setMateriaAberta] =
     useState(null);
@@ -223,9 +241,6 @@ export default function AdminConteudos() {
 
   const [modalTopico, setModalTopico] =
     useState(null);
-
-  const [editorConteudo, setEditorConteudo] =
-  useState(null);  
 
   const [formMateria, setFormMateria] =
     useState(EMPTY_MATERIA);
@@ -238,10 +253,13 @@ export default function AdminConteudos() {
       setCarregando(true);
       setErro('');
 
-      const dados = await request('/conteudos');
+      const dados =
+        await request('/conteudos');
 
       setMaterias(
-        Array.isArray(dados.materias)
+        Array.isArray(
+          dados.materias
+        )
           ? dados.materias
           : []
       );
@@ -261,7 +279,9 @@ export default function AdminConteudos() {
     carregarMaterias();
   }, []);
 
-  function mostrarSucesso(mensagem) {
+  function mostrarSucesso(
+    mensagem
+  ) {
     setSucesso(mensagem);
 
     window.setTimeout(() => {
@@ -272,7 +292,8 @@ export default function AdminConteudos() {
   function abrirNovaMateria() {
     setFormMateria({
       ...EMPTY_MATERIA,
-      ordem: materias.length + 1,
+      ordem:
+        materias.length + 1,
     });
 
     setModalMateria({
@@ -280,15 +301,27 @@ export default function AdminConteudos() {
     });
   }
 
-  function abrirEditarMateria(materia) {
+  function abrirEditarMateria(
+    materia
+  ) {
     setFormMateria({
       nome: materia.nome || '',
       slug: materia.slug || '',
-      icone: materia.icone || 'book',
-      cor: materia.cor || '#2196F3',
-      descricao: materia.descricao || '',
-      ativa: Boolean(materia.ativa),
-      ordem: materia.ordem || 0,
+      icone:
+        materia.icone ||
+        'book',
+      cor:
+        materia.cor ||
+        '#2196F3',
+      descricao:
+        materia.descricao ||
+        '',
+      ativa:
+        Boolean(
+          materia.ativa
+        ),
+      ordem:
+        materia.ordem || 0,
     });
 
     setModalMateria({
@@ -297,45 +330,55 @@ export default function AdminConteudos() {
     });
   }
 
-  function abrirNovoTopico(materia) {
+  function abrirNovoTopico(
+    materia
+  ) {
     setFormTopico({
       ...EMPTY_TOPICO,
-      ordem: (materia.topicos?.length || 0) + 1,
+      ordem:
+        (materia.topicos
+          ?.length || 0) + 1,
     });
 
     setModalTopico({
       modo: 'criar',
-      materiaId: materia.id,
+      materiaId:
+        materia.id,
     });
   }
 
-  function abrirEditarTopico(topico) {
+  function abrirEditarTopico(
+    topico
+  ) {
     setFormTopico({
-      nome: topico.nome || '',
-      descricao: topico.descricao || '',
-      ordem: topico.ordem || 0,
-      ativo: Boolean(topico.ativo),
+      nome:
+        topico.nome || '',
+      descricao:
+        topico.descricao ||
+        '',
+      ordem:
+        topico.ordem || 0,
+      ativo:
+        Boolean(
+          topico.ativo
+        ),
     });
 
-    
     setModalTopico({
       modo: 'editar',
       id: topico.id,
-      materiaId: topico.materia_id,
+      materiaId:
+        topico.materia_id,
     });
   }
 
-  function abrirEditorConteudo(topico) {
-  setEditorConteudo({
-    topicoId: topico.id,
-    topicoNome: topico.nome,
-    pagina: null,
-  });
-}
-
   async function salvarMateria() {
-    if (!formMateria.nome.trim()) {
-      setErro('Informe o nome da matéria.');
+    if (
+      !formMateria.nome.trim()
+    ) {
+      setErro(
+        'Informe o nome da matéria.'
+      );
       return;
     }
 
@@ -345,18 +388,38 @@ export default function AdminConteudos() {
 
       const payload = {
         ...formMateria,
-        nome: formMateria.nome.trim(),
-        slug: formMateria.slug
-          ? gerarSlug(formMateria.slug)
-          : gerarSlug(formMateria.nome),
-        ordem: Number(formMateria.ordem) || 0,
+
+        nome:
+          formMateria.nome.trim(),
+
+        slug:
+          formMateria.slug
+            ? gerarSlug(
+                formMateria.slug
+              )
+            : gerarSlug(
+                formMateria.nome
+              ),
+
+        ordem:
+          Number(
+            formMateria.ordem
+          ) || 0,
       };
 
-      if (modalMateria.modo === 'criar') {
-        await request('/conteudos/materias', {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        });
+      if (
+        modalMateria.modo ===
+        'criar'
+      ) {
+        await request(
+          '/conteudos/materias',
+          {
+            method: 'POST',
+            body: JSON.stringify(
+              payload
+            ),
+          }
+        );
 
         mostrarSucesso(
           'Matéria criada com sucesso.'
@@ -366,7 +429,9 @@ export default function AdminConteudos() {
           `/conteudos/materias/${modalMateria.id}`,
           {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: JSON.stringify(
+              payload
+            ),
           }
         );
 
@@ -380,15 +445,23 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível salvar a matéria.'
+      );
     } finally {
       setSalvando(false);
     }
   }
 
   async function salvarTopico() {
-    if (!formTopico.nome.trim()) {
-      setErro('Informe o nome do tópico.');
+    if (
+      !formTopico.nome.trim()
+    ) {
+      setErro(
+        'Informe o nome do tópico.'
+      );
       return;
     }
 
@@ -398,16 +471,27 @@ export default function AdminConteudos() {
 
       const payload = {
         ...formTopico,
-        nome: formTopico.nome.trim(),
-        ordem: Number(formTopico.ordem) || 0,
+
+        nome:
+          formTopico.nome.trim(),
+
+        ordem:
+          Number(
+            formTopico.ordem
+          ) || 0,
       };
 
-      if (modalTopico.modo === 'criar') {
+      if (
+        modalTopico.modo ===
+        'criar'
+      ) {
         await request(
           `/conteudos/materias/${modalTopico.materiaId}/topicos`,
           {
             method: 'POST',
-            body: JSON.stringify(payload),
+            body: JSON.stringify(
+              payload
+            ),
           }
         );
 
@@ -419,7 +503,9 @@ export default function AdminConteudos() {
           `/conteudos/topicos/${modalTopico.id}`,
           {
             method: 'PUT',
-            body: JSON.stringify(payload),
+            body: JSON.stringify(
+              payload
+            ),
           }
         );
 
@@ -433,16 +519,23 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível salvar o tópico.'
+      );
     } finally {
       setSalvando(false);
     }
   }
 
-  async function excluirMateria(materia) {
-    const confirmar = window.confirm(
-      `Tem certeza que deseja excluir "${materia.nome}"?\n\nTodos os tópicos dessa matéria também serão excluídos.`
-    );
+  async function excluirMateria(
+    materia
+  ) {
+    const confirmar =
+      window.confirm(
+        `Tem certeza que deseja excluir "${materia.nome}"?\n\nTodos os tópicos dessa matéria também serão excluídos.`
+      );
 
     if (!confirmar) {
       return;
@@ -458,8 +551,13 @@ export default function AdminConteudos() {
         }
       );
 
-      if (materiaAberta === materia.id) {
-        setMateriaAberta(null);
+      if (
+        materiaAberta ===
+        materia.id
+      ) {
+        setMateriaAberta(
+          null
+        );
       }
 
       mostrarSucesso(
@@ -469,14 +567,21 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível excluir a matéria.'
+      );
     }
   }
 
-  async function excluirTopico(topico) {
-    const confirmar = window.confirm(
-      `Excluir o tópico "${topico.nome}"?`
-    );
+  async function excluirTopico(
+    topico
+  ) {
+    const confirmar =
+      window.confirm(
+        `Excluir o tópico "${topico.nome}"?`
+      );
 
     if (!confirmar) {
       return;
@@ -499,11 +604,17 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível excluir o tópico.'
+      );
     }
   }
 
-  async function alternarMateria(materia) {
+  async function alternarMateria(
+    materia
+  ) {
     try {
       setErro('');
 
@@ -512,7 +623,10 @@ export default function AdminConteudos() {
         {
           method: 'PUT',
           body: JSON.stringify({
-            ativa: !Boolean(materia.ativa),
+            ativa:
+              !Boolean(
+                materia.ativa
+              ),
           }),
         }
       );
@@ -526,11 +640,17 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível alterar a matéria.'
+      );
     }
   }
 
-  async function alternarTopico(topico) {
+  async function alternarTopico(
+    topico
+  ) {
     try {
       setErro('');
 
@@ -539,7 +659,10 @@ export default function AdminConteudos() {
         {
           method: 'PUT',
           body: JSON.stringify({
-            ativo: !Boolean(topico.ativo),
+            ativo:
+              !Boolean(
+                topico.ativo
+              ),
           }),
         }
       );
@@ -553,61 +676,107 @@ export default function AdminConteudos() {
       await carregarMaterias();
     } catch (error) {
       console.error(error);
-      setErro(error.message);
+
+      setErro(
+        error.message ||
+          'Não foi possível alterar o tópico.'
+      );
     }
   }
 
-  const materiasFiltradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
+  const materiasFiltradas =
+    useMemo(() => {
+      const termo =
+        busca.trim().toLowerCase();
 
-    return materias.filter((materia) => {
-      const correspondeBusca =
-        !termo ||
-        materia.nome
-          ?.toLowerCase()
-          .includes(termo) ||
-        materia.descricao
-          ?.toLowerCase()
-          .includes(termo) ||
-        materia.topicos?.some((topico) =>
-          topico.nome
-            ?.toLowerCase()
-            .includes(termo)
-        );
+      return materias.filter(
+        (materia) => {
+          const correspondeBusca =
+            !termo ||
+            materia.nome
+              ?.toLowerCase()
+              .includes(termo) ||
+            materia.descricao
+              ?.toLowerCase()
+              .includes(termo) ||
+            materia.topicos?.some(
+              (topico) =>
+                topico.nome
+                  ?.toLowerCase()
+                  .includes(termo)
+            );
 
-      const correspondeFiltro =
-        filtro === 'todas' ||
-        (filtro === 'ativas' &&
-          Boolean(materia.ativa)) ||
-        (filtro === 'inativas' &&
-          !Boolean(materia.ativa));
+          const correspondeFiltro =
+            filtro === 'todas' ||
+            (filtro === 'ativas' &&
+              Boolean(
+                materia.ativa
+              )) ||
+            (filtro ===
+              'inativas' &&
+              !Boolean(
+                materia.ativa
+              ));
 
-      return (
-        correspondeBusca &&
-        correspondeFiltro
+          return (
+            correspondeBusca &&
+            correspondeFiltro
+          );
+        }
       );
-    });
-  }, [materias, busca, filtro]);
+    }, [
+      materias,
+      busca,
+      filtro,
+    ]);
 
-  const totalTopicos = materias.reduce(
-    (total, materia) =>
-      total + (materia.topicos?.length || 0),
-    0
-  );
+  const totalTopicos =
+    materias.reduce(
+      (total, materia) =>
+        total +
+        (materia.topicos
+          ?.length || 0),
+      0
+    );
 
-  const totalAtivas = materias.filter(
-    (materia) => Boolean(materia.ativa)
-  ).length;
+  const totalAtivas =
+    materias.filter(
+      (materia) =>
+        Boolean(
+          materia.ativa
+        )
+    ).length;
+
+  const totalTopicosAtivos =
+    materias.reduce(
+      (total, materia) =>
+        total +
+        (
+          materia.topicos ||
+          []
+        ).filter(
+          (topico) =>
+            Boolean(
+              topico.ativo
+            )
+        ).length,
+      0
+    );
 
   return (
     <div className="admin-page">
+
+      {/* CABEÇALHO */}
+
       <header className="page-header">
         <div>
           <span className="admin-section-kicker">
             CMS / CONTEÚDO
           </span>
 
-          <h1>Conteúdos</h1>
+          <h1>
+            Conteúdos
+          </h1>
 
           <p>
             Gerencie as matérias e os tópicos
@@ -619,35 +788,58 @@ export default function AdminConteudos() {
           <button
             type="button"
             className="mural-btn secondary"
-            onClick={carregarMaterias}
-            disabled={carregando}
+            onClick={
+              carregarMaterias
+            }
+            disabled={
+              carregando
+            }
           >
-            <Icon name="refresh" size={17} />
+            <Icon
+              name="refresh"
+              size={17}
+            />
+
             Atualizar
           </button>
 
           <button
             type="button"
             className="mural-btn"
-            onClick={abrirNovaMateria}
+            onClick={
+              abrirNovaMateria
+            }
           >
-            <Icon name="plus" size={17} />
+            <Icon
+              name="plus"
+              size={17}
+            />
+
             Nova matéria
           </button>
         </div>
       </header>
 
+      {/* ALERTAS */}
+
       {erro && (
         <div
           className="admin-alert"
           style={{
-            marginBottom: '16px',
-            padding: '12px 15px',
-            borderRadius: '12px',
-            background: '#fff1f0',
-            border: '1px solid #ffc9c5',
-            color: '#b42318',
-            fontSize: '13px',
+            marginBottom:
+              '16px',
+            padding:
+              '12px 15px',
+            borderRadius:
+              '12px',
+            background:
+              '#fff1f0',
+            border:
+              '1px solid #ffc9c5',
+            color:
+              '#b42318',
+            fontSize:
+              '13px',
             fontWeight: 700,
           }}
         >
@@ -659,13 +851,20 @@ export default function AdminConteudos() {
         <div
           className="admin-alert"
           style={{
-            marginBottom: '16px',
-            padding: '12px 15px',
-            borderRadius: '12px',
-            background: '#edf9f1',
-            border: '1px solid #b8e6c5',
-            color: '#16733a',
-            fontSize: '13px',
+            marginBottom:
+              '16px',
+            padding:
+              '12px 15px',
+            borderRadius:
+              '12px',
+            background:
+              '#edf9f1',
+            border:
+              '1px solid #b8e6c5',
+            color:
+              '#16733a',
+            fontSize:
+              '13px',
             fontWeight: 700,
           }}
         >
@@ -673,7 +872,10 @@ export default function AdminConteudos() {
         </div>
       )}
 
+      {/* ESTATÍSTICAS */}
+
       <section className="admin-content-stats">
+
         <article className="stat-card">
           <div className="stat-value">
             {materias.length}
@@ -706,71 +908,101 @@ export default function AdminConteudos() {
 
         <article className="stat-card">
           <div className="stat-value">
-            {materias.reduce(
-              (total, materia) =>
-                total +
-                (materia.topicos || []).filter(
-                  (topico) =>
-                    Boolean(topico.ativo)
-                ).length,
-              0
-            )}
+            {totalTopicosAtivos}
           </div>
 
           <div className="stat-label">
             Tópicos ativos
           </div>
         </article>
+
       </section>
 
-      <section className="panel-card">
+      {/* FILTROS */}
+
+      <section
+        className="panel-card"
+        style={{
+          marginTop:
+            '18px',
+        }}
+      >
         <div
           className="admin-content-toolbar"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            flexWrap: 'wrap',
+            display:
+              'flex',
+            alignItems:
+              'center',
+            justifyContent:
+              'space-between',
+            gap:
+              '12px',
+            flexWrap:
+              'wrap',
           }}
         >
           <div
             style={{
-              flex: '1 1 280px',
+              flex:
+                '1 1 280px',
             }}
           >
             <input
               type="text"
               value={busca}
-              onChange={(event) =>
-                setBusca(event.target.value)
+              onChange={(
+                event
+              ) =>
+                setBusca(
+                  event.target.value
+                )
               }
               placeholder="Buscar matéria ou tópico..."
               style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                border: '1px solid var(--line)',
-                borderRadius: '11px',
-                padding: '11px 13px',
-                font: 'inherit',
-                outline: 'none',
+                width:
+                  '100%',
+                boxSizing:
+                  'border-box',
+                border:
+                  '1px solid var(--line)',
+                borderRadius:
+                  '11px',
+                padding:
+                  '11px 13px',
+                font:
+                  'inherit',
+                outline:
+                  'none',
               }}
             />
           </div>
 
           <select
             value={filtro}
-            onChange={(event) =>
-              setFiltro(event.target.value)
+            onChange={(
+              event
+            ) =>
+              setFiltro(
+                event.target
+                  .value
+              )
             }
             style={{
-              minWidth: '150px',
-              border: '1px solid var(--line)',
-              borderRadius: '11px',
-              padding: '11px 13px',
-              background: '#fff',
-              color: 'var(--ink)',
-              font: 'inherit',
+              minWidth:
+                '150px',
+              border:
+                '1px solid var(--line)',
+              borderRadius:
+                '11px',
+              padding:
+                '11px 13px',
+              background:
+                '#fff',
+              color:
+                'var(--ink)',
+              font:
+                'inherit',
             }}
           >
             <option value="todas">
@@ -788,8 +1020,16 @@ export default function AdminConteudos() {
         </div>
       </section>
 
+      {/* LISTA */}
+
       {carregando ? (
-        <div className="admin-content-empty large">
+        <div
+          className="admin-content-empty large"
+          style={{
+            marginTop:
+              '18px',
+          }}
+        >
           <strong>
             Carregando conteúdos...
           </strong>
@@ -799,514 +1039,578 @@ export default function AdminConteudos() {
           </span>
         </div>
       ) : materiasFiltradas.length === 0 ? (
-        <div className="admin-content-empty large">
+        <div
+          className="admin-content-empty large"
+          style={{
+            marginTop:
+              '18px',
+          }}
+        >
           <strong>
             Nenhuma matéria encontrada
           </strong>
 
           <span>
-            Tente alterar sua busca ou cadastre
-            uma nova matéria.
+            Tente alterar sua busca ou
+            cadastre uma nova matéria.
           </span>
         </div>
       ) : (
         <div
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            marginTop: '18px',
+            display:
+              'flex',
+            flexDirection:
+              'column',
+            gap:
+              '12px',
+            marginTop:
+              '18px',
           }}
         >
-          {materiasFiltradas.map((materia) => {
-            const aberta =
-              materiaAberta === materia.id;
+          {materiasFiltradas.map(
+            (materia) => {
+              const aberta =
+                materiaAberta ===
+                materia.id;
 
-            const topicosAtivos =
-              materia.topicos?.filter(
-                (topico) =>
-                  Boolean(topico.ativo)
-              ).length || 0;
-
-            return (
-              <article
-                className="content-subject-card"
-                key={materia.id}
-              >
-                <div
-                  className="content-subject-header"
-                  style={{
-                    cursor: 'pointer',
-                  }}
-                  onClick={() =>
-                    setMateriaAberta(
-                      aberta ? null : materia.id
+              const topicosAtivos =
+                materia.topicos?.filter(
+                  (topico) =>
+                    Boolean(
+                      topico.ativo
                     )
+                ).length || 0;
+
+              return (
+                <article
+                  className="content-subject-card"
+                  key={
+                    materia.id
                   }
                 >
+
                   <div
+                    className="content-subject-header"
                     style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '13px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background:
-                        materia.cor ||
-                        'var(--accent)',
-                      color: '#fff',
-                      flexShrink: 0,
+                      cursor:
+                        'pointer',
                     }}
-                  >
-                    <Icon
-                      name={
-                        ICONES.includes(
-                          materia.icone
-                        )
-                          ? materia.icone
-                          : 'book'
-                      }
-                      size={21}
-                    />
-                  </div>
-
-                  <div
-                    className="admin-subject-main"
-                    style={{
-                      minWidth: 0,
-                      flex: 1,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        flexWrap: 'wrap',
-                      }}
-                    >
-                      <h3>
-                        {materia.nome}
-                      </h3>
-
-                      <span
-                        className="admin-status"
-                        style={{
-                          padding:
-                            '4px 8px',
-                          borderRadius:
-                            '999px',
-                          background:
-                            materia.ativa
-                              ? '#e9f8ed'
-                              : '#f1f3f2',
-                          color:
-                            materia.ativa
-                              ? 'var(--accent-dark)'
-                              : 'var(--muted)',
-                          fontSize:
-                            '10px',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {materia.ativa
-                          ? 'ATIVA'
-                          : 'INATIVA'}
-                      </span>
-                    </div>
-
-                    <p>
-                      {materia.descricao ||
-                        'Sem descrição cadastrada.'}
-                    </p>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '14px',
-                        marginTop: '6px',
-                        color: 'var(--muted)',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                      }}
-                    >
-                      <span>
-                        {materia.topicos
-                          ?.length || 0}{' '}
-                        tópicos
-                      </span>
-
-                      <span>
-                        {topicosAtivos}{' '}
-                        ativos
-                      </span>
-
-                      <span>
-                        Ordem {materia.ordem}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className="admin-subject-actions"
-                    onClick={(event) =>
-                      event.stopPropagation()
+                    onClick={() =>
+                      setMateriaAberta(
+                        aberta
+                          ? null
+                          : materia.id
+                      )
                     }
-                    style={{
-                      display: 'flex',
-                      gap: '6px',
-                    }}
                   >
-                    <button
-                      type="button"
-                      className="mural-btn secondary"
-                      onClick={() =>
-                        abrirEditarMateria(
-                          materia
-                        )
-                      }
-                    >
-                      <Icon
-                        name="edit"
-                        size={15}
-                      />
-                      Editar
-                    </button>
 
-                    <button
-                      type="button"
-                      className="mural-btn secondary"
-                      onClick={() =>
-                        alternarMateria(
-                          materia
-                        )
-                      }
-                    >
-                      {materia.ativa
-                        ? 'Desativar'
-                        : 'Ativar'}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="mural-btn danger"
-                      onClick={() =>
-                        excluirMateria(
-                          materia
-                        )
-                      }
-                    >
-                      <Icon
-                        name="trash"
-                        size={15}
-                      />
-                    </button>
-                  </div>
-
-                  <div
-                    className="admin-chevron"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent:
-                        'center',
-                      transition:
-                        'transform .2s ease',
-                      transform: aberta
-                        ? 'rotate(180deg)'
-                        : 'rotate(0deg)',
-                    }}
-                  >
-                    <Icon
-                      name="chevron"
-                      size={18}
-                    />
-                  </div>
-                </div>
-
-                {aberta && (
-                  <div
-                    className="admin-topic-area"
-                    style={{
-                      borderTop:
-                        '1px solid var(--line)',
-                      padding:
-                        '18px 20px 20px',
-                    }}
-                  >
                     <div
                       style={{
-                        display: 'flex',
+                        width:
+                          '44px',
+                        height:
+                          '44px',
+                        borderRadius:
+                          '13px',
+                        display:
+                          'flex',
                         alignItems:
                           'center',
                         justifyContent:
-                          'space-between',
-                        gap: '12px',
-                        marginBottom:
-                          '12px',
+                          'center',
+                        background:
+                          materia.cor ||
+                          'var(--accent)',
+                        color:
+                          '#fff',
+                        flexShrink:
+                          0,
                       }}
                     >
-                      <div>
-                        <strong>
-                          Tópicos da matéria
-                        </strong>
+                      <Icon
+                        name={
+                          ICONES.includes(
+                            materia.icone
+                          )
+                            ? materia.icone
+                            : 'book'
+                        }
+                        size={21}
+                      />
+                    </div>
 
-                        <p
+                    <div
+                      className="admin-subject-main"
+                      style={{
+                        minWidth:
+                          0,
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display:
+                            'flex',
+                          alignItems:
+                            'center',
+                          gap:
+                            '8px',
+                          flexWrap:
+                            'wrap',
+                        }}
+                      >
+                        <h3>
+                          {materia.nome}
+                        </h3>
+
+                        <span
+                          className="admin-status"
                           style={{
-                            margin:
-                              '4px 0 0',
+                            padding:
+                              '4px 8px',
+                            borderRadius:
+                              '999px',
+                            background:
+                              materia.ativa
+                                ? '#e9f8ed'
+                                : '#f1f3f2',
                             color:
-                              'var(--muted)',
+                              materia.ativa
+                                ? 'var(--accent-dark)'
+                                : 'var(--muted)',
                             fontSize:
-                              '11px',
+                              '10px',
+                            fontWeight:
+                              800,
                           }}
                         >
-                          Organize os assuntos
-                          que serão utilizados
-                          pelo sistema.
-                        </p>
+                          {materia.ativa
+                            ? 'ATIVA'
+                            : 'INATIVA'}
+                        </span>
                       </div>
 
+                      <p>
+                        {materia.descricao ||
+                          'Sem descrição cadastrada.'}
+                      </p>
+
+                      <div
+                        style={{
+                          display:
+                            'flex',
+                          gap:
+                            '14px',
+                          marginTop:
+                            '6px',
+                          color:
+                            'var(--muted)',
+                          fontSize:
+                            '11px',
+                          fontWeight:
+                            700,
+                        }}
+                      >
+                        <span>
+                          {materia.topicos
+                            ?.length ||
+                            0}{' '}
+                          tópicos
+                        </span>
+
+                        <span>
+                          {topicosAtivos}{' '}
+                          ativos
+                        </span>
+
+                        <span>
+                          Ordem{' '}
+                          {materia.ordem}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className="admin-subject-actions"
+                      onClick={(
+                        event
+                      ) =>
+                        event.stopPropagation()
+                      }
+                      style={{
+                        display:
+                          'flex',
+                        gap:
+                          '6px',
+                      }}
+                    >
                       <button
                         type="button"
-                        className="mural-btn"
+                        className="mural-btn secondary"
                         onClick={() =>
-                          abrirNovoTopico(
+                          abrirEditarMateria(
                             materia
                           )
                         }
                       >
                         <Icon
-                          name="plus"
+                          name="edit"
                           size={15}
                         />
-                        Novo tópico
+
+                        Editar
+                      </button>
+
+                      <button
+                        type="button"
+                        className="mural-btn secondary"
+                        onClick={() =>
+                          alternarMateria(
+                            materia
+                          )
+                        }
+                      >
+                        {materia.ativa
+                          ? 'Desativar'
+                          : 'Ativar'}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="mural-btn danger"
+                        onClick={() =>
+                          excluirMateria(
+                            materia
+                          )
+                        }
+                      >
+                        <Icon
+                          name="trash"
+                          size={15}
+                        />
                       </button>
                     </div>
 
-                    {materia.topicos?.length ? (
+                    <div
+                      className="admin-chevron"
+                      style={{
+                        display:
+                          'flex',
+                        alignItems:
+                          'center',
+                        justifyContent:
+                          'center',
+                        transition:
+                          'transform .2s ease',
+                        transform:
+                          aberta
+                            ? 'rotate(180deg)'
+                            : 'rotate(0deg)',
+                      }}
+                    >
+                      <Icon
+                        name="chevron"
+                        size={18}
+                      />
+                    </div>
+                  </div>
+
+                  {aberta && (
+                    <div
+                      className="admin-topic-area"
+                      style={{
+                        borderTop:
+                          '1px solid var(--line)',
+                        padding:
+                          '18px 20px 20px',
+                      }}
+                    >
                       <div
                         style={{
                           display:
                             'flex',
-                          flexDirection:
-                            'column',
-                          gap: '7px',
+                          alignItems:
+                            'center',
+                          justifyContent:
+                            'space-between',
+                          gap:
+                            '12px',
+                          marginBottom:
+                            '12px',
                         }}
                       >
-                        {materia.topicos.map(
-                          (
-                            topico,
-                            index
-                          ) => (
-                            <div
-                              className="admin-topic-row"
-                              key={
-                                topico.id
-                              }
-                              style={{
-                                display:
-                                  'grid',
-                                gridTemplateColumns:
-                                  '35px 1fr auto',
-                                alignItems:
-                                  'center',
-                                gap: '10px',
-                                padding:
-                                  '10px 11px',
-                                border:
-                                  '1px solid var(--line)',
-                                borderRadius:
-                                  '11px',
-                              }}
-                            >
-                              <span
-                                style={{
-                                  color:
-                                    'var(--muted)',
-                                  fontSize:
-                                    '11px',
-                                  fontWeight:
-                                    800,
-                                }}
-                              >
-                                {String(
-                                  topico.ordem ||
-                                    index +
-                                      1
-                                ).padStart(
-                                  2,
-                                  '0'
-                                )}
-                              </span>
+                        <div>
+                          <strong>
+                            Tópicos da matéria
+                          </strong>
 
-                              <div>
-                                <strong
-                                  style={{
-                                    color:
-                                      'var(--ink)',
-                                    fontSize:
-                                      '13px',
-                                  }}
-                                >
-                                  {
-                                    topico.nome
-                                  }
-                                </strong>
+                          <p
+                            style={{
+                              margin:
+                                '4px 0 0',
+                              color:
+                                'var(--muted)',
+                              fontSize:
+                                '11px',
+                            }}
+                          >
+                            Organize os assuntos
+                            utilizados pelo
+                            sistema.
+                          </p>
+                        </div>
 
-                                {topico.descricao && (
-                                  <small
-                                    style={{
-                                      display:
-                                        'block',
-                                      marginTop:
-                                        '3px',
-                                      color:
-                                        'var(--muted)',
-                                    }}
-                                  >
-                                    {
-                                      topico.descricao
-                                    }
-                                  </small>
-                                )}
-                              </div>
+                        <button
+                          type="button"
+                          className="mural-btn"
+                          onClick={() =>
+                            abrirNovoTopico(
+                              materia
+                            )
+                          }
+                        >
+                          <Icon
+                            name="plus"
+                            size={15}
+                          />
 
+                          Novo tópico
+                        </button>
+                      </div>
+
+                      {materia.topicos?.length ? (
+                        <div
+                          style={{
+                            display:
+                              'flex',
+                            flexDirection:
+                              'column',
+                            gap:
+                              '7px',
+                          }}
+                        >
+                          {materia.topicos.map(
+                            (
+                              topico,
+                              index
+                            ) => (
                               <div
+                                className="admin-topic-row"
+                                key={
+                                  topico.id
+                                }
                                 style={{
                                   display:
-                                    'flex',
+                                    'grid',
+                                  gridTemplateColumns:
+                                    '35px 1fr auto',
                                   alignItems:
                                     'center',
-                                  gap: '6px',
+                                  gap:
+                                    '10px',
+                                  padding:
+                                    '10px 11px',
+                                  border:
+                                    '1px solid var(--line)',
+                                  borderRadius:
+                                    '11px',
                                 }}
                               >
                                 <span
-                                  className="admin-status"
                                   style={{
-                                    padding:
-                                      '4px 7px',
-                                    borderRadius:
-                                      '999px',
-                                    background:
-                                      topico.ativo
-                                        ? '#e9f8ed'
-                                        : '#f1f3f2',
                                     color:
-                                      topico.ativo
-                                        ? 'var(--accent-dark)'
-                                        : 'var(--muted)',
+                                      'var(--muted)',
                                     fontSize:
-                                      '9px',
+                                      '11px',
                                     fontWeight:
                                       800,
                                   }}
                                 >
-                                  {topico.ativo
-                                    ? 'ATIVO'
-                                    : 'INATIVO'}
+                                  {String(
+                                    topico.ordem ||
+                                      index + 1
+                                  ).padStart(
+                                    2,
+                                    '0'
+                                  )}
                                 </span>
 
-                                <button
-                                  type="button"
-                                  className="mural-btn secondary"
-                                  onClick={() =>
-                                    abrirEditarTopico(
-                                      topico
-                                    )
-                                  }
-                                >
-                                  <Icon
-                                    name="edit"
-                                    size={
-                                      14
+                                <div>
+                                  <strong
+                                    style={{
+                                      color:
+                                        'var(--ink)',
+                                      fontSize:
+                                        '13px',
+                                    }}
+                                  >
+                                    {
+                                      topico.nome
                                     }
-                                  />
-                                </button>
+                                  </strong>
 
-                                <button
-                                  type="button"
-                                  className="mural-btn secondary"
-                                  onClick={() =>
-                                    alternarTopico(
-                                      topico
-                                    )
-                                  }
-                                >
-                                  {topico.ativo
-                                    ? 'Desativar'
-                                    : 'Ativar'}
-                                </button>
+                                  {topico.descricao && (
+                                    <small
+                                      style={{
+                                        display:
+                                          'block',
+                                        marginTop:
+                                          '3px',
+                                        color:
+                                          'var(--muted)',
+                                      }}
+                                    >
+                                      {
+                                        topico.descricao
+                                      }
+                                    </small>
+                                  )}
+                                </div>
 
-                                <button
-                                  type="button"
-                                  className="mural-btn danger"
-                                  onClick={() =>
-                                    excluirTopico(
-                                      topico
-                                    )
-                                  }
+                                <div
+                                  style={{
+                                    display:
+                                      'flex',
+                                    alignItems:
+                                      'center',
+                                    gap:
+                                      '6px',
+                                  }}
                                 >
-                                  <Icon
-                                    name="trash"
-                                    size={
-                                      14
+                                  <span
+                                    className="admin-status"
+                                    style={{
+                                      padding:
+                                        '4px 7px',
+                                      borderRadius:
+                                        '999px',
+                                      background:
+                                        topico.ativo
+                                          ? '#e9f8ed'
+                                          : '#f1f3f2',
+                                      color:
+                                        topico.ativo
+                                          ? 'var(--accent-dark)'
+                                          : 'var(--muted)',
+                                      fontSize:
+                                        '9px',
+                                      fontWeight:
+                                        800,
+                                    }}
+                                  >
+                                    {topico.ativo
+                                      ? 'ATIVO'
+                                      : 'INATIVO'}
+                                  </span>
+
+                                  <button
+                                    type="button"
+                                    className="mural-btn secondary"
+                                    onClick={() =>
+                                      abrirEditarTopico(
+                                        topico
+                                      )
                                     }
-                                  />
-                                </button>
+                                  >
+                                    <Icon
+                                      name="edit"
+                                      size={14}
+                                    />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="mural-btn secondary"
+                                    onClick={() =>
+                                      alternarTopico(
+                                        topico
+                                      )
+                                    }
+                                  >
+                                    {topico.ativo
+                                      ? 'Desativar'
+                                      : 'Ativar'}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="mural-btn danger"
+                                    onClick={() =>
+                                      excluirTopico(
+                                        topico
+                                      )
+                                    }
+                                  >
+                                    <Icon
+                                      name="trash"
+                                      size={14}
+                                    />
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    ) : (
-                      <div
-                        className="admin-content-empty"
-                      >
-                        <strong>
-                          Nenhum tópico
-                          cadastrado.
-                        </strong>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <div className="admin-content-empty">
+                          <strong>
+                            Nenhum tópico cadastrado.
+                          </strong>
 
-                        <span>
-                          Adicione o primeiro
-                          tópico desta matéria.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </article>
-            );
-          })}
+                          <span>
+                            Adicione o primeiro
+                            tópico desta matéria.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </article>
+              );
+            }
+          )}
         </div>
       )}
+
+      {/* MODAL DE MATÉRIA */}
 
       {modalMateria && (
         <Modal
           titulo={
-            modalMateria.modo === 'criar'
+            modalMateria.modo ===
+            'criar'
               ? 'Nova matéria'
               : 'Editar matéria'
           }
           onClose={() =>
             setModalMateria(null)
           }
-          onSave={salvarMateria}
-          salvando={salvando}
+          onSave={
+            salvarMateria
+          }
+          salvando={
+            salvando
+          }
         >
           <label className="admin-field">
-            <span>Nome da matéria</span>
+            <span>
+              Nome da matéria
+            </span>
 
             <input
-              value={formMateria.nome}
-              onChange={(event) =>
+              value={
+                formMateria.nome
+              }
+              onChange={(
+                event
+              ) =>
                 setFormMateria(
                   (atual) => ({
                     ...atual,
-                    nome: event.target
-                      .value,
+                    nome:
+                      event.target
+                        .value,
                   })
                 )
               }
@@ -1315,16 +1619,23 @@ export default function AdminConteudos() {
           </label>
 
           <label className="admin-field">
-            <span>Slug</span>
+            <span>
+              Slug
+            </span>
 
             <input
-              value={formMateria.slug}
-              onChange={(event) =>
+              value={
+                formMateria.slug
+              }
+              onChange={(
+                event
+              ) =>
                 setFormMateria(
                   (atual) => ({
                     ...atual,
-                    slug: event.target
-                      .value,
+                    slug:
+                      event.target
+                        .value,
                   })
                 )
               }
@@ -1332,50 +1643,66 @@ export default function AdminConteudos() {
             />
 
             <small>
-              Pode deixar vazio para o sistema
-              gerar automaticamente.
+              Pode deixar vazio para o
+              sistema gerar automaticamente.
             </small>
           </label>
 
           <div className="admin-field-row">
             <label className="admin-field">
-              <span>Ícone</span>
+              <span>
+                Ícone
+              </span>
 
               <select
-                value={formMateria.icone}
-                onChange={(event) =>
+                value={
+                  formMateria.icone
+                }
+                onChange={(
+                  event
+                ) =>
                   setFormMateria(
                     (atual) => ({
                       ...atual,
                       icone:
-                        event.target.value,
+                        event.target
+                          .value,
                     })
                   )
                 }
               >
-                {ICONES.map((icone) => (
-                  <option
-                    key={icone}
-                    value={icone}
-                  >
-                    {icone}
-                  </option>
-                ))}
+                {ICONES.map(
+                  (icone) => (
+                    <option
+                      key={icone}
+                      value={icone}
+                    >
+                      {icone}
+                    </option>
+                  )
+                )}
               </select>
             </label>
 
             <label className="admin-field">
-              <span>Cor</span>
+              <span>
+                Cor
+              </span>
 
               <input
                 type="text"
-                value={formMateria.cor}
-                onChange={(event) =>
+                value={
+                  formMateria.cor
+                }
+                onChange={(
+                  event
+                ) =>
                   setFormMateria(
                     (atual) => ({
                       ...atual,
-                      cor: event.target
-                        .value,
+                      cor:
+                        event.target
+                          .value,
                     })
                   )
                 }
@@ -1386,13 +1713,19 @@ export default function AdminConteudos() {
 
           <div className="admin-field-row">
             <label className="admin-field">
-              <span>Ordem</span>
+              <span>
+                Ordem
+              </span>
 
               <input
                 type="number"
                 min="0"
-                value={formMateria.ordem}
-                onChange={(event) =>
+                value={
+                  formMateria.ordem
+                }
+                onChange={(
+                  event
+                ) =>
                   setFormMateria(
                     (atual) => ({
                       ...atual,
@@ -1411,7 +1744,9 @@ export default function AdminConteudos() {
                 checked={Boolean(
                   formMateria.ativa
                 )}
-                onChange={(event) =>
+                onChange={(
+                  event
+                ) =>
                   setFormMateria(
                     (atual) => ({
                       ...atual,
@@ -1428,17 +1763,24 @@ export default function AdminConteudos() {
           </div>
 
           <label className="admin-field">
-            <span>Descrição</span>
+            <span>
+              Descrição
+            </span>
 
             <textarea
               rows="4"
-              value={formMateria.descricao}
-              onChange={(event) =>
+              value={
+                formMateria.descricao
+              }
+              onChange={(
+                event
+              ) =>
                 setFormMateria(
                   (atual) => ({
                     ...atual,
                     descricao:
-                      event.target.value,
+                      event.target
+                        .value,
                   })
                 )
               }
@@ -1448,30 +1790,44 @@ export default function AdminConteudos() {
         </Modal>
       )}
 
+      {/* MODAL DE TÓPICO */}
+
       {modalTopico && (
         <Modal
           titulo={
-            modalTopico.modo === 'criar'
+            modalTopico.modo ===
+            'criar'
               ? 'Novo tópico'
               : 'Editar tópico'
           }
           onClose={() =>
             setModalTopico(null)
           }
-          onSave={salvarTopico}
-          salvando={salvando}
+          onSave={
+            salvarTopico
+          }
+          salvando={
+            salvando
+          }
         >
           <label className="admin-field">
-            <span>Nome do tópico</span>
+            <span>
+              Nome do tópico
+            </span>
 
             <input
-              value={formTopico.nome}
-              onChange={(event) =>
+              value={
+                formTopico.nome
+              }
+              onChange={(
+                event
+              ) =>
                 setFormTopico(
                   (atual) => ({
                     ...atual,
-                    nome: event.target
-                      .value,
+                    nome:
+                      event.target
+                        .value,
                   })
                 )
               }
@@ -1481,13 +1837,19 @@ export default function AdminConteudos() {
 
           <div className="admin-field-row">
             <label className="admin-field">
-              <span>Ordem</span>
+              <span>
+                Ordem
+              </span>
 
               <input
                 type="number"
                 min="0"
-                value={formTopico.ordem}
-                onChange={(event) =>
+                value={
+                  formTopico.ordem
+                }
+                onChange={(
+                  event
+                ) =>
                   setFormTopico(
                     (atual) => ({
                       ...atual,
@@ -1506,7 +1868,9 @@ export default function AdminConteudos() {
                 checked={Boolean(
                   formTopico.ativo
                 )}
-                onChange={(event) =>
+                onChange={(
+                  event
+                ) =>
                   setFormTopico(
                     (atual) => ({
                       ...atual,
@@ -1523,17 +1887,24 @@ export default function AdminConteudos() {
           </div>
 
           <label className="admin-field">
-            <span>Descrição</span>
+            <span>
+              Descrição
+            </span>
 
             <textarea
               rows="4"
-              value={formTopico.descricao}
-              onChange={(event) =>
+              value={
+                formTopico.descricao
+              }
+              onChange={(
+                event
+              ) =>
                 setFormTopico(
                   (atual) => ({
                     ...atual,
                     descricao:
-                      event.target.value,
+                      event.target
+                        .value,
                   })
                 )
               }
@@ -1542,6 +1913,7 @@ export default function AdminConteudos() {
           </label>
         </Modal>
       )}
+
     </div>
   );
 }

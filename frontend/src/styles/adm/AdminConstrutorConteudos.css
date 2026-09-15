@@ -1,0 +1,233 @@
+/* =========================================================
+   CONSTRUTOR DE CONTEÚDOS — ADMIN
+   ========================================================= */
+
+.admin-page {
+  width: 100%;
+}
+
+/* Cabeçalho */
+
+.page-header {
+  margin-bottom: 22px;
+}
+
+.page-header > div {
+  max-width: 850px;
+}
+
+.admin-section-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--accent-dark, #216e4a);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: var(--ink, #1f2924);
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.page-header p {
+  margin: 8px 0 0;
+  color: var(--muted, #6b746f);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   CARDS DE ESTATÍSTICAS
+   ========================================================= */
+
+.admin-content-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid var(--line, #e4e8e5);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 45, 35, 0.04);
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  right: -22px;
+  bottom: -30px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(33, 110, 74, 0.06);
+}
+
+.stat-value {
+  position: relative;
+  z-index: 1;
+  color: var(--ink, #1f2924);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  position: relative;
+  z-index: 1;
+  margin-top: 7px;
+  color: var(--muted, #6b746f);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* =========================================================
+   PAINEL DE BUSCA
+   ========================================================= */
+
+.panel-card {
+  border: 1px solid var(--line, #e4e8e5);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 45, 35, 0.04);
+}
+
+.panel-card input {
+  font-family: inherit;
+}
+
+.panel-card input::placeholder {
+  color: #9ba39f;
+}
+
+/* =========================================================
+   LISTA DE MATÉRIAS
+   ========================================================= */
+
+.panel-card .panel-card {
+  box-shadow: none;
+}
+
+.panel-card h3 {
+  font-weight: 800;
+}
+
+.panel-card button {
+  font-family: inherit;
+}
+
+.panel-card button:not(:disabled) {
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.panel-card button:not(:disabled):hover {
+  border-color: rgba(33, 110, 74, 0.25) !important;
+  background: #fbfdfc !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(25, 45, 35, 0.05);
+}
+
+.panel-card button:not(:disabled):focus-visible {
+  outline: 3px solid rgba(33, 110, 74, 0.16);
+  outline-offset: 2px;
+}
+
+/* Ícone da matéria */
+
+.panel-card > div:first-child > div:first-child {
+  transition: transform 160ms ease;
+}
+
+.panel-card:hover > div:first-child > div:first-child {
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   TÓPICOS
+   ========================================================= */
+
+.panel-card button strong {
+  line-height: 1.35;
+}
+
+.panel-card button small {
+  line-height: 1.45;
+}
+
+/* =========================================================
+   ESTADOS VAZIOS / CARREGAMENTO
+   ========================================================= */
+
+.admin-content-empty {
+  border: 1px dashed #d8dfdb;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.admin-content-empty.large {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 30px;
+  text-align: center;
+}
+
+.admin-content-empty strong {
+  color: var(--ink, #1f2924);
+  font-size: 14px;
+}
+
+.admin-content-empty span {
+  margin-top: 6px;
+  color: var(--muted, #6b746f);
+  font-size: 12px;
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .admin-content-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header h1 {
+    font-size: 25px;
+  }
+
+  .page-header p {
+    font-size: 12px;
+  }
+
+  .stat-card {
+    padding: 17px;
+  }
+
+  .stat-value {
+    font-size: 25px;
+  }
+
+  .panel-card button {
+    padding: 11px !important;
+  }
+}

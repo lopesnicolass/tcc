@@ -18,6 +18,7 @@ const flashcardRoutes = require("./routes/flashcardRoutes");
 const cronogramaRoutes = require("./routes/cronogramaRoutes");
 const resultadoFlashcardRoutes = require("./routes/resultadoFlashcardRoutes");
 const conteudoPaginaRoutes = require("./routes/conteudoPaginaRoutes");
+
 const app = express();
 
 app.use(cors());
