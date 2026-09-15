@@ -1,21 +1,5 @@
 require("dotenv").config();
 
-
-// ============================
-// VALIDAÇÃO DAS VARIÁVEIS DE AMBIENTE
-// ============================
-
-if (!process.env.JWT_SECRET) {
-
-    console.error(
-        "❌ A variável de ambiente JWT_SECRET não foi definida. " +
-        "Crie um arquivo .env na pasta backend/ com base no .env.example."
-    );
-
-    process.exit(1);
-}
-
-
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -29,73 +13,112 @@ const muralRoutes = require("./routes/muralRoutes");
 const sessaoRoutes = require("./routes/sessaoRoutes");
 const provaRoutes = require("./routes/provaRoutes");
 const gamificacaoRoutes = require("./routes/gamificacaoRoutes");
-const conteudoRoutes = require('./routes/conteudoRoutes');
+const conteudoRoutes = require("./routes/conteudoRoutes");
 const flashcardRoutes = require("./routes/flashcardRoutes");
-
-
-
+const cronogramaRoutes = require("./routes/cronogramaRoutes");
+const resultadoFlashcardRoutes = require("./routes/resultadoFlashcardRoutes");
+const conteudoPaginaRoutes = require("./routes/conteudoPaginaRoutes");
 const app = express();
-
-
-// ============================
-// CONFIGURAÇÕES
-// ============================
 
 app.use(cors());
 
 app.use(express.json());
 
-
-// ============================
-// ARQUIVOS PDF
-// ============================
-
 app.use(
     "/uploads",
-    express.static(path.join(__dirname, "uploads"))
+    express.static(
+        path.join(__dirname, "uploads")
+    )
 );
 
+app.use(
+    "/auth",
+    authRoutes
+);
 
-// ============================
-// ROTAS
-// ============================
+app.use(
+    "/usuarios",
+    usuarioRoutes
+);
 
-app.use("/auth", authRoutes);
-app.use("/usuarios", usuarioRoutes);
-app.use("/resultados", resultadoRoutes);
-app.use("/questoes", questaoRoutes);
-app.use("/simulados", simuladoRoutes);
-app.use("/mural", muralRoutes);
-app.use("/sessoes", sessaoRoutes);
-app.use("/provas", provaRoutes);
-app.use("/gamificacao", gamificacaoRoutes);
-app.use("/flashcards", flashcardRoutes);
+app.use(
+    "/resultados",
+    resultadoRoutes
+);
 
-app.use("/conteudos", conteudoRoutes);
+app.use(
+    "/questoes",
+    questaoRoutes
+);
 
-// ============================
-// ROTA INICIAL
-// ============================
+app.use(
+    "/simulados",
+    simuladoRoutes
+);
 
-app.get("/", (req, res) => {
+app.use(
+    "/mural",
+    muralRoutes
+);
 
-    res.json({
-        mensagem: "API do Vestibulinho funcionando!"
-    });
+app.use(
+    "/sessoes",
+    sessaoRoutes
+);
 
-});
+app.use(
+    "/provas",
+    provaRoutes
+);
 
+app.use(
+    "/gamificacao",
+    gamificacaoRoutes
+);
 
-// ============================
-// SERVIDOR
-// ============================
+app.use(
+    "/conteudos",
+    conteudoRoutes
+);
 
-const PORT = process.env.PORT || 3000;
+app.use(
+    "/flashcards",
+    flashcardRoutes
+);
 
-app.listen(PORT, () => {
+app.use(
+    "/cronograma",
+    cronogramaRoutes
+);
 
-    console.log(
-        `🚀 Servidor rodando na porta ${PORT}`
-    );
+app.use(
+    "/flashcards/resultados",
+    resultadoFlashcardRoutes
+);
 
-});
+app.use(
+    "/paginas-conteudo",
+    conteudoPaginaRoutes
+);
+
+app.get(
+    "/",
+    (req, res) => {
+        res.json({
+            mensagem:
+                "API do Vestibulinho funcionando!"
+        });
+    }
+);
+
+const PORT =
+    process.env.PORT || 3000;
+
+app.listen(
+    PORT,
+    () => {
+        console.log(
+            `Servidor rodando na porta ${PORT}`
+        );
+    }
+);

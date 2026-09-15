@@ -211,6 +211,12 @@ export default function PlanoAutomatico() {
   const [addingWeek, setAddingWeek] =
     useState(null);
 
+  const [syncingPlan, setSyncingPlan] =
+    useState(false);
+
+  const [syncError, setSyncError] =
+    useState('');
+
   const phases = [
     'Fundamentos',
     'Construção de conhecimento',
@@ -273,7 +279,94 @@ export default function PlanoAutomatico() {
       }
     }, [plan]);
 
-  function generate() {
+  function montarAtividadesDoPlano(p) {
+
+    const hoje =
+      new Date();
+
+    const nomesDias = [
+      'Domingo',
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado'
+    ];
+
+    const domingo =
+      new Date(hoje);
+
+    domingo.setDate(
+      hoje.getDate() -
+        hoje.getDay()
+    );
+
+    const atividades =
+      [];
+
+    p.forEach((month) => {
+
+      month.semanas.forEach(
+        (week) => {
+
+          week.days.forEach(
+            (day) => {
+
+              const indiceDia =
+                nomesDias.indexOf(
+                  day.day
+                );
+
+              const alvo =
+                new Date(
+                  domingo
+                );
+
+              alvo.setDate(
+                domingo.getDate() +
+                  indiceDia +
+                  7 *
+                    (month.numero - 1) +
+                  7 *
+                    (week.number - 1)
+              );
+
+              const dataFinal =
+                day.data ||
+                `${alvo.getFullYear()}-${pad(
+                  alvo.getMonth() + 1
+                )}-${pad(
+                  alvo.getDate()
+                )}`;
+
+              atividades.push({
+                data:
+                  dataFinal,
+                horario:
+                  '08:00',
+                nome:
+                  day.topico,
+                materia:
+                  day.materia,
+                topicoId:
+                  day.topicoId ||
+                  null,
+                done:
+                  false,
+                origem:
+                  'plano-automatico'
+              });
+            }
+          );
+        }
+      );
+    });
+
+    return atividades;
+  }
+
+  async function generate() {
     const p =
       generatePlan(
         months,
@@ -294,6 +387,95 @@ export default function PlanoAutomatico() {
       20,
       'plano automático gerado'
     );
+
+    const usuarioId =
+      Number(
+        getUser().id ||
+          getUser().usuarioId ||
+          0
+      );
+
+    const token =
+      getToken();
+
+    if (!usuarioId) {
+      return;
+    }
+
+    const atividades =
+      montarAtividadesDoPlano(p);
+
+    if (!atividades.length) {
+      return;
+    }
+
+    try {
+
+      setSyncingPlan(true);
+
+      setSyncError('');
+
+      const response =
+        await fetch(
+          `${API_URL}/cronograma/${usuarioId}/lote`,
+          {
+            method:
+              'POST',
+
+            headers: {
+              'Content-Type':
+                'application/json',
+
+              ...(token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`
+                  }
+                : {})
+            },
+
+            body:
+              JSON.stringify({
+                atividades,
+
+                substituirOrigem:
+                  'plano-automatico'
+              })
+          }
+        );
+
+      let data = {};
+
+      try {
+        data =
+          await response.json();
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.mensagem ||
+            'Não foi possível salvar o plano no cronograma.'
+        );
+      }
+
+    } catch (erro) {
+
+      console.error(
+        'Erro ao salvar plano no cronograma:',
+        erro
+      );
+
+      setSyncError(
+        erro.message ||
+        'O plano foi gerado, mas não foi possível salvá-lo no cronograma.'
+      );
+
+    } finally {
+
+      setSyncingPlan(false);
+    }
   }
 
   async function addWeek(
@@ -695,9 +877,25 @@ export default function PlanoAutomatico() {
           <button
             className="mural-btn primary"
             onClick={generate}
+            disabled={syncingPlan}
           >
-            Gerar meu plano
+            {syncingPlan
+              ? 'Gerando e salvando...'
+              : 'Gerar meu plano'}
           </button>
+
+          {syncError && (
+
+            <span
+              style={{
+                color: '#c0392b',
+                fontSize: '0.85rem'
+              }}
+            >
+              {syncError}
+            </span>
+
+          )}
 
         </div>
 
@@ -785,6 +983,7 @@ export default function PlanoAutomatico() {
                     {' · '}
                     {months * 4 * days}
                     {' sessões'}
+
                   </p>
 
                 </div>

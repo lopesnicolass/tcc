@@ -294,6 +294,26 @@ db.run(`
     `);
 
 
+        db.run(`
+        CREATE TABLE IF NOT EXISTS cronograma_atividades (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            data TEXT NOT NULL,
+            horario TEXT NOT NULL DEFAULT '08:00',
+            nome TEXT NOT NULL,
+            materia TEXT NOT NULL,
+            concluida INTEGER NOT NULL DEFAULT 0,
+            origem TEXT DEFAULT NULL,
+            topico_id INTEGER DEFAULT NULL,
+            data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+            FOREIGN KEY (topico_id) REFERENCES topicos(id) ON DELETE SET NULL
+        )
+    `);
+
+    db.run(`CREATE INDEX IF NOT EXISTS idx_cronograma_usuario ON cronograma_atividades(usuario_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_cronograma_usuario_data ON cronograma_atividades(usuario_id, data)`);
+
     // =====================================================
     // ÍNDICES — PLANOS AUTOMÁTICOS
     // =====================================================
@@ -797,7 +817,141 @@ db.run(`
         `,
         "id, simulado_id, questao_id, ordem"
     );
+    db.run(`
+    CREATE TABLE IF NOT EXISTS sessoes_flashcards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        usuario_id INTEGER NOT NULL,
+        total_cards INTEGER NOT NULL DEFAULT 0,
+        acertos INTEGER NOT NULL DEFAULT 0,
+        erros INTEGER NOT NULL DEFAULT 0,
+        data_inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_fim DATETIME DEFAULT NULL,
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuarios(id)
+            ON DELETE CASCADE
+    )
+`);
 
+db.run(`
+    CREATE TABLE IF NOT EXISTS respostas_flashcards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sessao_id INTEGER NOT NULL,
+        usuario_id INTEGER NOT NULL,
+        flashcard_id INTEGER NOT NULL,
+        materia TEXT NOT NULL,
+        acertou INTEGER NOT NULL,
+        data_resposta DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (sessao_id)
+            REFERENCES sessoes_flashcards(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id)
+            REFERENCES usuarios(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (flashcard_id)
+            REFERENCES flashcards(id)
+            ON DELETE CASCADE
+    )
+`);
+
+db.run(`
+    CREATE INDEX IF NOT EXISTS idx_sessoes_flashcards_usuario
+    ON sessoes_flashcards(usuario_id)
+`);
+
+db.run(`
+    CREATE INDEX IF NOT EXISTS idx_respostas_flashcards_usuario
+    ON respostas_flashcards(usuario_id)
+`);
+
+db.run(`
+    CREATE INDEX IF NOT EXISTS idx_respostas_flashcards_materia
+    ON respostas_flashcards(usuario_id, materia)
+`);
+
+    // =====================================================
+    // PÁGINAS DINÂMICAS DE CONTEÚDO
+    // =====================================================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS paginas_conteudo (
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            topico_id INTEGER NOT NULL,
+
+            titulo TEXT NOT NULL,
+
+            descricao TEXT DEFAULT '',
+
+            publicado INTEGER NOT NULL DEFAULT 1,
+
+            created_at DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            updated_at DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (topico_id)
+                REFERENCES topicos(id)
+                ON DELETE CASCADE,
+
+            UNIQUE (topico_id)
+        )
+    `);
+
+
+    // =====================================================
+    // BLOCOS DAS PÁGINAS DE CONTEÚDO
+    // =====================================================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS blocos_conteudo (
+
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            pagina_id INTEGER NOT NULL,
+
+            tipo TEXT NOT NULL,
+
+            ordem INTEGER NOT NULL DEFAULT 0,
+
+            dados TEXT NOT NULL DEFAULT '{}',
+
+            ativo INTEGER NOT NULL DEFAULT 1,
+
+            created_at DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            updated_at DATETIME
+                DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (pagina_id)
+                REFERENCES paginas_conteudo(id)
+                ON DELETE CASCADE
+        )
+    `);
+
+
+    // =====================================================
+    // ÍNDICES — PÁGINAS DE CONTEÚDO
+    // =====================================================
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_paginas_conteudo_topico
+        ON paginas_conteudo(topico_id)
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_blocos_conteudo_pagina
+        ON blocos_conteudo(pagina_id)
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_blocos_conteudo_ordem
+        ON blocos_conteudo(pagina_id, ordem)
+    `);
+
+    
 });
 
 module.exports = db;

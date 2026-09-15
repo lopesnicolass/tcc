@@ -224,6 +224,9 @@ export default function AdminConteudos() {
   const [modalTopico, setModalTopico] =
     useState(null);
 
+  const [editorConteudo, setEditorConteudo] =
+  useState(null);  
+
   const [formMateria, setFormMateria] =
     useState(EMPTY_MATERIA);
 
@@ -314,12 +317,21 @@ export default function AdminConteudos() {
       ativo: Boolean(topico.ativo),
     });
 
+    
     setModalTopico({
       modo: 'editar',
       id: topico.id,
       materiaId: topico.materia_id,
     });
   }
+
+  function abrirEditorConteudo(topico) {
+  setEditorConteudo({
+    topicoId: topico.id,
+    topicoNome: topico.nome,
+    pagina: null,
+  });
+}
 
   async function salvarMateria() {
     if (!formMateria.nome.trim()) {

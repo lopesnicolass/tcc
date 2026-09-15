@@ -284,16 +284,27 @@ export default function FlashCards() {
           }
         );
 
-      const dados =
-        await resposta.json();
+ const texto = await resposta.text();
 
-      if (!resposta.ok) {
+let dados = {};
 
-        throw new Error(
-          dados.erro ||
-          'Não foi possível iniciar a sessão.'
-        );
-      }
+try {
+  dados = texto
+    ? JSON.parse(texto)
+    : {};
+} catch {
+  throw new Error(
+    `O servidor não retornou JSON. Status: ${resposta.status}. Verifique se a rota de resultados dos flashcards existe no backend.`
+  );
+}
+
+if (!resposta.ok) {
+  throw new Error(
+    dados.erro ||
+    dados.mensagem ||
+    'Não foi possível iniciar a sessão.'
+  );
+}
 
       setSessaoId(
         dados.sessao.id
@@ -410,16 +421,27 @@ export default function FlashCards() {
           }
         );
 
-      const dados =
-        await resposta.json();
+   const texto = await resposta.text();
 
-      if (!resposta.ok) {
+let dados = {};
 
-        throw new Error(
-          dados.erro ||
-          'Não foi possível registrar a resposta.'
-        );
-      }
+try {
+  dados = texto
+    ? JSON.parse(texto)
+    : {};
+} catch {
+  throw new Error(
+    `O servidor não retornou JSON. Status: ${resposta.status}.`
+  );
+}
+
+if (!resposta.ok) {
+  throw new Error(
+    dados.erro ||
+    dados.mensagem ||
+    'Não foi possível registrar a resposta.'
+  );
+}
 
       const novasRespostas = [
         ...respostasSessao,
@@ -512,16 +534,27 @@ export default function FlashCards() {
           }
         );
 
-      const dados =
-        await resposta.json();
+const texto = await resposta.text();
 
-      if (!resposta.ok) {
+let dados = {};
 
-        throw new Error(
-          dados.erro ||
-          'Erro ao finalizar sessão.'
-        );
-      }
+try {
+  dados = texto
+    ? JSON.parse(texto)
+    : {};
+} catch {
+  throw new Error(
+    `O servidor não retornou JSON. Status: ${resposta.status}.`
+  );
+}
+
+if (!resposta.ok) {
+  throw new Error(
+    dados.erro ||
+    dados.mensagem ||
+    'Erro ao finalizar sessão.'
+  );
+}
 
     } catch (erro) {
 
