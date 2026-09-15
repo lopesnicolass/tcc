@@ -23,7 +23,7 @@ import AdminSimulados from './pages/adm/AdminSimulados.jsx';
 import AdminFlashCards from './pages/adm/AdminFlashCards.jsx';
 import AdminProvas from './pages/adm/AdminProvas.jsx';
 import AdminConteudos from './pages/adm/AdminConteudos.jsx';
-// import AdminCronogramas from './pages/adm/AdminCronogramas.jsx';
+import AdminCronogramas from './pages/adm/AdminCronogramas.jsx';
 
 import XPToast from './components/XPToast.jsx';
 
@@ -61,6 +61,10 @@ export default function App() {
        {/* ÁREA PROTEGIDA DO ADMIN */}
 <Route element={<ProtectedRoute />}>
   <Route element={<AdminLayout />}>
+  <Route
+  path="/admin/cronogramas"
+  element={<AdminCronogramas />}
+/>
     <Route path="/admin" element={<AdminDashboard />} />
     <Route path="/admin/conteudos" element={<AdminConteudos />} />
     <Route path="/admin/usuarios" element={<AdminUsuarios />} />

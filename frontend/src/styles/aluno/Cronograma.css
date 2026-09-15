@@ -262,3 +262,40 @@
 .calendar-confirm-delete:active {
   transform: scale(0.98);
 }
+.calendar-actions-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.calendar-delete-plan {
+  border: 1px solid #c9d7ea;
+  background: #ffffff;
+  color: #315b9d;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.calendar-delete-plan:hover {
+  border-color: #b8c9df;
+  background: #f5f8fc;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 700px) {
+  .calendar-actions-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .calendar-delete-plan,
+  .calendar-actions-buttons .mural-btn {
+    flex: 1;
+  }
+}

@@ -32,6 +32,11 @@ const NAV_SECTIONS = [
         icon: 'file',
       },
       {
+        to: '/admin/cronogramas',
+        label: 'Cronogramas',
+        icon: 'calendar',
+      },
+      {
         to: '/admin/flashcards',
         label: 'FlashCards',
         icon: 'layers',
@@ -69,6 +74,10 @@ const ICONS = {
 
   file: (
     <path d="M6 3h9l3 3v15H6V3Zm9 0v4h3M9 12h6M9 16h6" />
+  ),
+
+  calendar: (
+    <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 4h14M8 3v4m8-4v4" />
   ),
 
   user: (
@@ -261,7 +270,10 @@ export default function AdminSidebar() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon name={item.icon} size={19} />
+                    <Icon
+                      name={item.icon}
+                      size={19}
+                    />
                   </span>
 
                   <span className="label">
@@ -311,7 +323,10 @@ export default function AdminSidebar() {
               flexShrink: 0,
             }}
           >
-            <Icon name="arrowLeft" size={19} />
+            <Icon
+              name="arrowLeft"
+              size={19}
+            />
           </span>
 
           <span className="label">

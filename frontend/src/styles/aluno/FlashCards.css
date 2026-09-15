@@ -1,31 +1,901 @@
-/* Estilos da página FlashCards */
+/* =====================================================
+   FLASHCARDS
+   ===================================================== */
 
-.flashcard-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:20px; }
-
-.materia-section{ margin-bottom:34px; }
-
-.materia-section-title{
-  font-family:"Space Grotesk", sans-serif; font-size:18px; font-weight:700;
-  color:var(--ink); margin:0 0 14px;
+.flashcard-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fill,
+      minmax(200px, 1fr)
+    );
+  gap: 20px;
 }
 
-.flashcard{ perspective:1000px; height:160px; cursor:pointer; }
 
-.flashcard-inner{
-  position:relative; width:100%; height:100%;
-  transition:transform .5s var(--bouncy);
-  transform-style:preserve-3d;
+.materia-section {
+  margin-bottom: 34px;
 }
 
-.flashcard.flipped .flashcard-inner{ transform:rotateY(180deg); }
 
-.flashcard-face{
-  position:absolute; inset:0; border-radius:18px;
-  display:flex; align-items:center; justify-content:center;
-  text-align:center; padding:16px; font-size:15px; font-weight:600;
-  backface-visibility:hidden; box-shadow:0 1px 2px rgba(13,71,161,0.05);
+.materia-section-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 14px;
 }
 
-.flashcard-face.front{ background:#fff; color:var(--ink); }
 
-.flashcard-face.back{ background:linear-gradient(135deg, var(--ink), #08306B); color:#fff; transform:rotateY(180deg); }
+/* =====================================================
+   CARD NORMAL
+   ===================================================== */
+
+.flashcard {
+  perspective: 1000px;
+  height: 160px;
+  cursor: pointer;
+}
+
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition:
+    transform .5s var(--bouncy);
+  transform-style: preserve-3d;
+}
+
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  padding: 16px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  backface-visibility: hidden;
+
+  box-shadow:
+    0 1px 2px
+    rgba(13, 71, 161, 0.05);
+}
+
+
+.flashcard-face.front {
+  background: #fff;
+  color: var(--ink);
+}
+
+
+.flashcard-face.back {
+  background:
+    linear-gradient(
+      135deg,
+      var(--ink),
+      #08306B
+    );
+
+  color: #fff;
+
+  transform:
+    rotateY(180deg);
+}
+
+
+.flashcards-vazio {
+  margin: 0;
+  padding: 24px;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--muted);
+  text-align: center;
+}
+
+
+/* =====================================================
+   ERRO
+   ===================================================== */
+
+.flashcards-erro {
+  max-width: 620px;
+  padding: 24px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 4px 20px
+    rgba(13, 71, 161, 0.06);
+}
+
+
+.flashcards-erro p {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+
+.flashcards-btn-primary,
+.flashcards-btn-secondary {
+  border: none;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    .2s ease;
+}
+
+
+.flashcards-btn-primary {
+  background: var(--ink);
+  color: #fff;
+}
+
+
+.flashcards-btn-primary:hover {
+  transform: translateY(-1px);
+  opacity: .94;
+}
+
+
+.flashcards-btn-secondary {
+  background: #eef3f8;
+  color: var(--ink);
+}
+
+
+.flashcards-btn-secondary:hover {
+  background: #e5ebf3;
+}
+
+
+/* =====================================================
+   BANNER - HORA DOS FLASHCARDS
+   ===================================================== */
+
+.flashcards-game-banner {
+  margin-bottom: 28px;
+  padding: 26px;
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #f2f6fb 100%
+    );
+
+  border: 1px solid #e1e9f2;
+
+  box-shadow:
+    0 8px 24px
+    rgba(13, 71, 161, 0.06);
+}
+
+
+.flashcards-game-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+
+.flashcards-game-eyebrow {
+  display: inline-block;
+  margin-bottom: 7px;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+
+  color: var(--accent-dark);
+}
+
+
+.flashcards-game-banner h2 {
+  margin: 0 0 8px;
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 24px;
+  font-weight: 800;
+
+  color: var(--ink);
+}
+
+
+.flashcards-game-banner p {
+  margin: 0;
+  max-width: 620px;
+
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+
+.flashcards-game-start {
+  flex-shrink: 0;
+
+  border: none;
+  border-radius: 13px;
+
+  padding: 13px 24px;
+
+  background: var(--ink);
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    opacity .2s ease;
+}
+
+
+.flashcards-game-start:hover:not(:disabled) {
+  transform:
+    translateY(-2px);
+}
+
+
+.flashcards-game-start:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+
+.flashcards-game-warning {
+  margin-top: 16px !important;
+  padding-top: 15px;
+
+  border-top:
+    1px solid #e5ebf2;
+
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   PÁGINA DO JOGO
+   ===================================================== */
+
+.flashcards-game-page {
+  min-height: 100%;
+  width: 100%;
+}
+
+
+.flashcards-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 14px;
+}
+
+
+.flashcards-back-button {
+  border: none;
+  background: transparent;
+
+  color: var(--muted);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  padding: 8px 0;
+
+  cursor: pointer;
+
+  transition:
+    color .2s ease;
+}
+
+
+.flashcards-back-button:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+
+.flashcards-back-button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+
+.flashcards-game-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+
+.flashcards-game-title span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+.flashcards-game-title strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+
+/* =====================================================
+   PROGRESSO
+   ===================================================== */
+
+.flashcards-progress {
+  width: 100%;
+  height: 7px;
+
+  margin-bottom: 36px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #e8eef5;
+}
+
+
+.flashcards-progress-bar {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--ink);
+
+  transition:
+    width .3s ease;
+}
+
+
+/* =====================================================
+   CONTEÚDO DO JOGO
+   ===================================================== */
+
+.flashcards-game-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+
+  padding:
+    10px 0 40px;
+}
+
+
+.flashcards-game-subtitle {
+  margin: 0 0 18px;
+
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+
+/* =====================================================
+   CARD DO JOGO
+   ===================================================== */
+
+.flashcard-game-card {
+  width: min(100%, 560px);
+  height: 340px;
+
+  perspective: 1200px;
+
+  cursor: pointer;
+
+  touch-action: none;
+
+  user-select: none;
+
+  will-change:
+    transform;
+}
+
+
+.flashcard-game-inner {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  transform-style: preserve-3d;
+
+  transition:
+    transform .55s var(--bouncy);
+}
+
+
+.flashcard-game-card.is-flipped
+  .flashcard-game-inner {
+  transform:
+    rotateY(180deg);
+}
+
+
+.flashcard-game-face {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+
+  border-radius: 28px;
+
+  text-align: center;
+
+  backface-visibility:
+    hidden;
+
+  box-shadow:
+    0 16px 42px
+    rgba(13, 71, 161, 0.10);
+}
+
+
+.flashcard-game-front {
+  background: #fff;
+  color: var(--ink);
+
+  border:
+    1px solid #e4ebf3;
+}
+
+
+.flashcard-game-back {
+  background:
+    linear-gradient(
+      135deg,
+      var(--ink),
+      #08306B
+    );
+
+  color: #fff;
+
+  transform:
+    rotateY(180deg);
+}
+
+
+.flashcard-game-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 22px;
+
+  padding:
+    7px 12px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(13, 71, 161, 0.08);
+
+  color:
+    var(--accent-dark);
+
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+
+.flashcard-game-back
+  .flashcard-game-label {
+  background:
+    rgba(255,255,255,.12);
+
+  color: #fff;
+}
+
+
+.flashcard-game-face p {
+  margin: 0;
+
+  max-width: 460px;
+
+  font-size: 22px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+
+.flashcard-game-face small {
+  margin-top: 28px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+.flashcard-game-back p {
+  color: #fff;
+}
+
+
+/* =====================================================
+   DICA DE ARRASTO
+   ===================================================== */
+
+.flashcards-swipe-hint {
+  width: min(100%, 560px);
+
+  display: flex;
+  justify-content: space-between;
+
+  margin-top: 15px;
+  padding: 0 6px;
+
+  color: var(--muted);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.flashcards-swipe-hint span:first-child {
+  color: #39734f;
+}
+
+
+.flashcards-swipe-hint span:last-child {
+  color: #a75050;
+}
+
+
+/* =====================================================
+   BOTÕES DO JOGO
+   ===================================================== */
+
+.flashcards-game-actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 14px;
+
+  margin-top: 28px;
+
+  width: min(100%, 560px);
+}
+
+
+.flashcards-answer-button {
+  flex: 1;
+
+  border: none;
+
+  border-radius: 14px;
+
+  padding:
+    14px 20px;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform .2s ease,
+    opacity .2s ease;
+}
+
+
+.flashcards-answer-button.correct {
+  background: #edf7f1;
+  color: #39734f;
+}
+
+
+.flashcards-answer-button.wrong {
+  background: #f9eded;
+  color: #a75050;
+}
+
+
+.flashcards-answer-button:hover:not(:disabled) {
+  transform:
+    translateY(-1px);
+}
+
+
+.flashcards-answer-button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+
+.flashcards-game-error {
+  margin: 16px 0 0;
+
+  color: #a75050;
+
+  font-size: 13px;
+
+  text-align: center;
+}
+
+
+/* =====================================================
+   RESULTADO
+   ===================================================== */
+
+.flashcards-result {
+  width: min(100%, 620px);
+
+  margin:
+    40px auto 0;
+
+  padding: 34px;
+
+  border-radius: 24px;
+
+  background: #fff;
+
+  border:
+    1px solid #e4ebf3;
+
+  box-shadow:
+    0 14px 40px
+    rgba(13, 71, 161, 0.08);
+
+  text-align: center;
+}
+
+
+.flashcards-result-icon {
+  width: 58px;
+  height: 58px;
+
+  margin:
+    0 auto 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    #edf7f1;
+
+  color:
+    #39734f;
+
+  font-size: 28px;
+  font-weight: 800;
+}
+
+
+.flashcards-result h1 {
+  margin:
+    0 0 7px;
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 26px;
+
+  color:
+    var(--ink);
+}
+
+
+.flashcards-result > p {
+  margin:
+    0 0 26px;
+
+  color:
+    var(--muted);
+
+  font-size: 14px;
+}
+
+
+.flashcards-result-score {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  margin-bottom: 28px;
+}
+
+
+.flashcards-result-score strong {
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 52px;
+  line-height: 1;
+
+  color:
+    var(--ink);
+}
+
+
+.flashcards-result-score span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+.flashcards-result-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 28px;
+}
+
+
+.flashcards-result-stat {
+  padding: 17px 12px;
+
+  border-radius: 15px;
+
+  background: #f6f8fb;
+}
+
+
+.flashcards-result-stat span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+.flashcards-result-stat strong {
+  color: var(--ink);
+
+  font-size: 24px;
+  font-weight: 800;
+}
+
+
+.flashcards-result-actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 760px) {
+
+  .flashcards-game-banner-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+
+  .flashcards-game-start {
+    width: 100%;
+  }
+
+
+  .flashcard-game-card {
+    height: 320px;
+  }
+
+
+  .flashcard-game-face {
+    padding: 28px;
+  }
+
+
+  .flashcard-game-face p {
+    font-size: 19px;
+  }
+
+}
+
+
+@media (max-width: 560px) {
+
+  .flashcards-game-header {
+    align-items: flex-start;
+  }
+
+
+  .flashcards-game-title {
+    text-align: right;
+  }
+
+
+  .flashcard-game-card {
+    height: 300px;
+  }
+
+
+  .flashcard-game-face {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+
+  .flashcard-game-face p {
+    font-size: 18px;
+  }
+
+
+  .flashcards-game-actions {
+    flex-direction: column;
+  }
+
+
+  .flashcards-result {
+    padding: 26px 18px;
+  }
+
+
+  .flashcards-result-stats {
+    gap: 8px;
+  }
+
+
+  .flashcards-result-stat {
+    padding:
+      14px 8px;
+  }
+
+
+  .flashcards-result-actions {
+    flex-direction: column;
+  }
+
+
+  .flashcards-result-actions button {
+    width: 100%;
+  }
+
+}

@@ -1,13 +1,15 @@
 import '../../styles/aluno/PlanoAutomatico.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGamification } from '../../context/GamificationContext.jsx';
-import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/cu.jsx';
-import Icon from '../../components/Icon.jsx';
+import { TOPICS_BANK } from './Conteudos.jsx';
+import { useGamification } from "../../context/GamificationContext.jsx";
+import { getSubjectStyle } from "../../utils/subjects.js";
+import SubjectIcon from "../../components/cu.jsx";
+import Icon from "../../components/Icon.jsx";
 
 const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:3000';
 
 const DAYS_BY_COUNT = {
   1: ['Quarta'],
@@ -27,158 +29,67 @@ const DAYS_BY_COUNT = {
   ]
 };
 
-const DAY_INDEX = {
-  Domingo: 0,
-  Segunda: 1,
-  Terça: 2,
-  Quarta: 3,
-  Quinta: 4,
-  Sexta: 5,
-  Sábado: 6
-};
+const SUBJECTS =
+  Object.keys(TOPICS_BANK);
 
-const PLAN_STORAGE_KEY =
+const STORAGE_KEY =
   'tenna_plano_automatico';
-
-const CALENDAR_STORAGE_KEY =
-  'tenna_calendario_atividades';
 
 const pad = (n) =>
   String(n).padStart(2, '0');
 
-function getUserKey() {
+function getUser() {
   try {
-    const usuario =
-      JSON.parse(
-        localStorage.getItem(
-          'etecamp_usuario'
-        ) || '{}'
-      );
-
-    return String(
-      usuario.id ||
-        usuario.usuarioId ||
-        'anonimo'
+    return JSON.parse(
+      localStorage.getItem(
+        'etecamp_usuario'
+      ) || '{}'
     );
   } catch {
-    return 'anonimo';
+    return {};
   }
 }
 
-function formatMonth(date) {
-  const text =
-    date.toLocaleDateString(
-      'pt-BR',
-      {
-        month: 'long',
-        year: 'numeric'
-      }
-    );
+function getUserKey() {
+  const usuario =
+    getUser();
 
-  return (
-    text.charAt(0).toUpperCase() +
-    text.slice(1)
+  return String(
+    usuario.id ||
+      usuario.usuarioId ||
+      'anonimo'
   );
 }
 
-function getDateForWeekDay(
-  year,
-  month,
-  weekNumber,
-  dayName
-) {
-  const firstDay =
-    new Date(
-      year,
-      month,
-      1
-    );
-
-  const firstDayIndex =
-    firstDay.getDay();
-
-  const targetIndex =
-    DAY_INDEX[dayName];
-
-  let offset =
-    targetIndex -
-    firstDayIndex;
-
-  if (offset < 0) {
-    offset += 7;
-  }
-
-  const date =
-    1 +
-    offset +
-    (weekNumber - 1) * 7;
-
-  const result =
-    new Date(
-      year,
-      month,
-      date
-    );
-
-  if (
-    result.getMonth() !==
-    month
-  ) {
-    return null;
-  }
-
-  return result;
+function getToken() {
+  return (
+    localStorage.getItem(
+      'etecamp_token'
+    ) ||
+    localStorage.getItem('token') ||
+    localStorage.getItem(
+      'accessToken'
+    ) ||
+    ''
+  );
 }
 
-/*
- * Gera o plano usando as matérias e tópicos
- * vindos do banco de dados.
- */
 function generatePlan(
   months,
-  days,
-  materias
+  days
 ) {
   const daysList =
     DAYS_BY_COUNT[days] ||
     DAYS_BY_COUNT[3];
 
-  const materiasAtivas =
-  (materias || [])
-    .filter(
-      (materia) =>
-        Number(materia.ativa) === 1
-    )
-    .map(
-      (materia) => ({
-        ...materia,
-        topicos:
-          (materia.topicos || [])
-            .filter(
-              (topico) =>
-                Number(topico.ativo) === 1
-            )
-      })
-    )
-    .filter(
-      (materia) =>
-        materia.topicos.length > 0
-    );
+  let subjectIndex = 0;
 
-  if (!materiasAtivas.length) {
-    return [];
-  }
-
-  let materiaIndex = 0;
-
-  const topicPositions =
+  const positions =
     Object.fromEntries(
-      materiasAtivas.map(
-        (materia) => [
-          materia.id,
-          0
-        ]
-      )
+      SUBJECTS.map((s) => [
+        s,
+        0
+      ])
     );
 
   const now =
@@ -188,12 +99,12 @@ function generatePlan(
     {
       length: months
     },
-    (_, monthIndex) => {
-      const monthDate =
+    (_, mi) => {
+
+      const d =
         new Date(
           now.getFullYear(),
-          now.getMonth() +
-            monthIndex,
+          now.getMonth() + mi,
           1
         );
 
@@ -202,95 +113,64 @@ function generatePlan(
           {
             length: 4
           },
-          (_, weekIndex) => {
-            const weekNumber =
-              weekIndex + 1;
+          (_, wi) => ({
+            number:
+              wi + 1,
 
-            const daysData =
+            days:
               daysList.map(
                 (day) => {
-                  const materia =
-                    materiasAtivas[
-                      materiaIndex %
-                        materiasAtivas.length
+
+                  const subject =
+                    SUBJECTS[
+                      subjectIndex++ %
+                        SUBJECTS.length
                     ];
 
-                  materiaIndex++;
-
-                  const position =
-                    topicPositions[
-                      materia.id
-                    ] || 0;
+                  const pos =
+                    positions[
+                      subject
+                    ]++;
 
                   const topics =
-                    materia.topicos;
-
-                  const topic =
-                    topics[
-                      position %
-                        topics.length
+                    TOPICS_BANK[
+                      subject
                     ];
 
-                  topicPositions[
-                    materia.id
-                  ] =
-                    position + 1;
-
-                  const date =
-                    getDateForWeekDay(
-                      monthDate.getFullYear(),
-                      monthDate.getMonth(),
-                      weekNumber,
-                      day
-                    );
+                  const topico =
+                    topics[
+                      pos %
+                        topics.length
+                    ];
 
                   return {
                     day,
                     materia:
-                      materia.nome,
-                    materiaId:
-                      materia.id,
-                    topico:
-                      topic.nome,
-                    topicoId:
-                      topic.id,
-                    descricao:
-                      topic.descricao ||
-                      '',
+                      subject,
+                    topico,
                     key:
-                      `${materia.id}::${topic.id}`,
-                    data:
-                      date
-                        ? `${date.getFullYear()}-${pad(
-                            date.getMonth() + 1
-                          )}-${pad(
-                            date.getDate()
-                          )}`
-                        : null
+                      `${subject}::${topico}`
                   };
                 }
-              );
-
-            return {
-              number:
-                weekNumber,
-              days:
-                daysData
-            };
-          }
+              )
+          })
         );
 
       return {
         numero:
-          monthIndex + 1,
+          mi + 1,
+
         nome:
-          formatMonth(
-            monthDate
+          d.toLocaleDateString(
+            'pt-BR',
+            {
+              month:
+                'long',
+              year:
+                'numeric'
+            }
           ),
-        ano:
-          monthDate.getFullYear(),
-        mes:
-          monthDate.getMonth(),
+
         semanas
       };
     }
@@ -299,86 +179,9 @@ function generatePlan(
 
 function savePlan(plan) {
   localStorage.setItem(
-    `${PLAN_STORAGE_KEY}_${getUserKey()}`,
+    `${STORAGE_KEY}_${getUserKey()}`,
     JSON.stringify(plan)
   );
-}
-
-function getCalendarActivities() {
-  try {
-    return JSON.parse(
-      localStorage.getItem(
-        `${CALENDAR_STORAGE_KEY}_${getUserKey()}`
-      ) || '[]'
-    );
-  } catch {
-    return [];
-  }
-}
-
-function saveCalendarActivities(
-  activities
-) {
-  localStorage.setItem(
-    `${CALENDAR_STORAGE_KEY}_${getUserKey()}`,
-    JSON.stringify(
-      activities
-    )
-  );
-}
-
-function addPlanToCalendar(plan) {
-  const existing =
-    getCalendarActivities();
-
-  const generated = [];
-
-  plan.forEach(
-    (month) => {
-      month.semanas.forEach(
-        (week) => {
-          week.days.forEach(
-            (day, index) => {
-              if (!day.data) {
-                return;
-              }
-
-              generated.push({
-                id:
-                  `plano-${month.numero}-${week.number}-${index}-${Date.now()}-${Math.random()}`,
-                data:
-                  day.data,
-                horario:
-                  '08:00',
-                nome:
-                  day.topico,
-                materia:
-                  day.materia,
-                topicoId:
-                  day.topicoId,
-                done:
-                  false,
-                origem:
-                  'plano-automatico'
-              });
-            }
-          );
-        }
-      );
-    }
-  );
-
-  const oldActivities =
-    existing.filter(
-      (item) =>
-        item.origem !==
-        'plano-automatico'
-    );
-
-  saveCalendarActivities([
-    ...oldActivities,
-    ...generated
-  ]);
 }
 
 export default function PlanoAutomatico() {
@@ -405,20 +208,8 @@ export default function PlanoAutomatico() {
       new Set(['1-1'])
     );
 
-  const [
-    materiasData,
-    setMateriasData
-  ] = useState([]);
-
-  const [
-    carregandoConteudos,
-    setCarregandoConteudos
-  ] = useState(true);
-
-  const [
-    erroConteudos,
-    setErroConteudos
-  ] = useState('');
+  const [addingWeek, setAddingWeek] =
+    useState(null);
 
   const phases = [
     'Fundamentos',
@@ -429,179 +220,13 @@ export default function PlanoAutomatico() {
     'Simulados'
   ];
 
-  /*
-   * BUSCA OS CONTEÚDOS DIRETAMENTE DO BANCO
-   */
-  useEffect(() => {
-    let ativo = true;
-
-    async function carregarConteudos() {
-      try {
-        setCarregandoConteudos(true);
-        setErroConteudos('');
-
-        const resposta =
-          await fetch(
-            `${API_URL}/conteudos/publico`
-          );
-
-        const dados =
-          await resposta
-            .json()
-            .catch(() => ({}));
-
-        if (!resposta.ok) {
-          throw new Error(
-            dados.erro ||
-              dados.mensagem ||
-              'Não foi possível carregar os conteúdos.'
-          );
-        }
-
-        const materias =
-          Array.isArray(dados)
-            ? dados
-            : dados.materias || [];
-
-        if (!ativo) {
-          return;
-        }
-
-        const materiasValidas =
-          materias
-            .filter(
-              (materia) =>
-                Number(
-                  materia.ativa
-                ) === 1
-            )
-            .map(
-              (materia) => ({
-                ...materia,
-                topicos:
-                  (
-                    materia.topicos ||
-                    []
-                  ).filter(
-                    (topico) =>
-                      Number(
-                        topico.ativo
-                      ) === 1
-                  )
-              })
-            )
-            .filter(
-              (materia) =>
-                materia.topicos.length > 0
-            );
-
-        setMateriasData(
-          materiasValidas
-        );
-
-      } catch (error) {
-        console.error(
-          'Erro ao carregar conteúdos do plano:',
-          error
-        );
-
-        if (ativo) {
-          setErroConteudos(
-            error.message ||
-              'Não foi possível carregar os conteúdos.'
-          );
-        }
-      } finally {
-        if (ativo) {
-          setCarregandoConteudos(
-            false
-          );
-        }
-      }
-    }
-
-    carregarConteudos();
-
-    return () => {
-      ativo = false;
-    };
-  }, []);
-
   const current =
     plan?.find(
       (m) =>
-        m.numero === selected
+        m.numero ===
+        selected
     ) ||
     plan?.[0];
-
-  /*
-   * PROGRESSO AGORA USA OS IDs DOS TÓPICOS
-   * DO BANCO.
-   */
-  const [estudados, setEstudados] =
-    useState({});
-
-  useEffect(() => {
-    async function carregarProgresso() {
-      const token =
-        localStorage.getItem(
-          'etecamp_token'
-        );
-
-      if (!token) {
-        return;
-      }
-
-      try {
-        const resposta =
-          await fetch(
-            `${API_URL}/conteudos/progresso`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
-            }
-          );
-
-        const dados =
-          await resposta
-            .json()
-            .catch(() => ({}));
-
-        if (
-          resposta.ok &&
-          Array.isArray(
-            dados.topicos
-          )
-        ) {
-          const mapa = {};
-
-          dados.topicos.forEach(
-            (item) => {
-              mapa[
-                String(
-                  item.topico_id
-                )
-              ] =
-                Boolean(
-                  item.estudado
-                );
-            }
-          );
-
-          setEstudados(mapa);
-        }
-      } catch (error) {
-        console.error(
-          'Erro ao carregar progresso do plano:',
-          error
-        );
-      }
-    }
-
-    carregarProgresso();
-  }, []);
 
   const progress =
     useMemo(() => {
@@ -609,77 +234,53 @@ export default function PlanoAutomatico() {
         return 0;
       }
 
-      const topicIds = [
-        ...new Set(
-          plan.flatMap(
-            (month) =>
-              month.semanas.flatMap(
-                (week) =>
-                  week.days
-                    .filter(
-                      (day) =>
-                        day.topicoId
-                    )
-                    .map(
-                      (day) =>
-                        String(
-                          day.topicoId
-                        )
-                    )
-              )
-          )
-        )
-      ];
+      try {
+        const done =
+          JSON.parse(
+            localStorage.getItem(
+              `conteudosEstudados_${getUserKey()}`
+            ) || '{}'
+          );
 
-      if (!topicIds.length) {
+        const keys = [
+          ...new Set(
+            plan.flatMap(
+              (m) =>
+                m.semanas.flatMap(
+                  (w) =>
+                    w.days.map(
+                      (d) =>
+                        d.key
+                    )
+                )
+            )
+          )
+        ];
+
+        return keys.length
+          ? Math.round(
+              keys.filter(
+                (k) =>
+                  done[k]
+              ).length /
+                keys.length *
+                100
+            )
+          : 0;
+
+      } catch {
         return 0;
       }
+    }, [plan]);
 
-      const concluidos =
-        topicIds.filter(
-          (id) =>
-            estudados[id]
-        ).length;
-
-      return Math.round(
-        (concluidos /
-          topicIds.length) *
-          100
-      );
-    }, [
-      plan,
-      estudados
-    ]);
-
-  async function generate() {
-    if (
-      carregandoConteudos
-    ) {
-      return;
-    }
-
-    if (!materiasData.length) {
-      setErroConteudos(
-        'Não existem matérias e tópicos ativos suficientes para gerar o plano.'
-      );
-      return;
-    }
-
-    const newPlan =
+  function generate() {
+    const p =
       generatePlan(
         months,
-        days,
-        materiasData
+        days
       );
 
-    if (!newPlan.length) {
-      setErroConteudos(
-        'Não foi possível gerar o plano com os conteúdos cadastrados.'
-      );
-      return;
-    }
-
-    setPlan(newPlan);
+    setPlan(p);
 
     setSelected(1);
 
@@ -687,14 +288,7 @@ export default function PlanoAutomatico() {
       new Set(['1-1'])
     );
 
-    savePlan(newPlan);
-
-    /*
-     * SALVA O PLANO INTEIRO NO CALENDÁRIO
-     */
-    addPlanToCalendar(
-      newPlan
-    );
+    savePlan(p);
 
     addXP(
       20,
@@ -702,27 +296,98 @@ export default function PlanoAutomatico() {
     );
   }
 
-  function addWeek(
+  async function addWeek(
     month,
     week
   ) {
-    const existing =
-      getCalendarActivities();
+    const usuarioId =
+      Number(
+        getUser().id ||
+          getUser().usuarioId ||
+          0
+      );
 
-    const newActivities =
+    const token =
+      getToken();
+
+    if (!usuarioId) {
+      return;
+    }
+
+    const atividades =
       [];
 
     week.days.forEach(
       (day, index) => {
-        if (!day.data) {
-          return;
-        }
 
-        newActivities.push({
-          id:
-            `semana-${month.numero}-${week.number}-${index}-${Date.now()}-${Math.random()}`,
+        const data =
+          day.data ||
+          null;
+
+        /*
+         * Como o plano atual já trabalha
+         * por dias da semana, calculamos
+         * a próxima ocorrência daquela
+         * data a partir do início da semana.
+         */
+
+        const hoje =
+          new Date();
+
+        const alvo =
+          new Date(
+            hoje
+          );
+
+        const nomesDias = [
+          'Domingo',
+          'Segunda',
+          'Terça',
+          'Quarta',
+          'Quinta',
+          'Sexta',
+          'Sábado'
+        ];
+
+        const indiceDia =
+          nomesDias.indexOf(
+            day.day
+          );
+
+        const domingo =
+          new Date(
+            hoje
+          );
+
+        domingo.setDate(
+          hoje.getDate() -
+            hoje.getDay()
+        );
+
+        alvo.setTime(
+          domingo.getTime()
+        );
+
+        alvo.setDate(
+          domingo.getDate() +
+            indiceDia +
+            7 *
+              (month.numero - 1) +
+            7 *
+              (week.number - 1)
+        );
+
+        const dataFinal =
+          data ||
+          `${alvo.getFullYear()}-${pad(
+            alvo.getMonth() + 1
+          )}-${pad(
+            alvo.getDate()
+          )}`;
+
+        atividades.push({
           data:
-            day.data,
+            dataFinal,
           horario:
             '08:00',
           nome:
@@ -730,7 +395,8 @@ export default function PlanoAutomatico() {
           materia:
             day.materia,
           topicoId:
-            day.topicoId,
+            day.topicoId ||
+            null,
           done:
             false,
           origem:
@@ -739,19 +405,81 @@ export default function PlanoAutomatico() {
       }
     );
 
-    saveCalendarActivities([
-      ...existing,
-      ...newActivities
-    ]);
+    try {
+      setAddingWeek(
+        `${month.numero}-${week.number}`
+      );
 
-    addXP(
-      10,
-      'semana adicionada ao calendário'
-    );
+      const response =
+        await fetch(
+          `${API_URL}/cronograma/${usuarioId}/lote`,
+          {
+            method:
+              'POST',
 
-    navigate(
-      '/cronograma'
-    );
+            headers: {
+              'Content-Type':
+                'application/json',
+
+              ...(token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`
+                  }
+                : {})
+            },
+
+            body:
+              JSON.stringify({
+                atividades,
+
+                substituirOrigem:
+                  null
+              })
+          }
+        );
+
+      let data = {};
+
+      try {
+        data =
+          await response.json();
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data.mensagem ||
+            'Não foi possível adicionar a semana ao calendário.'
+        );
+      }
+
+      addXP(
+        10,
+        'semana adicionada ao calendário'
+      );
+
+      navigate(
+        '/cronograma'
+      );
+
+    } catch (erro) {
+      console.error(
+        'Erro ao adicionar semana:',
+        erro
+      );
+
+      window.alert(
+        erro.message ||
+          'Não foi possível adicionar a semana ao calendário.'
+      );
+
+    } finally {
+      setAddingWeek(
+        null
+      );
+    }
   }
 
   const focoMateria =
@@ -773,8 +501,11 @@ export default function PlanoAutomatico() {
 
   return (
     <div className="tenna-auto-plan">
+
       <section className="tenna-auto-intro">
+
         <div className="tenna-auto-intro-copy">
+
           <span className="tenna-auto-kicker">
             PLANO AUTOMÁTICO
           </span>
@@ -788,14 +519,15 @@ export default function PlanoAutomatico() {
 
           <p>
             O Tenna organiza os conteúdos
-            cadastrados para o Vestibulinho
-            em uma jornada de estudos.
+            para o Vestibulinho em etapas.
             Você escolhe seu ritmo e recebe
-            um caminho personalizado.
+            um caminho de estudo simples.
           </p>
+
         </div>
 
         <div className="tenna-auto-intro-badge">
+
           <Icon
             name="target"
             size={26}
@@ -805,45 +537,34 @@ export default function PlanoAutomatico() {
           <small>
             Seu foco
           </small>
+
         </div>
+
       </section>
 
-      {erroConteudos && (
-        <div
-          style={{
-            marginBottom: '18px',
-            padding: '14px 16px',
-            borderRadius: '12px',
-            background: '#fff1f0',
-            border:
-              '1px solid #ffc9c5',
-            color: '#b42318',
-            fontSize: '13px',
-            fontWeight: 700
-          }}
-        >
-          {erroConteudos}
-        </div>
-      )}
-
       <section className="tenna-auto-config">
+
         <div className="tenna-auto-config-head">
+
           <div>
+
             <span className="tenna-auto-step">
               01
             </span>
 
             <div>
+
               <h3>
                 Monte seu plano
               </h3>
 
               <p>
-                Escolha quanto tempo
-                você tem e quantos dias
-                consegue estudar.
+                Escolha quanto tempo você tem
+                e quantos dias consegue estudar.
               </p>
+
             </div>
+
           </div>
 
           {plan && (
@@ -851,17 +572,22 @@ export default function PlanoAutomatico() {
               ✓ Plano criado
             </span>
           )}
+
         </div>
 
         <div className="tenna-auto-options">
+
           <div className="tenna-auto-option-group">
+
             <span className="tenna-auto-label">
               Tempo até a prova
             </span>
 
             <div className="tenna-auto-pills">
+
               {[12, 9, 6, 5, 4, 3, 2, 1].map(
                 (m) => (
+
                   <button
                     key={m}
                     type="button"
@@ -876,6 +602,7 @@ export default function PlanoAutomatico() {
                       setMonths(m)
                     }
                   >
+
                     <strong>
                       {m}
                     </strong>
@@ -885,20 +612,27 @@ export default function PlanoAutomatico() {
                         ? 'mês'
                         : 'meses'}
                     </span>
+
                   </button>
+
                 )
               )}
+
             </div>
+
           </div>
 
           <div className="tenna-auto-option-group">
+
             <span className="tenna-auto-label">
               Dias de estudo por semana
             </span>
 
             <div className="tenna-auto-pills days">
+
               {[1, 2, 3, 4, 5, 6, 7].map(
                 (d) => (
+
                   <button
                     key={d}
                     type="button"
@@ -913,6 +647,7 @@ export default function PlanoAutomatico() {
                       setDays(d)
                     }
                   >
+
                     <strong>
                       {d}x
                     </strong>
@@ -920,53 +655,60 @@ export default function PlanoAutomatico() {
                     <span>
                       por semana
                     </span>
+
                   </button>
+
                 )
               )}
+
             </div>
+
           </div>
+
         </div>
 
         <div className="tenna-auto-config-bottom">
+
           <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display:
+                'flex',
+              alignItems:
+                'center',
               gap: 7,
-              color: 'var(--muted)'
+              color:
+                'var(--muted)'
             }}
           >
+
             <Icon
               name="book"
               size={14}
               color="var(--accent-dark)"
             />
 
-            {carregandoConteudos
-              ? 'Carregando conteúdos cadastrados...'
-              : `${materiasData.length} matéria(s) disponível(is) no banco.`}
+            A base de conteúdos é a mesma
+            da área <strong>Conteúdos</strong>.
+
           </span>
 
           <button
             className="mural-btn primary"
-            onClick={
-              generate
-            }
-            disabled={
-              carregandoConteudos ||
-              !materiasData.length
-            }
+            onClick={generate}
           >
-            {carregandoConteudos
-              ? 'Carregando...'
-              : 'Gerar meu plano'}
+            Gerar meu plano
           </button>
+
         </div>
+
       </section>
 
       {plan && (
+
         <div className="tenna-auto-result">
+
           <section className="tenna-auto-next">
+
             <div
               className="tenna-auto-next-icon"
               style={{
@@ -985,6 +727,7 @@ export default function PlanoAutomatico() {
             </div>
 
             <div className="tenna-auto-next-info">
+
               <span>
                 PRÓXIMO FOCO
               </span>
@@ -996,6 +739,7 @@ export default function PlanoAutomatico() {
               <p>
                 {focoTopico}
               </p>
+
             </div>
 
             <button
@@ -1012,17 +756,23 @@ export default function PlanoAutomatico() {
                 name="arrowRight"
                 size={14}
               />
+
             </button>
+
           </section>
 
           <section className="tenna-auto-journey">
+
             <div className="tenna-auto-journey-head">
+
               <div>
+
                 <span className="tenna-auto-step">
                   02
                 </span>
 
                 <div>
+
                   <h3>
                     Sua jornada
                   </h3>
@@ -1031,17 +781,18 @@ export default function PlanoAutomatico() {
                     {months}{' '}
                     {months === 1
                       ? 'mês'
-                      : 'meses'}{' '}
-                    ·{' '}
-                    {months *
-                      4 *
-                      days}{' '}
-                    sessões
+                      : 'meses'}
+                    {' · '}
+                    {months * 4 * days}
+                    {' sessões'}
                   </p>
+
                 </div>
+
               </div>
 
               <div className="tenna-auto-progress-value">
+
                 <strong>
                   {progress}%
                 </strong>
@@ -1049,31 +800,38 @@ export default function PlanoAutomatico() {
                 <span>
                   concluído
                 </span>
+
               </div>
+
             </div>
 
             <div className="tenna-auto-progress-track">
+
               <span
                 style={{
                   width:
                     `${progress}%`
                 }}
               />
+
             </div>
 
             <div className="tenna-auto-timeline-wrap">
+
               <div className="tenna-auto-timeline-line" />
 
               <div className="tenna-auto-timeline">
+
                 {plan.map(
-                  (month) => (
+                  (m) => (
+
                     <button
                       key={
-                        month.numero
+                        m.numero
                       }
                       className={
                         `tenna-auto-timeline-item ${
-                          month.numero ===
+                          m.numero ===
                           selected
                             ? 'active'
                             : ''
@@ -1081,37 +839,45 @@ export default function PlanoAutomatico() {
                       }
                       onClick={() =>
                         setSelected(
-                          month.numero
+                          m.numero
                         )
                       }
                     >
+
                       <span className="tenna-auto-timeline-dot">
-                        {month.numero}
+                        {m.numero}
                       </span>
 
                       <strong>
-                        Mês {month.numero}
+                        Mês {m.numero}
                       </strong>
 
                       <small>
-                        {month.numero ===
-                        1
+                        {m.numero === 1
                           ? 'Começo'
-                          : month.numero ===
-                            months
-                          ? 'Reta final'
-                          : 'Preparação'}
+                          : m.numero ===
+                              months
+                            ? 'Reta final'
+                            : 'Preparação'}
                       </small>
+
                     </button>
+
                   )
                 )}
+
               </div>
+
             </div>
+
           </section>
 
           <section className="tenna-auto-month">
+
             <div className="tenna-auto-month-head">
+
               <div className="tenna-auto-month-title">
+
                 <div
                   className="tenna-auto-month-icon"
                   style={{
@@ -1126,9 +892,10 @@ export default function PlanoAutomatico() {
                 </div>
 
                 <div>
+
                   <span>
-                    MÊS {current.numero}{' '}
-                    ·{' '}
+                    MÊS {current.numero}
+                    {' · '}
                     {
                       phases[
                         Math.min(
@@ -1147,41 +914,51 @@ export default function PlanoAutomatico() {
 
                   <p>
                     {current.semanas.reduce(
-                      (total, week) =>
-                        total +
-                        week.days.length,
+                      (n, w) =>
+                        n +
+                        w.days.length,
                       0
-                    )}{' '}
-                    dias de estudo organizados
+                    )}
+                    {' dias de estudo organizados'}
                   </p>
+
                 </div>
+
               </div>
 
               <div className="tenna-auto-month-count">
+
                 <strong>
-                  {
-                    current.semanas.length
-                  }
+                  {current.semanas.length}
                 </strong>
 
                 <span>
                   semanas
                 </span>
+
               </div>
+
             </div>
 
             <div className="tenna-auto-weeks">
+
               {current.semanas.map(
-                (week) => {
+                (w) => {
+
                   const key =
-                    `${current.numero}-${week.number}`;
+                    `${current.numero}-${w.number}`;
 
                   const open =
                     openWeeks.has(
                       key
                     );
 
+                  const adding =
+                    addingWeek ===
+                    key;
+
                   return (
+
                     <article
                       className={
                         `tenna-auto-week ${
@@ -1192,56 +969,54 @@ export default function PlanoAutomatico() {
                       }
                       key={key}
                     >
+
                       <button
                         className="tenna-auto-week-head"
                         onClick={() =>
                           setOpenWeeks(
                             (prev) => {
-                              const next =
+                              const n =
                                 new Set(
                                   prev
                                 );
 
-                              if (
-                                next.has(
-                                  key
-                                )
-                              ) {
-                                next.delete(
-                                  key
-                                );
-                              } else {
-                                next.add(
-                                  key
-                                );
-                              }
+                              n.has(
+                                key
+                              )
+                                ? n.delete(
+                                    key
+                                  )
+                                : n.add(
+                                    key
+                                  );
 
-                              return next;
+                              return n;
                             }
                           )
                         }
                       >
+
                         <span className="tenna-auto-week-number">
                           {pad(
-                            week.number
+                            w.number
                           )}
                         </span>
 
                         <span className="tenna-auto-week-title">
+
                           <strong>
-                            Semana{' '}
-                            {week.number}
+                            Semana {w.number}
                           </strong>
 
                           <small>
-                            {
-                              week.days.length
-                            }{' '}
-                            dias de estudo
+                            {w.days.length}
+                            {' dias de estudo'}
                           </small>
+
                         </span>
 
                         <span className="tenna-auto-week-status">
+
                           {open
                             ? 'Fechar'
                             : 'Ver semana'}
@@ -1249,47 +1024,34 @@ export default function PlanoAutomatico() {
                           <b>
                             ›
                           </b>
+
                         </span>
+
                       </button>
 
                       {open && (
-                        <div className="tenna-auto-week-body">
-                          <div className="tenna-auto-day-list">
-                            {week.days.map(
-                              (
-                                day,
-                                index
-                              ) => {
-                                const dayStyle =
-                                  getSubjectStyle(
-                                    day.materia
-                                  );
 
-                                const estudado =
-                                  Boolean(
-                                    estudados[
-                                      String(
-                                        day.topicoId
-                                      )
-                                    ]
+                        <div className="tenna-auto-week-body">
+
+                          <div className="tenna-auto-day-list">
+
+                            {w.days.map(
+                              (d, i) => {
+
+                                const dStyle =
+                                  getSubjectStyle(
+                                    d.materia
                                   );
 
                                 return (
+
                                   <div
                                     className="tenna-auto-day"
-                                    key={
-                                      `${day.topicoId}-${index}`
-                                    }
-                                    style={
-                                      estudado
-                                        ? {
-                                            opacity: 0.58
-                                          }
-                                        : undefined
-                                    }
+                                    key={i}
                                   >
+
                                     <div className="tenna-auto-day-name">
-                                      {day.day
+                                      {d.day
                                         .slice(
                                           0,
                                           3
@@ -1301,66 +1063,37 @@ export default function PlanoAutomatico() {
                                       className="tenna-auto-day-icon"
                                       style={{
                                         background:
-                                          dayStyle.bg,
+                                          dStyle.bg,
                                         color:
-                                          dayStyle.color
+                                          dStyle.color
                                       }}
                                     >
                                       <SubjectIcon
                                         materia={
-                                          day.materia
+                                          d.materia
                                         }
-                                        size={
-                                          16
-                                        }
+                                        size={16}
                                       />
                                     </div>
 
                                     <div className="tenna-auto-day-content">
+
                                       <strong>
-                                        {day.materia}
+                                        {d.materia}
                                       </strong>
 
                                       <span>
-                                        {day.topico}
+                                        {d.topico}
                                       </span>
 
-                                      {day.descricao && (
-                                        <small
-                                          style={{
-                                            display:
-                                              'block',
-                                            marginTop:
-                                              '3px',
-                                            color:
-                                              'var(--muted)'
-                                          }}
-                                        >
-                                          {
-                                            day.descricao
-                                          }
-                                        </small>
-                                      )}
                                     </div>
 
-                                    {estudado && (
-                                      <span
-                                        style={{
-                                          fontSize:
-                                            '11px',
-                                          fontWeight:
-                                            700,
-                                          color:
-                                            dayStyle.color
-                                        }}
-                                      >
-                                        ✓
-                                      </span>
-                                    )}
                                   </div>
+
                                 );
                               }
                             )}
+
                           </div>
 
                           <button
@@ -1368,30 +1101,34 @@ export default function PlanoAutomatico() {
                             onClick={() =>
                               addWeek(
                                 current,
-                                week
+                                w
                               )
                             }
+                            disabled={adding}
                           >
-                            + Adicionar semana ao meu calendário
+                            {adding
+                              ? 'Adicionando...'
+                              : '+ Adicionar semana ao meu calendário'}
                           </button>
+
                         </div>
+
                       )}
+
                     </article>
+
                   );
                 }
               )}
+
             </div>
+
           </section>
+
         </div>
+
       )}
+
     </div>
   );
 }
-
-const cardStyle = {
-  background: '#ffffff',
-  borderRadius: '20px',
-  padding: '22px',
-  boxShadow:
-    '0 8px 28px rgba(21,72,125,0.07)'
-};

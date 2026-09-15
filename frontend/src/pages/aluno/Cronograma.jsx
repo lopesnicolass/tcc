@@ -1,11 +1,16 @@
-import '../../styles/aluno/Cronograma.css';
 import { useEffect, useMemo, useState } from 'react';
+import '../../styles/aluno/Cronograma.css';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
 import SubjectIcon from '../../components/cu.jsx';
 import Icon from '../../components/Icon.jsx';
 
-const STORAGE_KEY = 'tenna_calendario_atividades';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:3000';
+
+const STORAGE_KEY =
+  'tenna_calendario_atividades';
 
 const WEEK_DAYS = [
   'Domingo',
@@ -38,61 +43,66 @@ const dateKey = (date) =>
 
 const todayKey = dateKey(new Date());
 
-function getUserKey() {
+function getUsuario() {
   try {
-    const raw =
+    return JSON.parse(
       localStorage.getItem(
         'etecamp_usuario'
-      );
-
-    if (!raw) {
-      return 'anonimo';
-    }
-
-    const user = JSON.parse(raw);
-
-    return String(
-      user.id ||
-      user.usuarioId ||
-      'anonimo'
+      ) || '{}'
     );
   } catch {
-    return 'anonimo';
+    return {};
   }
 }
 
-function loadActivities() {
+function getUserId() {
+  const usuario = getUsuario();
+
+  return Number(
+    usuario.id ||
+      usuario.usuarioId ||
+      0
+  );
+}
+
+function getToken() {
+  return (
+    localStorage.getItem(
+      'etecamp_token'
+    ) ||
+    localStorage.getItem('token') ||
+    localStorage.getItem(
+      'accessToken'
+    ) ||
+    ''
+  );
+}
+
+function getLegacyActivities() {
   try {
+    const userId =
+      getUserId();
+
     const raw =
       localStorage.getItem(
-        `${STORAGE_KEY}_${getUserKey()}`
+        `${STORAGE_KEY}_${userId || 'anonimo'}`
       );
 
-    if (raw) {
-      return JSON.parse(raw);
+    if (!raw) {
+      return [];
     }
-  } catch {
-    // fallback
-  }
 
-  return [
-    {
-      id: 1,
-      data: todayKey,
-      horario: '08:00',
-      nome: 'Revisar conteúdo',
-      materia: 'Matemática',
-      done: false
-    },
-    {
-      id: 2,
-      data: todayKey,
-      horario: '14:00',
-      nome: 'Interpretação de texto',
-      materia: 'Português',
-      done: false
-    }
-  ];
+    const activities =
+      JSON.parse(raw);
+
+    return Array.isArray(
+      activities
+    )
+      ? activities
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 const emptyForm = {
@@ -106,8 +116,20 @@ export default function Cronograma() {
   const { addXP } =
     useGamification();
 
+  const usuarioId =
+    getUserId();
+
+  const token =
+    getToken();
+
   const [activities, setActivities] =
-    useState(loadActivities);
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
 
   const [currentMonth, setCurrentMonth] =
     useState(
@@ -134,12 +156,158 @@ export default function Cronograma() {
   const [form, setForm] =
     useState(emptyForm);
 
+  async function apiFetch(
+    url,
+    options = {}
+  ) {
+    const headers = {
+      'Content-Type':
+        'application/json',
+      ...(options.headers || {})
+    };
+
+    if (token) {
+      headers.Authorization =
+        `Bearer ${token}`;
+    }
+
+    const response =
+      await fetch(
+        `${API_URL}${url}`,
+        {
+          ...options,
+          headers
+        }
+      );
+
+    let data = {};
+
+    try {
+      data =
+        await response.json();
+    } catch {
+      data = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data.mensagem ||
+          'Erro ao acessar o servidor.'
+      );
+    }
+
+    return data;
+  }
+
+  async function carregarCronograma() {
+    if (!usuarioId) {
+      setActivities([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const data =
+        await apiFetch(
+          `/cronograma/${usuarioId}`
+        );
+
+      const atividades =
+        Array.isArray(
+          data.atividades
+        )
+          ? data.atividades
+          : [];
+
+      /*
+       * Migra atividades antigas do localStorage
+       * somente se o banco ainda estiver vazio.
+       */
+      if (
+        atividades.length === 0
+      ) {
+        const antigas =
+          getLegacyActivities();
+
+        const antigasValidas =
+          antigas.filter(
+            (atividade) =>
+              atividade &&
+              atividade.nome &&
+              atividade.materia &&
+              atividade.data &&
+              atividade.horario
+          );
+
+        if (
+          antigasValidas.length
+        ) {
+          const resposta =
+            await apiFetch(
+              `/cronograma/${usuarioId}/lote`,
+              {
+                method: 'POST',
+                body: JSON.stringify({
+                  atividades:
+                    antigasValidas.map(
+                      (atividade) => ({
+                        nome:
+                          atividade.nome,
+                        materia:
+                          atividade.materia,
+                        data:
+                          atividade.data,
+                        horario:
+                          atividade.horario ||
+                          '08:00',
+                        done:
+                          Boolean(
+                            atividade.done
+                          ),
+                        origem:
+                          atividade.origem ||
+                          null,
+                        topicoId:
+                          atividade.topicoId ||
+                          null
+                      })
+                    )
+                })
+              }
+            );
+
+          setActivities(
+            Array.isArray(
+              resposta.atividades
+            )
+              ? resposta.atividades
+              : []
+          );
+
+          return;
+        }
+      }
+
+      setActivities(
+        atividades
+      );
+    } catch (erro) {
+      console.error(
+        'Erro ao carregar cronograma:',
+        erro
+      );
+
+      setActivities([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    localStorage.setItem(
-      `${STORAGE_KEY}_${getUserKey()}`,
-      JSON.stringify(activities)
-    );
-  }, [activities]);
+    carregarCronograma();
+  }, [usuarioId]);
 
   const monthTitle =
     currentMonth.toLocaleDateString(
@@ -156,13 +324,15 @@ export default function Cronograma() {
 
   const calendarDays =
     useMemo(() => {
-      const first = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth(),
-        1
-      );
+      const first =
+        new Date(
+          currentMonth.getFullYear(),
+          currentMonth.getMonth(),
+          1
+        );
 
-      const start = new Date(first);
+      const start =
+        new Date(first);
 
       start.setDate(
         1 - first.getDay()
@@ -171,7 +341,8 @@ export default function Cronograma() {
       return Array.from(
         { length: 42 },
         (_, i) => {
-          const d = new Date(start);
+          const d =
+            new Date(start);
 
           d.setDate(
             start.getDate() + i
@@ -189,18 +360,23 @@ export default function Cronograma() {
           a.data === selectedDate
       )
       .sort((a, b) =>
-        (a.horario || '').localeCompare(
+        (
+          a.horario || ''
+        ).localeCompare(
           b.horario || ''
         )
       );
+
+  const monthPrefix =
+    `${currentMonth.getFullYear()}-${pad(
+      currentMonth.getMonth() + 1
+    )}`;
 
   const monthActivities =
     activities.filter(
       (a) =>
         a.data?.startsWith(
-          `${currentMonth.getFullYear()}-${pad(
-            currentMonth.getMonth() + 1
-          )}`
+          monthPrefix
         )
     );
 
@@ -278,88 +454,269 @@ export default function Cronograma() {
     setEditing(activity);
 
     setForm({
-      nome: activity.nome,
-      materia: activity.materia,
-      data: activity.data,
-      horario: activity.horario
+      nome:
+        activity.nome || '',
+      materia:
+        activity.materia ||
+        'Matemática',
+      data:
+        activity.data ||
+        todayKey,
+      horario:
+        activity.horario ||
+        '08:00'
     });
 
     setShowCreate(true);
   }
 
-  function saveActivity(e) {
+  async function saveActivity(e) {
     e.preventDefault();
 
-    if (!form.nome.trim()) {
+    if (
+      !form.nome.trim() ||
+      !form.data ||
+      !form.horario
+    ) {
       return;
     }
 
-    if (editing) {
-      setActivities((prev) =>
-        prev.map((a) =>
-          a.id === editing.id
-            ? {
-                ...a,
-                ...form,
+    if (!usuarioId) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      if (editing) {
+        const data =
+          await apiFetch(
+            `/cronograma/${usuarioId}/${editing.id}`,
+            {
+              method: 'PUT',
+              body: JSON.stringify({
                 nome:
-                  form.nome.trim()
-              }
-            : a
+                  form.nome.trim(),
+                materia:
+                  form.materia,
+                data:
+                  form.data,
+                horario:
+                  form.horario
+              })
+            }
+          );
+
+        if (
+          data.atividade
+        ) {
+          setActivities(
+            (prev) =>
+              prev.map(
+                (a) =>
+                  a.id ===
+                  editing.id
+                    ? data.atividade
+                    : a
+              )
+          );
+        } else {
+          await carregarCronograma();
+        }
+      } else {
+        const data =
+          await apiFetch(
+            `/cronograma/${usuarioId}`,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                nome:
+                  form.nome.trim(),
+                materia:
+                  form.materia,
+                data:
+                  form.data,
+                horario:
+                  form.horario,
+                done: false
+              })
+            }
+          );
+
+        if (
+          data.atividade
+        ) {
+          setActivities(
+            (prev) => [
+              ...prev,
+              data.atividade
+            ]
+          );
+        } else {
+          await carregarCronograma();
+        }
+
+        addXP(
+          5,
+          'atividade adicionada ao calendário'
+        );
+      }
+
+      setSelectedDate(
+        form.data
+      );
+
+      const d =
+        new Date(
+          `${form.data}T12:00:00`
+        );
+
+      setCurrentMonth(
+        new Date(
+          d.getFullYear(),
+          d.getMonth(),
+          1
         )
       );
-    } else {
-      setActivities((prev) => [
-        ...prev,
-        {
-          id:
-            Date.now(),
-          ...form,
-          nome:
-            form.nome.trim(),
-          done: false
-        }
-      ]);
 
-      addXP(
-        5,
-        'atividade adicionada ao calendário'
+      setShowCreate(false);
+      setEditing(null);
+    } catch (erro) {
+      console.error(
+        'Erro ao salvar atividade:',
+        erro
       );
+
+      window.alert(
+        erro.message ||
+          'Não foi possível salvar a atividade.'
+      );
+    } finally {
+      setSaving(false);
     }
-
-    setSelectedDate(form.data);
-
-    const d =
-      new Date(
-        `${form.data}T12:00:00`
-      );
-
-    setCurrentMonth(
-      new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        1
-      )
-    );
-
-    setShowCreate(false);
   }
 
-  function deleteActivity() {
-    if (!editing) {
+  async function deleteActivity() {
+    if (
+      !editing ||
+      !usuarioId
+    ) {
       return;
     }
 
-    setActivities((prev) =>
-      prev.filter(
-        (a) =>
-          a.id !== editing.id
-      )
-    );
+    try {
+      setSaving(true);
 
-    setShowCreate(false);
+      await apiFetch(
+        `/cronograma/${usuarioId}/${editing.id}`,
+        {
+          method: 'DELETE'
+        }
+      );
+
+      setActivities(
+        (prev) =>
+          prev.filter(
+            (a) =>
+              a.id !==
+              editing.id
+          )
+      );
+
+      setShowCreate(false);
+      setEditing(null);
+    } catch (erro) {
+      console.error(
+        'Erro ao excluir atividade:',
+        erro
+      );
+
+      window.alert(
+        erro.message ||
+          'Não foi possível excluir a atividade.'
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function deleteAutomaticPlan() {
+  async function toggleDone(activity) {
+    if (
+      !usuarioId ||
+      !activity?.id
+    ) {
+      return;
+    }
+
+    const novoStatus =
+      !activity.done;
+
+    setActivities(
+      (prev) =>
+        prev.map(
+          (a) =>
+            a.id ===
+            activity.id
+              ? {
+                  ...a,
+                  done:
+                    novoStatus
+                }
+              : a
+        )
+    );
+
+    try {
+      const data =
+        await apiFetch(
+          `/cronograma/${usuarioId}/${activity.id}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({
+              done:
+                novoStatus
+            })
+          }
+        );
+
+      if (
+        data.atividade
+      ) {
+        setActivities(
+          (prev) =>
+            prev.map(
+              (a) =>
+                a.id ===
+                activity.id
+                  ? data.atividade
+                  : a
+            )
+        );
+      }
+    } catch (erro) {
+      console.error(
+        'Erro ao atualizar conclusão:',
+        erro
+      );
+
+      setActivities(
+        (prev) =>
+          prev.map(
+            (a) =>
+              a.id ===
+              activity.id
+                ? {
+                    ...a,
+                    done:
+                      activity.done
+                  }
+                : a
+          )
+      );
+    }
+  }
+
+  function requestDeleteAutomaticPlan() {
     const hasAutomaticPlan =
       activities.some(
         (activity) =>
@@ -368,31 +725,84 @@ export default function Cronograma() {
       );
 
     if (!hasAutomaticPlan) {
-      setShowDeletePlanConfirm(false);
       return;
     }
 
-    setActivities((prev) =>
-      prev.filter(
-        (activity) =>
-          activity.origem !==
-          'plano-automatico'
-      )
+    setShowDeletePlanConfirm(
+      true
     );
-
-    setShowDeletePlanConfirm(false);
   }
 
-  function toggleDone(activity) {
-    setActivities((prev) =>
-      prev.map((a) =>
-        a.id === activity.id
-          ? {
-              ...a,
-              done: !a.done
-            }
-          : a
-      )
+  async function confirmDeleteAutomaticPlan() {
+    if (!usuarioId) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      await apiFetch(
+        `/cronograma/${usuarioId}/origem/plano-automatico`,
+        {
+          method: 'DELETE'
+        }
+      );
+
+      setActivities(
+        (prev) =>
+          prev.filter(
+            (activity) =>
+              activity.origem !==
+              'plano-automatico'
+          )
+      );
+
+      setShowDeletePlanConfirm(
+        false
+      );
+    } catch (erro) {
+      console.error(
+        'Erro ao excluir plano automático:',
+        erro
+      );
+
+      window.alert(
+        erro.message ||
+          'Não foi possível apagar o plano automático.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="calendar-page">
+
+        <section className="tenna-auto-intro">
+
+          <div className="tenna-auto-intro-copy">
+
+            <span className="tenna-auto-kicker">
+              MINHA ROTINA
+            </span>
+
+            <h2>
+              Organize seu{' '}
+              <span>
+                calendário de estudos
+              </span>
+            </h2>
+
+            <p>
+              Carregando seu cronograma...
+            </p>
+
+          </div>
+
+        </section>
+
+      </div>
     );
   }
 
@@ -449,8 +859,16 @@ export default function Cronograma() {
 
           <button
             className="calendar-delete-plan"
-            onClick={() =>
-              setShowDeletePlanConfirm(true)
+            onClick={
+              requestDeleteAutomaticPlan
+            }
+            disabled={
+              saving ||
+              !activities.some(
+                (activity) =>
+                  activity.origem ===
+                  'plano-automatico'
+              )
             }
           >
             Apagar plano automático
@@ -579,7 +997,7 @@ export default function Cronograma() {
             </strong>{' '}
             para receber uma sugestão
             de rotina e trazer o plano
-            completo para cá.
+            para o calendário.
           </p>
 
         </div>
@@ -631,7 +1049,9 @@ export default function Cronograma() {
 
             {WEEK_DAYS.map(
               (day) => (
-                <span key={day}>
+                <span
+                  key={day}
+                >
                   {day.slice(0, 3)}
                 </span>
               )
@@ -650,7 +1070,8 @@ export default function Cronograma() {
                 const dayActivities =
                   activities.filter(
                     (a) =>
-                      a.data === key
+                      a.data ===
+                      key
                   );
 
                 const inMonth =
@@ -658,10 +1079,12 @@ export default function Cronograma() {
                   currentMonth.getMonth();
 
                 const selected =
-                  key === selectedDate;
+                  key ===
+                  selectedDate;
 
                 const isToday =
-                  key === todayKey;
+                  key ===
+                  todayKey;
 
                 return (
 
@@ -745,10 +1168,12 @@ export default function Cronograma() {
                       3 && (
 
                       <span className="calendar-more">
+
                         +
                         {dayActivities.length -
                           3}{' '}
                         mais
+
                       </span>
 
                     )}
@@ -781,7 +1206,8 @@ export default function Cronograma() {
                   {
                     weekday:
                       'long',
-                    day: 'numeric',
+                    day:
+                      'numeric',
                     month:
                       'long'
                   }
@@ -875,6 +1301,7 @@ export default function Cronograma() {
                         className="calendar-check"
                         onClick={(e) => {
                           e.stopPropagation();
+
                           toggleDone(
                             activity
                           );
@@ -905,8 +1332,8 @@ export default function Cronograma() {
                       <div className="calendar-task-info">
 
                         <span>
-                          {activity.horario}{' '}
-                          ·{' '}
+                          {activity.horario}
+                          {' · '}
                           {activity.materia}
                         </span>
 
@@ -947,11 +1374,16 @@ export default function Cronograma() {
 
         <div
           className="modal-overlay"
-          onMouseDown={(e) =>
-            e.target ===
+          onMouseDown={(e) => {
+            if (
+              e.target ===
               e.currentTarget &&
-            setShowCreate(false)
-          }
+              !saving
+            ) {
+              setShowCreate(false);
+              setEditing(null);
+            }
+          }}
         >
 
           <form
@@ -991,6 +1423,7 @@ export default function Cronograma() {
                   })
                 }
                 placeholder="Ex.: Equação do 2º grau"
+                disabled={saving}
               />
 
             </div>
@@ -1012,12 +1445,14 @@ export default function Cronograma() {
                         e.target.value
                     })
                   }
+                  disabled={saving}
                 >
 
                   {MATERIAS.map(
                     (m) => (
                       <option
                         key={m}
+                        value={m}
                       >
                         {m}
                       </option>
@@ -1044,6 +1479,7 @@ export default function Cronograma() {
                         e.target.value
                     })
                   }
+                  disabled={saving}
                 />
 
               </div>
@@ -1066,6 +1502,7 @@ export default function Cronograma() {
                       e.target.value
                   })
                 }
+                disabled={saving}
               />
 
             </div>
@@ -1080,6 +1517,7 @@ export default function Cronograma() {
                   onClick={
                     deleteActivity
                   }
+                  disabled={saving}
                 >
                   Excluir
                 </button>
@@ -1089,9 +1527,19 @@ export default function Cronograma() {
               <button
                 type="button"
                 className="mural-btn secondary"
-                onClick={() =>
-                  setShowCreate(false)
-                }
+                onClick={() => {
+                  if (
+                    !saving
+                  ) {
+                    setShowCreate(
+                      false
+                    );
+                    setEditing(
+                      null
+                    );
+                  }
+                }}
+                disabled={saving}
               >
                 Cancelar
               </button>
@@ -1099,10 +1547,13 @@ export default function Cronograma() {
               <button
                 className="mural-btn primary"
                 type="submit"
+                disabled={saving}
               >
-                {editing
-                  ? 'Salvar alterações'
-                  : 'Adicionar'}
+                {saving
+                  ? 'Salvando...'
+                  : editing
+                    ? 'Salvar alterações'
+                    : 'Adicionar'}
               </button>
 
             </div>
@@ -1120,9 +1571,12 @@ export default function Cronograma() {
           onMouseDown={(e) => {
             if (
               e.target ===
-              e.currentTarget
+                e.currentTarget &&
+              !saving
             ) {
-              setShowDeletePlanConfirm(false);
+              setShowDeletePlanConfirm(
+                false
+              );
             }
           }}
         >
@@ -1132,10 +1586,12 @@ export default function Cronograma() {
             <div className="modal-header">
 
               <div className="calendar-delete-icon">
+
                 <Icon
                   name="calendar"
                   size={26}
                 />
+
               </div>
 
               <h2>
@@ -1143,9 +1599,11 @@ export default function Cronograma() {
               </h2>
 
               <p>
-                Todas as atividades geradas pelo
-                plano automático serão removidas
-                do seu calendário.
+                Todas as atividades geradas
+                pelo plano automático serão
+                removidas do seu calendário.
+                Suas atividades adicionadas
+                manualmente continuarão salvas.
               </p>
 
             </div>
@@ -1156,8 +1614,11 @@ export default function Cronograma() {
                 type="button"
                 className="mural-btn secondary"
                 onClick={() =>
-                  setShowDeletePlanConfirm(false)
+                  setShowDeletePlanConfirm(
+                    false
+                  )
                 }
+                disabled={saving}
               >
                 Cancelar
               </button>
@@ -1166,10 +1627,13 @@ export default function Cronograma() {
                 type="button"
                 className="calendar-confirm-delete"
                 onClick={
-                  deleteAutomaticPlan
+                  confirmDeleteAutomaticPlan
                 }
+                disabled={saving}
               >
-                Sim, apagar plano
+                {saving
+                  ? 'Apagando...'
+                  : 'Sim, apagar plano'}
               </button>
 
             </div>
