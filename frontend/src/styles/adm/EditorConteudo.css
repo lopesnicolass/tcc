@@ -13,7 +13,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -21,7 +21,7 @@
 }
 
 .editor-back-button:hover {
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
 }
 
 .editor-primary-button,
@@ -42,8 +42,8 @@
 
 .editor-primary-button {
   padding: 10px 14px;
-  border: 1px solid var(--accent, #31835e);
-  background: var(--accent, #31835e);
+  border: 1px solid var(--accent, #2196F3);
+  background: var(--accent, #2196F3);
   color: #fff;
 }
 
@@ -55,7 +55,7 @@
   padding: 10px 14px;
   border: 1px solid var(--line, #e2e7e4);
   background: #fff;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
 }
 
 .editor-danger-button {
@@ -87,9 +87,9 @@
 }
 
 .editor-success {
-  border: 1px solid #cfe5d8;
-  background: #f2faf5;
-  color: #23734c;
+  border: 1px solid #CFE5F7;
+  background: #F1F8FF;
+  color: #0D47A1;
 }
 
 .editor-error {
@@ -143,7 +143,7 @@
 .editor-panel-title h2,
 .editor-sidebar h2 {
   margin: 0;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 16px;
   font-weight: 800;
 }
@@ -170,7 +170,7 @@
 }
 
 .editor-field-label {
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 11px;
   font-weight: 800;
 }
@@ -184,7 +184,7 @@
   border-radius: 9px;
   outline: none;
   background: #fff;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-family: inherit;
   font-size: 12px;
 }
@@ -229,7 +229,7 @@
   justify-content: center;
   border-radius: 8px;
   background: #f1f4f2;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 10px;
   font-weight: 800;
 }
@@ -284,12 +284,12 @@
   justify-content: center;
   border-radius: 8px;
   background: rgba(49, 131, 94, 0.1);
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
 }
 
 .editor-block-name strong {
   display: block;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 11px;
   font-weight: 800;
 }
@@ -330,7 +330,7 @@
 
 .editor-block-body h3 {
   margin: 0 0 7px;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 13px;
 }
 
@@ -444,7 +444,7 @@
   border: 1px solid #dce5df;
   border-radius: 8px;
   background: #f8fbf9;
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
   font-size: 10px;
   font-weight: 800;
   text-decoration: none;
@@ -454,7 +454,7 @@
 
 .editor-sidebar-description {
   margin: 6px 0 13px;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 10px;
   line-height: 1.5;
 }
@@ -503,7 +503,7 @@
 
 .editor-type.selected > span {
   background: rgba(49, 131, 94, 0.11) !important;
-  color: var(--accent-dark, #216e4a) !important;
+  color: var(--accent-dark, #0D47A1) !important;
 }
 
 .editor-type > div {
@@ -512,7 +512,7 @@
 
 .editor-type strong {
   display: block;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 10px;
 }
 
@@ -531,7 +531,7 @@
 
 .editor-danger-panel p {
   margin: 6px 0 12px;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 10px;
   line-height: 1.5;
 }
@@ -557,12 +557,12 @@
   margin-bottom: 10px;
   border-radius: 13px;
   background: #f0f4f2;
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
 }
 
 .editor-empty strong,
 .editor-loading strong {
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 13px;
 }
 
@@ -570,7 +570,7 @@
 .editor-loading span {
   max-width: 360px;
   margin: 5px 0 13px;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 10px;
   line-height: 1.55;
 }
@@ -581,7 +581,7 @@
   padding: 10px;
   border: 1px dashed #ccd7d1;
   background: #fbfcfb;
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
 }
 
 .editor-add-button:hover {
@@ -603,7 +603,7 @@
 }
 
 .editor-items-header > span {
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 11px;
   font-weight: 800;
 }
@@ -612,7 +612,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line, #e1e6e3);
   background: #fff;
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
   font-size: 9px;
 }
 
@@ -706,7 +706,7 @@
 
 .editor-modal-header h2 {
   margin: 0;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 16px;
 }
 
@@ -947,7 +947,7 @@
   outline: 0 !important;
 
   background: transparent !important;
-  color: #1f2924 !important;
+  color: #173A5E !important;
 
   font-family: inherit;
   font-size: 11px;
@@ -980,7 +980,7 @@
   border-radius: 9px !important;
 
   background: #fff !important;
-  color: #1f2924 !important;
+  color: #173A5E !important;
 
   font-family: inherit !important;
   text-align: left !important;
@@ -1016,8 +1016,8 @@
 
 .editor-related-item.selected
 .editor-related-check {
-  border-color: #31835e;
-  background: #31835e;
+  border-color: #2196F3;
+  background: #2196F3;
 }
 
 .editor-related-item > span:last-child {
@@ -1028,7 +1028,7 @@
 }
 
 .editor-related-item strong {
-  color: #1f2924;
+  color: #173A5E;
   font-size: 10px;
   font-weight: 800;
 }
@@ -1053,3 +1053,5 @@
   font-size: 10px;
   text-align: center;
 }
+/* Refinamento visual TENNA — construtor de aula */
+.editor-page-header{padding-bottom:2px}.editor-page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.editor-layout{grid-template-columns:minmax(0,1fr) 300px!important;gap:18px!important}.editor-panel{border-radius:18px!important;border-color:rgba(13,71,161,.10)!important;box-shadow:0 9px 28px -26px rgba(13,71,161,.55)!important}.editor-type.selected{border-color:var(--accent)!important;background:var(--paper)!important;box-shadow:0 6px 18px -14px rgba(13,71,161,.45)}.editor-block{border-radius:15px!important;border-color:rgba(13,71,161,.10)!important}.editor-block-icon{background:var(--paper)!important;color:var(--accent-dark)!important}.editor-add-button{border-color:rgba(33,150,243,.22)!important;color:var(--accent-dark)!important;background:#f8fbfe!important}.editor-modal-overlay{background:rgba(9,40,72,.35)!important;backdrop-filter:blur(3px)}.editor-modal{border-radius:20px!important;border-color:rgba(13,71,161,.12)!important;box-shadow:0 25px 70px -30px rgba(13,71,161,.55)!important}@media(max-width:850px){.editor-layout{grid-template-columns:1fr!important}.editor-sidebar{position:static}}

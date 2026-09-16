@@ -19,7 +19,7 @@
 .admin-section-kicker {
   display: inline-block;
   margin-bottom: 8px;
-  color: var(--accent-dark, #216e4a);
+  color: var(--accent-dark, #0D47A1);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -27,14 +27,14 @@
 
 .page-header h1 {
   margin: 0;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 32px;
   line-height: 1.1;
 }
 
 .page-header p {
   margin: 8px 0 0;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -73,7 +73,7 @@
 .stat-value {
   position: relative;
   z-index: 1;
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 28px;
   font-weight: 800;
   line-height: 1;
@@ -83,7 +83,7 @@
   position: relative;
   z-index: 1;
   margin-top: 7px;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 12px;
   font-weight: 600;
 }
@@ -186,13 +186,13 @@
 }
 
 .admin-content-empty strong {
-  color: var(--ink, #1f2924);
+  color: var(--ink, #173A5E);
   font-size: 14px;
 }
 
 .admin-content-empty span {
   margin-top: 6px;
-  color: var(--muted, #6b746f);
+  color: var(--muted, #6B849A);
   font-size: 12px;
 }
 
@@ -231,3 +231,5 @@
     padding: 11px !important;
   }
 }
+/* Refinamento visual TENNA — seleção de tópicos */
+.admin-page{max-width:1180px;margin:0 auto}.page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.stat-card{border-color:rgba(13,71,161,.10);box-shadow:0 8px 25px -24px rgba(13,71,161,.55)}.stat-card::after{background:rgba(33,150,243,.07)}.panel-card{border-color:rgba(13,71,161,.10);box-shadow:0 9px 26px -25px rgba(13,71,161,.55)}.panel-card button:not(:disabled):hover{border-color:rgba(33,150,243,.22)!important;background:#f8fbfe!important;box-shadow:0 7px 18px -15px rgba(13,71,161,.35)}

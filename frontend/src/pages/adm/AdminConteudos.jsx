@@ -858,11 +858,11 @@ export default function AdminConteudos() {
             borderRadius:
               '12px',
             background:
-              '#edf9f1',
+              '#F1F8FF',
             border:
-              '1px solid #b8e6c5',
+              '1px solid #B8DDF7',
             color:
-              '#16733a',
+              '#0D47A1',
             fontSize:
               '13px',
             fontWeight: 700,

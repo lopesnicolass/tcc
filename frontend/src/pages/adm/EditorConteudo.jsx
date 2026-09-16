@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../../styles/adm/EditorConteudo.css';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function obterToken() {
   return (
@@ -2489,7 +2489,7 @@ export default function EditorConteudo({
                               type="button"
                               className="editor-icon-button"
                               onClick={() =>
-                                abrirEdicaoBloco(
+                                abrirEditarBloco(
                                   bloco
                                 )
                               }
