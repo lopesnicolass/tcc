@@ -728,32 +728,46 @@ export default function PlanoAutomatico() {
 
         <div className="tenna-auto-config-head">
 
-          <div>
+          <div className="tenna-auto-config-title">
 
-            <span className="tenna-auto-step">
-              01
-            </span>
+  <div>
 
-            <div>
+    <h3>
+      Monte seu plano
+    </h3>
 
-              <h3>
-                Monte seu plano
-              </h3>
+    <p>
+      Escolha quanto tempo você tem e quantos dias consegue estudar.
+    </p>
 
-              <p>
-                Escolha quanto tempo você tem
-                e quantos dias consegue estudar.
-              </p>
+    {plan && (
+      <span className="tenna-auto-ready">
+        ✓ Plano criado
+      </span>
+    )}
 
+  </div>
+
+</div>
+
+          <div className="tenna-auto-personalized">
+            <div className="tenna-auto-personalized-icon">
+              <Icon
+                name="target"
+                size={27}
+                color="var(--accent-dark)"
+              />
             </div>
 
-          </div>
+            <div className="tenna-auto-personalized-copy">
+              <strong>Seu plano será personalizado</strong>
+              <span>✓ Organiza seu tempo de estudo</span>
+              <span>✓ Equilibra as matérias</span>
+              <span>✓ Ajuda você a evoluir no seu ritmo</span>
+            </div>
 
-          {plan && (
-            <span className="tenna-auto-ready">
-              ✓ Plano criado
-            </span>
-          )}
+            <div className="tenna-auto-personalized-deco" aria-hidden="true">✦</div>
+          </div>
 
         </div>
 

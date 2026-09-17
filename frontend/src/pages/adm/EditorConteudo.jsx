@@ -359,6 +359,9 @@ export default function EditorConteudo({
   const [descricao, setDescricao] =
     useState('');
 
+  const [publicado, setPublicado] =
+    useState(false);
+
   const [tipoNovoBloco, setTipoNovoBloco] =
     useState('texto');
 
@@ -401,6 +404,7 @@ export default function EditorConteudo({
         setPagina(null);
         setTitulo(topicoNome || '');
         setDescricao('');
+        setPublicado(false);
         setBlocos([]);
         return;
       }
@@ -415,6 +419,11 @@ export default function EditorConteudo({
 
       setDescricao(
         dados.pagina.descricao || ''
+      );
+
+      setPublicado(
+        Number(dados.pagina.publicado) === 1 ||
+          dados.pagina.publicado === true
       );
 
       const lista = Array.isArray(
@@ -521,6 +530,7 @@ export default function EditorConteudo({
           topicoNome ||
           'Conteúdo',
         descricao: descricao.trim(),
+        publicado: publicado ? 1 : 0,
       };
 
       if (!pagina?.id) {
@@ -532,10 +542,13 @@ export default function EditorConteudo({
           }
         );
 
-        setPagina(
-          dados.pagina ||
-            dados.data ||
-            dados
+        const paginaSalva =
+          dados.pagina || dados.data || dados;
+
+        setPagina(paginaSalva);
+        setPublicado(
+          Number(paginaSalva?.publicado) === 1 ||
+            paginaSalva?.publicado === true
         );
 
         mostrarSucesso(
@@ -550,13 +563,18 @@ export default function EditorConteudo({
           }
         );
 
+        const paginaSalva =
+          dados.pagina || dados.data || dados;
+
         setPagina((anterior) => ({
           ...anterior,
-          ...(dados.pagina ||
-            dados.data ||
-            dados),
+          ...paginaSalva,
           id: pagina.id,
         }));
+        setPublicado(
+          Number(paginaSalva?.publicado) === 1 ||
+            paginaSalva?.publicado === true
+        );
 
         mostrarSucesso(
           'Página salva com sucesso.'
@@ -590,6 +608,7 @@ export default function EditorConteudo({
             topicoNome ||
             'Conteúdo',
           descricao: descricao.trim(),
+          publicado: publicado ? 1 : 0,
         }),
       }
     );
@@ -2247,21 +2266,100 @@ export default function EditorConteudo({
           </p>
         </div>
 
-        <button
-          type="button"
-          className="editor-primary-button"
-          onClick={salvarPagina}
-          disabled={salvandoPagina}
-        >
-          <Icon
-            name="save"
-            size={17}
-          />
+        <div className="editor-header-actions">
+          <span
+            className={`editor-publication-status ${
+              publicado ? 'published' : 'draft'
+            }`}
+          >
+            <span className="editor-publication-dot" />
+            {publicado ? 'Publicado' : 'Rascunho'}
+          </span>
 
-          {salvandoPagina
-            ? 'Salvando...'
-            : 'Salvar página'}
-        </button>
+          <button
+            type="button"
+            className={
+              publicado
+                ? 'editor-secondary-button'
+                : 'editor-primary-button'
+            }
+            onClick={async () => {
+              const proximoStatus = !publicado;
+              setPublicado(proximoStatus);
+
+              try {
+                setSalvandoPagina(true);
+                setErro('');
+
+                if (!pagina?.id) {
+                  const dados = await request(
+                    '/paginas-conteudo',
+                    {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        topicoId: Number(topicoId),
+                        titulo: titulo.trim() || topicoNome || 'Conteúdo',
+                        descricao: descricao.trim(),
+                        publicado: proximoStatus ? 1 : 0,
+                      }),
+                    }
+                  );
+                  const criada = dados.pagina || dados.data || dados;
+                  setPagina(criada);
+                } else {
+                  const dados = await request(
+                    `/paginas-conteudo/${pagina.id}`,
+                    {
+                      method: 'PUT',
+                      body: JSON.stringify({
+                        titulo: titulo.trim() || topicoNome || 'Conteúdo',
+                        descricao: descricao.trim(),
+                        publicado: proximoStatus ? 1 : 0,
+                      }),
+                    }
+                  );
+                  setPagina((anterior) => ({
+                    ...anterior,
+                    ...(dados.pagina || dados.data || dados),
+                  }));
+                }
+
+                mostrarSucesso(
+                  proximoStatus
+                    ? 'Conteúdo publicado para os alunos.'
+                    : 'Conteúdo retirado da publicação.'
+                );
+              } catch (error) {
+                setPublicado(!proximoStatus);
+                setErro(
+                  error.message ||
+                    'Não foi possível alterar a publicação.'
+                );
+              } finally {
+                setSalvandoPagina(false);
+              }
+            }}
+            disabled={salvandoPagina}
+          >
+            {publicado ? 'Despublicar' : 'Publicar'}
+          </button>
+
+          <button
+            type="button"
+            className="editor-primary-button"
+            onClick={salvarPagina}
+            disabled={salvandoPagina}
+          >
+            <Icon
+              name="save"
+              size={17}
+            />
+
+            {salvandoPagina
+              ? 'Salvando...'
+              : 'Salvar página'}
+          </button>
+        </div>
       </header>
 
       {sucesso && (

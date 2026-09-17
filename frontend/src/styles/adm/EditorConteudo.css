@@ -1055,3 +1055,61 @@
 }
 /* Refinamento visual TENNA — construtor de aula */
 .editor-page-header{padding-bottom:2px}.editor-page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.editor-layout{grid-template-columns:minmax(0,1fr) 300px!important;gap:18px!important}.editor-panel{border-radius:18px!important;border-color:rgba(13,71,161,.10)!important;box-shadow:0 9px 28px -26px rgba(13,71,161,.55)!important}.editor-type.selected{border-color:var(--accent)!important;background:var(--paper)!important;box-shadow:0 6px 18px -14px rgba(13,71,161,.45)}.editor-block{border-radius:15px!important;border-color:rgba(13,71,161,.10)!important}.editor-block-icon{background:var(--paper)!important;color:var(--accent-dark)!important}.editor-add-button{border-color:rgba(33,150,243,.22)!important;color:var(--accent-dark)!important;background:#f8fbfe!important}.editor-modal-overlay{background:rgba(9,40,72,.35)!important;backdrop-filter:blur(3px)}.editor-modal{border-radius:20px!important;border-color:rgba(13,71,161,.12)!important;box-shadow:0 25px 70px -30px rgba(13,71,161,.55)!important}@media(max-width:850px){.editor-layout{grid-template-columns:1fr!important}.editor-sidebar{position:static}}
+
+/* =========================================================
+   PUBLICAÇÃO DA AULA
+   ========================================================= */
+.editor-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editor-publication-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line, #dce5df);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--muted, #6B849A);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.editor-publication-status.published {
+  border-color: rgba(33, 150, 243, .22);
+  background: #f1f8ff;
+  color: #0D47A1;
+}
+
+.editor-publication-status.draft {
+  background: #f7f9fa;
+}
+
+.editor-publication-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a8b1b7;
+}
+
+.editor-publication-status.published .editor-publication-dot {
+  background: #2196F3;
+}
+
+@media (max-width: 760px) {
+  .editor-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .editor-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

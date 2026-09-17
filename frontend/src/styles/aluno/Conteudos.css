@@ -448,3 +448,280 @@
     display:none;
   }
 }
+
+/* =========================================================
+   AJUSTE VISUAL — LISTA DE TÓPICOS
+   Mantém os cards largos, mas deixa o conteúdo aberto mais
+   organizado e próximo do visual das demais telas.
+   ========================================================= */
+
+.conteudos-page .content-subject-list{
+  gap:16px;
+}
+
+.conteudos-page .content-subject-card{
+  border-radius:20px;
+  border:1px solid rgba(13,71,161,.10);
+  border-left-width:4px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 7px 20px -17px rgba(13,71,161,.45);
+}
+
+.conteudos-page .content-subject-header{
+  min-height:82px;
+  padding:15px 22px;
+}
+
+.conteudos-page .content-subject-title{
+  gap:14px;
+}
+
+.conteudos-page .content-subject-icon{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+  border-radius:15px;
+}
+
+.conteudos-page .content-subject-title h2{
+  font-size:16px;
+}
+
+.conteudos-page .content-subject-title > div > span{
+  font-size:12px;
+}
+
+.conteudos-page .content-subject-progress > span:first-child{
+  font-size:13px;
+}
+
+/* Área aberta */
+.conteudos-page .content-topic-list{
+  gap:7px;
+  padding:12px 18px 16px;
+  border-top:1px solid rgba(13,71,161,.10);
+  background:#F5FAFF;
+}
+
+/* Cada tópico vira um pequeno card */
+.conteudos-page .content-topic{
+  gap:10px;
+  min-height:50px;
+  padding:3px 8px 3px 7px;
+  border:1px solid rgba(13,71,161,.08);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 2px 8px rgba(13,71,161,.035);
+  transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.conteudos-page .content-topic:hover{
+  background:#fff;
+  border-color:rgba(33,150,243,.20);
+  transform:translateX(2px);
+  box-shadow:0 5px 12px rgba(13,71,161,.07);
+}
+
+.conteudos-page .content-topic-check{
+  width:28px;
+  height:28px;
+  flex-basis:28px;
+  border-radius:8px;
+}
+
+.conteudos-page .content-topic-open{
+  min-height:42px;
+  padding:6px 5px;
+  border-radius:9px;
+  grid-template-columns:32px minmax(0,1fr) auto 14px;
+}
+
+.conteudos-page .content-topic-open:hover{
+  background:transparent;
+}
+
+.conteudos-page .content-topic-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  background:#EAF5FF;
+  color:var(--accent-dark);
+  font-size:10px;
+}
+
+.conteudos-page .content-topic-name{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--ink);
+}
+
+.conteudos-page .content-topic-status{
+  padding:6px 11px;
+  border:1px solid rgba(13,71,161,.08);
+  background:#F5FAFF;
+  font-size:10.5px;
+  font-weight:700;
+}
+
+.conteudos-page .content-topic-arrow{
+  font-size:20px;
+  color:#7EA9D3;
+}
+
+.conteudos-page .content-topic.studied{
+  border-color:rgba(33,150,243,.18);
+}
+
+.conteudos-page .content-topic.studied .content-topic-number{
+  background:#E3F2FD;
+}
+
+.conteudos-page .content-topic.studied .content-topic-status{
+  background:#E3F2FD;
+  border-color:rgba(33,150,243,.12);
+}
+
+@media(max-width:700px){
+  .conteudos-page .content-subject-header{
+    padding:13px 15px;
+  }
+
+  .conteudos-page .content-topic-list{
+    padding:10px 11px 13px;
+  }
+
+  .conteudos-page .content-topic-open{
+    grid-template-columns:30px minmax(0,1fr) 14px;
+  }
+
+  .conteudos-page .content-topic-status{
+    display:none;
+  }
+}
+
+
+/* =========================================================
+   VERSÃO FINAL — MATÉRIA EXPANDIDA
+   Mantém a largura atual da página e deixa os tópicos
+   compactos, claros e alinhados ao restante da interface.
+   ========================================================= */
+.conteudos-page .content-subject-card{
+  background:#fff;
+  border:1px solid rgba(13,71,161,.10);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 6px 18px -15px rgba(13,71,161,.35);
+}
+
+.conteudos-page .content-subject-header{
+  min-height:78px;
+  padding:14px 20px;
+  background:#fff;
+}
+
+.conteudos-page .content-topic-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:14px 16px 16px;
+  border-top:1px solid rgba(13,71,161,.09);
+  background:#F3F9FE;
+}
+
+.conteudos-page .content-topic{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto 18px;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  min-height:52px;
+  box-sizing:border-box;
+  padding:7px 10px;
+  border:1px solid rgba(13,71,161,.08);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(13,71,161,.035);
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+
+.conteudos-page .content-topic:hover{
+  background:#fff;
+  border-color:rgba(33,150,243,.24);
+  transform:translateX(2px);
+  box-shadow:0 5px 12px rgba(13,71,161,.07);
+}
+
+.conteudos-page .content-topic-check{
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  border:1.5px solid #C9DFF2;
+  border-radius:8px;
+  background:#fff;
+}
+
+.conteudos-page .content-topic-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  background:#EAF5FF;
+  color:#0D47A1;
+  font-size:10.5px;
+}
+
+.conteudos-page .content-topic-name{
+  min-width:0;
+  color:#0D47A1;
+  font-size:13.5px;
+  font-weight:600;
+}
+
+.conteudos-page .content-topic-status{
+  padding:6px 11px;
+  border:1px solid rgba(13,71,161,.07);
+  border-radius:999px;
+  background:#F5FAFF;
+  color:#6D98C2;
+  font-size:10.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.conteudos-page .content-topic-arrow{
+  font-size:19px;
+  color:#7EA9D3;
+}
+
+.conteudos-page .content-topic.studied{
+  border-color:rgba(33,150,243,.16);
+}
+
+.conteudos-page .content-topic.studied .content-topic-check{
+  border-color:#2196F3;
+  background:#2196F3;
+}
+
+.conteudos-page .content-topic.studied .content-topic-number{
+  background:#E3F2FD;
+}
+
+@media(max-width:700px){
+  .conteudos-page .content-topic-list{
+    padding:10px 10px 13px;
+  }
+
+  .conteudos-page .content-topic{
+    grid-template-columns:30px minmax(0,1fr) 18px;
+  }
+
+  .conteudos-page .content-topic-status{
+    display:none;
+  }
+}
