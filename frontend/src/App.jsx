@@ -12,6 +12,7 @@ import Mural from './pages/aluno/Mural.jsx';
 import Cronograma from './pages/aluno/Cronograma.jsx';
 import PlanoAutomatico from './pages/aluno/PlanoAutomatico.jsx';
 import Conteudos from './pages/aluno/Conteudos.jsx';
+import ConteudoEstudo from './pages/aluno/ConteudoEstudo.jsx';
 import Simulados from './pages/aluno/Simulados.jsx';
 import Provas from './pages/aluno/Provas.jsx';
 import Desempenho from './pages/aluno/Desempenho.jsx';
@@ -76,6 +77,11 @@ export default function App() {
             <Route
               path="/conteudos"
               element={<Conteudos />}
+            />
+
+            <Route
+              path="/conteudos/:topicoId"
+              element={<ConteudoEstudo />}
             />
 
             <Route

@@ -851,17 +851,7 @@ export default function PlanoAutomatico() {
 
         <div className="tenna-auto-config-bottom">
 
-          <span
-            style={{
-              display:
-                'flex',
-              alignItems:
-                'center',
-              gap: 7,
-              color:
-                'var(--muted)'
-            }}
-          >
+          <span className="tenna-auto-config-note">
 
             <Icon
               name="book"
@@ -886,12 +876,7 @@ export default function PlanoAutomatico() {
 
           {syncError && (
 
-            <span
-              style={{
-                color: '#c0392b',
-                fontSize: '0.85rem'
-              }}
-            >
+            <span className="tenna-auto-error">
               {syncError}
             </span>
 

@@ -1,5 +1,6 @@
 import '../../styles/aluno/Conteudos.css';
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
 import SubjectIcon from '../../components/cu.jsx';
 import Icon from '../../components/Icon.jsx';
@@ -184,6 +185,8 @@ export const TOPICS_BANK = {
 };
 
 export default function Conteudos() {
+  const navigate = useNavigate();
+
   const API_URL =
     import.meta.env.VITE_API_URL ||
     'http://localhost:3000';
@@ -883,7 +886,7 @@ export default function Conteudos() {
                               );
 
                             return (
-                              <button
+                              <div
                                 className={
                                   `content-topic ${
                                     done
@@ -893,14 +896,6 @@ export default function Conteudos() {
                                 }
                                 key={
                                   topic.id
-                                }
-                                onClick={() =>
-                                  toggleEstudado(
-                                    topic
-                                  )
-                                }
-                                disabled={
-                                  salvando
                                 }
                                 style={
                                   done
@@ -914,8 +909,23 @@ export default function Conteudos() {
                                 }
                               >
 
-                                <span
+                                <button
+                                  type="button"
                                   className="content-topic-check"
+                                  onClick={(evento) => {
+                                    evento.stopPropagation();
+                                    toggleEstudado(
+                                      topic
+                                    );
+                                  }}
+                                  disabled={
+                                    salvando
+                                  }
+                                  aria-label={
+                                    done
+                                      ? 'Marcar tópico como não estudado'
+                                      : 'Marcar tópico como estudado'
+                                  }
                                   style={
                                     done
                                       ? {
@@ -930,40 +940,56 @@ export default function Conteudos() {
                                   {done
                                     ? '✓'
                                     : ''}
-                                </span>
+                                </button>
 
-                                <span className="content-topic-number">
-                                  {String(
-                                    index + 1
-                                  ).padStart(
-                                    2,
-                                    '0'
-                                  )}
-                                </span>
-
-                                <span className="content-topic-name">
-                                  {topic.nome}
-                                </span>
-
-                                <span
-                                  className="content-topic-status"
-                                  style={
-                                    done
-                                      ? {
-                                          color:
-                                            style.color
-                                        }
-                                      : undefined
+                                <button
+                                  type="button"
+                                  className="content-topic-open"
+                                  onClick={() =>
+                                    navigate(
+                                      `/conteudos/${topic.id}`
+                                    )
                                   }
                                 >
-                                  {salvando
-                                    ? 'Salvando...'
-                                    : done
-                                      ? 'Estudado'
-                                      : 'Marcar'}
-                                </span>
 
-                              </button>
+                                  <span className="content-topic-number">
+                                    {String(
+                                      index + 1
+                                    ).padStart(
+                                      2,
+                                      '0'
+                                    )}
+                                  </span>
+
+                                  <span className="content-topic-name">
+                                    {topic.nome}
+                                  </span>
+
+                                  <span
+                                    className="content-topic-status"
+                                    style={
+                                      done
+                                        ? {
+                                            color:
+                                              style.color
+                                          }
+                                        : undefined
+                                    }
+                                  >
+                                    {salvando
+                                      ? 'Salvando...'
+                                      : done
+                                        ? 'Estudado'
+                                        : 'Ver conteúdo'}
+                                  </span>
+
+                                  <span className="content-topic-arrow">
+                                    ›
+                                  </span>
+
+                                </button>
+
+                              </div>
                             );
                           }
                         )}
