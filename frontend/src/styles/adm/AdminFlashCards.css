@@ -10,4 +10,4 @@
   transition:transform .2s var(--bouncy), box-shadow .2s ease;
 }
 
-.admin-flashcard-item:hover{ transform:translateY(-4px) rotate(-1deg); box-shadow:0 10px 20px -8px rgba(13,71,161,0.25); }
+.admin-flashcard-item:hover{ transform:translateY(-4px); box-shadow:0 10px 20px -8px rgba(13,71,161,0.25); }

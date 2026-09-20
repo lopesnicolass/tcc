@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { TOPICS_BANK } from './Conteudos.jsx';
 import { useGamification } from "../../context/GamificationContext.jsx";
 import { getSubjectStyle } from "../../utils/subjects.js";
-import SubjectIcon from "../../components/cu.jsx";
+import SubjectIcon from "../../components/SubjectIcon.jsx";
 import Icon from "../../components/Icon.jsx";
 
 const API_URL =

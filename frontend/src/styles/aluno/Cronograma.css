@@ -70,13 +70,15 @@
 
 .calendar-kicker{display:block;font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--accent);margin-bottom:5px}
 
-.calendar-overview{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:14px;margin:24px 0}
+.calendar-overview{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:14px;margin:0 0 24px}
 
-.calendar-overview>div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 5px 18px rgba(13,71,161,.05)}
+.calendar-overview>div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 5px 18px rgba(13,71,161,.05);display:flex;align-items:center;gap:13px}
 
 .calendar-overview span{display:block;color:var(--muted);font-size:12px;font-weight:700}
 
-.calendar-overview strong{display:block;color:var(--ink);font:700 27px "Space Grotesk";margin-top:5px}
+.calendar-overview span.calendar-stat-icon{display:flex;flex:0 0 42px;align-items:center;justify-content:center;width:42px;height:42px;border-radius:13px;background:var(--paper);font-size:19px}
+
+.calendar-overview strong{display:block;color:var(--ink);font-family:"Space Grotesk";font-weight:700;margin-top:5px;font-size:24px}
 
 .calendar-overview-tip{display:flex!important;align-items:center;gap:12px;background:linear-gradient(135deg,#fff,#f3f8ff)!important}
 
@@ -183,14 +185,6 @@
 .calendar-actions-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:20px 0}
 
 .calendar-actions-row p{margin:0;color:var(--muted);font-size:13px}
-
-.calendar-overview{margin:0 0 24px}
-
-.calendar-overview>div{display:flex;align-items:center;gap:13px}
-
-.calendar-overview span.calendar-stat-icon{display:flex;flex:0 0 42px;align-items:center;justify-content:center;width:42px;height:42px;border-radius:13px;background:var(--paper);font-size:19px}
-
-.calendar-overview strong{font-size:24px}
 
 .calendar-event{display:flex;align-items:center;gap:5px;border-radius:6px;padding:4px 6px;border-left-width:3px;border-left-style:solid;font-weight:700}
 

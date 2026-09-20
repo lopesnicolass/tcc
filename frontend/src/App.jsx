@@ -6,6 +6,7 @@ import Auth from './pages/public/Auth.jsx';
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AdminRoute from './components/AdminRoute.jsx';
 
 import Home from './pages/aluno/Home.jsx';
 import Mural from './pages/aluno/Mural.jsx';
@@ -128,52 +129,55 @@ export default function App() {
 
           {/* ===================================================
               ÁREA DO ADMIN
+              (AdminRoute exige usuario.tipo === 'admin')
               =================================================== */}
-          <Route
-            path="/admin"
-            element={<AdminLayout />}
-          >
-
+          <Route element={<AdminRoute />}>
             <Route
-              index
-              element={<AdminDashboard />}
-            />
+              path="/admin"
+              element={<AdminLayout />}
+            >
 
-            <Route
-              path="conteudos"
-              element={<AdminConteudos />}
-            />
+              <Route
+                index
+                element={<AdminDashboard />}
+              />
 
-            <Route
-              path="conteudos/construir"
-              element={<AdminConstrutorConteudos />}
-            />
+              <Route
+                path="conteudos"
+                element={<AdminConteudos />}
+              />
 
-            <Route
-              path="simulados"
-              element={<AdminSimulados />}
-            />
+              <Route
+                path="conteudos/construir"
+                element={<AdminConstrutorConteudos />}
+              />
 
-            <Route
-              path="provas"
-              element={<AdminProvas />}
-            />
+              <Route
+                path="simulados"
+                element={<AdminSimulados />}
+              />
 
-            <Route
-              path="cronogramas"
-              element={<AdminCronogramas />}
-            />
+              <Route
+                path="provas"
+                element={<AdminProvas />}
+              />
 
-            <Route
-              path="flashcards"
-              element={<AdminFlashCards />}
-            />
+              <Route
+                path="cronogramas"
+                element={<AdminCronogramas />}
+              />
 
-            <Route
-              path="usuarios"
-              element={<AdminUsuarios />}
-            />
+              <Route
+                path="flashcards"
+                element={<AdminFlashCards />}
+              />
 
+              <Route
+                path="usuarios"
+                element={<AdminUsuarios />}
+              />
+
+            </Route>
           </Route>
 
         </Route>

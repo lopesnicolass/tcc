@@ -2,7 +2,7 @@ import '../../styles/aluno/Conteudos.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/cu.jsx';
+import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 
 export const TOPICS_BANK = {
@@ -862,6 +862,15 @@ export default function Conteudos() {
                       </div>
 
                     </button>
+
+                    <div className="content-subject-track">
+                      <div
+                        style={{
+                          width: `${materiaProgresso}%`,
+                          background: style.color
+                        }}
+                      />
+                    </div>
 
                     {aberto && (
 

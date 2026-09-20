@@ -1,15 +1,3 @@
-@keyframes bounceIn{
-  0%{ transform:scale(.92); opacity:0; }
-  60%{ transform:scale(1.02); opacity:1; }
-  100%{ transform:scale(1); }
-}
-
-@keyframes wiggle{
-  0%,100%{ transform:rotate(0deg); }
-  25%{ transform:rotate(-10deg); }
-  75%{ transform:rotate(10deg); }
-}
-
 @keyframes pulseRing{
   0%{ box-shadow:0 0 0 0 rgba(33,150,243,0.45); }
   100%{ box-shadow:0 0 0 14px rgba(33,150,243,0); }
@@ -85,23 +73,6 @@
   color:rgba(255,255,255,0.5);
 }
 
-.sidebar-streak{
-  display:flex; align-items:center; gap:12px;
-  background:rgba(255,255,255,0.08);
-  border-radius:14px;
-  padding:11px 14px;
-  margin-top:auto;
-  transition:transform .18s var(--bouncy), background .15s ease;
-}
-
-.sidebar-streak:hover{ background:rgba(255,255,255,0.12); transform:scale(1.02); }
-
-.sidebar-streak-icon{ font-size:20px; }
-
-.sidebar-streak-num{ font-family:"Space Grotesk"; font-weight:700; font-size:19px; color:#fff; line-height:1.1; }
-
-.sidebar-streak-label{ font-size:11px; color:rgba(255,255,255,0.55); }
-
 .sidebar-nav{
   display:flex;
   flex-direction:column;
@@ -127,7 +98,7 @@
   transform:translateX(4px);
 }
 
-.sidebar-link:hover svg{ animation:wiggle .4s ease; }
+.sidebar-link:hover svg{ transform:scale(1.08); }
 
 .sidebar-link.active{
   background:var(--accent);
@@ -135,7 +106,7 @@
   font-weight:600;
 }
 
-.sidebar-link svg{ flex-shrink:0; width:20px; height:20px; }
+.sidebar-link svg{ flex-shrink:0; width:20px; height:20px; transition:transform .15s ease; }
 
 .dashboard-content{
   flex:1;
@@ -170,9 +141,9 @@
 
 .stat-card:nth-child(4){ animation-delay:.26s; }
 
-.stat-card:hover{ transform:translateY(-5px) rotate(-0.6deg); box-shadow:0 14px 24px -10px rgba(13,71,161,0.22); }
+.stat-card:hover{ transform:translateY(-4px); box-shadow:0 14px 24px -10px rgba(13,71,161,0.22); }
 
-.stat-card:hover .stat-icon{ transform:rotate(-10deg) scale(1.12); }
+.stat-card:hover .stat-icon{ transform:scale(1.08); }
 
 .stat-value{
   font-size:32px;
@@ -213,14 +184,13 @@
     0 1px 1px rgba(0,0,0,0.06),
     3px 10px 16px -6px rgba(30,20,10,0.35),
     10px 24px 34px -20px rgba(30,20,10,0.3);
-  transform:rotate(var(--tilt, 0deg));
   transition:transform .25s var(--bouncy), box-shadow .2s ease;
   cursor:pointer;
   animation:popIn .35s var(--bouncy) backwards;
 }
 
 .postit:hover{
-  transform:rotate(0deg) translateY(-6px) scale(1.05);
+  transform:translateY(-6px);
   box-shadow:
     0 1px 1px rgba(0,0,0,0.06),
     5px 18px 24px -8px rgba(30,20,10,0.4),
@@ -281,7 +251,7 @@
   transition:transform .25s var(--bouncy);
 }
 
-.meta-circle:hover{ transform:scale(1.06) rotate(4deg); }
+.meta-circle:hover{ transform:scale(1.06); }
 
 .meta-circle-label{ font-size:14px; color:var(--muted); text-align:center; }
 
@@ -419,7 +389,7 @@
   animation:pulseRing 2.4s ease-in-out infinite;
 }
 
-.fab-add:hover{ background:var(--accent-dark); transform:scale(1.1) rotate(90deg); animation:none; }
+.fab-add:hover{ background:var(--accent-dark); transform:scale(1.06); animation:none; }
 
 .question-count-badge{
   display:inline-flex; align-items:center; gap:6px;
@@ -980,14 +950,16 @@
 .content-subject-card{
   overflow:hidden;
   border:1px solid rgba(13,71,161,.09);
+  border-left-width:4px;
+  border-left-style:solid;
   border-radius:19px;
   background:#fff;
   box-shadow:0 5px 18px -17px rgba(13,71,161,.45);
-  transition:transform .2s var(--bouncy),box-shadow .2s ease,border-color .2s ease;
+  transition:box-shadow .18s ease, transform .18s ease;
 }
 
 .content-subject-card:hover{
-  transform:translateY(-2px);
+  transform:translateY(-1px);
   border-color:rgba(33,150,243,.16);
   box-shadow:0 13px 28px -20px rgba(13,71,161,.38);
 }
@@ -998,7 +970,7 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
+  gap:14px;
   padding:13px 18px;
   border:0;
   background:#fff;
@@ -1008,7 +980,7 @@
 }
 
 .content-subject-card:hover .content-subject-icon{
-  transform:rotate(-5deg) scale(1.05);
+  transform:scale(1.05);
   background:#d9edfc;
 }
 
@@ -1079,14 +1051,6 @@
 .admin-icon-btn{width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink-soft);cursor:pointer;font-size:14px;transition:.15s;}
 
 .admin-icon-btn:hover{border-color:var(--accent-light);background:var(--paper);color:var(--accent-dark);}
-
-/* ===== Melhorias visuais: Cronograma, Conteúdos e Plano automático ===== */
-
-.content-subject-card{border-left-width:4px;border-left-style:solid;transition:box-shadow .18s ease,transform .18s ease}
-
-.content-subject-card:hover{transform:translateY(-1px)}
-
-.content-subject-header{display:flex;justify-content:space-between;align-items:center;gap:14px}
 
 /* =====================================================
    ADMIN DASHBOARD — VISÃO GERAL
@@ -1217,8 +1181,8 @@
    ========================================================= */
 
 @keyframes streakFlameFloat{
-  0%,100%{ transform:translateY(0) rotate(-2deg) scale(1); }
-  50%{ transform:translateY(-3px) rotate(2deg) scale(1.04); }
+  0%,100%{ transform:translateY(0) scale(1); }
+  50%{ transform:translateY(-3px) scale(1.04); }
 }
 
 @keyframes streakGlowPulse{

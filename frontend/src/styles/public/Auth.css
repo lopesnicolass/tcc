@@ -48,6 +48,13 @@
 .panel-visual{
   overflow:hidden;
   border-radius:28px 28px 0 0;
+  background:var(--ink);
+  padding:clamp(28px, 5vw, 48px);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  color:#fff;
+  gap:24px;
 }
 
 .panel-form{
@@ -60,17 +67,6 @@
   }.panel-form{
     border-radius:0 28px 28px 0;
   }
-}
-
-.panel-visual{
-  background:var(--ink);
-  padding:clamp(28px, 5vw, 48px);
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  overflow:hidden;
-  color:#fff;
-  gap:24px;
 }
 
 .panel-visual-simple{
@@ -246,7 +242,7 @@
   transition:transform .2s var(--bouncy), color .15s ease;
 }
 
-.toggle-eye:hover{ color:var(--ink-soft); transform:translateY(-50%) scale(1.15); animation:wiggle .4s ease; }
+.toggle-eye:hover{ color:var(--ink-soft); transform:translateY(-50%) scale(1.06); }
 
 .toggle-eye svg{ width:20px; height:20px; }
 

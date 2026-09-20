@@ -2,7 +2,7 @@ import '../../styles/aluno/ConteudoEstudo.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
-import SubjectIcon from '../../components/cu.jsx';
+import SubjectIcon from '../../components/SubjectIcon.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
 
 const API_URL =

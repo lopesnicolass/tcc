@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../styles/aluno/Cronograma.css';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/cu.jsx';
+import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 
 const API_URL =

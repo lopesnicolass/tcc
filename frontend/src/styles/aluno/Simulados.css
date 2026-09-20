@@ -9,7 +9,7 @@
   transition:transform .2s var(--bouncy), box-shadow .2s ease;
 }
 
-.simulado-card:hover{ transform:translateY(-5px) rotate(-0.4deg); box-shadow:0 14px 24px -10px rgba(13,71,161,0.22); }
+.simulado-card:hover{ transform:translateY(-5px); box-shadow:0 14px 24px -10px rgba(13,71,161,0.22); }
 
 .simulado-top{ display:flex; justify-content:space-between; align-items:center; }
 

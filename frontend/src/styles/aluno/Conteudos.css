@@ -7,8 +7,8 @@
 
 .conteudos-page{
   width:100%;
-  max-width:1180px;
-  margin:0 auto;
+  max-width:none;
+  margin:0;
   padding:0 0 56px;
   color:var(--ink);
 }
@@ -210,18 +210,63 @@
 
 /* =========================================================
    LISTA DE MATÉRIAS
+   (bloco único — antes havia 3 versões conflitantes destas
+   mesmas classes espalhadas pelo arquivo, uma sobrescrevendo
+   a outra e deixando os cards sem sombra/hover/cor)
    ========================================================= */
 
 .conteudos-page .content-subject-list{
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:18px;
+}
+
+.conteudos-page .content-subject-card{
+  border-radius:22px;
+  border:1px solid rgba(13,71,161,.10);
+  border-left:5px solid var(--accent);
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 10px 26px -20px rgba(13,71,161,.45);
+  transition:transform .22s var(--bouncy), box-shadow .22s ease;
+  animation:popIn .4s var(--bouncy) backwards;
+}
+
+.conteudos-page .content-subject-list .content-subject-card:nth-child(1){ animation-delay:.03s; }
+.conteudos-page .content-subject-list .content-subject-card:nth-child(2){ animation-delay:.08s; }
+.conteudos-page .content-subject-list .content-subject-card:nth-child(3){ animation-delay:.13s; }
+.conteudos-page .content-subject-list .content-subject-card:nth-child(4){ animation-delay:.18s; }
+.conteudos-page .content-subject-list .content-subject-card:nth-child(5){ animation-delay:.23s; }
+.conteudos-page .content-subject-list .content-subject-card:nth-child(6){ animation-delay:.28s; }
+
+.conteudos-page .content-subject-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 34px -20px rgba(13,71,161,.5);
+}
+
+.conteudos-page .content-subject-card:hover .content-subject-icon{
+  transform:scale(1.06);
+}
+
+.conteudos-page .content-subject-header{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  min-height:88px;
+  padding:18px 24px;
+  border:0;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
 }
 
 .conteudos-page .content-subject-title{
   display:flex;
   align-items:center;
-  gap:13px;
+  gap:16px;
   min-width:0;
 }
 
@@ -229,17 +274,17 @@
   display:flex;
   align-items:center;
   justify-content:center;
-  width:46px;
-  height:46px;
-  flex:0 0 46px;
-  border-radius:14px;
+  width:52px;
+  height:52px;
+  flex:0 0 52px;
+  border-radius:16px;
   transition:transform .2s var(--bouncy);
 }
 
 .conteudos-page .content-subject-title h2{
   margin:0;
   font-family:"Space Grotesk", sans-serif;
-  font-size:15.5px;
+  font-size:17px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -247,22 +292,22 @@
 
 .conteudos-page .content-subject-title > div > span{
   display:block;
-  margin-top:2px;
+  margin-top:3px;
   color:var(--muted);
-  font-size:11.5px;
+  font-size:12px;
 }
 
 .conteudos-page .content-subject-progress{
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
   flex:0 0 auto;
 }
 
 .conteudos-page .content-subject-progress > span:first-child{
   font-family:"Space Grotesk", sans-serif;
   font-weight:800;
-  font-size:13px;
+  font-size:15px;
 }
 
 .conteudos-page .content-chevron{
@@ -278,41 +323,71 @@
   color:var(--accent);
 }
 
+/* Barrinha de progresso por matéria — fica visível mesmo
+   com o card fechado, então dá pra ver o progresso batendo
+   o olho sem precisar abrir cada matéria */
+.conteudos-page .content-subject-track{
+  height:6px;
+  margin:0 24px 18px;
+  border-radius:99px;
+  background:var(--paper);
+  overflow:hidden;
+}
+
+.conteudos-page .content-subject-track > div{
+  height:100%;
+  border-radius:inherit;
+  transition:width .5s var(--bouncy);
+}
+
 /* =========================================================
    LISTA DE TÓPICOS (ACCORDION ABERTO)
+   (bloco único — igual à lista de matérias, esta seção também
+   tinha 3 versões conflitantes da mesma regra espalhadas pelo
+   arquivo; consolidei mantendo o resultado visual que já
+   estava valendo, só sem a bagunça por trás)
    ========================================================= */
 
 .conteudos-page .content-topic-list{
   display:flex;
   flex-direction:column;
-  padding:6px 10px 10px;
-  border-top:1px solid var(--line);
-  background:var(--paper);
+  gap:8px;
+  padding:14px 16px 16px;
+  border-top:1px solid rgba(13,71,161,.09);
+  background:#F3F9FE;
 }
 
 .conteudos-page .content-topic{
-  display:flex;
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) auto 18px;
   align-items:center;
-  gap:8px;
+  gap:12px;
   width:100%;
-  padding:4px 6px;
-  border-radius:13px;
-  background:transparent;
-  transition:background .15s ease;
+  min-height:52px;
+  box-sizing:border-box;
+  padding:7px 10px;
+  border:1px solid rgba(13,71,161,.08);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 2px 7px rgba(13,71,161,.035);
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 .conteudos-page .content-topic:hover{
   background:#fff;
+  border-color:rgba(33,150,243,.24);
+  transform:translateX(2px);
+  box-shadow:0 5px 12px rgba(13,71,161,.07);
 }
 
 .conteudos-page .content-topic-check{
   display:flex;
-  flex:0 0 26px;
   align-items:center;
   justify-content:center;
-  width:26px;
-  height:26px;
-  border:1.5px solid var(--line);
+  flex:0 0 28px;
+  width:28px;
+  height:28px;
+  border:1.5px solid #C9DFF2;
   border-radius:8px;
   background:#fff;
   color:#fff;
@@ -338,14 +413,15 @@
 
 .conteudos-page .content-topic-open{
   display:grid;
-  grid-template-columns:30px minmax(0,1fr) auto auto;
+  grid-template-columns:32px minmax(0,1fr) auto 14px;
   align-items:center;
   gap:10px;
   flex:1;
   min-width:0;
-  padding:9px 10px;
+  min-height:42px;
+  padding:6px 5px;
   border:0;
-  border-radius:10px;
+  border-radius:9px;
   background:transparent;
   text-align:left;
   color:var(--ink);
@@ -355,33 +431,30 @@
 }
 
 .conteudos-page .content-topic-open:hover{
-  background:var(--paper);
+  background:transparent;
 }
 
 .conteudos-page .content-topic-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  background:#EAF5FF;
+  color:#0D47A1;
   font-family:"Space Grotesk", sans-serif;
   font-size:10.5px;
   font-weight:800;
-  color:var(--muted);
 }
 
 .conteudos-page .content-topic-name{
   min-width:0;
-  font-size:13px;
+  color:#0D47A1;
+  font-size:13.5px;
+  font-weight:600;
   line-height:1.4;
   overflow-wrap:break-word;
-}
-
-.conteudos-page .content-topic-arrow{
-  font-size:19px;
-  line-height:1;
-  color:var(--muted);
-  transition:transform .15s ease, color .15s ease;
-}
-
-.conteudos-page .content-topic-open:hover .content-topic-arrow{
-  transform:translateX(2px);
-  color:var(--accent);
 }
 
 .conteudos-page .content-topic.studied .content-topic-name{
@@ -390,19 +463,41 @@
   text-decoration-color:rgba(13,71,161,.35);
 }
 
+.conteudos-page .content-topic-arrow{
+  font-size:19px;
+  line-height:1;
+  color:#7EA9D3;
+  transition:transform .15s ease, color .15s ease;
+}
+
+.conteudos-page .content-topic-open:hover .content-topic-arrow{
+  transform:translateX(2px);
+  color:var(--accent);
+}
+
 .conteudos-page .content-topic-status{
-  padding:5px 10px;
+  padding:6px 11px;
+  border:1px solid rgba(13,71,161,.07);
   border-radius:999px;
-  background:var(--card);
-  color:var(--muted);
+  background:#F5FAFF;
+  color:#6D98C2;
   font-size:10.5px;
-  font-weight:800;
+  font-weight:700;
   white-space:nowrap;
+}
+
+.conteudos-page .content-topic.studied{
+  border-color:rgba(33,150,243,.16);
+}
+
+.conteudos-page .content-topic.studied .content-topic-number{
+  background:#E3F2FD;
 }
 
 .conteudos-page .content-topic.studied .content-topic-status{
   background:#E3F2FD;
   color:var(--accent-dark);
+  border-color:rgba(33,150,243,.12);
 }
 
 /* =========================================================
@@ -429,169 +524,17 @@
   }
 }
 
-@media(max-width:560px){
-  .conteudos-page{
-    padding-bottom:36px;
-  }
-
-  .conteudos-page .content-subject-icon{
-    width:40px;
-    height:40px;
-    flex:0 0 40px;
-  }
-
-  .conteudos-page .content-topic-open{
-    grid-template-columns:26px minmax(0,1fr) auto;
-  }
-
-  .conteudos-page .content-topic-status{
-    display:none;
-  }
-}
-
-/* =========================================================
-   AJUSTE VISUAL — LISTA DE TÓPICOS
-   Mantém os cards largos, mas deixa o conteúdo aberto mais
-   organizado e próximo do visual das demais telas.
-   ========================================================= */
-
-.conteudos-page .content-subject-list{
-  gap:16px;
-}
-
-.conteudos-page .content-subject-card{
-  border-radius:20px;
-  border:1px solid rgba(13,71,161,.10);
-  border-left-width:4px;
-  background:#fff;
-  overflow:hidden;
-  box-shadow:0 7px 20px -17px rgba(13,71,161,.45);
-}
-
-.conteudos-page .content-subject-header{
-  min-height:82px;
-  padding:15px 22px;
-}
-
-.conteudos-page .content-subject-title{
-  gap:14px;
-}
-
-.conteudos-page .content-subject-icon{
-  width:48px;
-  height:48px;
-  flex-basis:48px;
-  border-radius:15px;
-}
-
-.conteudos-page .content-subject-title h2{
-  font-size:16px;
-}
-
-.conteudos-page .content-subject-title > div > span{
-  font-size:12px;
-}
-
-.conteudos-page .content-subject-progress > span:first-child{
-  font-size:13px;
-}
-
-/* Área aberta */
-.conteudos-page .content-topic-list{
-  gap:7px;
-  padding:12px 18px 16px;
-  border-top:1px solid rgba(13,71,161,.10);
-  background:#F5FAFF;
-}
-
-/* Cada tópico vira um pequeno card */
-.conteudos-page .content-topic{
-  gap:10px;
-  min-height:50px;
-  padding:3px 8px 3px 7px;
-  border:1px solid rgba(13,71,161,.08);
-  border-radius:12px;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(13,71,161,.035);
-  transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
-}
-
-.conteudos-page .content-topic:hover{
-  background:#fff;
-  border-color:rgba(33,150,243,.20);
-  transform:translateX(2px);
-  box-shadow:0 5px 12px rgba(13,71,161,.07);
-}
-
-.conteudos-page .content-topic-check{
-  width:28px;
-  height:28px;
-  flex-basis:28px;
-  border-radius:8px;
-}
-
-.conteudos-page .content-topic-open{
-  min-height:42px;
-  padding:6px 5px;
-  border-radius:9px;
-  grid-template-columns:32px minmax(0,1fr) auto 14px;
-}
-
-.conteudos-page .content-topic-open:hover{
-  background:transparent;
-}
-
-.conteudos-page .content-topic-number{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:8px;
-  background:#EAF5FF;
-  color:var(--accent-dark);
-  font-size:10px;
-}
-
-.conteudos-page .content-topic-name{
-  font-size:13.5px;
-  font-weight:600;
-  color:var(--ink);
-}
-
-.conteudos-page .content-topic-status{
-  padding:6px 11px;
-  border:1px solid rgba(13,71,161,.08);
-  background:#F5FAFF;
-  font-size:10.5px;
-  font-weight:700;
-}
-
-.conteudos-page .content-topic-arrow{
-  font-size:20px;
-  color:#7EA9D3;
-}
-
-.conteudos-page .content-topic.studied{
-  border-color:rgba(33,150,243,.18);
-}
-
-.conteudos-page .content-topic.studied .content-topic-number{
-  background:#E3F2FD;
-}
-
-.conteudos-page .content-topic.studied .content-topic-status{
-  background:#E3F2FD;
-  border-color:rgba(33,150,243,.12);
-}
-
 @media(max-width:700px){
   .conteudos-page .content-subject-header{
     padding:13px 15px;
   }
 
   .conteudos-page .content-topic-list{
-    padding:10px 11px 13px;
+    padding:10px 10px 13px;
+  }
+
+  .conteudos-page .content-topic{
+    grid-template-columns:30px minmax(0,1fr) 18px;
   }
 
   .conteudos-page .content-topic-open{
@@ -603,122 +546,15 @@
   }
 }
 
-
-/* =========================================================
-   VERSÃO FINAL — MATÉRIA EXPANDIDA
-   Mantém a largura atual da página e deixa os tópicos
-   compactos, claros e alinhados ao restante da interface.
-   ========================================================= */
-.conteudos-page .content-subject-card{
-  background:#fff;
-  border:1px solid rgba(13,71,161,.10);
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 6px 18px -15px rgba(13,71,161,.35);
-}
-
-.conteudos-page .content-subject-header{
-  min-height:78px;
-  padding:14px 20px;
-  background:#fff;
-}
-
-.conteudos-page .content-topic-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  padding:14px 16px 16px;
-  border-top:1px solid rgba(13,71,161,.09);
-  background:#F3F9FE;
-}
-
-.conteudos-page .content-topic{
-  display:grid;
-  grid-template-columns:30px minmax(0,1fr) auto 18px;
-  align-items:center;
-  gap:12px;
-  width:100%;
-  min-height:52px;
-  box-sizing:border-box;
-  padding:7px 10px;
-  border:1px solid rgba(13,71,161,.08);
-  border-radius:12px;
-  background:#fff;
-  box-shadow:0 2px 7px rgba(13,71,161,.035);
-  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
-}
-
-.conteudos-page .content-topic:hover{
-  background:#fff;
-  border-color:rgba(33,150,243,.24);
-  transform:translateX(2px);
-  box-shadow:0 5px 12px rgba(13,71,161,.07);
-}
-
-.conteudos-page .content-topic-check{
-  width:28px;
-  height:28px;
-  flex:0 0 28px;
-  border:1.5px solid #C9DFF2;
-  border-radius:8px;
-  background:#fff;
-}
-
-.conteudos-page .content-topic-number{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:30px;
-  height:30px;
-  border-radius:8px;
-  background:#EAF5FF;
-  color:#0D47A1;
-  font-size:10.5px;
-}
-
-.conteudos-page .content-topic-name{
-  min-width:0;
-  color:#0D47A1;
-  font-size:13.5px;
-  font-weight:600;
-}
-
-.conteudos-page .content-topic-status{
-  padding:6px 11px;
-  border:1px solid rgba(13,71,161,.07);
-  border-radius:999px;
-  background:#F5FAFF;
-  color:#6D98C2;
-  font-size:10.5px;
-  font-weight:700;
-  white-space:nowrap;
-}
-
-.conteudos-page .content-topic-arrow{
-  font-size:19px;
-  color:#7EA9D3;
-}
-
-.conteudos-page .content-topic.studied{
-  border-color:rgba(33,150,243,.16);
-}
-
-.conteudos-page .content-topic.studied .content-topic-check{
-  border-color:#2196F3;
-  background:#2196F3;
-}
-
-.conteudos-page .content-topic.studied .content-topic-number{
-  background:#E3F2FD;
-}
-
-@media(max-width:700px){
-  .conteudos-page .content-topic-list{
-    padding:10px 10px 13px;
+@media(max-width:560px){
+  .conteudos-page{
+    padding-bottom:36px;
   }
 
-  .conteudos-page .content-topic{
-    grid-template-columns:30px minmax(0,1fr) 18px;
+  .conteudos-page .content-subject-icon{
+    width:40px;
+    height:40px;
+    flex:0 0 40px;
   }
 
   .conteudos-page .content-topic-status{
