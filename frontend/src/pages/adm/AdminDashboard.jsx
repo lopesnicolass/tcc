@@ -204,34 +204,35 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard-page admin-overview-page">
-      <header className="admin-overview-header">
-        <div>
+      <header className="admin-overview-header admin-overview-hero">
+        <div className="admin-hero-copy">
           <span className="admin-eyebrow">PAINEL ADMINISTRATIVO</span>
           <h1>Visão geral</h1>
-          <p>Gerencie o conteúdo do Tenna e acompanhe o que está acontecendo na plataforma.</p>
+          <p>Tenha uma visão rápida da plataforma e acesse diretamente o que precisa gerenciar.</p>
         </div>
 
-        <button
-          type="button"
-          className="admin-refresh-btn"
-          onClick={carregarDashboard}
-          disabled={carregando}
-        >
-          <Icon name="refresh" size={17} />
-          {carregando ? 'Atualizando...' : 'Atualizar dados'}
-        </button>
+        <div className="admin-hero-actions">
+          <div className="admin-connection-badge">
+            <span className="admin-status-dot" />
+            <span><strong>Sistema conectado</strong><small>Dados atualizados do servidor</small></span>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={carregarDashboard}
+            disabled={carregando}
+          >
+            <Icon name="refresh" size={17} />
+            {carregando ? 'Atualizando...' : 'Atualizar dados'}
+          </button>
+        </div>
       </header>
 
-      <div className="admin-dashboard-status">
-        <span className="admin-status-dot" />
-        <strong>Sistema administrativo</strong>
-        <span>Dados conectados ao backend</span>
-        {ultimaAtualizacao && (
-          <time dateTime={ultimaAtualizacao.toISOString()}>
-            Atualizado às {ultimaAtualizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-          </time>
-        )}
-      </div>
+      {ultimaAtualizacao && (
+        <div className="admin-update-line">
+          Última atualização às {ultimaAtualizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      )}
 
       {erro && (
         <div className="admin-alert admin-dashboard-alert" role="alert">
@@ -240,109 +241,42 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      <section className="admin-overview-card admin-quick-card admin-primary-card">
+        <div className="admin-section-heading admin-section-heading-row">
+          <div>
+            <span className="admin-section-kicker">COMECE POR AQUI</span>
+            <h2>Ações rápidas</h2>
+            <p>Acesse diretamente as áreas que você mais utiliza no gerenciamento da plataforma.</p>
+          </div>
+          <span className="admin-section-hint">5 áreas principais</span>
+        </div>
+
+        <div className="admin-quick-grid">
+          <QuickAction to="/admin/conteudos" icon="book" title="Gerenciar conteúdos" description="Matérias e tópicos" />
+          <QuickAction to="/admin/simulados" icon="check" title="Gerenciar simulados" description="Simulados e questões" />
+          <QuickAction to="/admin/provas" icon="file" title="Adicionar prova" description="Provas e gabaritos" />
+          <QuickAction to="/admin/usuarios" icon="users" title="Gerenciar usuários" description="Alunos e administradores" />
+          <QuickAction to="/admin/flashcards" icon="book" title="FlashCards" description="Cartões de estudo" />
+        </div>
+      </section>
+
       <section className="admin-overview-stats" aria-label="Resumo da plataforma">
-        <StatCard
-          icon="users"
-          value={dados.usuarios.length}
-          label="Usuários cadastrados"
-          detail={`${alunos} alunos`}
-          loading={carregando}
-        />
-        <StatCard
-          icon="book"
-          value={dados.questoes.length}
-          label="Questões cadastradas"
-          detail="Banco de questões"
-          loading={carregando}
-        />
-        <StatCard
-          icon="check"
-          value={dados.simulados.length}
-          label="Simulados"
-          detail="Disponíveis no sistema"
-          loading={carregando}
-        />
-        <StatCard
-          icon="file"
-          value={dados.provas.length}
-          label="Provas anteriores"
-          detail="Arquivos cadastrados"
-          loading={carregando}
-        />
+        <div className="admin-stats-heading">
+          <div>
+            <span className="admin-section-kicker">VISÃO DA PLATAFORMA</span>
+            <h2>Resumo geral</h2>
+          </div>
+          <span>Dados atuais</span>
+        </div>
+        <div className="admin-stats-cards">
+          <StatCard icon="users" value={dados.usuarios.length} label="Usuários cadastrados" detail={`${alunos} alunos`} loading={carregando} />
+          <StatCard icon="book" value={dados.questoes.length} label="Questões cadastradas" detail="Banco de questões" loading={carregando} />
+          <StatCard icon="check" value={dados.simulados.length} label="Simulados" detail="Disponíveis no sistema" loading={carregando} />
+          <StatCard icon="file" value={dados.provas.length} label="Provas anteriores" detail="Arquivos cadastrados" loading={carregando} />
+        </div>
       </section>
 
       <div className="admin-overview-layout">
-        <section className="admin-overview-card admin-quick-card">
-          <div className="admin-section-heading">
-            <div>
-              <span className="admin-section-kicker">ATALHOS</span>
-              <h2>Ações rápidas</h2>
-              <p>Entre direto nas áreas que você mais vai utilizar.</p>
-            </div>
-          </div>
-
-          <div className="admin-quick-grid">
-            <QuickAction
-              to="/admin/conteudos"
-              icon="book"
-              title="Gerenciar conteúdos"
-              description="Matérias e tópicos"
-            />
-            <QuickAction
-              to="/admin/simulados"
-              icon="check"
-              title="Gerenciar simulados"
-              description="Simulados e questões"
-            />
-            <QuickAction
-              to="/admin/provas"
-              icon="file"
-              title="Adicionar prova"
-              description="Provas e gabaritos"
-            />
-            <QuickAction
-              to="/admin/usuarios"
-              icon="users"
-              title="Gerenciar usuários"
-              description="Alunos e administradores"
-            />
-            <QuickAction
-              to="/admin/flashcards"
-              icon="book"
-              title="FlashCards"
-              description="Cartões de estudo"
-            />
-          </div>
-        </section>
-
-        <section className="admin-overview-card admin-health-card">
-          <div className="admin-section-heading">
-            <div>
-              <span className="admin-section-kicker">CONTROLE</span>
-              <h2>Resumo do sistema</h2>
-              <p>Indicadores básicos do ambiente administrativo.</p>
-            </div>
-          </div>
-
-          <div className="admin-health-list">
-            <div className="admin-health-row">
-              <span className="admin-health-icon"><Icon name="shield" size={18} /></span>
-              <div><strong>Acesso administrativo</strong><small>Área protegida por autenticação</small></div>
-              <span className="admin-health-badge">Protegido</span>
-            </div>
-            <div className="admin-health-row">
-              <span className="admin-health-icon"><Icon name="activity" size={18} /></span>
-              <div><strong>Usuários</strong><small>{admins} administrador(es) · {alunos} aluno(s)</small></div>
-              <span className="admin-health-badge">Ativo</span>
-            </div>
-            <div className="admin-health-row">
-              <span className="admin-health-icon"><Icon name="book" size={18} /></span>
-              <div><strong>Banco de questões</strong><small>{dados.questoes.length} questão(ões) disponível(is)</small></div>
-              <span className="admin-health-badge">Online</span>
-            </div>
-          </div>
-        </section>
-
         <section className="admin-overview-card admin-recent-card">
           <div className="admin-section-heading admin-section-heading-row">
             <div>
@@ -357,9 +291,7 @@ export default function AdminDashboard() {
             <div className="admin-recent-list">
               {usuariosRecentes.map((usuario) => (
                 <div className="admin-recent-user" key={usuario.id}>
-                  <div className="admin-user-avatar">
-                    {(usuario.nome || '?').trim().charAt(0).toUpperCase()}
-                  </div>
+                  <div className="admin-user-avatar">{(usuario.nome || '?').trim().charAt(0).toUpperCase()}</div>
                   <div className="admin-user-copy">
                     <strong>{usuario.nome || 'Usuário sem nome'}</strong>
                     <span>{usuario.email || 'E-mail não informado'}</span>
@@ -372,8 +304,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="admin-empty-state">
-              <span>👥</span>
-              <strong>Nenhum usuário encontrado</strong>
+              <span>👥</span><strong>Nenhum usuário encontrado</strong>
               <p>Quando houver cadastros, eles aparecerão aqui.</p>
             </div>
           )}
@@ -404,12 +335,24 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="admin-empty-state">
-              <span>📄</span>
-              <strong>Nenhuma prova cadastrada</strong>
+              <span>📄</span><strong>Nenhuma prova cadastrada</strong>
               <p>Adicione uma prova anterior para começar a biblioteca.</p>
               <Link to="/admin/provas" className="admin-inline-action"><Icon name="plus" size={15} /> Cadastrar prova</Link>
             </div>
           )}
+        </section>
+
+        <section className="admin-overview-card admin-health-card admin-system-card">
+          <div className="admin-section-heading">
+            <span className="admin-section-kicker">STATUS</span>
+            <h2>Sistema</h2>
+            <p>Informações rápidas sobre o ambiente administrativo.</p>
+          </div>
+          <div className="admin-health-list">
+            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="shield" size={18} /></span><div><strong>Acesso administrativo</strong><small>Área protegida por autenticação</small></div><span className="admin-health-badge">Protegido</span></div>
+            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="activity" size={18} /></span><div><strong>Usuários</strong><small>{admins} administrador(es) · {alunos} aluno(s)</small></div><span className="admin-health-badge">Ativo</span></div>
+            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="book" size={18} /></span><div><strong>Banco de questões</strong><small>{dados.questoes.length} questão(ões) disponível(is)</small></div><span className="admin-health-badge">Online</span></div>
+          </div>
         </section>
       </div>
 

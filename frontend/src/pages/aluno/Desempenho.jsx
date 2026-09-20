@@ -459,24 +459,12 @@ export default function Desempenho() {
   return (
     <div
       style={{
-        maxWidth: '1400px',
-        margin: '0 auto',
+        width: '100%',
+        maxWidth: 'none',
+        margin: '0',
         paddingBottom: '40px'
       }}
     >
-      {/* CABEÇALHO */}
-
-      <div className="page-header">
-        <div>
-          <h1>Desempenho</h1>
-
-          <p>
-            Visualize sua evolução, entenda seus
-            resultados e descubra onde melhorar.
-          </p>
-        </div>
-      </div>
-
       {/* HERO */}
 
       <div
@@ -502,6 +490,37 @@ export default function Desempenho() {
               '0 14px 40px rgba(13,82,184,0.20)'
           }}
         >
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 3,
+              marginBottom: '26px'
+            }}
+          >
+            <h1
+              style={{
+                margin: 0,
+                color: '#fff',
+                fontSize: '32px',
+                lineHeight: 1.15,
+                fontWeight: 700
+              }}
+            >
+              Desempenho
+            </h1>
+
+            <p
+              style={{
+                margin: '8px 0 0',
+                color: 'rgba(255,255,255,0.82)',
+                fontSize: '14px',
+                lineHeight: 1.5
+              }}
+            >
+              Visualize sua evolução, entenda seus resultados e descubra onde melhorar.
+            </p>
+          </div>
+
           <div
             style={{
               position: 'absolute',

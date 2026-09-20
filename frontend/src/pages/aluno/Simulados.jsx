@@ -1671,10 +1671,9 @@ export default function Simulados() {
   return (
     <div>
 
-            <div className="page-header">
-
+      <div className="simulados-hero">
         <h1>Simulados</h1>
-
+        <p>Pratique seus conhecimentos, acompanhe seus resultados e avance na sua preparação para o Vestibulinho.</p>
       </div>
 
       <div className="materia-tabs">
@@ -1685,7 +1684,7 @@ export default function Simulados() {
             className={`materia-tab ${filtro === materia ? 'active' : ''}`}
             onClick={() => setFiltro(materia)}
           >
-            <span className="materia-tab-icon">{MATERIA_ICONS[materia] || '📌'}</span>
+            <span className="materia-tab-icon" aria-hidden="true" />
             {materia}
             <span className="materia-tab-count">
               {materia === 'Todas'

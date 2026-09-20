@@ -102,3 +102,102 @@
 @media(max-width:600px){
 .admin-modal-actions .mural-btn{flex:1;}
 }
+
+/* Cabeçalho em destaque, seguindo o padrão visual das demais páginas */
+.mural-hero{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:28px;
+  min-height:158px;
+  padding:30px 32px;
+  margin-bottom:24px;
+  overflow:hidden;
+  border-radius:24px;
+  background:linear-gradient(135deg, #1458b8 0%, #2696e8 100%);
+  box-shadow:0 14px 28px -18px rgba(13,71,161,.5);
+}
+
+.mural-hero::before{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  right:-70px;
+  top:-110px;
+  background:rgba(255,255,255,.08);
+}
+
+.mural-hero::after{
+  content:"";
+  position:absolute;
+  width:150px;
+  height:150px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:50%;
+  right:95px;
+  bottom:-105px;
+}
+
+.mural-hero-content{
+  position:relative;
+  z-index:1;
+  min-width:0;
+}
+
+.mural-hero-eyebrow{
+  display:block;
+  margin-bottom:7px;
+  color:rgba(255,255,255,.72);
+  font-family:"IBM Plex Sans", sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.12em;
+}
+
+.mural-hero h1{
+  margin:0;
+  color:#fff;
+  font-size:clamp(28px, 3vw, 38px);
+  line-height:1.1;
+}
+
+.mural-hero p{
+  max-width:700px;
+  margin:9px 0 0;
+  color:rgba(255,255,255,.82);
+  font-size:15px;
+  line-height:1.5;
+}
+
+.mural-hero .mural-actions{
+  position:relative;
+  z-index:1;
+  flex-shrink:0;
+}
+
+.mural-hero .mural-btn.primary{
+  background:#fff;
+  color:var(--ink);
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.35);
+}
+
+.mural-hero .mural-btn.primary:hover{
+  background:#f5f9ff;
+  color:var(--ink);
+}
+
+@media(max-width:700px){
+  .mural-hero{
+    align-items:flex-start;
+    flex-direction:column;
+    padding:26px 24px;
+  }
+
+  .mural-hero .mural-actions,
+  .mural-hero .mural-btn{
+    width:100%;
+  }
+}

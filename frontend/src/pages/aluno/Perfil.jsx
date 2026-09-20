@@ -904,7 +904,7 @@ export default function Perfil() {
           }}
         >
 
-          <div className="perfil-avatar-card">
+          <div className="perfil-avatar-card perfil-profile-card">
 
             <div
               className="avatar-circle"

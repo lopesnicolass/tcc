@@ -29,21 +29,16 @@ export default function Provas() {
     }, []);
 
     return (
-        <div>
+        <div className="provas-page">
 
-            <div className="page-header">
-
-                <div>
-
+            <div className="provas-header">
+                <div className="provas-header-content">
+                    <span className="provas-eyebrow">Vestibulinho ETEC</span>
                     <h1>Provas dos anos anteriores</h1>
-
                     <p>
-                        Melhore seu desempenho e conhecimento realizando
-                        as provas dos anos anteriores.
+                        Melhore seu desempenho e conhecimento realizando as provas dos anos anteriores.
                     </p>
-
                 </div>
-
             </div>
 
 
@@ -58,7 +53,7 @@ export default function Provas() {
 
             {!carregando && provas.length === 0 && (
 
-                <div className="mural-empty">
+                <div className="provas-empty">
                     Nenhuma prova anterior foi cadastrada ainda.
                 </div>
 

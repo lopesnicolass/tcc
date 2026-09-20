@@ -23,14 +23,7 @@ const COLOR_CLASS = {
   Ciências: 'postit-ciencias',
 };
 
-const MATERIA_ICONS = {
-  Todas: '📚',
-  Português: '📖',
-  Matemática: '📐',
-  História: '🏛️',
-  Geografia: '🌎',
-  Ciências: '🔬',
-};
+
 
 const TILTS = [-3, 2, -1.5, 3, -2, 1.5];
 
@@ -583,24 +576,22 @@ export default function Mural() {
       {/* CABEÇALHO */}
       {/* ============================================= */}
 
-      <div className="mural-header">
+      <div className="mural-hero">
 
-        <h1>
-          Mural de Post-its
-        </h1>
+        <div className="mural-hero-content">
+          <span className="mural-hero-eyebrow">SEU ESPAÇO DE ANOTAÇÕES</span>
+          <h1>Mural de Post-its</h1>
+          <p>Organize suas anotações por matéria e deixe seus principais lembretes sempre à vista.</p>
+        </div>
 
         <div className="mural-actions">
-
           <button
             className="mural-btn primary"
-            onClick={
-              openAddModal
-            }
+            onClick={openAddModal}
           >
             + Adicionar post-it
           </button>
-
-                  </div>
+        </div>
 
       </div>
 
@@ -610,7 +601,6 @@ export default function Mural() {
           className={`materia-tab ${filtro === 'Todas' ? 'active' : ''}`}
           onClick={() => setFiltro('Todas')}
         >
-          <span className="materia-tab-icon">{MATERIA_ICONS['Todas']}</span>
           Todas
           <span className="materia-tab-count">{postits.length}</span>
         </button>
@@ -621,7 +611,6 @@ export default function Mural() {
             className={`materia-tab ${filtro === materia ? 'active' : ''}`}
             onClick={() => setFiltro(materia)}
           >
-            <span className="materia-tab-icon">{MATERIA_ICONS[materia] || '📌'}</span>
             {materia}
             <span className="materia-tab-count">
               {postits.filter((p) => p.materia === materia).length}

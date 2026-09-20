@@ -1,3 +1,181 @@
-/* Estilos da página Provas */
+/* =========================================================
+   PÁGINA — PROVAS ANTERIORES
+   ========================================================= */
 
+.provas-page{
+  width:100%;
+  max-width:none;
+  margin:0;
+  padding:0 0 56px;
+  color:var(--ink);
+}
 
+/* Cabeçalho em card, seguindo o padrão visual das demais páginas */
+.provas-page .provas-header{
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  min-height:150px;
+  padding:30px 32px;
+  margin-bottom:22px;
+  border-radius:22px;
+  background:linear-gradient(120deg, var(--ink), var(--accent));
+  color:#fff;
+  box-shadow:0 16px 34px -24px rgba(13,71,161,.7);
+}
+
+.provas-page .provas-header::after{
+  content:"";
+  position:absolute;
+  width:220px;
+  height:220px;
+  right:-70px;
+  top:-105px;
+  border-radius:50%;
+  border:38px solid rgba(255,255,255,.08);
+  pointer-events:none;
+}
+
+.provas-page .provas-header-content{
+  position:relative;
+  z-index:1;
+  max-width:760px;
+}
+
+.provas-page .provas-eyebrow{
+  display:block;
+  margin-bottom:7px;
+  color:rgba(255,255,255,.78);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.provas-page .provas-header h1{
+  margin:0 0 7px;
+  color:#fff;
+  font-family:"Space Grotesk", sans-serif;
+  font-size:clamp(25px, 3vw, 34px);
+  line-height:1.1;
+}
+
+.provas-page .provas-header p{
+  margin:0;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  line-height:1.5;
+}
+
+/* Lista */
+.provas-page .provas-list{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+
+.provas-page .prova-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  min-height:76px;
+  padding:16px 20px 16px 24px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--card);
+  box-shadow:0 10px 28px -25px rgba(13,71,161,.55);
+  transition:transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.provas-page .prova-row:hover{
+  transform:translateY(-2px);
+  border-color:rgba(33,150,243,.3);
+  box-shadow:0 14px 30px -23px rgba(13,71,161,.7);
+}
+
+.provas-page .prova-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--ink);
+  font-family:"Space Grotesk", sans-serif;
+  font-size:16px;
+  font-weight:800;
+}
+
+.provas-page .prova-title::before{
+  content:"";
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  border-radius:12px;
+  background:var(--paper);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+
+.provas-page .prova-links{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  flex:0 0 auto;
+}
+
+.provas-page .prova-links a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:86px;
+  height:38px;
+  padding:0 15px;
+  border:1px solid rgba(33,150,243,.2);
+  border-radius:11px;
+  background:#eef7ff;
+  color:var(--accent-dark);
+  font-size:12.5px;
+  font-weight:800;
+  text-decoration:none;
+  transition:background .15s ease, color .15s ease, transform .15s ease;
+}
+
+.provas-page .prova-links a:hover{
+  background:var(--accent);
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.provas-page .provas-empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:150px;
+  padding:30px;
+  border:1px dashed var(--line);
+  border-radius:18px;
+  background:var(--card);
+  color:var(--muted);
+  text-align:center;
+}
+
+@media (max-width:700px){
+  .provas-page .provas-header{
+    min-height:130px;
+    padding:24px;
+    border-radius:18px;
+  }
+
+  .provas-page .prova-row{
+    align-items:flex-start;
+    flex-direction:column;
+    padding:17px;
+  }
+
+  .provas-page .prova-links{
+    width:100%;
+  }
+
+  .provas-page .prova-links a{
+    flex:1;
+  }
+}
