@@ -1,0 +1,995 @@
+/* =====================================================
+   PÁGINA DE CONTEÚDO DO ALUNO
+   ===================================================== */
+
+.pagina-conteudo-page {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-bottom: 50px;
+}
+
+/* =====================================================
+   BOTÃO VOLTAR
+   ===================================================== */
+
+.pagina-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  border: 0;
+  background: transparent;
+
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+
+  padding: 4px 0;
+  margin-bottom: 18px;
+
+  cursor: pointer;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.pagina-back-button:hover {
+  color: var(--accent-dark);
+  transform: translateX(-2px);
+}
+
+/* =====================================================
+   HERO
+   ===================================================== */
+
+.pagina-hero {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 24px;
+
+  padding: 25px 28px;
+
+  margin-bottom: 24px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--ink),
+      var(--accent)
+    );
+
+  box-shadow:
+    0 12px 35px rgba(25, 45, 35, 0.08);
+}
+
+.pagina-hero::after {
+  content: "";
+
+  position: absolute;
+  width: 280px;
+  height: 280px;
+
+  right: -80px;
+  top: -150px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,0.16),
+      transparent 65%
+    );
+
+  pointer-events: none;
+}
+
+.pagina-hero-top {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 26px;
+}
+
+.pagina-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  color:
+    rgba(255,255,255,0.68);
+
+  font-size: 11px;
+}
+
+.pagina-materia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 7px 11px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.pagina-hero-content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 16px;
+}
+
+.pagina-hero-icon {
+  width: 58px;
+  height: 58px;
+
+  flex-shrink: 0;
+
+  border-radius: 17px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(255,255,255,0.12);
+
+  color: #fff;
+}
+
+.pagina-kicker {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    rgba(255,255,255,0.58);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+.pagina-hero h1 {
+  margin: 0;
+
+  color: #fff;
+
+  font-size:
+    clamp(27px, 4vw, 40px);
+
+  line-height: 1.1;
+}
+
+.pagina-hero p {
+  max-width: 780px;
+
+  margin: 9px 0 0;
+
+  color:
+    rgba(255,255,255,0.77);
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+/* =====================================================
+   LAYOUT
+   ===================================================== */
+
+.pagina-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr) 285px;
+
+  gap: 22px;
+
+  align-items: start;
+}
+
+.pagina-main {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+/* =====================================================
+   BLOCOS
+   ===================================================== */
+
+.pagina-content-block {
+  background: #fff;
+
+  border: 1px solid
+    rgba(30, 45, 37, 0.07);
+
+  border-radius: 19px;
+
+  padding: 23px;
+
+  box-shadow:
+    0 7px 25px
+      rgba(30, 45, 37, 0.045);
+}
+
+.pagina-content-block h2 {
+  margin: 0 0 12px;
+
+  color: var(--ink);
+
+  font-size: 19px;
+
+  line-height: 1.3;
+}
+
+.pagina-rich-text {
+  color: var(--ink);
+
+  font-size: 15px;
+
+  line-height: 1.85;
+
+  white-space: pre-wrap;
+}
+
+.pagina-muted {
+  color: var(--muted);
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  margin: 12px 0 0;
+}
+
+/* =====================================================
+   DESTAQUE
+   ===================================================== */
+
+.pagina-highlight {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 14px;
+
+  border: 0;
+}
+
+.pagina-highlight.info {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(33,110,74,0.08),
+      rgba(33,110,74,0.035)
+    );
+}
+
+.pagina-highlight.warning {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(225,171,40,0.13),
+      rgba(225,171,40,0.05)
+    );
+}
+
+.pagina-highlight.success {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(41,144,92,0.11),
+      rgba(41,144,92,0.04)
+    );
+}
+
+.pagina-highlight.danger {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(190,70,70,0.1),
+      rgba(190,70,70,0.035)
+    );
+}
+
+.pagina-highlight-icon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background: rgba(255,255,255,0.85);
+
+  color: var(--accent-dark);
+}
+
+.pagina-highlight-content {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.pagina-highlight-content strong {
+  color: var(--ink);
+
+  font-size: 15px;
+}
+
+.pagina-highlight-content span {
+  color: var(--muted);
+
+  font-size: 13.5px;
+
+  line-height: 1.65;
+
+  white-space: pre-wrap;
+}
+
+/* =====================================================
+   VIDEO
+   ===================================================== */
+
+.pagina-video {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 16 / 9;
+
+  overflow: hidden;
+
+  border-radius: 15px;
+
+  background: #101613;
+}
+
+.pagina-video iframe {
+  width: 100%;
+  height: 100%;
+
+  border: 0;
+}
+
+/* =====================================================
+   IMAGEM
+   ===================================================== */
+
+.pagina-image {
+  margin: 0;
+}
+
+.pagina-image img {
+  display: block;
+
+  width: 100%;
+  max-height: 600px;
+
+  object-fit: contain;
+
+  border-radius: 15px;
+
+  background: var(--paper);
+}
+
+.pagina-image figcaption {
+  margin-top: 9px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+/* =====================================================
+   PDF
+   ===================================================== */
+
+.pagina-resource {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border-radius: 15px;
+
+  border: 1px solid
+    rgba(33,110,74,0.12);
+
+  background:
+    rgba(33,110,74,0.045);
+
+  color: inherit;
+
+  text-decoration: none;
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.pagina-resource:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(33,110,74,0.25);
+
+  box-shadow:
+    0 7px 18px
+      rgba(33,110,74,0.08);
+}
+
+.pagina-resource-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: var(--accent-light);
+
+  color: var(--accent-dark);
+}
+
+.pagina-resource-copy {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+
+  gap: 3px;
+}
+
+.pagina-resource-copy strong {
+  color: var(--ink);
+
+  font-size: 13.5px;
+}
+
+.pagina-resource-copy small {
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+/* =====================================================
+   LISTA
+   ===================================================== */
+
+.pagina-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.pagina-list li {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 11px;
+
+  color: var(--ink);
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+.pagina-list-marker {
+  width: 27px;
+  height: 27px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: var(--accent-light);
+
+  color: var(--accent-dark);
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+/* =====================================================
+   RECURSOS
+   ===================================================== */
+
+.pagina-resource-block {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+}
+
+.pagina-resource-block-icon {
+  width: 47px;
+  height: 47px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 14px;
+
+  background: var(--accent-light);
+
+  color: var(--accent-dark);
+}
+
+.pagina-resource-block-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.pagina-resource-block-copy h2 {
+  margin: 0 0 5px;
+
+  font-size: 16px;
+}
+
+.pagina-resource-block-copy p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 12.5px;
+
+  line-height: 1.55;
+}
+
+.pagina-secondary-button {
+  border: 0;
+
+  padding: 10px 13px;
+
+  border-radius: 11px;
+
+  background:
+    var(--ink);
+
+  color: #fff;
+
+  font-size: 11.5px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.pagina-secondary-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.pagina-id-list {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin-top: 9px;
+}
+
+.pagina-id-list span {
+  padding: 4px 7px;
+
+  border-radius: 7px;
+
+  background: var(--paper);
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+/* =====================================================
+   CHECKLIST
+   ===================================================== */
+
+.pagina-checklist {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.pagina-check-item {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 11px 12px;
+
+  border-radius: 12px;
+
+  background: var(--paper);
+
+  color: var(--ink);
+
+  font-size: 13.5px;
+
+  line-height: 1.45;
+}
+
+.pagina-check-icon {
+  width: 27px;
+  height: 27px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: var(--accent);
+
+  color: #fff;
+}
+
+/* =====================================================
+   SIDEBAR
+   ===================================================== */
+
+.pagina-aside {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  position: sticky;
+  top: 20px;
+}
+
+.pagina-progress-card,
+.pagina-aside-card {
+  padding: 20px;
+
+  background: #fff;
+
+  border: 1px solid
+    rgba(30,45,37,0.07);
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 7px 24px
+      rgba(30,45,37,0.045);
+}
+
+.pagina-aside-label {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 9.5px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.11em;
+}
+
+.pagina-progress-card strong {
+  display: block;
+
+  margin-top: 7px;
+
+  color: var(--ink);
+
+  font-size: 16px;
+}
+
+.pagina-progress-card p {
+  margin: 7px 0 15px;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  line-height: 1.55;
+}
+
+.pagina-study-button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 11px 12px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background:
+    var(--ink);
+
+  color: #fff;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.pagina-study-button:hover {
+  transform: translateY(-1px);
+}
+
+.pagina-study-button.completed {
+  background:
+    var(--accent);
+}
+
+.pagina-study-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.pagina-topic-info {
+  padding: 11px 0;
+
+  border-bottom:
+    1px solid
+    rgba(30,45,37,0.07);
+}
+
+.pagina-topic-info:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.pagina-topic-info span {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+.pagina-topic-info strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--ink);
+
+  font-size: 12.5px;
+}
+
+/* =====================================================
+   ESTADOS
+   ===================================================== */
+
+.pagina-state-card {
+  min-height: 260px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 35px;
+
+  border-radius: 19px;
+
+  border: 1px dashed #d8dfdb;
+
+  background:
+    rgba(255,255,255,0.72);
+
+  text-align: center;
+}
+
+.pagina-state-icon {
+  width: 50px;
+  height: 50px;
+
+  margin-bottom: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background: var(--accent-light);
+
+  color: var(--accent-dark);
+}
+
+.pagina-state-card strong {
+  color: var(--ink);
+
+  font-size: 15px;
+}
+
+.pagina-state-card span {
+  max-width: 430px;
+
+  color: var(--muted);
+
+  font-size: 12.5px;
+
+  line-height: 1.55;
+}
+
+.pagina-state-card.error {
+  border-color:
+    rgba(190,70,70,0.2);
+}
+
+/* =====================================================
+   PLACEHOLDER / JSON
+   ===================================================== */
+
+.pagina-block-placeholder {
+  padding: 20px;
+
+  border-radius: 13px;
+
+  background: var(--paper);
+
+  color: var(--muted);
+
+  text-align: center;
+
+  font-size: 12.5px;
+}
+
+.pagina-json {
+  margin: 0;
+
+  padding: 15px;
+
+  overflow-x: auto;
+
+  border-radius: 12px;
+
+  background: #f5f7f6;
+
+  color: var(--ink);
+
+  font-size: 11px;
+}
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 900px) {
+  .pagina-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-aside {
+    position: static;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pagina-conteudo-page {
+    padding-bottom: 30px;
+  }
+
+  .pagina-hero {
+    padding: 20px;
+  }
+
+  .pagina-hero-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pagina-hero-content {
+    gap: 12px;
+  }
+
+  .pagina-hero-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .pagina-hero h1 {
+    font-size: 26px;
+  }
+
+  .pagina-content-block {
+    padding: 18px;
+  }
+
+  .pagina-resource-block {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .pagina-secondary-button {
+    margin-left: 61px;
+  }
+
+  .pagina-aside {
+    grid-template-columns: 1fr;
+  }
+}

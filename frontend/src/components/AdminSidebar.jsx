@@ -9,7 +9,6 @@ const NAV_SECTIONS = [
         to: '/admin',
         label: 'Dashboard',
         icon: 'home',
-        end: true,
       },
     ],
   },
@@ -122,6 +121,8 @@ export default function AdminSidebar() {
   return (
     <aside className="sidebar admin-sidebar">
 
+      {/* LOGO */}
+
       <div className="sidebar-brand admin-sidebar-brand">
         <img
           src={logoIcon}
@@ -135,6 +136,8 @@ export default function AdminSidebar() {
           }}
         />
       </div>
+
+      {/* STATUS */}
 
       <div
         className="admin-sidebar-status"
@@ -193,6 +196,8 @@ export default function AdminSidebar() {
         </div>
       </div>
 
+      {/* NAVEGAÇÃO */}
+
       <div
         className="admin-sidebar-navigation"
         style={{
@@ -232,7 +237,10 @@ export default function AdminSidebar() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  end={item.end}
+                  end={
+                    item.to === '/admin' ||
+                    item.to === '/admin/conteudos'
+                  }
                   className={({ isActive }) =>
                     `sidebar-link admin-sidebar-link ${
                       isActive ? 'active' : ''
@@ -250,7 +258,10 @@ export default function AdminSidebar() {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon name={item.icon} size={19} />
+                    <Icon
+                      name={item.icon}
+                      size={19}
+                    />
                   </span>
 
                   <span className="label">
@@ -263,6 +274,8 @@ export default function AdminSidebar() {
         ))}
       </div>
 
+      {/* RODAPÉ */}
+
       <div
         className="admin-sidebar-footer"
         style={{
@@ -270,7 +283,8 @@ export default function AdminSidebar() {
           flexDirection: 'column',
           gap: '8px',
           paddingTop: '12px',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop:
+            '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <Link
@@ -287,7 +301,10 @@ export default function AdminSidebar() {
               flexShrink: 0,
             }}
           >
-            <Icon name="arrowLeft" size={19} />
+            <Icon
+              name="arrowLeft"
+              size={19}
+            />
           </span>
 
           <span className="label">
@@ -295,6 +312,7 @@ export default function AdminSidebar() {
           </span>
         </Link>
       </div>
+
     </aside>
   );
 }

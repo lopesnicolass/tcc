@@ -19,6 +19,7 @@ import Provas from './pages/aluno/Provas.jsx';
 import Desempenho from './pages/aluno/Desempenho.jsx';
 import FlashCards from './pages/aluno/FlashCards.jsx';
 import Perfil from './pages/aluno/Perfil.jsx';
+import PaginaConteudo from './pages/PaginaConteudo.jsx';
 
 import Terrario from './terrario/Terrario.jsx';
 
@@ -84,7 +85,10 @@ export default function App() {
               path="/conteudos/:topicoId"
               element={<ConteudoEstudo />}
             />
-
+<Route
+  path="/conteudos/topico/:topicoId"
+  element={<PaginaConteudo />}
+/>
             <Route
               path="/cronograma"
               element={<Cronograma />}
