@@ -1,7 +1,7 @@
 import '../../styles/adm/AdminUsuarios.css';
 import { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 export default function AdminUsuarios() {
 
@@ -18,34 +18,11 @@ export default function AdminUsuarios() {
 
     try {
 
-      const token = localStorage.getItem('etecamp_token');
-
-      if (!token) {
-        setErro('Token não encontrado.');
-        setCarregando(false);
-        return;
-      }
-
-      const resposta = await fetch(
-        `${API_URL}/usuarios`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      const dados = await request(
+        '/usuarios',
+        {},
+        'Erro ao carregar usuários.'
       );
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        setErro(
-          dados.mensagem || 'Erro ao carregar usuários.'
-        );
-
-        setCarregando(false);
-        return;
-      }
 
       setUsers(dados.usuarios || []);
 
@@ -53,9 +30,7 @@ export default function AdminUsuarios() {
 
       console.error(erro);
 
-      setErro(
-        'Não foi possível conectar ao servidor.'
-      );
+      setErro(erro.message);
 
     } finally {
 
@@ -100,33 +75,11 @@ export default function AdminUsuarios() {
 
       setExcluindo(id);
 
-      const token = localStorage.getItem('etecamp_token');
-
-      if (!token) {
-        setErro('Token não encontrado.');
-        return;
-      }
-
-      const resposta = await fetch(
-        `${API_URL}/usuarios/${id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      await request(
+        `/usuarios/${id}`,
+        { method: 'DELETE' },
+        'Erro ao excluir usuário.'
       );
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-
-        setErro(
-          dados.mensagem || 'Erro ao excluir usuário.'
-        );
-
-        return;
-      }
 
       // Remove o usuário da tela imediatamente
       setUsers((prev) =>
@@ -137,9 +90,7 @@ export default function AdminUsuarios() {
 
       console.error(erro);
 
-      setErro(
-        'Não foi possível conectar ao servidor.'
-      );
+      setErro(erro.message);
 
     } finally {
 

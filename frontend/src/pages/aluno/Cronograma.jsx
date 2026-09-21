@@ -4,10 +4,7 @@ import { useGamification } from '../../context/GamificationContext.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 const STORAGE_KEY =
   'tenna_calendario_atividades';
@@ -65,19 +62,6 @@ function getUserId() {
   );
 }
 
-function getToken() {
-  return (
-    localStorage.getItem(
-      'etecamp_token'
-    ) ||
-    localStorage.getItem('token') ||
-    localStorage.getItem(
-      'accessToken'
-    ) ||
-    ''
-  );
-}
-
 function getLegacyActivities() {
   try {
     const userId =
@@ -119,9 +103,6 @@ export default function Cronograma() {
   const usuarioId =
     getUserId();
 
-  const token =
-    getToken();
-
   const [activities, setActivities] =
     useState([]);
 
@@ -156,49 +137,6 @@ export default function Cronograma() {
   const [form, setForm] =
     useState(emptyForm);
 
-  async function apiFetch(
-    url,
-    options = {}
-  ) {
-    const headers = {
-      'Content-Type':
-        'application/json',
-      ...(options.headers || {})
-    };
-
-    if (token) {
-      headers.Authorization =
-        `Bearer ${token}`;
-    }
-
-    const response =
-      await fetch(
-        `${API_URL}${url}`,
-        {
-          ...options,
-          headers
-        }
-      );
-
-    let data = {};
-
-    try {
-      data =
-        await response.json();
-    } catch {
-      data = {};
-    }
-
-    if (!response.ok) {
-      throw new Error(
-        data.mensagem ||
-          'Erro ao acessar o servidor.'
-      );
-    }
-
-    return data;
-  }
-
   async function carregarCronograma() {
     if (!usuarioId) {
       setActivities([]);
@@ -210,7 +148,7 @@ export default function Cronograma() {
       setLoading(true);
 
       const data =
-        await apiFetch(
+        await request(
           `/cronograma/${usuarioId}`
         );
 
@@ -245,7 +183,7 @@ export default function Cronograma() {
           antigasValidas.length
         ) {
           const resposta =
-            await apiFetch(
+            await request(
               `/cronograma/${usuarioId}/lote`,
               {
                 method: 'POST',
@@ -490,7 +428,7 @@ export default function Cronograma() {
 
       if (editing) {
         const data =
-          await apiFetch(
+          await request(
             `/cronograma/${usuarioId}/${editing.id}`,
             {
               method: 'PUT',
@@ -525,7 +463,7 @@ export default function Cronograma() {
         }
       } else {
         const data =
-          await apiFetch(
+          await request(
             `/cronograma/${usuarioId}`,
             {
               method: 'POST',
@@ -607,7 +545,7 @@ export default function Cronograma() {
     try {
       setSaving(true);
 
-      await apiFetch(
+      await request(
         `/cronograma/${usuarioId}/${editing.id}`,
         {
           method: 'DELETE'
@@ -668,7 +606,7 @@ export default function Cronograma() {
 
     try {
       const data =
-        await apiFetch(
+        await request(
           `/cronograma/${usuarioId}/${activity.id}`,
           {
             method: 'PUT',
@@ -741,7 +679,7 @@ export default function Cronograma() {
     try {
       setSaving(true);
 
-      await apiFetch(
+      await request(
         `/cronograma/${usuarioId}/origem/plano-automatico`,
         {
           method: 'DELETE'

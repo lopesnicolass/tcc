@@ -1,8 +1,7 @@
 import '../../styles/aluno/Provas.css';
 import { useEffect, useState } from "react";
 
-const API_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { API_URL, request } from '../../services/api.js';
 
 export default function Provas() {
 
@@ -11,8 +10,7 @@ export default function Provas() {
 
     useEffect(() => {
 
-        fetch(`${API_URL}/provas`)
-            .then((res) => res.json())
+        request('/provas')
             .then((dados) => {
 
                 setProvas(dados.provas || []);

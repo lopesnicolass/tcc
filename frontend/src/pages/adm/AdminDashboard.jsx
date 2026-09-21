@@ -2,7 +2,7 @@ import '../../styles/adm/AdminDashboard.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 const ICONS = {
   users: (
@@ -116,31 +116,19 @@ export default function AdminDashboard() {
     setCarregando(true);
     setErro('');
 
-    const token = localStorage.getItem('etecamp_token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
     const endpoints = [
-      ['usuarios', `${API_URL}/usuarios`, headers],
-      ['simulados', `${API_URL}/simulados`, headers],
-      ['questoes', `${API_URL}/questoes`, headers],
-      ['provas', `${API_URL}/provas`, headers],
+      ['usuarios', '/usuarios'],
+      ['simulados', '/simulados'],
+      ['questoes', '/questoes'],
+      ['provas', '/provas'],
     ];
 
     try {
       const respostas = await Promise.all(
-        endpoints.map(async ([chave, url, requestHeaders]) => {
+        endpoints.map(async ([chave, url]) => {
           try {
-            const resposta = await fetch(url, { headers: requestHeaders });
-            const texto = await resposta.text();
-            let payload = {};
-
-            try {
-              payload = texto ? JSON.parse(texto) : {};
-            } catch {
-              payload = {};
-            }
-
-            return { chave, ok: resposta.ok, payload };
+            const payload = await request(url);
+            return { chave, ok: true, payload };
           } catch (error) {
             return { chave, ok: false, payload: {}, error };
           }

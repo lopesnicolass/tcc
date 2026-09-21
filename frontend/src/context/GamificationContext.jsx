@@ -7,11 +7,9 @@ import {
   useRef
 } from 'react';
 
-const GamificationContext = createContext(null);
+import { request, obterToken } from '../services/api.js';
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+const GamificationContext = createContext(null);
 
 export const LEVEL_TITLES = [
   'Iniciante',
@@ -47,13 +45,6 @@ function calcLevel(xp) {
   };
 }
 
-function getToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token')
-  );
-}
-
 const XP_ACTIONS = {
   'simulado iniciado': 'simulado_iniciado',
   'simulado concluído': 'simulado_concluido',
@@ -77,7 +68,7 @@ export function GamificationProvider({ children }) {
   const requestsEmAndamento = useRef(new Set());
 
   const carregarGamificacao = useCallback(async () => {
-    const token = getToken();
+    const token = obterToken();
 
     if (!token) {
       setState({ xp: 0, streak: 0, lastActiveDate: null });
@@ -85,17 +76,7 @@ export function GamificationProvider({ children }) {
     }
 
     try {
-      const resposta = await fetch(`${API_URL}/gamificacao`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!resposta.ok) {
-        throw new Error(`Erro ${resposta.status} ao buscar gamificação`);
-      }
-
-      const dados = await resposta.json();
+      const dados = await request('/gamificacao');
 
       setState({
         xp: Number(dados.xp) || 0,
@@ -122,7 +103,7 @@ export function GamificationProvider({ children }) {
   }, [carregarGamificacao]);
 
   async function addXP(amount, reason) {
-    const token = getToken();
+    const token = obterToken();
 
     if (!token) {
       console.warn('Usuário não está logado.');
@@ -145,21 +126,10 @@ export function GamificationProvider({ children }) {
     requestsEmAndamento.current.add(requestKey);
 
     try {
-      const resposta = await fetch(`${API_URL}/gamificacao/xp`, {
+      const dados = await request('/gamificacao/xp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({ action })
       });
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        console.error('Erro ao adicionar XP:', dados);
-        return;
-      }
 
       setState({
         xp: Number(dados.xp) || 0,
