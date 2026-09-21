@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getSubjectStyle } from '../utils/subjects.js';
-import SubjectIcon from '../components/cu.jsx';
-import Icon from '../components/Icon.jsx';
-import '../styles/aluno/PaginaConteudo.css';
-
+import { getSubjectStyle } from '../../utils/subjects.js';
+import SubjectIcon from '../../components/cu.jsx';
+import Icon from '../../components/Icon.jsx';
+import '../../styles/aluno/PaginaConteudo.css';
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -94,8 +93,26 @@ export default function PaginaConteudo() {
   const [estudado, setEstudado] = useState(false);
   const [salvandoEstudo, setSalvandoEstudo] = useState(false);
 
-  const topicoNumero =
-    Number(topicoId);
+  /*
+   * =========================================================
+   * FLASHCARDS
+   * =========================================================
+   */
+
+  const [flashcards, setFlashcards] = useState([]);
+  const [flashcardAtual, setFlashcardAtual] = useState(0);
+  const [mostrarResposta, setMostrarResposta] =
+    useState(false);
+  const [carregandoFlashcards, setCarregandoFlashcards] =
+    useState(false);
+
+  const topicoNumero = Number(topicoId);
+
+  /*
+   * =========================================================
+   * CARREGAR PÁGINA
+   * =========================================================
+   */
 
   useEffect(() => {
     async function carregarPagina() {
@@ -208,34 +225,26 @@ export default function PaginaConteudo() {
     }
   }, [topicoNumero]);
 
-  async function alternarEstudado() {
-    const token = obterToken();
+  /*
+   * =========================================================
+   * CARREGAR FLASHCARDS
+   * =========================================================
+   */
 
-    if (!token) {
-      setErro(
-        'Sua sessão expirou. Faça login novamente.'
-      );
-      return;
-    }
-
-    const novoStatus = !estudado;
-
+  async function carregarFlashcards(idsSelecionados = []) {
     try {
-      setSalvandoEstudo(true);
-      setErro('');
+      setCarregandoFlashcards(true);
+
+      const token = obterToken();
 
       const resposta = await fetch(
-        `${API_URL}/conteudos/progresso/${topicoNumero}`,
+        `${API_URL}/flashcards`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization:
-              `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            estudado: novoStatus,
-          }),
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
         }
       );
 
@@ -247,11 +256,248 @@ export default function PaginaConteudo() {
         throw new Error(
           dados.erro ||
             dados.mensagem ||
+            'Não foi possível carregar os flashcards.'
+        );
+      }
+
+      const lista = Array.isArray(dados)
+        ? dados
+        : Array.isArray(dados.flashcards)
+          ? dados.flashcards
+          : [];
+
+      let cardsAtivos = lista.filter(
+        (card) =>
+          card.ativo === 1 ||
+          card.ativo === true ||
+          card.ativo === undefined
+      );
+
+      /*
+       * Se o administrador informou IDs no bloco,
+       * usamos somente aqueles flashcards.
+       *
+       * Se não informou IDs, usamos todos os
+       * flashcards ativos.
+       */
+      if (idsSelecionados.length > 0) {
+        const ids = new Set(
+          idsSelecionados.map((id) =>
+            Number(id)
+          )
+        );
+
+        cardsAtivos = cardsAtivos.filter(
+          (card) =>
+            ids.has(Number(card.id))
+        );
+      }
+
+      const cardsFormatados =
+        cardsAtivos.map((card) => ({
+          id: card.id,
+          materia: card.materia || '',
+          pergunta:
+            card.primario ||
+            card.pergunta ||
+            '',
+          resposta:
+            card.secundario ||
+            card.resposta ||
+            '',
+        }));
+
+      setFlashcards(cardsFormatados);
+      setFlashcardAtual(0);
+
+      /*
+       * IMPORTANTE:
+       * sempre começa com a resposta escondida.
+       */
+      setMostrarResposta(false);
+    } catch (error) {
+      console.error(
+        'Erro ao carregar flashcards:',
+        error
+      );
+
+      setFlashcards([]);
+    } finally {
+      setCarregandoFlashcards(false);
+    }
+  }
+
+  /*
+   * Quando os blocos da página chegam,
+   * verifica se existe algum bloco de flashcards
+   * e carrega os cards relacionados.
+   */
+  useEffect(() => {
+    if (!Array.isArray(blocos)) {
+      return;
+    }
+
+    const blocoFlashcards =
+      blocos.find(
+        (bloco) =>
+          bloco.tipo === 'flashcards'
+      );
+
+    if (!blocoFlashcards) {
+      setFlashcards([]);
+      setFlashcardAtual(0);
+      setMostrarResposta(false);
+      return;
+    }
+
+    const dados =
+      normalizarDados(
+        blocoFlashcards
+      );
+
+    const ids =
+      formatarIds(dados.ids);
+
+    carregarFlashcards(ids);
+  }, [blocos]);
+
+  /*
+   * =========================================================
+   * FLASHCARD ATUAL
+   * =========================================================
+   */
+
+  const cardAtual =
+    flashcards.length > 0
+      ? flashcards[flashcardAtual]
+      : null;
+
+  /*
+   * =========================================================
+   * MOSTRAR / ESCONDER RESPOSTA
+   * =========================================================
+   */
+
+  function alternarResposta() {
+    setMostrarResposta(
+      (atual) => !atual
+    );
+  }
+
+  /*
+   * =========================================================
+   * PRÓXIMO FLASHCARD
+   * =========================================================
+   */
+
+  function proximoFlashcard() {
+    if (
+      flashcards.length === 0
+    ) {
+      return;
+    }
+
+    setFlashcardAtual(
+      (atual) =>
+        Math.min(
+          atual + 1,
+          flashcards.length - 1
+        )
+    );
+
+    /*
+     * CORREÇÃO:
+     * quando muda de card, a resposta
+     * obrigatoriamente volta a ficar escondida.
+     */
+    setMostrarResposta(false);
+  }
+
+  /*
+   * =========================================================
+   * FLASHCARD ANTERIOR
+   * =========================================================
+   */
+
+  function anteriorFlashcard() {
+    if (
+      flashcards.length === 0
+    ) {
+      return;
+    }
+
+    setFlashcardAtual(
+      (atual) =>
+        Math.max(
+          atual - 1,
+          0
+        )
+    );
+
+    /*
+     * CORREÇÃO:
+     * quando volta de card, a resposta
+     * também começa escondida.
+     */
+    setMostrarResposta(false);
+  }
+
+  /*
+   * =========================================================
+   * MARCAR COMO ESTUDADO
+   * =========================================================
+   */
+
+  async function alternarEstudado() {
+    const token = obterToken();
+
+    if (!token) {
+      setErro(
+        'Sua sessão expirou. Faça login novamente.'
+      );
+      return;
+    }
+
+    const novoStatus =
+      !estudado;
+
+    try {
+      setSalvandoEstudo(true);
+      setErro('');
+
+      const resposta = await fetch(
+        `${API_URL}/conteudos/progresso/${topicoNumero}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type':
+              'application/json',
+            Authorization:
+              `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            estudado:
+              novoStatus,
+          }),
+        }
+      );
+
+      const dados =
+        await resposta
+          .json()
+          .catch(() => ({}));
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro ||
+            dados.mensagem ||
             'Não foi possível atualizar seu progresso.'
         );
       }
 
-      setEstudado(novoStatus);
+      setEstudado(
+        novoStatus
+      );
     } catch (error) {
       console.error(
         'Erro ao atualizar progresso:',
@@ -267,17 +513,36 @@ export default function PaginaConteudo() {
     }
   }
 
-  const materiaStyle = useMemo(() => {
-    return getSubjectStyle(
-      pagina?.materia || ''
-    );
-  }, [pagina?.materia]);
+  /*
+   * =========================================================
+   * ESTILO DA MATÉRIA
+   * =========================================================
+   */
+
+  const materiaStyle =
+    useMemo(() => {
+      return getSubjectStyle(
+        pagina?.materia || ''
+      );
+    }, [pagina?.materia]);
+
+  /*
+   * =========================================================
+   * RENDERIZAR BLOCO
+   * =========================================================
+   */
 
   function renderBloco(bloco) {
     const dados =
       normalizarDados(bloco);
 
     switch (bloco.tipo) {
+      /*
+       * =====================================================
+       * TEXTO
+       * =====================================================
+       */
+
       case 'texto':
         return (
           <section
@@ -285,7 +550,9 @@ export default function PaginaConteudo() {
             key={bloco.id}
           >
             {dados.titulo && (
-              <h2>{dados.titulo}</h2>
+              <h2>
+                {dados.titulo}
+              </h2>
             )}
 
             {dados.texto && (
@@ -296,11 +563,18 @@ export default function PaginaConteudo() {
           </section>
         );
 
+      /*
+       * =====================================================
+       * DESTAQUE
+       * =====================================================
+       */
+
       case 'destaque':
         return (
           <section
             className={`pagina-content-block pagina-highlight ${
-              dados.variante || 'info'
+              dados.variante ||
+              'info'
             }`}
             key={bloco.id}
           >
@@ -325,9 +599,17 @@ export default function PaginaConteudo() {
           </section>
         );
 
+      /*
+       * =====================================================
+       * VÍDEO
+       * =====================================================
+       */
+
       case 'video': {
         const videoUrl =
-          youtubeEmbed(dados.url);
+          youtubeEmbed(
+            dados.url
+          );
 
         return (
           <section
@@ -335,7 +617,9 @@ export default function PaginaConteudo() {
             key={bloco.id}
           >
             {dados.titulo && (
-              <h2>{dados.titulo}</h2>
+              <h2>
+                {dados.titulo}
+              </h2>
             )}
 
             {videoUrl ? (
@@ -366,6 +650,12 @@ export default function PaginaConteudo() {
         );
       }
 
+      /*
+       * =====================================================
+       * IMAGEM
+       * =====================================================
+       */
+
       case 'imagem':
         return (
           <section
@@ -373,7 +663,9 @@ export default function PaginaConteudo() {
             key={bloco.id}
           >
             {dados.titulo && (
-              <h2>{dados.titulo}</h2>
+              <h2>
+                {dados.titulo}
+              </h2>
             )}
 
             {dados.url ? (
@@ -403,6 +695,12 @@ export default function PaginaConteudo() {
           </section>
         );
 
+      /*
+       * =====================================================
+       * PDF
+       * =====================================================
+       */
+
       case 'pdf':
         return (
           <section
@@ -410,7 +708,9 @@ export default function PaginaConteudo() {
             key={bloco.id}
           >
             {dados.titulo && (
-              <h2>{dados.titulo}</h2>
+              <h2>
+                {dados.titulo}
+              </h2>
             )}
 
             {dados.descricao && (
@@ -458,6 +758,12 @@ export default function PaginaConteudo() {
           </section>
         );
 
+      /*
+       * =====================================================
+       * LISTA
+       * =====================================================
+       */
+
       case 'lista':
         return (
           <section
@@ -465,7 +771,9 @@ export default function PaginaConteudo() {
             key={bloco.id}
           >
             {dados.titulo && (
-              <h2>{dados.titulo}</h2>
+              <h2>
+                {dados.titulo}
+              </h2>
             )}
 
             {Array.isArray(
@@ -477,29 +785,39 @@ export default function PaginaConteudo() {
                     (item) =>
                       String(item).trim()
                   )
-                  .map((item, index) => (
-                    <li key={index}>
-                      <span className="pagina-list-marker">
-                        {index + 1}
-                      </span>
+                  .map(
+                    (
+                      item,
+                      index
+                    ) => (
+                      <li
+                        key={index}
+                      >
+                        <span className="pagina-list-marker">
+                          {index + 1}
+                        </span>
 
-                      <span>
-                        {item}
-                      </span>
-                    </li>
-                  ))}
+                        <span>
+                          {item}
+                        </span>
+                      </li>
+                    )
+                  )}
               </ul>
             )}
           </section>
         );
 
-      case 'flashcards': {
-        const ids =
-          formatarIds(dados.ids);
+      /*
+       * =====================================================
+       * FLASHCARDS
+       * =====================================================
+       */
 
+      case 'flashcards':
         return (
           <section
-            className="pagina-content-block pagina-resource-block"
+            className="pagina-content-block pagina-resource-block pagina-flashcards-block"
             key={bloco.id}
           >
             <div className="pagina-resource-block-icon">
@@ -512,41 +830,116 @@ export default function PaginaConteudo() {
             <div className="pagina-resource-block-copy">
               <h2>
                 {dados.titulo ||
-                  'Flashcards'}
+                  'Flashcards para revisar'}
               </h2>
 
               <p>
                 {dados.descricao ||
-                  'Revise este assunto utilizando os flashcards relacionados.'}
+                  'Revise este assunto com flashcards interativos.'}
               </p>
-
-              {ids.length > 0 && (
-                <div className="pagina-id-list">
-                  {ids.map((id) => (
-                    <span key={id}>
-                      #{id}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
 
-            <button
-              type="button"
-              className="pagina-secondary-button"
-              onClick={() =>
-                navigate('/flashcards')
-              }
-            >
-              Abrir flashcards
-            </button>
+            {carregandoFlashcards ? (
+              <div className="pagina-flashcards-loading">
+                Carregando flashcards...
+              </div>
+            ) : flashcards.length === 0 ? (
+              <div className="pagina-block-placeholder">
+                Nenhum flashcard relacionado foi encontrado.
+              </div>
+            ) : (
+              <div className="pagina-flashcards-player">
+
+                <div className="pagina-flashcards-counter">
+                  CARD {flashcardAtual + 1} DE{' '}
+                  {flashcards.length}
+                </div>
+
+                <div
+                  className={`pagina-flashcard ${
+                    mostrarResposta
+                      ? 'show-answer'
+                      : ''
+                  }`}
+                >
+                  <span className="pagina-flashcard-label">
+                    {mostrarResposta
+                      ? 'RESPOSTA'
+                      : 'PERGUNTA'}
+                  </span>
+
+                  <div className="pagina-flashcard-content">
+                    <strong>
+                      {mostrarResposta
+                        ? cardAtual?.resposta
+                        : cardAtual?.pergunta}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="pagina-flashcard-actions">
+
+                  <button
+                    type="button"
+                    className="pagina-secondary-button"
+                    onClick={
+                      alternarResposta
+                    }
+                  >
+                    {mostrarResposta
+                      ? 'Esconder resposta'
+                      : 'Mostrar resposta'}
+                  </button>
+
+                  <div className="pagina-flashcard-navigation">
+
+                    <button
+                      type="button"
+                      className="pagina-secondary-button"
+                      onClick={
+                        anteriorFlashcard
+                      }
+                      disabled={
+                        flashcardAtual === 0
+                      }
+                    >
+                      ← Anterior
+                    </button>
+
+                    <button
+                      type="button"
+                      className="pagina-secondary-button"
+                      onClick={
+                        proximoFlashcard
+                      }
+                      disabled={
+                        flashcardAtual ===
+                        flashcards.length - 1
+                      }
+                    >
+                      Próximo →
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+            )}
           </section>
         );
-      }
+
+      /*
+       * =====================================================
+       * QUESTÕES
+       * =====================================================
+       */
 
       case 'questoes': {
         const ids =
-          formatarIds(dados.ids);
+          formatarIds(
+            dados.ids
+          );
 
         return (
           <section
@@ -573,11 +966,15 @@ export default function PaginaConteudo() {
 
               {ids.length > 0 && (
                 <div className="pagina-id-list">
-                  {ids.map((id) => (
-                    <span key={id}>
-                      #{id}
-                    </span>
-                  ))}
+                  {ids.map(
+                    (id) => (
+                      <span
+                        key={id}
+                      >
+                        #{id}
+                      </span>
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -586,7 +983,9 @@ export default function PaginaConteudo() {
               type="button"
               className="pagina-secondary-button"
               onClick={() =>
-                navigate('/simulados')
+                navigate(
+                  '/simulados'
+                )
               }
             >
               Praticar
@@ -594,6 +993,12 @@ export default function PaginaConteudo() {
           </section>
         );
       }
+
+      /*
+       * =====================================================
+       * SIMULADO
+       * =====================================================
+       */
 
       case 'simulado':
         return (
@@ -622,7 +1027,8 @@ export default function PaginaConteudo() {
               {dados.id && (
                 <div className="pagina-id-list">
                   <span>
-                    Simulado #{dados.id}
+                    Simulado #
+                    {dados.id}
                   </span>
                 </div>
               )}
@@ -632,13 +1038,21 @@ export default function PaginaConteudo() {
               type="button"
               className="pagina-secondary-button"
               onClick={() =>
-                navigate('/simulados')
+                navigate(
+                  '/simulados'
+                )
               }
             >
               Fazer simulado
             </button>
           </section>
         );
+
+      /*
+       * =====================================================
+       * CHECKLIST
+       * =====================================================
+       */
 
       case 'checklist':
         return (
@@ -652,36 +1066,48 @@ export default function PaginaConteudo() {
             </h2>
 
             <div className="pagina-checklist">
-              {(Array.isArray(
-                dados.itens
-              )
-                ? dados.itens
-                : []
+              {(
+                Array.isArray(
+                  dados.itens
+                )
+                  ? dados.itens
+                  : []
               )
                 .filter(
                   (item) =>
                     String(item).trim()
                 )
-                .map((item, index) => (
-                  <div
-                    key={index}
-                    className="pagina-check-item"
-                  >
-                    <span className="pagina-check-icon">
-                      <Icon
-                        name="check"
-                        size={14}
-                      />
-                    </span>
+                .map(
+                  (
+                    item,
+                    index
+                  ) => (
+                    <div
+                      key={index}
+                      className="pagina-check-item"
+                    >
+                      <span className="pagina-check-icon">
+                        <Icon
+                          name="check"
+                          size={14}
+                        />
+                      </span>
 
-                    <span>
-                      {item}
-                    </span>
-                  </div>
-                ))}
+                      <span>
+                        {item}
+                      </span>
+                    </div>
+                  )
+                )}
             </div>
           </section>
         );
+
+      /*
+       * =====================================================
+       * TIPO DESCONHECIDO
+       * =====================================================
+       */
 
       default:
         return (
@@ -700,6 +1126,12 @@ export default function PaginaConteudo() {
         );
     }
   }
+
+  /*
+   * =========================================================
+   * CARREGANDO PÁGINA
+   * =========================================================
+   */
 
   if (carregando) {
     return (
@@ -724,6 +1156,12 @@ export default function PaginaConteudo() {
     );
   }
 
+  /*
+   * =========================================================
+   * ERRO
+   * =========================================================
+   */
+
   if (erro) {
     return (
       <div className="pagina-conteudo-page">
@@ -731,13 +1169,16 @@ export default function PaginaConteudo() {
           type="button"
           className="pagina-back-button"
           onClick={() =>
-            navigate('/conteudos')
+            navigate(
+              '/conteudos'
+            )
           }
         >
           <Icon
             name="arrowLeft"
             size={17}
           />
+
           Voltar aos conteúdos
         </button>
 
@@ -761,6 +1202,12 @@ export default function PaginaConteudo() {
     );
   }
 
+  /*
+   * =========================================================
+   * SEM PÁGINA
+   * =========================================================
+   */
+
   if (!pagina) {
     return (
       <div className="pagina-conteudo-page">
@@ -768,13 +1215,16 @@ export default function PaginaConteudo() {
           type="button"
           className="pagina-back-button"
           onClick={() =>
-            navigate('/conteudos')
+            navigate(
+              '/conteudos'
+            )
           }
         >
           <Icon
             name="arrowLeft"
             size={17}
           />
+
           Voltar aos conteúdos
         </button>
 
@@ -799,6 +1249,12 @@ export default function PaginaConteudo() {
     );
   }
 
+  /*
+   * =========================================================
+   * PÁGINA
+   * =========================================================
+   */
+
   return (
     <div className="pagina-conteudo-page">
 
@@ -806,13 +1262,16 @@ export default function PaginaConteudo() {
         type="button"
         className="pagina-back-button"
         onClick={() =>
-          navigate('/conteudos')
+          navigate(
+            '/conteudos'
+          )
         }
       >
         <Icon
           name="arrowLeft"
           size={17}
         />
+
         Voltar aos conteúdos
       </button>
 
@@ -826,6 +1285,7 @@ export default function PaginaConteudo() {
         }}
       >
         <div className="pagina-hero-top">
+
           <div className="pagina-breadcrumb">
             <span>
               Conteúdos
@@ -854,23 +1314,30 @@ export default function PaginaConteudo() {
             }}
           >
             <SubjectIcon
-              materia={pagina.materia}
+              materia={
+                pagina.materia
+              }
               size={17}
             />
 
             {pagina.materia}
           </div>
+
         </div>
 
         <div className="pagina-hero-content">
+
           <div className="pagina-hero-icon">
             <SubjectIcon
-              materia={pagina.materia}
+              materia={
+                pagina.materia
+              }
               size={28}
             />
           </div>
 
           <div>
+
             <span className="pagina-kicker">
               MATERIAL DE ESTUDO
             </span>
@@ -884,16 +1351,23 @@ export default function PaginaConteudo() {
                 {pagina.descricao}
               </p>
             )}
+
           </div>
+
         </div>
       </header>
 
       <div className="pagina-layout">
+
         <main className="pagina-main">
+
           {blocos.length > 0 ? (
-            blocos.map(renderBloco)
+            blocos.map(
+              renderBloco
+            )
           ) : (
             <div className="pagina-state-card">
+
               <div className="pagina-state-icon">
                 <Icon
                   name="book"
@@ -908,12 +1382,16 @@ export default function PaginaConteudo() {
               <span>
                 Volte mais tarde para conferir as explicações e materiais.
               </span>
+
             </div>
           )}
+
         </main>
 
         <aside className="pagina-aside">
+
           <div className="pagina-progress-card">
+
             <span className="pagina-aside-label">
               SEU PROGRESSO
             </span>
@@ -957,9 +1435,11 @@ export default function PaginaConteudo() {
                   ? 'Marcar como não estudado'
                   : 'Marcar como estudado'}
             </button>
+
           </div>
 
           <div className="pagina-aside-card">
+
             <span className="pagina-aside-label">
               SOBRE ESTE TÓPICO
             </span>
@@ -993,8 +1473,11 @@ export default function PaginaConteudo() {
                 {blocos.length}
               </strong>
             </div>
+
           </div>
+
         </aside>
+
       </div>
     </div>
   );

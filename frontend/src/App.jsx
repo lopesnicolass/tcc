@@ -13,13 +13,12 @@ import Mural from './pages/aluno/Mural.jsx';
 import Cronograma from './pages/aluno/Cronograma.jsx';
 import PlanoAutomatico from './pages/aluno/PlanoAutomatico.jsx';
 import Conteudos from './pages/aluno/Conteudos.jsx';
-import ConteudoEstudo from './pages/aluno/ConteudoEstudo.jsx';
+import PaginaConteudo from './pages/aluno/PaginaConteudo.jsx';
 import Simulados from './pages/aluno/Simulados.jsx';
 import Provas from './pages/aluno/Provas.jsx';
 import Desempenho from './pages/aluno/Desempenho.jsx';
 import FlashCards from './pages/aluno/FlashCards.jsx';
 import Perfil from './pages/aluno/Perfil.jsx';
-import PaginaConteudo from './pages/PaginaConteudo.jsx';
 
 import Terrario from './terrario/Terrario.jsx';
 
@@ -40,30 +39,25 @@ export default function App() {
       <XPToast />
 
       <Routes>
-        {/* =====================================================
-            TELA INICIAL
-            ===================================================== */}
+
+        {/* PÁGINAS PÚBLICAS */}
+
         <Route
           path="/"
           element={<Landing />}
         />
 
-        {/* =====================================================
-            LOGIN
-            ===================================================== */}
         <Route
           path="/login"
           element={<Auth />}
         />
 
-        {/* =====================================================
-            ÁREA PROTEGIDA
-            ===================================================== */}
+        {/* ÁREA PROTEGIDA */}
+
         <Route element={<ProtectedRoute />}>
 
-          {/* ===================================================
-              ÁREA DO ALUNO
-              =================================================== */}
+          {/* ÁREA DO ALUNO */}
+
           <Route element={<DashboardLayout />}>
 
             <Route
@@ -81,14 +75,13 @@ export default function App() {
               element={<Conteudos />}
             />
 
+            {/* PÁGINA DE ESTUDO DO TÓPICO */}
+
             <Route
               path="/conteudos/:topicoId"
-              element={<ConteudoEstudo />}
+              element={<PaginaConteudo />}
             />
-<Route
-  path="/conteudos/topico/:topicoId"
-  element={<PaginaConteudo />}
-/>
+
             <Route
               path="/cronograma"
               element={<Cronograma />}
@@ -131,11 +124,10 @@ export default function App() {
 
           </Route>
 
-          {/* ===================================================
-              ÁREA DO ADMIN
-              (AdminRoute exige usuario.tipo === 'admin')
-              =================================================== */}
+          {/* ÁREA DO ADMIN */}
+
           <Route element={<AdminRoute />}>
+
             <Route
               path="/admin"
               element={<AdminLayout />}
@@ -182,13 +174,13 @@ export default function App() {
               />
 
             </Route>
+
           </Route>
 
         </Route>
 
-        {/* =====================================================
-            ROTA DESCONHECIDA
-            ===================================================== */}
+        {/* ROTA DESCONHECIDA */}
+
         <Route
           path="*"
           element={
@@ -198,6 +190,7 @@ export default function App() {
             />
           }
         />
+
       </Routes>
     </>
   );
