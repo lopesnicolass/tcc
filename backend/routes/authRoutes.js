@@ -2,9 +2,7 @@ const express = require("express");
 
 const {
     cadastrar,
-    login,
-    solicitarRecuperacaoSenha,
-    redefinirSenha
+    login
 } = require("../controllers/authController");
 
 const router = express.Router();
@@ -22,14 +20,6 @@ router.post("/cadastro", cadastrar);
 // ============================
 
 router.post("/login", login);
-
-
-// ============================
-// RECUPERAÇÃO DE SENHA
-// ============================
-
-router.post("/esqueci-senha", solicitarRecuperacaoSenha);
-router.post("/redefinir-senha", redefinirSenha);
 
 
 module.exports = router;
