@@ -2,14 +2,53 @@
    FLASHCARDS
    ===================================================== */
 
+/* =====================================================
+   CABEÇALHO DA PÁGINA
+   ===================================================== */
+
+.flashcards-hero{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:28px;
+  min-height:158px;
+  padding:30px 32px;
+  margin-bottom:22px;
+  overflow:hidden;
+  border-radius:24px;
+  background:linear-gradient(135deg,#1458b8 0%,#2696e8 100%);
+  box-shadow:0 14px 28px -18px rgba(13,71,161,.5);
+}
+
+.flashcards-hero::before{
+  content:""; position:absolute; width:220px; height:220px; right:-70px; top:-110px;
+  border-radius:50%; background:rgba(255,255,255,.08);
+}
+
+.flashcards-hero::after{
+  content:""; position:absolute; width:150px; height:150px; right:95px; bottom:-105px;
+  border:1px solid rgba(255,255,255,.12); border-radius:50%;
+}
+
+.flashcards-hero-content{position:relative; z-index:1; min-width:0;}
+.flashcards-hero-eyebrow{display:block; margin-bottom:7px; color:rgba(255,255,255,.72); font-size:12px; font-weight:800; letter-spacing:.12em;}
+.flashcards-hero h1{margin:0; color:#fff; font-size:clamp(28px,3vw,38px); line-height:1.1; font-weight:800;}
+.flashcards-hero p{max-width:700px; margin:9px 0 0; color:rgba(255,255,255,.84); font-size:15px; line-height:1.5;}
+
+.flashcards-hero-badge{
+  position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex:0 0 112px; min-height:92px; padding:12px; border:1px solid rgba(255,255,255,.24);
+  border-radius:18px; background:rgba(255,255,255,.10); color:#fff; backdrop-filter:blur(4px);
+}
+.flashcards-hero-badge span{font-size:18px; line-height:1; margin-bottom:3px;}
+.flashcards-hero-badge strong{font:800 24px "Space Grotesk",sans-serif; line-height:1;}
+.flashcards-hero-badge small{margin-top:5px; color:rgba(255,255,255,.76); font-size:10px; font-weight:700; text-align:center;}
+
 .flashcard-grid {
   display: grid;
-  grid-template-columns:
-    repeat(
-      auto-fill,
-      minmax(200px, 1fr)
-    );
-  gap: 20px;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:18px;
 }
 
 
@@ -33,8 +72,8 @@
 
 .flashcard {
   perspective: 1000px;
-  height: 160px;
-  cursor: pointer;
+  height:148px;
+  cursor:pointer;
 }
 
 
@@ -56,9 +95,10 @@
 .flashcard-face {
   position: absolute;
   inset: 0;
-  border-radius: 18px;
+  border-radius:16px;
+  border:1px solid var(--line);
 
-  display: flex;
+  display:flex;
   align-items: center;
   justify-content: center;
 
@@ -70,15 +110,20 @@
 
   backface-visibility: hidden;
 
-  box-shadow:
-    0 1px 2px
-    rgba(13, 71, 161, 0.05);
+  box-shadow:0 5px 16px rgba(13,71,161,.045);
+  transition:transform .18s var(--bouncy),box-shadow .18s ease,border-color .18s ease;
 }
 
 
 .flashcard-face.front {
   background: #fff;
   color: var(--ink);
+}
+
+.flashcard:hover .flashcard-face.front{
+  transform:translateY(-2px);
+  border-color:rgba(33,150,243,.28);
+  box-shadow:0 10px 22px rgba(13,71,161,.08);
 }
 
 
@@ -165,118 +210,18 @@
 
 
 /* =====================================================
-   BANNER - HORA DOS FLASHCARDS
+   HORA DOS FLASHCARDS
    ===================================================== */
 
-.flashcards-game-banner {
-  margin-bottom: 28px;
-  padding: 26px;
-  border-radius: 22px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffffff 0%,
-      #f2f6fb 100%
-    );
-
-  border: 1px solid #e1e9f2;
-
-  box-shadow:
-    0 8px 24px
-    rgba(13, 71, 161, 0.06);
-}
-
-
-.flashcards-game-banner-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-
-.flashcards-game-eyebrow {
-  display: inline-block;
-  margin-bottom: 7px;
-
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .12em;
-
-  color: var(--accent-dark);
-}
-
-
-.flashcards-game-banner h2 {
-  margin: 0 0 8px;
-
-  font-family:
-    "Space Grotesk",
-    sans-serif;
-
-  font-size: 24px;
-  font-weight: 800;
-
-  color: var(--ink);
-}
-
-
-.flashcards-game-banner p {
-  margin: 0;
-  max-width: 620px;
-
-  color: var(--muted);
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-
-.flashcards-game-start {
-  flex-shrink: 0;
-
-  border: none;
-  border-radius: 13px;
-
-  padding: 13px 24px;
-
-  background: var(--ink);
-  color: #fff;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    transform .2s ease,
-    opacity .2s ease;
-}
-
-
-.flashcards-game-start:hover:not(:disabled) {
-  transform:
-    translateY(-2px);
-}
-
-
-.flashcards-game-start:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-
-.flashcards-game-warning {
-  margin-top: 16px !important;
-  padding-top: 15px;
-
-  border-top:
-    1px solid #e5ebf2;
-
-  color: var(--muted);
-  font-size: 13px;
-}
-
+.flashcards-game-banner{margin-bottom:22px; padding:24px 28px; border:1px solid var(--line); border-radius:22px; background:#fff; box-shadow:0 8px 28px rgba(13,71,161,.06);}
+.flashcards-game-banner-content{display:flex; align-items:center; justify-content:space-between; gap:24px;}
+.flashcards-game-eyebrow{display:inline-block; margin-bottom:7px; color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.12em;}
+.flashcards-game-banner h2{margin:0 0 6px; color:var(--ink); font:800 22px "Space Grotesk",sans-serif;}
+.flashcards-game-banner p{margin:0; max-width:680px; color:var(--muted); font-size:13px; line-height:1.55;}
+.flashcards-game-start{flex-shrink:0; border:0; border-radius:12px; padding:12px 22px; background:var(--ink); color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:transform .18s var(--bouncy),box-shadow .18s ease,background .18s ease;}
+.flashcards-game-start:hover:not(:disabled){transform:translateY(-2px); background:var(--accent-dark); box-shadow:0 10px 18px -8px rgba(13,71,161,.45);}
+.flashcards-game-start:disabled{opacity:.45; cursor:not-allowed;}
+.flashcards-game-warning{margin:16px 0 0!important; padding:12px 14px; border-radius:12px; background:#f5f9fd; color:var(--muted); font-size:12px;}
 
 /* =====================================================
    PÁGINA DO JOGO
@@ -811,6 +756,9 @@
    ===================================================== */
 
 @media (max-width: 760px) {
+
+  .flashcards-hero{align-items:flex-start;flex-direction:column;padding:26px 24px;}
+  .flashcards-hero-badge{align-self:flex-start;flex-basis:auto;width:112px;}
 
   .flashcards-game-banner-content {
     flex-direction: column;

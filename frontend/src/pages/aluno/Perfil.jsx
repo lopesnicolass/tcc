@@ -706,37 +706,17 @@ export default function Perfil() {
       </div>
 
       {mensagem && (
-
-        <div
-          style={{
-            marginBottom: '18px',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: '#E3F2FD',
-            color: '#0D47A1',
-            fontWeight: 600
-          }}
-        >
-          {mensagem}
+        <div className="perfil-alert perfil-alert-success">
+          <span className="perfil-alert-icon">✓</span>
+          <span>{mensagem}</span>
         </div>
-
       )}
 
       {erro && (
-
-        <div
-          style={{
-            marginBottom: '18px',
-            padding: '12px 16px',
-            borderRadius: '12px',
-            background: '#FDECEC',
-            color: '#C1462F',
-            fontWeight: 600
-          }}
-        >
-          {erro}
+        <div className="perfil-alert perfil-alert-error">
+          <span className="perfil-alert-icon">!</span>
+          <span>{erro}</span>
         </div>
-
       )}
 
       <div className="perfil-grid">
@@ -745,6 +725,16 @@ export default function Perfil() {
           className="panel-card"
           onSubmit={handleSave}
         >
+
+          <div className="perfil-form-heading">
+            <div>
+              <span className="perfil-section-kicker">DADOS DA CONTA</span>
+              <h2>Informações do perfil</h2>
+              <p>Atualize seus dados pessoais e mantenha sua conta sempre organizada.</p>
+            </div>
+          </div>
+
+          <div className="perfil-fields">
 
           <div className="perfil-field">
 
@@ -884,15 +874,20 @@ export default function Perfil() {
 
           )}
 
-          <button
-            type="submit"
-            className="mural-btn primary"
-            disabled={salvando}
-          >
-            {salvando
-              ? 'Salvando...'
-              : 'Salvar Alterações'}
-          </button>
+          </div>
+
+          <div className="perfil-form-footer">
+            <span>Suas alterações serão aplicadas à sua conta.</span>
+            <button
+              type="submit"
+              className="mural-btn primary"
+              disabled={salvando}
+            >
+              {salvando
+                ? 'Salvando...'
+                : 'Salvar alterações'}
+            </button>
+          </div>
 
         </form>
 
@@ -905,6 +900,11 @@ export default function Perfil() {
         >
 
           <div className="perfil-avatar-card perfil-profile-card">
+
+            <div className="perfil-side-heading">
+              <span className="perfil-section-kicker">SUA CONTA</span>
+              <h3>Foto de perfil</h3>
+            </div>
 
             <div
               className="avatar-circle"

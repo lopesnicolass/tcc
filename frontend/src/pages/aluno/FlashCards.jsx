@@ -1280,21 +1280,21 @@ if (!resposta.ok) {
   return (
     <div>
 
-      <div className="page-header">
+      <section className="flashcards-hero">
 
-        <div>
-
-          <h1>
-            Flash Cards
-          </h1>
-
-          <p>
-            Revise os conteúdos de forma rápida com os Cards
-          </p>
-
+        <div className="flashcards-hero-content">
+          <span className="flashcards-hero-eyebrow">REVISÃO RÁPIDA</span>
+          <h1>Flash Cards</h1>
+          <p>Revise os conteúdos de forma rápida e teste seus conhecimentos para o Vestibulinho.</p>
         </div>
 
-      </div>
+        <div className="flashcards-hero-badge" aria-hidden="true">
+          <span>✦</span>
+          <strong>{cards.length}</strong>
+          <small>cards disponíveis</small>
+        </div>
+
+      </section>
 
 
       {/* =================================================
