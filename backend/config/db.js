@@ -559,6 +559,69 @@ db.run(`
 
 
     // =====================================================
+    // MIGRAÇÃO — FLASHCARDS VINCULADOS A CONTEÚDOS
+    // =====================================================
+
+    db.all(
+        `PRAGMA table_info(flashcards)`,
+        (erro, colunas) => {
+
+            if (erro) {
+                console.error(
+                    "Erro ao verificar tabela flashcards:",
+                    erro.message
+                );
+                return;
+            }
+
+            const nomesColunas = colunas.map(
+                coluna => coluna.name
+            );
+
+            if (!nomesColunas.includes("topico_id")) {
+
+                db.run(`
+                    ALTER TABLE flashcards
+                    ADD COLUMN topico_id INTEGER
+                    REFERENCES topicos(id)
+                    ON DELETE SET NULL
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar topico_id aos flashcards:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        console.log(
+                            "Coluna topico_id adicionada aos flashcards com sucesso."
+                        );
+
+                        db.run(`
+                            CREATE INDEX IF NOT EXISTS idx_flashcards_topico
+                            ON flashcards(topico_id)
+                        `, (erroIndice) => {
+                            if (erroIndice) {
+                                console.error(
+                                    "Erro ao criar índice dos conteúdos dos flashcards:",
+                                    erroIndice.message
+                                );
+                            }
+                        });
+                    }
+
+                });
+            } else {
+                db.run(`
+                    CREATE INDEX IF NOT EXISTS idx_flashcards_topico
+                    ON flashcards(topico_id)
+                `);
+            }
+        }
+    );
+
+
+    // =====================================================
     // ÍNDICES
     // =====================================================
 

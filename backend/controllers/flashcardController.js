@@ -2,6 +2,15 @@ const flashcardModel =
     require("../models/flashcardModel");
 
 
+function inteiroPositivo(valor) {
+    const numero = Number(valor);
+
+    return Number.isInteger(numero) && numero > 0
+        ? numero
+        : null;
+}
+
+
 // =====================================================
 // LISTAR FLASHCARDS
 // =====================================================
@@ -94,9 +103,9 @@ function criar(req, res) {
     const {
         primario,
         secundario,
-        materia
+        materiaId,
+        topicoId
     } = req.body || {};
-
 
     if (
         !primario ||
@@ -109,7 +118,6 @@ function criar(req, res) {
         });
     }
 
-
     if (
         !secundario ||
         !String(secundario).trim()
@@ -121,26 +129,46 @@ function criar(req, res) {
         });
     }
 
+    const materiaIdFinal =
+        inteiroPositivo(materiaId);
 
-    if (
-        !materia ||
-        !String(materia).trim()
-    ) {
+    const topicoIdFinal =
+        inteiroPositivo(topicoId);
+
+    if (!materiaIdFinal) {
 
         return res.status(400).json({
             erro:
-                "A matéria é obrigatória."
+                "Selecione uma matéria."
         });
     }
 
+    if (!topicoIdFinal) {
+
+        return res.status(400).json({
+            erro:
+                "Selecione um conteúdo."
+        });
+    }
 
     flashcardModel.criarFlashcard(
         String(primario).trim(),
         String(secundario).trim(),
-        String(materia).trim(),
+        materiaIdFinal,
+        topicoIdFinal,
         (erro, flashcard) => {
 
             if (erro) {
+
+                if (
+                    erro.code ===
+                    "CONTENT_LINK_INVALID"
+                ) {
+                    return res.status(400).json({
+                        erro:
+                            erro.message
+                    });
+                }
 
                 console.error(
                     "❌ Erro ao criar flashcard:",
@@ -186,12 +214,10 @@ function atualizar(req, res) {
         });
     }
 
-
     const dados =
         {
             ...(req.body || {})
         };
-
 
     if (
         dados.primario !== undefined
@@ -211,7 +237,6 @@ function atualizar(req, res) {
         }
     }
 
-
     if (
         dados.secundario !== undefined
     ) {
@@ -230,25 +255,37 @@ function atualizar(req, res) {
         }
     }
 
-
     if (
-        dados.materia !== undefined
+        dados.materiaId !== undefined
     ) {
+        dados.materiaId =
+            inteiroPositivo(
+                dados.materiaId
+            );
 
-        dados.materia =
-            String(
-                dados.materia
-            ).trim();
-
-        if (!dados.materia) {
-
+        if (!dados.materiaId) {
             return res.status(400).json({
                 erro:
-                    "A matéria é obrigatória."
+                    "Selecione uma matéria."
             });
         }
     }
 
+    if (
+        dados.topicoId !== undefined
+    ) {
+        dados.topicoId =
+            inteiroPositivo(
+                dados.topicoId
+            );
+
+        if (!dados.topicoId) {
+            return res.status(400).json({
+                erro:
+                    "Selecione um conteúdo."
+            });
+        }
+    }
 
     flashcardModel.atualizarFlashcard(
         id,
@@ -256,6 +293,18 @@ function atualizar(req, res) {
         (erro, flashcard) => {
 
             if (erro) {
+
+                if (
+                    erro.code ===
+                    "CONTENT_LINK_REQUIRED" ||
+                    erro.code ===
+                    "CONTENT_LINK_INVALID"
+                ) {
+                    return res.status(400).json({
+                        erro:
+                            erro.message
+                    });
+                }
 
                 console.error(
                     "❌ Erro ao atualizar flashcard:",
@@ -268,7 +317,6 @@ function atualizar(req, res) {
                 });
             }
 
-
             if (!flashcard) {
 
                 return res.status(404).json({
@@ -276,7 +324,6 @@ function atualizar(req, res) {
                         "Flashcard não encontrado."
                 });
             }
-
 
             return res.json({
 
@@ -311,7 +358,6 @@ function excluir(req, res) {
         });
     }
 
-
     flashcardModel.excluirFlashcard(
         id,
         (erro, excluido) => {
@@ -329,7 +375,6 @@ function excluir(req, res) {
                 });
             }
 
-
             if (!excluido) {
 
                 return res.status(404).json({
@@ -338,12 +383,9 @@ function excluir(req, res) {
                 });
             }
 
-
             return res.json({
-
                 mensagem:
                     "Flashcard excluído com sucesso."
-
             });
         }
     );

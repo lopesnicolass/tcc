@@ -67,6 +67,78 @@
 
 
 /* =====================================================
+   PESQUISA
+   ===================================================== */
+
+.flashcards-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 520px;
+  min-height: 46px;
+  margin: 0 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(13, 71, 161, .045);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.flashcards-search:focus-within {
+  border-color: rgba(33, 150, 243, .45);
+  box-shadow: 0 8px 20px rgba(13, 71, 161, .08);
+}
+
+.flashcards-search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  color: var(--muted);
+  font-size: 25px;
+  line-height: 1;
+  transform: rotate(-20deg);
+}
+
+.flashcards-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  padding: 0 12px 0 0;
+}
+
+.flashcards-search input::placeholder {
+  color: var(--muted);
+}
+
+.flashcards-search-clear {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 9px;
+  background: #eef3f8;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease;
+}
+
+.flashcards-search-clear:hover {
+  background: #e5ebf3;
+  color: var(--ink);
+}
+
+
+/* =====================================================
    CARD NORMAL
    ===================================================== */
 
@@ -846,4 +918,28 @@
     width: 100%;
   }
 
+}
+/* =====================================================
+   ORGANIZAÇÃO POR CONTEÚDO
+   ===================================================== */
+
+.flashcards-content-section{
+  margin-bottom:24px;
+}
+
+.flashcards-content-title{
+  margin:0 0 12px;
+  padding-left:12px;
+  border-left:3px solid var(--accent);
+  color:var(--muted);
+  font-family:"Space Grotesk",sans-serif;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.4;
+}
+
+@media (max-width:700px){
+  .flashcards-content-title{
+    font-size:13px;
+  }
 }

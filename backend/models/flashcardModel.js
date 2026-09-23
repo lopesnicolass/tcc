@@ -8,36 +8,82 @@ const db = require("../config/db");
 function criarFlashcard(
     primario,
     secundario,
-    materia,
+    materiaId,
+    topicoId,
     callback
 ) {
 
-    const sql = `
-        INSERT INTO flashcards
-        (
-            primario,
-            secundario,
-            materia
-        )
-        VALUES (?, ?, ?)
-    `;
+    db.get(
+        `
+            SELECT
+                t.id AS topico_id,
+                t.nome AS conteudo,
+                m.id AS materia_id,
+                m.nome AS materia
 
-    db.run(
-        sql,
-        [
-            primario,
-            secundario,
-            materia
-        ],
-        function (erro) {
+            FROM topicos t
+
+            INNER JOIN materias m
+                ON m.id = t.materia_id
+
+            WHERE t.id = ?
+              AND m.id = ?
+              AND t.ativo = 1
+              AND m.ativa = 1
+        `,
+        [topicoId, materiaId],
+        (erro, vinculo) => {
 
             if (erro) {
                 return callback(erro);
             }
 
-            buscarFlashcardPorId(
-                this.lastID,
-                callback
+            if (!vinculo) {
+                const erroVinculo =
+                    new Error(
+                        "O conteúdo selecionado não pertence à matéria informada ou não está disponível."
+                    );
+
+                erroVinculo.code =
+                    "CONTENT_LINK_INVALID";
+
+                return callback(
+                    erroVinculo
+                );
+            }
+
+            const sql = `
+                INSERT INTO flashcards
+                (
+                    primario,
+                    secundario,
+                    materia,
+                    topico_id
+                )
+                VALUES (?, ?, ?, ?)
+            `;
+
+            db.run(
+                sql,
+                [
+                    primario,
+                    secundario,
+                    vinculo.materia,
+                    vinculo.topico_id
+                ],
+                function (erroInsert) {
+
+                    if (erroInsert) {
+                        return callback(
+                            erroInsert
+                        );
+                    }
+
+                    buscarFlashcardPorId(
+                        this.lastID,
+                        callback
+                    );
+                }
             );
         }
     );
@@ -52,21 +98,33 @@ function listarFlashcards(callback) {
 
     const sql = `
         SELECT
-            id,
-            primario,
-            secundario,
-            materia,
-            ativo,
-            created_at,
-            updated_at
+            f.id,
+            f.primario,
+            f.secundario,
+            COALESCE(m.nome, f.materia) AS materia,
+            m.id AS materia_id,
+            f.topico_id,
+            t.nome AS conteudo,
+            f.ativo,
+            f.created_at,
+            f.updated_at
 
-        FROM flashcards
+        FROM flashcards f
 
-        WHERE ativo = 1
+        LEFT JOIN topicos t
+            ON t.id = f.topico_id
+
+        LEFT JOIN materias m
+            ON m.id = t.materia_id
+
+        WHERE f.ativo = 1
 
         ORDER BY
-            materia ASC,
-            id ASC
+            COALESCE(m.ordem, 9999) ASC,
+            COALESCE(m.nome, f.materia) ASC,
+            COALESCE(t.ordem, 9999) ASC,
+            COALESCE(t.nome, '') ASC,
+            f.id ASC
     `;
 
     db.all(
@@ -99,19 +157,62 @@ function buscarFlashcardPorId(
     db.get(
         `
             SELECT
-                id,
-                primario,
-                secundario,
-                materia,
-                ativo,
-                created_at,
-                updated_at
+                f.id,
+                f.primario,
+                f.secundario,
+                COALESCE(m.nome, f.materia) AS materia,
+                m.id AS materia_id,
+                f.topico_id,
+                t.nome AS conteudo,
+                f.ativo,
+                f.created_at,
+                f.updated_at
 
-            FROM flashcards
+            FROM flashcards f
 
-            WHERE id = ?
+            LEFT JOIN topicos t
+                ON t.id = f.topico_id
+
+            LEFT JOIN materias m
+                ON m.id = t.materia_id
+
+            WHERE f.id = ?
         `,
         [id],
+        callback
+    );
+}
+
+
+// =====================================================
+// VALIDAR VÍNCULO MATÉRIA + CONTEÚDO
+// =====================================================
+
+function buscarVinculoConteudo(
+    materiaId,
+    topicoId,
+    callback
+) {
+
+    db.get(
+        `
+            SELECT
+                t.id AS topico_id,
+                t.nome AS conteudo,
+                m.id AS materia_id,
+                m.nome AS materia
+
+            FROM topicos t
+
+            INNER JOIN materias m
+                ON m.id = t.materia_id
+
+            WHERE t.id = ?
+              AND m.id = ?
+              AND t.ativo = 1
+              AND m.ativa = 1
+        `,
+        [topicoId, materiaId],
         callback
     );
 }
@@ -157,49 +258,101 @@ function atualizarFlashcard(
                     ? dados.secundario
                     : atual.secundario;
 
-            const materia =
-                dados.materia !== undefined
-                    ? dados.materia
-                    : atual.materia;
-
             const ativo =
                 dados.ativo !== undefined
                     ? (dados.ativo ? 1 : 0)
                     : atual.ativo;
 
+            const materiaId =
+                dados.materiaId !== undefined
+                    ? Number(dados.materiaId)
+                    : null;
 
-            db.run(
-                `
-                    UPDATE flashcards
+            const topicoId =
+                dados.topicoId !== undefined
+                    ? Number(dados.topicoId)
+                    : null;
 
-                    SET
-                        primario = ?,
-                        secundario = ?,
-                        materia = ?,
-                        ativo = ?,
-                        updated_at =
-                            CURRENT_TIMESTAMP
+            if (
+                !Number.isInteger(materiaId) ||
+                materiaId <= 0 ||
+                !Number.isInteger(topicoId) ||
+                topicoId <= 0
+            ) {
+                const erroVinculo =
+                    new Error(
+                        "Matéria e conteúdo são obrigatórios."
+                    );
 
-                    WHERE id = ?
-                `,
-                [
-                    primario,
-                    secundario,
-                    materia,
-                    ativo,
-                    id
-                ],
-                (erroUpdate) => {
+                erroVinculo.code =
+                    "CONTENT_LINK_REQUIRED";
 
-                    if (erroUpdate) {
+                return callback(
+                    erroVinculo
+                );
+            }
+
+            buscarVinculoConteudo(
+                materiaId,
+                topicoId,
+                (erroVinculo, vinculo) => {
+
+                    if (erroVinculo) {
                         return callback(
-                            erroUpdate
+                            erroVinculo
                         );
                     }
 
-                    buscarFlashcardPorId(
-                        id,
-                        callback
+                    if (!vinculo) {
+                        const erroConteudo =
+                            new Error(
+                                "O conteúdo selecionado não pertence à matéria informada ou não está disponível."
+                            );
+
+                        erroConteudo.code =
+                            "CONTENT_LINK_INVALID";
+
+                        return callback(
+                            erroConteudo
+                        );
+                    }
+
+                    db.run(
+                        `
+                            UPDATE flashcards
+
+                            SET
+                                primario = ?,
+                                secundario = ?,
+                                materia = ?,
+                                topico_id = ?,
+                                ativo = ?,
+                                updated_at =
+                                    CURRENT_TIMESTAMP
+
+                            WHERE id = ?
+                        `,
+                        [
+                            primario,
+                            secundario,
+                            vinculo.materia,
+                            vinculo.topico_id,
+                            ativo,
+                            id
+                        ],
+                        (erroUpdate) => {
+
+                            if (erroUpdate) {
+                                return callback(
+                                    erroUpdate
+                                );
+                            }
+
+                            buscarFlashcardPorId(
+                                id,
+                                callback
+                            );
+                        }
                     );
                 }
             );
