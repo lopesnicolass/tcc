@@ -1,38 +1,38 @@
-/* =====================================================
-   PÁGINA DE CONTEÚDO DO ALUNO
-   ===================================================== */
+/* =========================================================
+   PÁGINA DE CONTEÚDO — ALUNO
+   ========================================================= */
 
 .pagina-conteudo-page {
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding-bottom: 50px;
+  padding-bottom: 52px;
 }
 
-/* =====================================================
+/* =========================================================
    BOTÃO VOLTAR
-   ===================================================== */
+   ========================================================= */
 
 .pagina-back-button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
 
+  margin: 0 0 16px;
+  padding: 5px 0;
+
   border: 0;
   background: transparent;
 
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
 
-  padding: 4px 0;
-  margin-bottom: 18px;
+  font: 700 13px "IBM Plex Sans", sans-serif;
 
   cursor: pointer;
 
   transition:
-    color 0.18s ease,
-    transform 0.18s ease;
+    color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .pagina-back-button:hover {
@@ -40,64 +40,86 @@
   transform: translateX(-2px);
 }
 
-/* =====================================================
+/* =========================================================
    HERO
-   ===================================================== */
+   ========================================================= */
 
 .pagina-hero {
   position: relative;
   overflow: hidden;
 
-  border-radius: 24px;
+  margin-bottom: 22px;
+  padding: 24px 26px;
 
-  padding: 25px 28px;
-
-  margin-bottom: 24px;
+  border-radius: 23px;
 
   background:
     linear-gradient(
       135deg,
-      var(--ink),
-      var(--accent)
+      var(--ink) 0%,
+      #1565c0 58%,
+      var(--accent) 100%
     );
 
+  color: #fff;
+
   box-shadow:
-    0 12px 35px rgba(25, 45, 35, 0.08);
+    0 18px 38px -25px
+      rgba(13, 71, 161, 0.56);
+}
+
+.pagina-hero::before {
+  content: "";
+
+  position: absolute;
+
+  width: 260px;
+  height: 260px;
+
+  right: -95px;
+  top: -160px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 255, 255, 0.09);
+
+  pointer-events: none;
 }
 
 .pagina-hero::after {
   content: "";
 
   position: absolute;
-  width: 280px;
-  height: 280px;
 
-  right: -80px;
-  top: -150px;
+  width: 180px;
+  height: 180px;
+
+  left: -120px;
+  bottom: -140px;
 
   border-radius: 50%;
 
   background:
-    radial-gradient(
-      circle,
-      rgba(255,255,255,0.16),
-      transparent 65%
-    );
+    rgba(144, 202, 249, 0.12);
 
   pointer-events: none;
 }
 
-.pagina-hero-top {
+.pagina-hero-top,
+.pagina-hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
+}
 
+.pagina-hero-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   gap: 15px;
 
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .pagina-breadcrumb {
@@ -108,7 +130,7 @@
   gap: 7px;
 
   color:
-    rgba(255,255,255,0.68);
+    rgba(255, 255, 255, 0.67);
 
   font-size: 11px;
 }
@@ -116,42 +138,51 @@
 .pagina-materia-badge {
   display: inline-flex;
   align-items: center;
+
   gap: 7px;
 
-  padding: 7px 11px;
+  padding: 7px 10px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.18);
 
   border-radius: 999px;
 
-  font-size: 11px;
+  background:
+    rgba(255, 255, 255, 0.1);
+
+  font-size: 10.5px;
   font-weight: 800;
 
   white-space: nowrap;
 }
 
 .pagina-hero-content {
-  position: relative;
-  z-index: 2;
-
   display: flex;
   align-items: flex-start;
 
-  gap: 16px;
+  gap: 15px;
 }
 
 .pagina-hero-icon {
-  width: 58px;
-  height: 58px;
-
-  flex-shrink: 0;
-
-  border-radius: 17px;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 58px;
+  height: 58px;
+
+  flex: 0 0 58px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.14);
+
+  border-radius: 17px;
+
   background:
-    rgba(255,255,255,0.12);
+    rgba(255, 255, 255, 0.12);
 
   color: #fff;
 }
@@ -159,13 +190,12 @@
 .pagina-kicker {
   display: block;
 
-  margin-bottom: 5px;
+  margin: 2px 0 5px;
 
   color:
-    rgba(255,255,255,0.58);
+    rgba(255, 255, 255, 0.56);
 
   font-size: 10px;
-
   font-weight: 800;
 
   letter-spacing: 0.12em;
@@ -174,30 +204,37 @@
 .pagina-hero h1 {
   margin: 0;
 
+  max-width: 860px;
+
   color: #fff;
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
 
   font-size:
     clamp(27px, 4vw, 40px);
 
-  line-height: 1.1;
+  line-height: 1.08;
+
+  letter-spacing: -0.025em;
 }
 
 .pagina-hero p {
-  max-width: 780px;
+  max-width: 790px;
 
   margin: 9px 0 0;
 
   color:
-    rgba(255,255,255,0.77);
+    rgba(255, 255, 255, 0.78);
 
   font-size: 14px;
-
   line-height: 1.6;
 }
 
-/* =====================================================
+/* =========================================================
    LAYOUT
-   ===================================================== */
+   ========================================================= */
 
 .pagina-layout {
   display: grid;
@@ -205,79 +242,84 @@
   grid-template-columns:
     minmax(0, 1fr) 285px;
 
-  gap: 22px;
+  gap: 20px;
 
   align-items: start;
 }
 
 .pagina-main {
+  display: flex;
+
   min-width: 0;
 
-  display: flex;
   flex-direction: column;
 
-  gap: 17px;
+  gap: 15px;
 }
 
-/* =====================================================
+/* =========================================================
    BLOCOS
-   ===================================================== */
+   ========================================================= */
 
-.pagina-content-block {
+.pagina-content-block,
+.pagina-progress-card,
+.pagina-aside-card {
+  border:
+    1px solid
+    rgba(13, 71, 161, 0.09);
+
   background: #fff;
 
-  border: 1px solid
-    rgba(30, 45, 37, 0.07);
-
-  border-radius: 19px;
-
-  padding: 23px;
-
   box-shadow:
-    0 7px 25px
-      rgba(30, 45, 37, 0.045);
+    0 8px 26px -20px
+      rgba(13, 71, 161, 0.42);
+}
+
+.pagina-content-block {
+  padding: 22px;
+  border-radius: 18px;
 }
 
 .pagina-content-block h2 {
-  margin: 0 0 12px;
+  margin: 0 0 11px;
 
   color: var(--ink);
 
-  font-size: 19px;
+  font-family:
+    "Space Grotesk",
+    sans-serif;
 
-  line-height: 1.3;
+  font-size: 19px;
+  line-height: 1.28;
 }
 
 .pagina-rich-text {
   color: var(--ink);
 
   font-size: 15px;
-
   line-height: 1.85;
 
   white-space: pre-wrap;
 }
 
 .pagina-muted {
+  margin: 11px 0 0;
+
   color: var(--muted);
 
   font-size: 13px;
-
   line-height: 1.6;
-
-  margin: 12px 0 0;
 }
 
-/* =====================================================
+/* =========================================================
    DESTAQUE
-   ===================================================== */
+   ========================================================= */
 
 .pagina-highlight {
   display: flex;
-
   align-items: flex-start;
 
-  gap: 14px;
+  gap: 13px;
 
   border: 0;
 }
@@ -286,8 +328,8 @@
   background:
     linear-gradient(
       135deg,
-      rgba(33,110,74,0.08),
-      rgba(33,110,74,0.035)
+      rgba(33, 150, 243, 0.1),
+      rgba(33, 150, 243, 0.035)
     );
 }
 
@@ -295,8 +337,8 @@
   background:
     linear-gradient(
       135deg,
-      rgba(225,171,40,0.13),
-      rgba(225,171,40,0.05)
+      rgba(255, 201, 60, 0.15),
+      rgba(255, 201, 60, 0.05)
     );
 }
 
@@ -304,8 +346,8 @@
   background:
     linear-gradient(
       135deg,
-      rgba(41,144,92,0.11),
-      rgba(41,144,92,0.04)
+      rgba(41, 144, 92, 0.11),
+      rgba(41, 144, 92, 0.04)
     );
 }
 
@@ -313,33 +355,35 @@
   background:
     linear-gradient(
       135deg,
-      rgba(190,70,70,0.1),
-      rgba(190,70,70,0.035)
+      rgba(193, 70, 47, 0.1),
+      rgba(193, 70, 47, 0.035)
     );
 }
 
 .pagina-highlight-icon {
-  width: 42px;
-  height: 42px;
-
-  flex-shrink: 0;
-
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
   border-radius: 13px;
 
-  background: rgba(255,255,255,0.85);
+  background:
+    rgba(255, 255, 255, 0.82);
 
   color: var(--accent-dark);
 }
 
 .pagina-highlight-content {
   display: flex;
+
   flex-direction: column;
 
-  gap: 5px;
+  gap: 4px;
 }
 
 .pagina-highlight-content strong {
@@ -352,15 +396,14 @@
   color: var(--muted);
 
   font-size: 13.5px;
-
   line-height: 1.65;
 
   white-space: pre-wrap;
 }
 
-/* =====================================================
-   VIDEO
-   ===================================================== */
+/* =========================================================
+   VÍDEO
+   ========================================================= */
 
 .pagina-video {
   position: relative;
@@ -373,7 +416,7 @@
 
   border-radius: 15px;
 
-  background: #101613;
+  background: #0b1721;
 }
 
 .pagina-video iframe {
@@ -383,9 +426,9 @@
   border: 0;
 }
 
-/* =====================================================
+/* =========================================================
    IMAGEM
-   ===================================================== */
+   ========================================================= */
 
 .pagina-image {
   margin: 0;
@@ -405,18 +448,18 @@
 }
 
 .pagina-image figcaption {
-  margin-top: 9px;
-
-  text-align: center;
+  margin-top: 8px;
 
   color: var(--muted);
 
   font-size: 12px;
+
+  text-align: center;
 }
 
-/* =====================================================
+/* =========================================================
    PDF
-   ===================================================== */
+   ========================================================= */
 
 .pagina-resource {
   display: flex;
@@ -426,57 +469,64 @@
 
   padding: 14px;
 
+  border:
+    1px solid
+    rgba(33, 150, 243, 0.13);
+
   border-radius: 15px;
 
-  border: 1px solid
-    rgba(33,110,74,0.12);
-
   background:
-    rgba(33,110,74,0.045);
+    rgba(33, 150, 243, 0.045);
 
   color: inherit;
 
   text-decoration: none;
 
   transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .pagina-resource:hover {
   transform: translateY(-2px);
 
   border-color:
-    rgba(33,110,74,0.25);
+    rgba(33, 150, 243, 0.24);
 
   box-shadow:
-    0 7px 18px
-      rgba(33,110,74,0.08);
+    0 8px 18px -12px
+      rgba(13, 71, 161, 0.45);
+}
+
+.pagina-resource-icon,
+.pagina-resource-block-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 auto;
+
+  border-radius: 13px;
+
+  background: var(--paper);
+
+  color: var(--accent-dark);
 }
 
 .pagina-resource-icon {
   width: 42px;
   height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  border-radius: 12px;
-
-  background: var(--accent-light);
-
-  color: var(--accent-dark);
 }
 
 .pagina-resource-copy {
   display: flex;
-  flex-direction: column;
+
+  min-width: 0;
 
   flex: 1;
+
+  flex-direction: column;
 
   gap: 3px;
 }
@@ -493,15 +543,121 @@
   font-size: 11px;
 }
 
-/* =====================================================
+.pagina-resource-block {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 14px;
+}
+
+.pagina-resource-block-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.pagina-resource-block-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.pagina-resource-block-copy h2 {
+  margin: 0 0 5px;
+
+  font-size: 16px;
+}
+
+.pagina-resource-block-copy p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 12.5px;
+
+  line-height: 1.55;
+}
+
+.pagina-secondary-button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  padding: 10px 13px;
+
+  background: var(--ink);
+
+  color: #fff;
+
+  font:
+    800 11.5px
+    "IBM Plex Sans",
+    sans-serif;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease,
+    background 0.16s ease;
+}
+
+.pagina-secondary-button:hover:not(
+  :disabled
+) {
+  transform: translateY(-1px);
+
+  background: #0b3d8a;
+}
+
+.pagina-secondary-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.pagina-id-list {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin-top: 9px;
+}
+
+.pagina-id-list span {
+  padding: 4px 7px;
+
+  border-radius: 7px;
+
+  background: var(--paper);
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+/* =========================================================
    LISTA
-   ===================================================== */
+   ========================================================= */
 
 .pagina-list {
   display: flex;
+
   flex-direction: column;
 
-  gap: 10px;
+  gap: 9px;
 
   margin: 0;
   padding: 0;
@@ -524,18 +680,19 @@
 }
 
 .pagina-list-marker {
-  width: 27px;
-  height: 27px;
-
-  flex-shrink: 0;
-
   display: flex;
+
   align-items: center;
   justify-content: center;
 
+  width: 27px;
+  height: 27px;
+
+  flex: 0 0 27px;
+
   border-radius: 8px;
 
-  background: var(--accent-light);
+  background: var(--paper);
 
   color: var(--accent-dark);
 
@@ -544,184 +701,194 @@
   font-weight: 800;
 }
 
-/* =====================================================
-   RECURSOS
-   ===================================================== */
+/* =========================================================
+   FLASHCARDS
+   ========================================================= */
 
-.pagina-resource-block {
-  display: flex;
-
-  align-items: center;
-
-  gap: 14px;
+.pagina-flashcards-block {
+  overflow: hidden;
 }
 
-.pagina-resource-block-icon {
-  width: 47px;
-  height: 47px;
+.pagina-flashcards-player {
+  width: 100%;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  border-radius: 14px;
-
-  background: var(--accent-light);
-
-  color: var(--accent-dark);
+  margin-top: 18px;
 }
 
-.pagina-resource-block-copy {
-  flex: 1;
-  min-width: 0;
-}
+.pagina-flashcards-loading {
+  padding: 16px;
 
-.pagina-resource-block-copy h2 {
-  margin: 0 0 5px;
+  border-radius: 12px;
 
-  font-size: 16px;
-}
-
-.pagina-resource-block-copy p {
-  margin: 0;
+  background: #f6fafe;
 
   color: var(--muted);
 
   font-size: 12.5px;
 
-  line-height: 1.55;
+  text-align: center;
 }
 
-.pagina-secondary-button {
-  border: 0;
+.pagina-flashcards-counter {
+  display: inline-flex;
 
-  padding: 10px 13px;
-
-  border-radius: 11px;
-
-  background:
-    var(--ink);
-
-  color: #fff;
-
-  font-size: 11.5px;
-
-  font-weight: 800;
-
-  cursor: pointer;
-
-  white-space: nowrap;
-
-  transition:
-    transform 0.18s ease,
-    opacity 0.18s ease;
-}
-
-.pagina-secondary-button:hover {
-  transform: translateY(-1px);
-  opacity: 0.92;
-}
-
-.pagina-id-list {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 6px;
-
-  margin-top: 9px;
-}
-
-.pagina-id-list span {
-  padding: 4px 7px;
-
-  border-radius: 7px;
-
-  background: var(--paper);
-
-  color: var(--muted);
-
-  font-size: 10px;
-
-  font-weight: 700;
-}
-
-/* =====================================================
-   CHECKLIST
-   ===================================================== */
-
-.pagina-checklist {
-  display: flex;
-  flex-direction: column;
-
-  gap: 10px;
-}
-
-.pagina-check-item {
-  display: flex;
   align-items: center;
 
-  gap: 11px;
+  margin-bottom: 9px;
 
-  padding: 11px 12px;
-
-  border-radius: 12px;
-
-  background: var(--paper);
-
-  color: var(--ink);
-
-  font-size: 13.5px;
-
-  line-height: 1.45;
-}
-
-.pagina-check-icon {
-  width: 27px;
-  height: 27px;
-
-  flex-shrink: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 5px 8px;
 
   border-radius: 8px;
 
-  background: var(--accent);
+  background: var(--paper);
 
-  color: #fff;
+  color: var(--accent-dark);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
 }
 
-/* =====================================================
+.pagina-flashcard {
+  display: flex;
+
+  min-height: 245px;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 34px;
+
+  border:
+    1px solid
+    rgba(33, 150, 243, 0.14);
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fff,
+      #f8fbfe
+    );
+
+  text-align: center;
+
+  box-shadow:
+    0 14px 30px -22px
+      rgba(13, 71, 161, 0.48);
+
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.pagina-flashcard:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 18px 34px -24px
+      rgba(13, 71, 161, 0.55);
+}
+
+.pagina-flashcard.show-answer {
+  background:
+    linear-gradient(
+      145deg,
+      #f1f8ff,
+      #fff
+    );
+}
+
+.pagina-flashcard-label {
+  display: block;
+
+  margin-bottom: 15px;
+
+  color: var(--accent);
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+}
+
+.pagina-flashcard-content {
+  width: min(
+    760px,
+    100%
+  );
+}
+
+.pagina-flashcard-content strong {
+  display: block;
+
+  color: var(--ink);
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size:
+    clamp(20px, 3vw, 27px);
+
+  font-weight: 700;
+
+  line-height: 1.42;
+}
+
+.pagina-flashcard.show-answer
+  .pagina-flashcard-content
+  strong {
+  color: var(--accent-dark);
+}
+
+.pagina-flashcard-actions {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-top: 14px;
+
+  flex-wrap: wrap;
+}
+
+.pagina-flashcard-navigation {
+  display: flex;
+
+  gap: 7px;
+}
+
+/* =========================================================
    SIDEBAR
-   ===================================================== */
+   ========================================================= */
 
 .pagina-aside {
   display: flex;
+
   flex-direction: column;
 
-  gap: 14px;
+  gap: 13px;
 
   position: sticky;
+
   top: 20px;
 }
 
 .pagina-progress-card,
 .pagina-aside-card {
-  padding: 20px;
-
-  background: #fff;
-
-  border: 1px solid
-    rgba(30,45,37,0.07);
+  padding: 19px;
 
   border-radius: 18px;
-
-  box-shadow:
-    0 7px 24px
-      rgba(30,45,37,0.045);
 }
 
 .pagina-aside-label {
@@ -743,6 +910,10 @@
 
   color: var(--ink);
 
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
   font-size: 16px;
 }
 
@@ -757,13 +928,14 @@
 }
 
 .pagina-study-button {
-  width: 100%;
-
   display: flex;
+
   align-items: center;
   justify-content: center;
 
   gap: 7px;
+
+  width: 100%;
 
   padding: 11px 12px;
 
@@ -771,34 +943,39 @@
 
   border-radius: 11px;
 
-  background:
-    var(--ink);
+  background: var(--ink);
 
   color: #fff;
 
-  font-size: 11px;
-
-  font-weight: 800;
+  font:
+    800 11px
+    "IBM Plex Sans",
+    sans-serif;
 
   cursor: pointer;
 
   transition:
-    transform 0.18s ease,
-    opacity 0.18s ease;
+    transform 0.16s ease,
+    opacity 0.16s ease,
+    background 0.16s ease;
 }
 
-.pagina-study-button:hover {
+.pagina-study-button:hover:not(
+  :disabled
+) {
   transform: translateY(-1px);
+
+  background: #0b3d8a;
 }
 
 .pagina-study-button.completed {
-  background:
-    var(--accent);
+  background: var(--accent);
 }
 
 .pagina-study-button:disabled {
-  cursor: wait;
   opacity: 0.65;
+
+  cursor: wait;
 }
 
 .pagina-topic-info {
@@ -806,11 +983,12 @@
 
   border-bottom:
     1px solid
-    rgba(30,45,37,0.07);
+    rgba(13, 71, 161, 0.07);
 }
 
 .pagina-topic-info:last-child {
   border-bottom: 0;
+
   padding-bottom: 0;
 }
 
@@ -830,16 +1008,19 @@
   color: var(--ink);
 
   font-size: 12.5px;
+
+  line-height: 1.4;
 }
 
-/* =====================================================
+/* =========================================================
    ESTADOS
-   ===================================================== */
+   ========================================================= */
 
 .pagina-state-card {
+  display: flex;
+
   min-height: 260px;
 
-  display: flex;
   flex-direction: column;
 
   align-items: center;
@@ -849,29 +1030,32 @@
 
   padding: 35px;
 
+  border:
+    1px dashed
+    rgba(13, 71, 161, 0.16);
+
   border-radius: 19px;
 
-  border: 1px dashed #d8dfdb;
-
   background:
-    rgba(255,255,255,0.72);
+    rgba(255, 255, 255, 0.75);
 
   text-align: center;
 }
 
 .pagina-state-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
   width: 50px;
   height: 50px;
 
   margin-bottom: 4px;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   border-radius: 15px;
 
-  background: var(--accent-light);
+  background: var(--paper);
 
   color: var(--accent-dark);
 }
@@ -894,25 +1078,21 @@
 
 .pagina-state-card.error {
   border-color:
-    rgba(190,70,70,0.2);
+    rgba(193, 70, 47, 0.22);
 }
-
-/* =====================================================
-   PLACEHOLDER / JSON
-   ===================================================== */
 
 .pagina-block-placeholder {
   padding: 20px;
 
   border-radius: 13px;
 
-  background: var(--paper);
+  background: #f6fafe;
 
   color: var(--muted);
 
-  text-align: center;
-
   font-size: 12.5px;
+
+  text-align: center;
 }
 
 .pagina-json {
@@ -924,16 +1104,674 @@
 
   border-radius: 12px;
 
-  background: #f5f7f6;
+  background: #f5f8fb;
 
   color: var(--ink);
 
   font-size: 11px;
 }
 
-/* =====================================================
-   RESPONSIVO
-   ===================================================== */
+/* =========================================================
+   QUESTÕES
+   ========================================================= */
+
+.pagina-questions-block
+  .pagina-resource-block {
+  margin-bottom: 17px;
+}
+
+.pagina-questions-loading {
+  padding: 16px;
+
+  border-radius: 12px;
+
+  background: #f6fafe;
+
+  color: var(--muted);
+
+  font-size: 12.5px;
+
+  text-align: center;
+}
+
+.pagina-inline-error {
+  margin-top: 12px;
+
+  padding: 11px 13px;
+
+  border:
+    1px solid
+    rgba(193, 70, 47, 0.18);
+
+  border-radius: 11px;
+
+  background: #fff5f3;
+
+  color: #b34b37;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+.pagina-questions-summary {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+
+  padding: 9px 11px;
+
+  border-radius: 11px;
+
+  background: #f6fafe;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.pagina-questions-summary strong {
+  color: var(--accent-dark);
+}
+
+.pagina-questions-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.pagina-question-card {
+  padding: 17px;
+
+  border:
+    1px solid
+    rgba(13, 71, 161, 0.09);
+
+  border-radius: 15px;
+
+  background: #fff;
+
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.pagina-question-card.correct {
+  border-color:
+    rgba(41, 144, 92, 0.28);
+
+  box-shadow:
+    0 8px 22px -18px
+      rgba(41, 144, 92, 0.5);
+}
+
+.pagina-question-card.incorrect {
+  border-color:
+    rgba(193, 70, 47, 0.24);
+
+  box-shadow:
+    0 8px 22px -18px
+      rgba(193, 70, 47, 0.45);
+}
+
+.pagina-question-head {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.pagina-question-head span {
+  color: var(--muted);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.11em;
+}
+
+.pagina-question-head strong {
+  font-size: 10px;
+}
+
+.pagina-question-card.correct
+  .pagina-question-head
+  strong {
+  color: #24804d;
+}
+
+.pagina-question-card.incorrect
+  .pagina-question-head
+  strong {
+  color: #b34b37;
+}
+
+.pagina-question-card h3 {
+  margin: 0 0 14px;
+
+  color: var(--ink);
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 15px;
+
+  line-height: 1.5;
+}
+
+.pagina-question-options {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.pagina-question-option {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  min-height: 47px;
+
+  padding: 8px 10px;
+
+  border:
+    1px solid
+    rgba(13, 71, 161, 0.09);
+
+  border-radius: 11px;
+
+  background: #fff;
+
+  color: var(--ink);
+
+  font: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.pagina-question-option:hover:not(
+  :disabled
+) {
+  transform: translateX(2px);
+
+  border-color:
+    rgba(33, 150, 243, 0.22);
+
+  background: #f9fcff;
+}
+
+.pagina-question-option.selected {
+  border-color:
+    rgba(33, 150, 243, 0.34);
+
+  background: #f1f8ff;
+}
+
+.pagina-question-option.correct {
+  border-color:
+    rgba(41, 144, 92, 0.3);
+
+  background: #f2fbf6;
+}
+
+.pagina-question-option.incorrect {
+  border-color:
+    rgba(193, 70, 47, 0.28);
+
+  background: #fff5f3;
+}
+
+.pagina-question-option:disabled {
+  cursor: default;
+}
+
+.pagina-question-letter {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  flex: 0 0 28px;
+
+  border-radius: 8px;
+
+  background: #edf5fb;
+
+  color: var(--accent-dark);
+
+  font-size: 10px;
+
+  font-weight: 800;
+}
+
+.pagina-question-option.selected
+  .pagina-question-letter {
+  background: var(--accent);
+
+  color: #fff;
+}
+
+.pagina-question-option.correct
+  .pagina-question-letter {
+  background: #2d9460;
+
+  color: #fff;
+}
+
+.pagina-question-option.incorrect
+  .pagina-question-letter {
+  background: #c45d48;
+
+  color: #fff;
+}
+
+.pagina-question-option-text {
+  min-width: 0;
+
+  flex: 1;
+
+  color: var(--ink);
+
+  font-size: 12.5px;
+
+  line-height: 1.45;
+}
+
+.pagina-question-feedback {
+  flex: 0 0 auto;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+.pagina-question-option.correct
+  .pagina-question-feedback {
+  color: #24804d;
+}
+
+.pagina-question-option.incorrect
+  .pagina-question-feedback {
+  color: #b34b37;
+}
+
+.pagina-primary-action {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 12px 15px;
+
+  border: 0;
+
+  border-radius: 11px;
+
+  background: var(--ink);
+
+  color: #fff;
+
+  font:
+    800 12px
+    "IBM Plex Sans",
+    sans-serif;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    opacity 0.16s ease,
+    background 0.16s ease;
+}
+
+.pagina-primary-action:hover:not(
+  :disabled
+) {
+  transform: translateY(-1px);
+
+  background: #0b3d8a;
+}
+
+.pagina-primary-action:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.pagina-questions-result {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 13px;
+
+  padding: 15px;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f3f9ff,
+      #f8fcfa
+    );
+}
+
+.pagina-questions-result > div {
+  min-width: 0;
+}
+
+.pagina-questions-result span {
+  display: block;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+}
+
+.pagina-questions-result strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--ink);
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 16px;
+}
+
+.pagina-questions-result p {
+  margin: 3px 0 0;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+/* =========================================================
+   CHECKLIST
+   ========================================================= */
+
+.pagina-checklist-block {
+  overflow: hidden;
+}
+
+.pagina-checklist-header {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.pagina-checklist-header h2 {
+  margin-bottom: 4px;
+}
+
+.pagina-checklist-header p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 12.5px;
+}
+
+.pagina-checklist-progress {
+  display: flex;
+
+  min-width: 52px;
+
+  flex-direction: column;
+
+  align-items: flex-end;
+}
+
+.pagina-checklist-progress strong {
+  color: var(--accent-dark);
+
+  font-family:
+    "Space Grotesk",
+    sans-serif;
+
+  font-size: 19px;
+}
+
+.pagina-checklist-progress span {
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+.pagina-checklist-track {
+  height: 7px;
+
+  margin: 14px 0 15px;
+
+  border-radius: 99px;
+
+  background: #edf5fa;
+
+  overflow: hidden;
+}
+
+.pagina-checklist-track > div {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--ink),
+      var(--accent)
+    );
+
+  transition:
+    width 0.35s ease;
+}
+
+.pagina-checklist {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.pagina-check-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+
+  width: 100%;
+
+  padding: 11px 12px;
+
+  border:
+    1px solid
+    rgba(13, 71, 161, 0.07);
+
+  border-radius: 12px;
+
+  background: #f6fafe;
+
+  color: var(--ink);
+
+  font: inherit;
+
+  font-size: 13px;
+
+  text-align: left;
+}
+
+.pagina-check-item.interactive {
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.pagina-check-item.interactive:hover:not(
+  :disabled
+) {
+  transform: translateX(2px);
+
+  border-color:
+    rgba(33, 150, 243, 0.2);
+
+  background: #fff;
+}
+
+.pagina-check-item.interactive.completed {
+  border-color:
+    rgba(41, 144, 92, 0.18);
+
+  background: #f1faf5;
+}
+
+.pagina-check-item:disabled {
+  cursor: wait;
+
+  opacity: 0.72;
+}
+
+.pagina-check-icon {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 27px;
+  height: 27px;
+
+  flex: 0 0 27px;
+
+  border:
+    1px solid
+    rgba(13, 71, 161, 0.12);
+
+  border-radius: 8px;
+
+  background: #fff;
+
+  color: #fff;
+}
+
+.pagina-check-item.completed
+  .pagina-check-icon {
+  border-color: #2d9460;
+
+  background: #2d9460;
+}
+
+.pagina-check-text {
+  min-width: 0;
+
+  flex: 1;
+
+  line-height: 1.45;
+}
+
+.pagina-check-item.completed
+  .pagina-check-text {
+  color: var(--muted);
+
+  text-decoration: line-through;
+
+  text-decoration-color:
+    rgba(41, 144, 92, 0.28);
+}
+
+.pagina-check-item small {
+  flex: 0 0 auto;
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  font-weight: 700;
+}
+
+.pagina-checklist-reset {
+  margin-top: 11px;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.pagina-checklist-reset:hover:not(
+  :disabled
+) {
+  color: #b34b37;
+}
+
+.pagina-checklist-reset:disabled {
+  cursor: wait;
+
+  opacity: 0.6;
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
 
 @media (max-width: 900px) {
   .pagina-layout {
@@ -945,22 +1783,46 @@
 
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .pagina-questions-summary,
+  .pagina-questions-result {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .pagina-questions-result
+    .pagina-secondary-button {
+    width: 100%;
+  }
+
+  .pagina-checklist-header {
+    gap: 10px;
+  }
+
+  .pagina-checklist-progress {
+    min-width: 46px;
   }
 }
 
 @media (max-width: 640px) {
-  .pagina-conteudo-page {
-    padding-bottom: 30px;
-  }
-
   .pagina-hero {
     padding: 20px;
+
+    border-radius: 20px;
   }
 
   .pagina-hero-top {
     align-items: flex-start;
+
     flex-direction: column;
+
+    margin-bottom: 20px;
   }
 
   .pagina-hero-content {
@@ -970,341 +1832,34 @@
   .pagina-hero-icon {
     width: 48px;
     height: 48px;
+
+    flex-basis: 48px;
   }
 
   .pagina-hero h1 {
-    font-size: 26px;
+    font-size: 25px;
+  }
+
+  .pagina-hero p {
+    font-size: 13px;
   }
 
   .pagina-content-block {
     padding: 18px;
-  }
 
-  .pagina-resource-block {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .pagina-secondary-button {
-    margin-left: 61px;
-  }
-
-  .pagina-aside {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* =========================================================
-   FLASHCARDS - PLAYER
-   ========================================================= */
-
-.pagina-flashcards-block {
-  overflow: hidden;
-}
-
-.pagina-resource-block-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.pagina-resource-block-header .pagina-resource-block-copy {
-  flex: 1;
-}
-
-.pagina-flashcards-start {
-  margin-top: 22px;
-  padding: 18px 20px;
-  border-radius: 16px;
-  background: #f5f9ff;
-  border: 1px solid #dcecff;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.pagina-flashcards-start > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.pagina-flashcards-start strong {
-  color: #174ea6;
-  font-size: 15px;
-}
-
-.pagina-flashcards-start span {
-  color: #6f8db8;
-  font-size: 13px;
-}
-
-/* PLAYER */
-
-.pagina-flashcards-player {
-  margin-top: 22px;
-  width: 100%;
-}
-
-.pagina-flashcards-counter {
-  margin-bottom: 10px;
-
-  color: #258ee8;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-/* CARD */
-
-.pagina-flashcard {
-  min-height: 230px;
-  padding: 32px;
-
-  border-radius: 20px;
-  border: 1px solid #dce8f7;
-
-  background: linear-gradient(
-    145deg,
-    #ffffff,
-    #f7fbff
-  );
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  text-align: center;
-
-  box-shadow: 0 8px 25px rgba(30, 90, 150, 0.07);
-
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.pagina-flashcard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(30, 90, 150, 0.1);
-}
-
-.pagina-flashcard.show-answer {
-  background: linear-gradient(
-    145deg,
-    #eef8ff,
-    #ffffff
-  );
-}
-
-.pagina-flashcard-label {
-  margin-bottom: 18px;
-
-  color: #258ee8;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.pagina-flashcard-content {
-  max-width: 700px;
-}
-
-.pagina-flashcard-content strong {
-  display: block;
-
-  color: #174ea6;
-
-  font-size: 22px;
-  line-height: 1.45;
-  font-weight: 700;
-}
-
-/* AÇÕES */
-
-.pagina-flashcard-actions {
-  margin-top: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.pagina-flashcard-navigation {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* BOTÃO PRINCIPAL */
-
-.pagina-secondary-button {
-  border: 0;
-  border-radius: 10px;
-
-  padding: 11px 17px;
-
-  background: #1555a8;
-  color: #ffffff;
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.pagina-secondary-button:hover:not(:disabled) {
-  background: #0e4690;
-  transform: translateY(-1px);
-}
-
-.pagina-secondary-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* FECHAR */
-
-.pagina-close-flashcards {
-  border: 1px solid #d7e2ef;
-  border-radius: 10px;
-
-  padding: 10px 15px;
-
-  background: #ffffff;
-  color: #60748e;
-
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.pagina-close-flashcards:hover {
-  background: #f5f8fc;
-  color: #174ea6;
-  border-color: #b9cee8;
-}
-
-/* IDs DOS FLASHCARDS */
-
-.pagina-id-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-
-  margin-top: 14px;
-}
-
-.pagina-id-list span {
-  display: inline-flex;
-  align-items: center;
-
-  padding: 4px 8px;
-
-  border-radius: 7px;
-
-  background: #edf5ff;
-  color: #3978bd;
-
-  font-size: 11px;
-  font-weight: 700;
-}
-
-/* =========================================================
-   RESOURCE BLOCK
-   ========================================================= */
-
-.pagina-resource-block {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.pagina-resource-block-icon {
-  width: 48px;
-  height: 48px;
-
-  flex: 0 0 48px;
-
-  border-radius: 14px;
-
-  background: #e8f3ff;
-  color: #1769c2;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pagina-resource-block-copy {
-  flex: 1;
-  min-width: 200px;
-}
-
-.pagina-resource-block-copy h2 {
-  margin: 0 0 6px;
-
-  color: #174ea6;
-  font-size: 17px;
-  line-height: 1.3;
-}
-
-.pagina-resource-block-copy p {
-  margin: 0;
-
-  color: #6f8db8;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-/* =========================================================
-   RESPONSIVO
-   ========================================================= */
-
-@media (max-width: 700px) {
-  .pagina-flashcards-start {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .pagina-flashcards-start
-    .pagina-secondary-button {
-    width: 100%;
+    border-radius: 16px;
   }
 
   .pagina-flashcard {
-    min-height: 200px;
-    padding: 24px 18px;
-  }
+    min-height: 210px;
 
-  .pagina-flashcard-content strong {
-    font-size: 19px;
+    padding: 25px 18px;
   }
 
   .pagina-flashcard-actions {
-    flex-direction: column;
     align-items: stretch;
+
+    flex-direction: column;
   }
 
   .pagina-flashcard-navigation {
@@ -1316,7 +1871,92 @@
     flex: 1;
   }
 
-  .pagina-close-flashcards {
-    width: 100%;
+  .pagina-aside {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-back-button,
+  .pagina-resource,
+  .pagina-secondary-button,
+  .pagina-study-button,
+  .pagina-flashcard,
+  .pagina-question-option,
+  .pagina-check-item {
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   CORREÇÃO — BLOCO DE FLASHCARDS
+   O player deve ficar abaixo do título/descrição.
+   ========================================================= */
+
+.pagina-flashcards-block {
+  display: grid;
+  grid-template-columns: 47px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 0;
+  align-items: start;
+}
+
+.pagina-flashcards-block > .pagina-resource-block-icon {
+  grid-column: 1;
+  grid-row: 1;
+  width: 47px;
+  height: 47px;
+}
+
+.pagina-flashcards-block > .pagina-resource-block-copy {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.pagina-flashcards-block > .pagina-flashcards-player,
+.pagina-flashcards-block > .pagina-flashcards-loading,
+.pagina-flashcards-block > .pagina-block-placeholder {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.pagina-flashcards-block > .pagina-flashcards-player {
+  margin-top: 22px;
+}
+
+.pagina-flashcards-loading {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .pagina-flashcards-block {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-flashcards-block > .pagina-resource-block-icon,
+  .pagina-flashcards-block > .pagina-resource-block-copy,
+  .pagina-flashcards-block > .pagina-flashcards-player,
+  .pagina-flashcards-block > .pagina-flashcards-loading,
+  .pagina-flashcards-block > .pagina-block-placeholder {
+    grid-column: 1;
+  }
+
+  .pagina-flashcards-block > .pagina-resource-block-icon {
+    grid-row: auto;
+  }
+
+  .pagina-flashcards-block > .pagina-resource-block-copy {
+    margin-top: 12px;
   }
 }

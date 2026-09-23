@@ -5,7 +5,9 @@ const {
     listarTodasQuestoes,
     buscarQuestao,
     editarQuestao,
-    deletarQuestao
+    deletarQuestao,
+    listarQuestoesDoConteudo,
+    corrigirQuestoesDoConteudo
 } = require("../controllers/questaoController");
 
 const autenticarToken =
@@ -17,9 +19,26 @@ const verificarAdmin =
 const router = express.Router();
 
 
-// ============================
-// CADASTRAR QUESTÃO — ADMIN
-// ============================
+// =====================================================
+// ROTAS DO ALUNO
+// =====================================================
+
+router.get(
+    "/aluno",
+    autenticarToken,
+    listarQuestoesDoConteudo
+);
+
+router.post(
+    "/corrigir-bloco",
+    autenticarToken,
+    corrigirQuestoesDoConteudo
+);
+
+
+// =====================================================
+// ROTAS ADMINISTRATIVAS
+// =====================================================
 
 router.post(
     "/",
@@ -28,24 +47,12 @@ router.post(
     cadastrarQuestao
 );
 
-
-// ============================
-// LISTAR QUESTÕES — ADMIN
-// (o banco de questões só é usado nas telas
-// administrativas de montagem de simulados)
-// ============================
-
 router.get(
     "/",
     autenticarToken,
     verificarAdmin,
     listarTodasQuestoes
 );
-
-
-// ============================
-// BUSCAR QUESTÃO POR ID — ADMIN
-// ============================
 
 router.get(
     "/:id",
@@ -54,11 +61,6 @@ router.get(
     buscarQuestao
 );
 
-
-// ============================
-// EDITAR QUESTÃO — ADMIN
-// ============================
-
 router.put(
     "/:id",
     autenticarToken,
@@ -66,17 +68,11 @@ router.put(
     editarQuestao
 );
 
-
-// ============================
-// EXCLUIR QUESTÃO — ADMIN
-// ============================
-
 router.delete(
     "/:id",
     autenticarToken,
     verificarAdmin,
     deletarQuestao
 );
-
 
 module.exports = router;

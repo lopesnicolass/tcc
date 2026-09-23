@@ -598,20 +598,34 @@ function listarConteudosEstudados(
     db.all(
         `
             SELECT
-                topico_id,
-                estudado,
-                data_estudo
-            FROM conteudos_estudados
-            WHERE usuario_id = ?
-              AND estudado = 1
+                t.id AS topico_id,
+
+                COALESCE(
+                    ce.estudado,
+                    0
+                ) AS estudado,
+
+                ce.data_estudo
+
+            FROM topicos t
+
+            LEFT JOIN conteudos_estudados ce
+                ON ce.topico_id = t.id
+                AND ce.usuario_id = ?
+
+            WHERE t.ativo = 1
+
             ORDER BY
-                data_estudo DESC,
-                topico_id ASC
+                t.materia_id ASC,
+                t.ordem ASC,
+                t.id ASC
         `,
         [usuarioId],
         (erro, registros) => {
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(

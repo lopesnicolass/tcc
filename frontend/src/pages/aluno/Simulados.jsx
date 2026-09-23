@@ -23,52 +23,95 @@ export default function Simulados() {
   const [simulados, setSimulados] = useState([]);
   const [filtro, setFiltro] = useState('Todas');
 
-  const [simuladoSelecionado, setSimuladoSelecionado] = useState(null);
+  const [simuladoSelecionado, setSimuladoSelecionado] =
+    useState(null);
+
   const [questoes, setQuestoes] = useState([]);
+
   const [respostas, setRespostas] = useState({});
 
-  const [resultadoFinal, setResultadoFinal] = useState(null);
-  const [mostrarErros, setMostrarErros] = useState(false);
+  const [resultadoFinal, setResultadoFinal] =
+    useState(null);
 
-  const [carregando, setCarregando] = useState(true);
-  const [carregandoQuestoes, setCarregandoQuestoes] = useState(false);
-  const [salvandoResultado, setSalvandoResultado] = useState(false);
+  const [mostrarErros, setMostrarErros] =
+    useState(false);
 
-  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] =
+    useState(true);
 
-  // Cronômetro do simulado
-  const [tempoRestante, setTempoRestante] = useState(null);
-  const [tempoGasto, setTempoGasto] = useState(null);
-  const finalizandoPorTempo = useRef(false);
+  const [carregandoQuestoes, setCarregandoQuestoes] =
+    useState(false);
+
+  const [salvandoResultado, setSalvandoResultado] =
+    useState(false);
+
+  const [erro, setErro] =
+    useState('');
+
+  // ==========================================
+  // CRONÔMETRO
+  // ==========================================
+
+  const [tempoRestante, setTempoRestante] =
+    useState(null);
+
+  const [tempoGasto, setTempoGasto] =
+    useState(null);
+
+  const finalizandoPorTempo =
+    useRef(false);
+
+  const abrindoSimuladoPorParametro =
+    useRef(false);
 
   // ==========================================
   // PEGAR ID DO USUÁRIO
   // ==========================================
 
   function obterUsuarioId() {
-    const usuarioSalvo = localStorage.getItem('etecamp_usuario');
+    const usuarioSalvo =
+      localStorage.getItem(
+        'etecamp_usuario'
+      );
 
     if (!usuarioSalvo) {
-      console.error('Usuário não encontrado no localStorage.');
+      console.error(
+        'Usuário não encontrado no localStorage.'
+      );
+
       return null;
     }
 
     try {
-      const usuario = JSON.parse(usuarioSalvo);
+      const usuario =
+        JSON.parse(
+          usuarioSalvo
+        );
 
       if (usuario.id) {
-        return Number(usuario.id);
+        return Number(
+          usuario.id
+        );
       }
 
       if (usuario.usuarioId) {
-        return Number(usuario.usuarioId);
+        return Number(
+          usuario.usuarioId
+        );
       }
 
-      console.error('ID do usuário não encontrado:', usuario);
+      console.error(
+        'ID do usuário não encontrado:',
+        usuario
+      );
 
       return null;
     } catch (error) {
-      console.error('Erro ao ler etecamp_usuario:', error);
+      console.error(
+        'Erro ao ler etecamp_usuario:',
+        error
+      );
+
       return null;
     }
   }
@@ -78,7 +121,8 @@ export default function Simulados() {
   // ==========================================
 
   function obterChaveStatus() {
-    const usuarioId = obterUsuarioId();
+    const usuarioId =
+      obterUsuarioId();
 
     if (!usuarioId) {
       return null;
@@ -87,8 +131,11 @@ export default function Simulados() {
     return `statusSimulados_${usuarioId}`;
   }
 
-  function obterChaveRespostas(simuladoId) {
-    const usuarioId = obterUsuarioId();
+  function obterChaveRespostas(
+    simuladoId
+  ) {
+    const usuarioId =
+      obterUsuarioId();
 
     if (!usuarioId) {
       return null;
@@ -98,43 +145,105 @@ export default function Simulados() {
   }
 
   // ==========================================
-  // CRONÔMETRO
+  // CHAVES DO CRONÔMETRO
   // ==========================================
 
-  function obterChavePrazo(simuladoId) {
-    const usuarioId = obterUsuarioId();
+  function obterChavePrazo(
+    simuladoId
+  ) {
+    const usuarioId =
+      obterUsuarioId();
 
-    if (!usuarioId) return null;
+    if (!usuarioId) {
+      return null;
+    }
 
     return `prazoSimulado_${usuarioId}_${simuladoId}`;
   }
 
-  function obterChaveInicio(simuladoId) {
-    const usuarioId = obterUsuarioId();
-    if (!usuarioId) return null;
+  function obterChaveInicio(
+    simuladoId
+  ) {
+    const usuarioId =
+      obterUsuarioId();
+
+    if (!usuarioId) {
+      return null;
+    }
 
     return `inicioSimulado_${usuarioId}_${simuladoId}`;
   }
 
-  function registrarInicioSimulado(simulado) {
-    const chaveInicio = obterChaveInicio(simulado.id);
-    if (!chaveInicio) return;
+  // ==========================================
+  // REGISTRAR INÍCIO
+  // ==========================================
 
-    localStorage.setItem(chaveInicio, String(Date.now()));
+  function registrarInicioSimulado(
+    simulado
+  ) {
+    const chaveInicio =
+      obterChaveInicio(
+        simulado.id
+      );
+
+    if (!chaveInicio) {
+      return;
+    }
+
+    localStorage.setItem(
+      chaveInicio,
+      String(Date.now())
+    );
   }
 
-  function obterTempoGasto(simulado) {
-    const chaveInicio = obterChaveInicio(simulado.id);
-    const inicio = chaveInicio
-      ? Number(localStorage.getItem(chaveInicio))
-      : NaN;
+  // ==========================================
+  // TEMPO GASTO
+  // ==========================================
+
+  function obterTempoGasto(
+    simulado
+  ) {
+    const chaveInicio =
+      obterChaveInicio(
+        simulado.id
+      );
+
+    const inicio =
+      chaveInicio
+        ? Number(
+            localStorage.getItem(
+              chaveInicio
+            )
+          )
+        : NaN;
 
     if (Number.isFinite(inicio)) {
-      const segundos = Math.max(0, Math.floor((Date.now() - inicio) / 1000));
-      const limite = Number(simulado.tempo_limite);
+      const segundos =
+        Math.max(
+          0,
+          Math.floor(
+            (
+              Date.now() -
+              inicio
+            ) / 1000
+          )
+        );
 
-      if (Number.isFinite(limite) && limite > 0) {
-        return Math.min(segundos, limite * 60);
+      const limite =
+        Number(
+          simulado.tempo_limite
+        );
+
+      if (
+        Number.isFinite(
+          limite
+        ) &&
+        limite > 0
+      ) {
+        return Math.min(
+          segundos,
+          limite * 60
+        );
       }
 
       return segundos;
@@ -143,108 +252,322 @@ export default function Simulados() {
     return 0;
   }
 
-  function limparInicioSimulado(simuladoId) {
-    const chaveInicio = obterChaveInicio(simuladoId);
+  // ==========================================
+  // LIMPAR INÍCIO
+  // ==========================================
+
+  function limparInicioSimulado(
+    simuladoId
+  ) {
+    const chaveInicio =
+      obterChaveInicio(
+        simuladoId
+      );
+
     if (chaveInicio) {
-      localStorage.removeItem(chaveInicio);
+      localStorage.removeItem(
+        chaveInicio
+      );
     }
-  }
-
-  function formatarTempo(segundos) {
-    if (segundos === null || segundos === undefined) return '--:--';
-
-    const total = Math.max(0, Number(segundos));
-    const minutos = Math.floor(total / 60);
-    const segundosRestantes = total % 60;
-
-    return `${String(minutos).padStart(2, '0')}:${String(segundosRestantes).padStart(2, '0')}`;
-  }
-
-  function limparCronometro(simuladoId) {
-    const chave = obterChavePrazo(simuladoId);
-
-    if (chave) {
-      localStorage.removeItem(chave);
-    }
-  }
-
-  function iniciarCronometro(simulado) {
-    const chave = obterChavePrazo(simulado.id);
-    if (!chave) return;
-
-    const minutos = Number(simulado.tempo_limite);
-
-    if (!Number.isFinite(minutos) || minutos <= 0) {
-      setTempoRestante(null);
-      return;
-    }
-
-    const agora = Date.now();
-    const prazo = agora + minutos * 60 * 1000;
-    localStorage.setItem(chave, String(prazo));
-    registrarInicioSimulado(simulado);
-    setTempoGasto(0);
-    setTempoRestante(minutos * 60);
-  }
-
-  function carregarCronometro(simulado) {
-    const chave = obterChavePrazo(simulado.id);
-    const minutos = Number(simulado.tempo_limite);
-
-    if (!chave || !Number.isFinite(minutos) || minutos <= 0) {
-      setTempoRestante(null);
-      return;
-    }
-
-    const prazoSalvo = Number(localStorage.getItem(chave));
-
-    if (!Number.isFinite(prazoSalvo)) {
-      iniciarCronometro(simulado);
-      return;
-    }
-
-    const restante = Math.max(0, Math.ceil((prazoSalvo - Date.now()) / 1000));
-
-    const chaveInicio = obterChaveInicio(simulado.id);
-    if (chaveInicio && !Number.isFinite(Number(localStorage.getItem(chaveInicio)))) {
-      const inicioCalculado = prazoSalvo - minutos * 60 * 1000;
-      localStorage.setItem(chaveInicio, String(inicioCalculado));
-    }
-
-    setTempoRestante(restante);
   }
 
   // ==========================================
-  // ATUALIZAR CRONÔMETRO A CADA SEGUNDO
+  // FORMATAR TEMPO
+  // ==========================================
+
+  function formatarTempo(
+    segundos
+  ) {
+    if (
+      segundos === null ||
+      segundos === undefined
+    ) {
+      return '--:--';
+    }
+
+    const total =
+      Math.max(
+        0,
+        Number(segundos)
+      );
+
+    const minutos =
+      Math.floor(
+        total / 60
+      );
+
+    const segundosRestantes =
+      total % 60;
+
+    return `${String(
+      minutos
+    ).padStart(
+      2,
+      '0'
+    )}:${String(
+      segundosRestantes
+    ).padStart(
+      2,
+      '0'
+    )}`;
+  }
+
+  // ==========================================
+  // LIMPAR PRAZO
+  // ==========================================
+
+  function limparCronometro(
+    simuladoId
+  ) {
+    const chave =
+      obterChavePrazo(
+        simuladoId
+      );
+
+    if (chave) {
+      localStorage.removeItem(
+        chave
+      );
+    }
+  }
+
+  // ==========================================
+  // INICIAR CRONÔMETRO
+  // ==========================================
+
+  function iniciarCronometro(
+    simulado
+  ) {
+    const chave =
+      obterChavePrazo(
+        simulado.id
+      );
+
+    if (!chave) {
+      return;
+    }
+
+    const minutos =
+      Number(
+        simulado.tempo_limite
+      );
+
+    if (
+      !Number.isFinite(
+        minutos
+      ) ||
+      minutos <= 0
+    ) {
+      setTempoRestante(
+        null
+      );
+
+      return;
+    }
+
+    const agora =
+      Date.now();
+
+    const prazo =
+      agora +
+      minutos *
+        60 *
+        1000;
+
+    localStorage.setItem(
+      chave,
+      String(prazo)
+    );
+
+    registrarInicioSimulado(
+      simulado
+    );
+
+    setTempoGasto(
+      0
+    );
+
+    setTempoRestante(
+      minutos * 60
+    );
+  }
+
+  // ==========================================
+  // CARREGAR CRONÔMETRO
+  // ==========================================
+
+  function carregarCronometro(
+    simulado
+  ) {
+    const chave =
+      obterChavePrazo(
+        simulado.id
+      );
+
+    const minutos =
+      Number(
+        simulado.tempo_limite
+      );
+
+    if (
+      !chave ||
+      !Number.isFinite(
+        minutos
+      ) ||
+      minutos <= 0
+    ) {
+      setTempoRestante(
+        null
+      );
+
+      return;
+    }
+
+    const prazoSalvo =
+      Number(
+        localStorage.getItem(
+          chave
+        )
+      );
+
+    if (
+      !Number.isFinite(
+        prazoSalvo
+      )
+    ) {
+      iniciarCronometro(
+        simulado
+      );
+
+      return;
+    }
+
+    const restante =
+      Math.max(
+        0,
+        Math.ceil(
+          (
+            prazoSalvo -
+            Date.now()
+          ) / 1000
+        )
+      );
+
+    const chaveInicio =
+      obterChaveInicio(
+        simulado.id
+      );
+
+    if (
+      chaveInicio &&
+      !Number.isFinite(
+        Number(
+          localStorage.getItem(
+            chaveInicio
+          )
+        )
+      )
+    ) {
+      const inicioCalculado =
+        prazoSalvo -
+        minutos *
+          60 *
+          1000;
+
+      localStorage.setItem(
+        chaveInicio,
+        String(
+          inicioCalculado
+        )
+      );
+    }
+
+    setTempoRestante(
+      restante
+    );
+  }
+
+  // ==========================================
+  // ATUALIZAR CRONÔMETRO
   // ==========================================
 
   useEffect(() => {
-    if (!simuladoSelecionado || resultadoFinal) {
+    if (
+      !simuladoSelecionado ||
+      resultadoFinal
+    ) {
       return;
     }
 
-    carregarCronometro(simuladoSelecionado);
+    carregarCronometro(
+      simuladoSelecionado
+    );
 
-    const intervalo = setInterval(() => {
-      const chave = obterChavePrazo(simuladoSelecionado.id);
-      const prazo = chave ? Number(localStorage.getItem(chave)) : NaN;
+    const intervalo =
+      setInterval(() => {
+        const chave =
+          obterChavePrazo(
+            simuladoSelecionado.id
+          );
 
-      if (!Number.isFinite(prazo)) {
-        return;
-      }
+        const prazo =
+          chave
+            ? Number(
+                localStorage.getItem(
+                  chave
+                )
+              )
+            : NaN;
 
-      const restante = Math.max(0, Math.ceil((prazo - Date.now()) / 1000));
-      setTempoRestante(restante);
+        if (
+          !Number.isFinite(
+            prazo
+          )
+        ) {
+          return;
+        }
 
-      if (restante <= 0 && !finalizandoPorTempo.current) {
-        finalizandoPorTempo.current = true;
-        clearInterval(intervalo);
-        finalizarSimulado(true);
-      }
-    }, 1000);
+        const restante =
+          Math.max(
+            0,
+            Math.ceil(
+              (
+                prazo -
+                Date.now()
+              ) / 1000
+            )
+          );
 
-    return () => clearInterval(intervalo);
-  }, [simuladoSelecionado, resultadoFinal, questoes.length]);
+        setTempoRestante(
+          restante
+        );
+
+        if (
+          restante <= 0 &&
+          !finalizandoPorTempo.current
+        ) {
+          finalizandoPorTempo.current =
+            true;
+
+          clearInterval(
+            intervalo
+          );
+
+          finalizarSimulado(
+            true
+          );
+        }
+      }, 1000);
+
+    return () =>
+      clearInterval(
+        intervalo
+      );
+  }, [
+    simuladoSelecionado,
+    resultadoFinal,
+    questoes.length
+  ]);
 
   // ==========================================
   // CARREGAR SIMULADOS
@@ -254,54 +577,170 @@ export default function Simulados() {
     carregarSimulados();
   }, []);
 
+  // ==========================================
+  // ABRIR SIMULADO VINDO DO CONTEÚDO
+  // ==========================================
+
+  useEffect(() => {
+    if (
+      carregando ||
+      simulados.length === 0 ||
+      simuladoSelecionado ||
+      abrindoSimuladoPorParametro.current
+    ) {
+      return;
+    }
+
+    const parametros =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const simuladoId =
+      Number(
+        parametros.get(
+          'simuladoId'
+        )
+      );
+
+    if (
+      !Number.isInteger(
+        simuladoId
+      ) ||
+      simuladoId <= 0
+    ) {
+      return;
+    }
+
+    const simulado =
+      simulados.find(
+        (item) =>
+          Number(
+            item.id
+          ) ===
+          simuladoId
+      );
+
+    // Retira o parâmetro da URL imediatamente.
+    // Assim o mesmo simulado não é aberto
+    // novamente por outro render.
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname
+    );
+
+    if (!simulado) {
+      setErro(
+        'O simulado solicitado não foi encontrado.'
+      );
+
+      return;
+    }
+
+    abrindoSimuladoPorParametro.current =
+      true;
+
+    abrirSimulado(
+      simulado
+    ).finally(() => {
+      abrindoSimuladoPorParametro.current =
+        false;
+    });
+  }, [
+    carregando,
+    simulados,
+    simuladoSelecionado
+  ]);
+
   async function carregarSimulados() {
     try {
-      setCarregando(true);
+      setCarregando(
+        true
+      );
+
       setErro('');
 
-      const resposta = await fetch(`${API_URL}/simulados`, {
-        headers: {
-          Authorization: `Bearer ${obterToken()}`
-        }
-      });
+      const resposta =
+        await fetch(
+          `${API_URL}/simulados`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${obterToken()}`
+            }
+          }
+        );
 
-      if (!resposta.ok) {
-        throw new Error('Erro ao buscar simulados.');
+      if (
+        !resposta.ok
+      ) {
+        throw new Error(
+          'Erro ao buscar simulados.'
+        );
       }
 
-      const dados = await resposta.json();
+      const dados =
+        await resposta.json();
 
-      const lista = dados.simulados || [];
+      const lista =
+        Array.isArray(
+          dados.simulados
+        )
+          ? dados.simulados
+          : [];
 
-      const chaveStatus = obterChaveStatus();
+      const chaveStatus =
+        obterChaveStatus();
 
       let statusSalvos = {};
 
       if (chaveStatus) {
         try {
-          statusSalvos = JSON.parse(
-            localStorage.getItem(chaveStatus) || '{}'
-          );
+          statusSalvos =
+            JSON.parse(
+              localStorage.getItem(
+                chaveStatus
+              ) || '{}'
+            );
         } catch (error) {
-          console.error('Erro ao ler status dos simulados:', error);
+          console.error(
+            'Erro ao ler status dos simulados:',
+            error
+          );
+
           statusSalvos = {};
         }
       }
 
-      const simuladosComStatus = lista.map((simulado) => ({
-        ...simulado,
-        status: statusSalvos[simulado.id] || 'nao-iniciado'
-      }));
+      const simuladosComStatus =
+        lista.map(
+          (simulado) => ({
+            ...simulado,
 
-      setSimulados(simuladosComStatus);
+            status:
+              statusSalvos[
+                simulado.id
+              ] ||
+              'nao-iniciado'
+          })
+        );
+
+      setSimulados(
+        simuladosComStatus
+      );
     } catch (error) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       setErro(
         'Não foi possível carregar os simulados. Verifique se o backend está rodando.'
       );
     } finally {
-      setCarregando(false);
+      setCarregando(
+        false
+      );
     }
   }
 
@@ -309,32 +748,47 @@ export default function Simulados() {
   // SALVAR STATUS
   // ==========================================
 
-  function salvarStatus(id, status) {
-    const chaveStatus = obterChaveStatus();
+  function salvarStatus(
+    id,
+    status
+  ) {
+    const chaveStatus =
+      obterChaveStatus();
 
     if (!chaveStatus) {
       console.error(
         'Não foi possível salvar o status: usuário não identificado.'
       );
+
       return;
     }
 
     let statusSalvos = {};
 
     try {
-      statusSalvos = JSON.parse(
-        localStorage.getItem(chaveStatus) || '{}'
-      );
+      statusSalvos =
+        JSON.parse(
+          localStorage.getItem(
+            chaveStatus
+          ) || '{}'
+        );
     } catch (error) {
-      console.error('Erro ao ler status:', error);
+      console.error(
+        'Erro ao ler status:',
+        error
+      );
+
       statusSalvos = {};
     }
 
-    statusSalvos[id] = status;
+    statusSalvos[id] =
+      status;
 
     localStorage.setItem(
       chaveStatus,
-      JSON.stringify(statusSalvos)
+      JSON.stringify(
+        statusSalvos
+      )
     );
   }
 
@@ -342,108 +796,187 @@ export default function Simulados() {
   // ABRIR SIMULADO
   // ==========================================
 
-  async function abrirSimulado(simulado) {
+  async function abrirSimulado(
+    simulado
+  ) {
     try {
-      setCarregandoQuestoes(true);
-      setErro('');
-      setResultadoFinal(null);
-      setMostrarErros(false);
+      finalizandoPorTempo.current =
+        false;
 
-      const resposta = await fetch(
-        `${API_URL}/simulados/${simulado.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${obterToken()}`
-          }
-        }
+      setCarregandoQuestoes(
+        true
       );
 
-      if (!resposta.ok) {
-        throw new Error('Erro ao buscar o simulado.');
+      setErro('');
+
+      setResultadoFinal(
+        null
+      );
+
+      setMostrarErros(
+        false
+      );
+
+      const resposta =
+        await fetch(
+          `${API_URL}/simulados/${simulado.id}`,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${obterToken()}`
+            }
+          }
+        );
+
+      if (
+        !resposta.ok
+      ) {
+        throw new Error(
+          'Erro ao buscar o simulado.'
+        );
       }
 
-      const dados = await resposta.json();
+      const dados =
+        await resposta.json();
 
-      const listaQuestoes = dados.questoes || [];
+      const listaQuestoes =
+        Array.isArray(
+          dados.questoes
+        )
+          ? dados.questoes
+          : [];
 
-      setSimuladoSelecionado(simulado);
-      setQuestoes(listaQuestoes);
+      setSimuladoSelecionado(
+        simulado
+      );
+
+      setQuestoes(
+        listaQuestoes
+      );
 
       // ========================================
-      // CARREGAR RESPOSTAS DO USUÁRIO
+      // CARREGAR RESPOSTAS
       // ========================================
 
-      const chaveRespostas = obterChaveRespostas(simulado.id);
+      const chaveRespostas =
+        obterChaveRespostas(
+          simulado.id
+        );
 
-      if (simulado.status === 'em-progresso' && chaveRespostas) {
+      if (
+        simulado.status ===
+          'em-progresso' &&
+        chaveRespostas
+      ) {
         try {
-          const respostasSalvas = JSON.parse(
-            localStorage.getItem(chaveRespostas) || '{}'
+          const respostasSalvas =
+            JSON.parse(
+              localStorage.getItem(
+                chaveRespostas
+              ) || '{}'
+            );
+
+          setRespostas(
+            respostasSalvas
+          );
+        } catch (error) {
+          console.error(
+            'Erro ao carregar respostas:',
+            error
           );
 
-          setRespostas(respostasSalvas);
-        } catch (error) {
-          console.error('Erro ao carregar respostas:', error);
           setRespostas({});
         }
       } else {
-        if (chaveRespostas) {
-          localStorage.removeItem(chaveRespostas);
+        if (
+          chaveRespostas
+        ) {
+          localStorage.removeItem(
+            chaveRespostas
+          );
         }
 
         setRespostas({});
       }
 
       // ========================================
-      // INICIAR OU REINICIAR SIMULADO
+      // INICIAR OU REINICIAR
       // ========================================
 
       if (
-        simulado.status === 'nao-iniciado' ||
-        simulado.status === 'concluido'
+        simulado.status ===
+          'nao-iniciado' ||
+        simulado.status ===
+          'concluido'
       ) {
-        const atualizado = {
-          ...simulado,
-          status: 'em-progresso'
-        };
+        const atualizado =
+          {
+            ...simulado,
 
-        setSimulados((prev) =>
-          prev.map((item) =>
-            item.id === simulado.id
-              ? atualizado
-              : item
-          )
+            status:
+              'em-progresso'
+          };
+
+        setSimulados(
+          (prev) =>
+            prev.map(
+              (item) =>
+                item.id ===
+                simulado.id
+                  ? atualizado
+                  : item
+            )
         );
 
-        setSimuladoSelecionado(atualizado);
+        setSimuladoSelecionado(
+          atualizado
+        );
 
         salvarStatus(
           simulado.id,
           'em-progresso'
         );
 
-        addXP(10, 'simulado iniciado');
+        addXP(
+          10,
+          'simulado iniciado'
+        );
       }
 
-      // Inicia ou recupera o cronômetro deste simulado.
-      if (simulado.status === 'em-progresso') {
-        carregarCronometro(simulado);
+      // ========================================
+      // CRONÔMETRO
+      // ========================================
+
+      if (
+        simulado.status ===
+        'em-progresso'
+      ) {
+        carregarCronometro(
+          simulado
+        );
       } else {
-        iniciarCronometro(simulado);
+        iniciarCronometro(
+          simulado
+        );
       }
 
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior:
+          'smooth'
       });
     } catch (error) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       setErro(
         'Não foi possível carregar as questões deste simulado.'
       );
     } finally {
-      setCarregandoQuestoes(false);
+      setCarregandoQuestoes(
+        false
+      );
     }
   }
 
@@ -451,82 +984,147 @@ export default function Simulados() {
   // SELECIONAR / TROCAR RESPOSTA
   // ==========================================
 
-  function selecionarResposta(questaoId, alternativa) {
-    setRespostas((prev) => {
-      const novasRespostas = {
-        ...prev,
-        [questaoId]: alternativa
-      };
+  function selecionarResposta(
+    questaoId,
+    alternativa
+  ) {
+    setRespostas(
+      (prev) => {
+        const novasRespostas =
+          {
+            ...prev,
 
-      if (simuladoSelecionado) {
-        const chaveRespostas = obterChaveRespostas(
-          simuladoSelecionado.id
-        );
+            [questaoId]:
+              alternativa
+          };
 
-        if (chaveRespostas) {
-          localStorage.setItem(
-            chaveRespostas,
-            JSON.stringify(novasRespostas)
-          );
+        if (
+          simuladoSelecionado
+        ) {
+          const chaveRespostas =
+            obterChaveRespostas(
+              simuladoSelecionado.id
+            );
+
+          if (
+            chaveRespostas
+          ) {
+            localStorage.setItem(
+              chaveRespostas,
+              JSON.stringify(
+                novasRespostas
+              )
+            );
+          }
         }
-      }
 
-      return novasRespostas;
-    });
+        return novasRespostas;
+      }
+    );
   }
 
   // ==========================================
-  // CORRIGIR SIMULADO NO SERVIDOR
-  // (o gabarito nunca fica disponível no
-  // navegador antes de finalizar a prova)
+  // CORRIGIR NO SERVIDOR
   // ==========================================
 
   async function corrigirNoServidor() {
-    const resposta = await fetch(
-      `${API_URL}/simulados/${simuladoSelecionado.id}/corrigir`,
-      {
-        method: 'POST',
+    const resposta =
+      await fetch(
+        `${API_URL}/simulados/${simuladoSelecionado.id}/corrigir`,
+        {
+          method:
+            'POST',
 
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${obterToken()}`
-        },
+          headers: {
+            'Content-Type':
+              'application/json',
 
-        body: JSON.stringify({ respostas })
-      }
-    );
+            Authorization:
+              `Bearer ${obterToken()}`
+          },
 
-    const dados = await resposta.json();
+          body:
+            JSON.stringify({
+              respostas
+            })
+        }
+      );
 
-    if (!resposta.ok) {
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok
+    ) {
       throw new Error(
         dados.mensagem ||
           'Erro ao corrigir o simulado.'
       );
     }
 
-    const detalhesComQuestao = dados.detalhes.map(
-      (item) => {
-        const index = questoes.findIndex(
-          (questao) => questao.id === item.questaoId
-        );
+    const detalhesComQuestao =
+      (
+        Array.isArray(
+          dados.detalhes
+        )
+          ? dados.detalhes
+          : []
+      ).map(
+        (item) => {
+          const index =
+            questoes.findIndex(
+              (questao) =>
+                Number(
+                  questao.id
+                ) ===
+                Number(
+                  item.questaoId
+                )
+            );
 
-        return {
-          questao: questoes[index] || { id: item.questaoId },
-          index: index >= 0 ? index : 0,
-          respostaUsuario: item.respostaUsuario,
-          respostaCorreta: item.respostaCorreta,
-          acertou: item.acertou
-        };
-      }
-    );
+          return {
+            questao:
+              index >= 0
+                ? questoes[
+                    index
+                  ]
+                : {
+                    id:
+                      item.questaoId
+                  },
+
+            index:
+              index >= 0
+                ? index
+                : 0,
+
+            respostaUsuario:
+              item.respostaUsuario,
+
+            respostaCorreta:
+              item.respostaCorreta,
+
+            acertou:
+              item.acertou
+          };
+        }
+      );
 
     return {
-      acertos: dados.resultado.acertos,
-      erros: dados.resultado.erros,
-      totalQuestoes: dados.resultado.totalQuestoes,
-      porcentagem: dados.resultado.porcentagem,
-      detalhes: detalhesComQuestao
+      acertos:
+        dados.resultado.acertos,
+
+      erros:
+        dados.resultado.erros,
+
+      totalQuestoes:
+        dados.resultado.totalQuestoes,
+
+      porcentagem:
+        dados.resultado.porcentagem,
+
+      detalhes:
+        detalhesComQuestao
     };
   }
 
@@ -534,8 +1132,11 @@ export default function Simulados() {
   // SALVAR RESULTADO
   // ==========================================
 
-  async function salvarResultado(resultado) {
-    const usuarioId = obterUsuarioId();
+  async function salvarResultado(
+    resultado
+  ) {
+    const usuarioId =
+      obterUsuarioId();
 
     if (!usuarioId) {
       throw new Error(
@@ -543,28 +1144,43 @@ export default function Simulados() {
       );
     }
 
-    const resposta = await fetch(
-      `${API_URL}/resultados`,
-      {
-        method: 'POST',
+    const resposta =
+      await fetch(
+        `${API_URL}/resultados`,
+        {
+          method:
+            'POST',
 
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${obterToken()}`
-        },
+          headers: {
+            'Content-Type':
+              'application/json',
 
-        body: JSON.stringify({
-          usuarioId,
-          acertos: resultado.acertos,
-          erros: resultado.erros,
-          totalQuestoes: resultado.totalQuestoes
-        })
-      }
-    );
+            Authorization:
+              `Bearer ${obterToken()}`
+          },
 
-    const dados = await resposta.json();
+          body:
+            JSON.stringify({
+              usuarioId,
 
-    if (!resposta.ok) {
+              acertos:
+                resultado.acertos,
+
+              erros:
+                resultado.erros,
+
+              totalQuestoes:
+                resultado.totalQuestoes
+            })
+        }
+      );
+
+    const dados =
+      await resposta.json();
+
+    if (
+      !resposta.ok
+    ) {
       throw new Error(
         dados.mensagem ||
           'Erro ao salvar resultado.'
@@ -578,73 +1194,130 @@ export default function Simulados() {
   // FINALIZAR SIMULADO
   // ==========================================
 
-  async function finalizarSimulado(tempoEsgotado = false) {
-    if (!simuladoSelecionado) {
+  async function finalizarSimulado(
+    tempoEsgotado = false
+  ) {
+    if (
+      !simuladoSelecionado
+    ) {
       return;
     }
 
-    const tempoTotalGasto = obterTempoGasto(simuladoSelecionado);
-    setTempoGasto(tempoTotalGasto);
+    // Evita que uma finalização manual e
+    // uma finalização automática aconteçam
+    // ao mesmo tempo.
+    if (
+      !tempoEsgotado
+    ) {
+      if (
+        finalizandoPorTempo.current
+      ) {
+        return;
+      }
+
+      finalizandoPorTempo.current =
+        true;
+    }
+
+    const tempoTotalGasto =
+      obterTempoGasto(
+        simuladoSelecionado
+      );
+
+    setTempoGasto(
+      tempoTotalGasto
+    );
 
     const respondeu =
-      Object.keys(respostas).length;
+      Object.keys(
+        respostas
+      ).length;
 
     if (!tempoEsgotado) {
-      if (respondeu < questoes.length) {
-        const continuar = window.confirm(
-          `Você respondeu ${respondeu} de ${questoes.length} questões.\n\nAs questões não respondidas serão consideradas erradas.\n\nDeseja finalizar mesmo assim?`
-        );
+      if (
+        respondeu <
+        questoes.length
+      ) {
+        const continuar =
+          window.confirm(
+            `Você respondeu ${respondeu} de ${questoes.length} questões.\n\nAs questões não respondidas serão consideradas erradas.\n\nDeseja finalizar mesmo assim?`
+          );
 
         if (!continuar) {
+          finalizandoPorTempo.current =
+            false;
+
           return;
         }
       }
 
-      const confirmar = window.confirm(
-        'Deseja finalizar o simulado?'
-      );
+      const confirmar =
+        window.confirm(
+          'Deseja finalizar o simulado?'
+        );
 
       if (!confirmar) {
+        finalizandoPorTempo.current =
+          false;
+
         return;
       }
     }
 
     try {
-      setSalvandoResultado(true);
+      setSalvandoResultado(
+        true
+      );
+
       setErro('');
 
-      if (tempoEsgotado) {
-        setTempoRestante(0);
+      if (
+        tempoEsgotado
+      ) {
+        setTempoRestante(
+          0
+        );
       }
 
       const resultadoCalculado =
         await corrigirNoServidor();
 
       const dados =
-        await salvarResultado(resultadoCalculado);
+        await salvarResultado(
+          resultadoCalculado
+        );
 
       const resultado =
-        dados.resultado || resultadoCalculado;
+        dados.resultado ||
+        resultadoCalculado;
 
       // ========================================
-      // ATUALIZAR STATUS PARA CONCLUÍDO
+      // STATUS
       // ========================================
 
-      setSimulados((prev) =>
-        prev.map((simulado) =>
-          simulado.id === simuladoSelecionado.id
-            ? {
-                ...simulado,
-                status: 'concluido'
-              }
-            : simulado
-        )
+      setSimulados(
+        (prev) =>
+          prev.map(
+            (simulado) =>
+              simulado.id ===
+              simuladoSelecionado.id
+                ? {
+                    ...simulado,
+
+                    status:
+                      'concluido'
+                  }
+                : simulado
+          )
       );
 
-      const simuladoAtualizado = {
-        ...simuladoSelecionado,
-        status: 'concluido'
-      };
+      const simuladoAtualizado =
+        {
+          ...simuladoSelecionado,
+
+          status:
+            'concluido'
+        };
 
       setSimuladoSelecionado(
         simuladoAtualizado
@@ -655,12 +1328,20 @@ export default function Simulados() {
         'concluido'
       );
 
-      limparCronometro(simuladoSelecionado.id);
-      limparInicioSimulado(simuladoSelecionado.id);
-      finalizandoPorTempo.current = false;
+      limparCronometro(
+        simuladoSelecionado.id
+      );
 
-      if (tempoEsgotado) {
-        setErro('O tempo acabou. O simulado foi finalizado automaticamente.');
+      limparInicioSimulado(
+        simuladoSelecionado.id
+      );
+
+      if (
+        tempoEsgotado
+      ) {
+        setErro(
+          'O tempo acabou. O simulado foi finalizado automaticamente.'
+        );
       }
 
       addXP(
@@ -669,32 +1350,54 @@ export default function Simulados() {
       );
 
       setResultadoFinal({
-        acertos: resultado.acertos,
-        erros: resultado.erros,
+        acertos:
+          resultado.acertos,
+
+        erros:
+          resultado.erros,
+
         totalQuestoes:
           resultado.totalQuestoes,
+
         porcentagem:
-          Number(resultado.porcentagem),
+          Number(
+            resultado.porcentagem
+          ),
+
         detalhes:
           resultadoCalculado.detalhes
       });
 
-      setMostrarErros(false);
+      setMostrarErros(
+        false
+      );
 
-      // Remove somente as respostas
-      // deste usuário e deste simulado.
+      // ========================================
+      // REMOVER RESPOSTAS SALVAS
+      // ========================================
+
       const chaveRespostas =
         obterChaveRespostas(
           simuladoSelecionado.id
         );
 
-      if (chaveRespostas) {
+      if (
+        chaveRespostas
+      ) {
         localStorage.removeItem(
           chaveRespostas
         );
       }
+
+      finalizandoPorTempo.current =
+        false;
     } catch (error) {
-      console.error(error);
+      console.error(
+        error
+      );
+
+      finalizandoPorTempo.current =
+        false;
 
       setErro(
         error.message ||
@@ -706,7 +1409,9 @@ export default function Simulados() {
           'Não foi possível salvar o resultado.'
       );
     } finally {
-      setSalvandoResultado(false);
+      setSalvandoResultado(
+        false
+      );
     }
   }
 
@@ -715,7 +1420,9 @@ export default function Simulados() {
   // ==========================================
 
   function refazerSimulado() {
-    if (!simuladoSelecionado) {
+    if (
+      !simuladoSelecionado
+    ) {
       return;
     }
 
@@ -724,32 +1431,51 @@ export default function Simulados() {
         simuladoSelecionado.id
       );
 
-    if (chaveRespostas) {
+    if (
+      chaveRespostas
+    ) {
       localStorage.removeItem(
         chaveRespostas
       );
     }
 
-    setRespostas({});
-    setResultadoFinal(null);
-    setMostrarErros(false);
-    setTempoGasto(null);
+    setRespostas(
+      {}
+    );
 
-    const simuladoAtualizado = {
-      ...simuladoSelecionado,
-      status: 'em-progresso'
-    };
+    setResultadoFinal(
+      null
+    );
+
+    setMostrarErros(
+      false
+    );
+
+    setTempoGasto(
+      null
+    );
+
+    const simuladoAtualizado =
+      {
+        ...simuladoSelecionado,
+
+        status:
+          'em-progresso'
+      };
 
     setSimuladoSelecionado(
       simuladoAtualizado
     );
 
-    setSimulados((prev) =>
-      prev.map((simulado) =>
-        simulado.id === simuladoSelecionado.id
-          ? simuladoAtualizado
-          : simulado
-      )
+    setSimulados(
+      (prev) =>
+        prev.map(
+          (simulado) =>
+            simulado.id ===
+            simuladoSelecionado.id
+              ? simuladoAtualizado
+              : simulado
+        )
     );
 
     salvarStatus(
@@ -757,12 +1483,17 @@ export default function Simulados() {
       'em-progresso'
     );
 
-    iniciarCronometro(simuladoSelecionado);
-    finalizandoPorTempo.current = false;
+    finalizandoPorTempo.current =
+      false;
+
+    iniciarCronometro(
+      simuladoSelecionado
+    );
 
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior:
+        'smooth'
     });
   }
 
@@ -770,17 +1501,26 @@ export default function Simulados() {
   // PRÓXIMA QUESTÃO
   // ==========================================
 
-  function proximaQuestao(index) {
+  function proximaQuestao(
+    index
+  ) {
     const proxima =
       document.getElementById(
         `questao-${index + 1}`
       );
 
-    if (proxima) {
-      proxima.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
+    if (
+      proxima
+    ) {
+      proxima.scrollIntoView(
+        {
+          behavior:
+            'smooth',
+
+          block:
+            'start'
+        }
+      );
     }
   }
 
@@ -789,33 +1529,66 @@ export default function Simulados() {
   // ==========================================
 
   function voltarParaSimulados() {
-    if (salvandoResultado) {
+    if (
+      salvandoResultado
+    ) {
       return;
     }
 
-    setSimuladoSelecionado(null);
-    setQuestoes([]);
-    setRespostas({});
-    setResultadoFinal(null);
-    setMostrarErros(false);
-    setTempoRestante(null);
+    finalizandoPorTempo.current =
+      false;
+
+    setSimuladoSelecionado(
+      null
+    );
+
+    setQuestoes(
+      []
+    );
+
+    setRespostas(
+      {}
+    );
+
+    setResultadoFinal(
+      null
+    );
+
+    setMostrarErros(
+      false
+    );
+
+    setTempoRestante(
+      null
+    );
+
+    setTempoGasto(
+      null
+    );
+
+    setErro('');
 
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior:
+        'smooth'
     });
   }
 
   // ==========================================
-  // FILTRO
+  // FILTROS
   // ==========================================
 
   const materias = [
     'Todas',
+
     ...Array.from(
       new Set(
         simulados
-          .map((simulado) => simulado.materia)
+          .map(
+            (simulado) =>
+              simulado.materia
+          )
           .filter(Boolean)
       )
     )
@@ -826,68 +1599,106 @@ export default function Simulados() {
       ? simulados
       : simulados.filter(
           (simulado) =>
-            simulado.materia === filtro
+            simulado.materia ===
+            filtro
         );
 
   const concluidos =
     simulados.filter(
       (simulado) =>
-        simulado.status === 'concluido'
+        simulado.status ===
+        'concluido'
     ).length;
+
   // ==========================================
-  // TELA DO SIMULADO
+  // RESULTADO / TELA DO SIMULADO
   // ==========================================
 
-  if (simuladoSelecionado) {
-    // ========================================
-    // RESULTADO FINAL
-    // ========================================
-
-    if (resultadoFinal) {
+  if (
+    simuladoSelecionado
+  ) {
+    if (
+      resultadoFinal
+    ) {
       return (
         <TelaResultado
-          simuladoSelecionado={simuladoSelecionado}
-          resultadoFinal={resultadoFinal}
-          tempoGasto={tempoGasto}
-          mostrarErros={mostrarErros}
-          setMostrarErros={setMostrarErros}
-          refazerSimulado={refazerSimulado}
-          voltarParaSimulados={voltarParaSimulados}
-          formatarTempo={formatarTempo}
+          simuladoSelecionado={
+            simuladoSelecionado
+          }
+          resultadoFinal={
+            resultadoFinal
+          }
+          tempoGasto={
+            tempoGasto
+          }
+          mostrarErros={
+            mostrarErros
+          }
+          setMostrarErros={
+            setMostrarErros
+          }
+          refazerSimulado={
+            refazerSimulado
+          }
+          voltarParaSimulados={
+            voltarParaSimulados
+          }
+          formatarTempo={
+            formatarTempo
+          }
         />
       );
     }
 
-    // ========================================
-    // TELA DAS QUESTÕES
-    // ========================================
-
     return (
       <TelaSimulado
-        simuladoSelecionado={simuladoSelecionado}
-        questoes={questoes}
-        tempoRestante={tempoRestante}
-        respostas={respostas}
-        salvandoResultado={salvandoResultado}
-        voltarParaSimulados={voltarParaSimulados}
-        formatarTempo={formatarTempo}
-        selecionarResposta={selecionarResposta}
-        proximaQuestao={proximaQuestao}
-        finalizarSimulado={finalizarSimulado}
+        simuladoSelecionado={
+          simuladoSelecionado
+        }
+        questoes={
+          questoes
+        }
+        tempoRestante={
+          tempoRestante
+        }
+        respostas={
+          respostas
+        }
+        salvandoResultado={
+          salvandoResultado
+        }
+        voltarParaSimulados={
+          voltarParaSimulados
+        }
+        formatarTempo={
+          formatarTempo
+        }
+        selecionarResposta={
+          selecionarResposta
+        }
+        proximaQuestao={
+          proximaQuestao
+        }
+        finalizarSimulado={
+          finalizarSimulado
+        }
       />
     );
   }
 
   // ==========================================
-  // CARREGANDO
+  // CARREGANDO LISTA
   // ==========================================
 
-  if (carregando) {
+  if (
+    carregando
+  ) {
     return (
       <div>
-
         <div className="page-header">
-          <h1>Simulados</h1>
+          <h1>
+            Simulados
+          </h1>
         </div>
 
         <div className="stat-card">
@@ -895,7 +1706,6 @@ export default function Simulados() {
             Carregando simulados...
           </h2>
         </div>
-
       </div>
     );
   }
@@ -906,15 +1716,33 @@ export default function Simulados() {
 
   return (
     <ListaSimulados
-      materias={materias}
-      filtro={filtro}
-      setFiltro={setFiltro}
-      simulados={simulados}
-      erro={erro}
-      concluidos={concluidos}
-      simuladosVisiveis={simuladosVisiveis}
-      abrirSimulado={abrirSimulado}
-      carregandoQuestoes={carregandoQuestoes}
+      materias={
+        materias
+      }
+      filtro={
+        filtro
+      }
+      setFiltro={
+        setFiltro
+      }
+      simulados={
+        simulados
+      }
+      erro={
+        erro
+      }
+      concluidos={
+        concluidos
+      }
+      simuladosVisiveis={
+        simuladosVisiveis
+      }
+      abrirSimulado={
+        abrirSimulado
+      }
+      carregandoQuestoes={
+        carregandoQuestoes
+      }
     />
   );
 }

@@ -5,6 +5,16 @@ import { getSubjectStyle } from '../../utils/subjects.js';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 
+
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
 export const TOPICS_BANK = {
   'Língua Portuguesa': [
     'Interpretação e compreensão de textos',
@@ -252,9 +262,7 @@ export default function Conteudos() {
         });
 
         const token =
-          localStorage.getItem(
-            'etecamp_token'
-          );
+  localStorage.getItem('etecamp_token');
 
         if (!token) {
           setEstudados({});

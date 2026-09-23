@@ -1,4 +1,5 @@
-const conteudoPaginaModel = require("../models/conteudoPaginaModel");
+const conteudoPaginaModel =
+    require("../models/conteudoPaginaModel");
 
 const TIPOS_BLOCO_VALIDOS = [
     "texto",
@@ -13,22 +14,39 @@ const TIPOS_BLOCO_VALIDOS = [
     "checklist"
 ];
 
-function erroBanco(res, erro, mensagem) {
-    console.error(mensagem, erro);
+
+function erroBanco(
+    res,
+    erro,
+    mensagem
+) {
+    console.error(
+        mensagem,
+        erro
+    );
 
     return res.status(500).json({
         erro: mensagem,
-        detalhe: erro?.message || undefined
+        detalhe:
+            erro?.message ||
+            undefined
     });
 }
 
+
 // =====================================================
-// PÁGINAS
+// PÁGINAS — LISTAR
 // =====================================================
 
-function listarPaginas(req, res) {
+function listarPaginas(
+    req,
+    res
+) {
     conteudoPaginaModel.listarPaginas(
-        (erro, paginas) => {
+        (
+            erro,
+            paginas
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -38,24 +56,45 @@ function listarPaginas(req, res) {
             }
 
             return res.json({
-                paginas: paginas || []
+                paginas:
+                    paginas || []
             });
         }
     );
 }
 
-function buscarPaginaPorId(req, res) {
-    const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
+// =====================================================
+// PÁGINA — BUSCAR POR ID
+// ADMIN
+// =====================================================
+
+function buscarPaginaPorId(
+    req,
+    res
+) {
+    const id =
+        Number(
+            req.params.id
+        );
+
+    if (
+        !Number.isInteger(id) ||
+        id <= 0
+    ) {
         return res.status(400).json({
-            erro: "ID da página inválido."
+            erro:
+                "ID da página inválido."
         });
     }
 
+
     conteudoPaginaModel.buscarPaginaPorId(
         id,
-        (erro, pagina) => {
+        (
+            erro,
+            pagina
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -66,13 +105,18 @@ function buscarPaginaPorId(req, res) {
 
             if (!pagina) {
                 return res.status(404).json({
-                    erro: "Página de conteúdo não encontrada."
+                    erro:
+                        "Página de conteúdo não encontrada."
                 });
             }
 
+
             conteudoPaginaModel.listarBlocos(
                 id,
-                (erroBlocos, blocos) => {
+                (
+                    erroBlocos,
+                    blocos
+                ) => {
                     if (erroBlocos) {
                         return erroBanco(
                             res,
@@ -83,7 +127,10 @@ function buscarPaginaPorId(req, res) {
 
                     return res.json({
                         pagina,
-                        blocos: blocos || []
+
+                        blocos:
+                            blocos ||
+                            []
                     });
                 }
             );
@@ -91,21 +138,45 @@ function buscarPaginaPorId(req, res) {
     );
 }
 
-function buscarPaginaPorTopico(req, res) {
-    const topicoId = Number(req.params.topicoId);
+
+// =====================================================
+// PÁGINA — BUSCAR POR TÓPICO
+//
+// ALUNO:
+// somente publicada.
+//
+// ADMIN:
+// pode visualizar mesmo não publicada.
+// =====================================================
+
+function buscarPaginaPorTopico(
+    req,
+    res
+) {
+    const topicoId =
+        Number(
+            req.params.topicoId
+        );
 
     if (
-        !Number.isInteger(topicoId) ||
+        !Number.isInteger(
+            topicoId
+        ) ||
         topicoId <= 0
     ) {
         return res.status(400).json({
-            erro: "ID do tópico inválido."
+            erro:
+                "ID do tópico inválido."
         });
     }
 
+
     conteudoPaginaModel.buscarPaginaPorTopico(
         topicoId,
-        (erro, pagina) => {
+        (
+            erro,
+            pagina
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -121,9 +192,28 @@ function buscarPaginaPorTopico(req, res) {
                 });
             }
 
+
+            // Aluno não enxerga página não publicada.
+            if (
+                req.usuario?.tipo !==
+                    "admin" &&
+                Number(
+                    pagina.publicado
+                ) !== 1
+            ) {
+                return res.json({
+                    pagina: null,
+                    blocos: []
+                });
+            }
+
+
             conteudoPaginaModel.listarBlocos(
                 pagina.id,
-                (erroBlocos, blocos) => {
+                (
+                    erroBlocos,
+                    blocos
+                ) => {
                     if (erroBlocos) {
                         return erroBanco(
                             res,
@@ -134,7 +224,10 @@ function buscarPaginaPorTopico(req, res) {
 
                     return res.json({
                         pagina,
-                        blocos: blocos || []
+
+                        blocos:
+                            blocos ||
+                            []
                     });
                 }
             );
@@ -142,36 +235,61 @@ function buscarPaginaPorTopico(req, res) {
     );
 }
 
-function criarPagina(req, res) {
+
+// =====================================================
+// PÁGINA — CRIAR
+// =====================================================
+
+function criarPagina(
+    req,
+    res
+) {
     const {
         topicoId,
         titulo,
-        descricao
+        descricao,
+        publicado
     } = req.body || {};
 
-    const idTopico = Number(topicoId);
+
+    const idTopico =
+        Number(
+            topicoId
+        );
+
 
     if (
-        !Number.isInteger(idTopico) ||
+        !Number.isInteger(
+            idTopico
+        ) ||
         idTopico <= 0
     ) {
         return res.status(400).json({
-            erro: "ID do tópico inválido."
+            erro:
+                "ID do tópico inválido."
         });
     }
+
 
     if (
         !titulo ||
-        !String(titulo).trim()
+        !String(
+            titulo
+        ).trim()
     ) {
         return res.status(400).json({
-            erro: "O título da página é obrigatório."
+            erro:
+                "O título da página é obrigatório."
         });
     }
 
+
     conteudoPaginaModel.buscarPaginaPorTopico(
         idTopico,
-        (erroBusca, existente) => {
+        (
+            erroBusca,
+            existente
+        ) => {
             if (erroBusca) {
                 return erroBanco(
                     res,
@@ -180,20 +298,35 @@ function criarPagina(req, res) {
                 );
             }
 
+
             if (existente) {
                 return res.status(409).json({
-                    erro: "Este tópico já possui uma página de conteúdo.",
-                    pagina: existente
+                    erro:
+                        "Este tópico já possui uma página de conteúdo.",
+
+                    pagina:
+                        existente
                 });
             }
 
+
             conteudoPaginaModel.criarPagina(
                 idTopico,
-                String(titulo).trim(),
+
+                String(
+                    titulo
+                ).trim(),
+
                 descricao
-                    ? String(descricao).trim()
+                    ? String(
+                        descricao
+                    ).trim()
                     : "",
-                (erro, pagina) => {
+
+                (
+                    erro,
+                    pagina
+                ) => {
                     if (erro) {
                         return erroBanco(
                             res,
@@ -202,9 +335,60 @@ function criarPagina(req, res) {
                         );
                     }
 
+
+                    // -------------------------------------------------
+                    // Se o ADM enviou publicado,
+                    // respeita a escolha.
+                    // -------------------------------------------------
+
+                    if (
+                        publicado !==
+                        undefined
+                    ) {
+                        conteudoPaginaModel.atualizarPagina(
+                            pagina.id,
+
+                            {
+                                publicado:
+                                    Boolean(
+                                        publicado
+                                    )
+                            },
+
+                            (
+                                erroAtualizacao,
+                                paginaAtualizada
+                            ) => {
+                                if (
+                                    erroAtualizacao
+                                ) {
+                                    return erroBanco(
+                                        res,
+                                        erroAtualizacao,
+                                        "Erro ao definir o estado de publicação da página."
+                                    );
+                                }
+
+
+                                return res.status(201).json({
+                                    mensagem:
+                                        "Página criada com sucesso.",
+
+                                    pagina:
+                                        paginaAtualizada ||
+                                        pagina
+                                });
+                            }
+                        );
+
+                        return;
+                    }
+
+
                     return res.status(201).json({
                         mensagem:
                             "Página criada com sucesso.",
+
                         pagina
                     });
                 }
@@ -213,49 +397,91 @@ function criarPagina(req, res) {
     );
 }
 
-function atualizarPagina(req, res) {
-    const id = Number(req.params.id);
+
+// =====================================================
+// PÁGINA — ATUALIZAR
+// =====================================================
+
+function atualizarPagina(
+    req,
+    res
+) {
+    const id =
+        Number(
+            req.params.id
+        );
+
 
     if (
         !Number.isInteger(id) ||
         id <= 0
     ) {
         return res.status(400).json({
-            erro: "ID da página inválido."
+            erro:
+                "ID da página inválido."
         });
     }
+
 
     const dados = {
         ...(req.body || {})
     };
 
+
     if (
-        dados.titulo !== undefined &&
-        !String(dados.titulo).trim()
+        dados.titulo !==
+            undefined &&
+        !String(
+            dados.titulo
+        ).trim()
     ) {
         return res.status(400).json({
-            erro: "O título da página é obrigatório."
+            erro:
+                "O título da página é obrigatório."
         });
     }
 
-    if (
-        dados.titulo !== undefined
-    ) {
-        dados.titulo =
-            String(dados.titulo).trim();
-    }
 
     if (
-        dados.descricao !== undefined
+        dados.titulo !==
+        undefined
+    ) {
+        dados.titulo =
+            String(
+                dados.titulo
+            ).trim();
+    }
+
+
+    if (
+        dados.descricao !==
+        undefined
     ) {
         dados.descricao =
-            String(dados.descricao);
+            String(
+                dados.descricao
+            );
     }
+
+
+    if (
+        dados.publicado !==
+        undefined
+    ) {
+        dados.publicado =
+            Boolean(
+                dados.publicado
+            );
+    }
+
 
     conteudoPaginaModel.atualizarPagina(
         id,
         dados,
-        (erro, pagina) => {
+        (
+            erro,
+            pagina
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -264,6 +490,7 @@ function atualizarPagina(req, res) {
                 );
             }
 
+
             if (!pagina) {
                 return res.status(404).json({
                     erro:
@@ -271,30 +498,49 @@ function atualizarPagina(req, res) {
                 });
             }
 
+
             return res.json({
                 mensagem:
                     "Página atualizada com sucesso.",
+
                 pagina
             });
         }
     );
 }
 
-function excluirPagina(req, res) {
-    const id = Number(req.params.id);
+
+// =====================================================
+// PÁGINA — EXCLUIR
+// =====================================================
+
+function excluirPagina(
+    req,
+    res
+) {
+    const id =
+        Number(
+            req.params.id
+        );
+
 
     if (
         !Number.isInteger(id) ||
         id <= 0
     ) {
         return res.status(400).json({
-            erro: "ID da página inválido."
+            erro:
+                "ID da página inválido."
         });
     }
 
+
     conteudoPaginaModel.excluirPagina(
         id,
-        (erro, excluida) => {
+        (
+            erro,
+            excluida
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -303,12 +549,14 @@ function excluirPagina(req, res) {
                 );
             }
 
+
             if (!excluida) {
                 return res.status(404).json({
                     erro:
                         "Página de conteúdo não encontrada."
                 });
             }
+
 
             return res.json({
                 mensagem:
@@ -318,25 +566,40 @@ function excluirPagina(req, res) {
     );
 }
 
+
 // =====================================================
-// BLOCOS
+// BLOCOS — LISTAR
 // =====================================================
 
-function listarBlocos(req, res) {
-    const paginaId = Number(req.params.paginaId);
+function listarBlocos(
+    req,
+    res
+) {
+    const paginaId =
+        Number(
+            req.params.paginaId
+        );
+
 
     if (
-        !Number.isInteger(paginaId) ||
+        !Number.isInteger(
+            paginaId
+        ) ||
         paginaId <= 0
     ) {
         return res.status(400).json({
-            erro: "ID da página inválido."
+            erro:
+                "ID da página inválido."
         });
     }
 
+
     conteudoPaginaModel.listarBlocos(
         paginaId,
-        (erro, blocos) => {
+        (
+            erro,
+            blocos
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -345,24 +608,42 @@ function listarBlocos(req, res) {
                 );
             }
 
+
             return res.json({
-                blocos: blocos || []
+                blocos:
+                    blocos || []
             });
         }
     );
 }
 
-function criarBloco(req, res) {
-    const paginaId = Number(req.params.paginaId);
+
+// =====================================================
+// BLOCOS — CRIAR
+// =====================================================
+
+function criarBloco(
+    req,
+    res
+) {
+    const paginaId =
+        Number(
+            req.params.paginaId
+        );
+
 
     if (
-        !Number.isInteger(paginaId) ||
+        !Number.isInteger(
+            paginaId
+        ) ||
         paginaId <= 0
     ) {
         return res.status(400).json({
-            erro: "ID da página inválido."
+            erro:
+                "ID da página inválido."
         });
     }
+
 
     const {
         tipo,
@@ -370,23 +651,35 @@ function criarBloco(req, res) {
         dados
     } = req.body || {};
 
+
     if (
-        !TIPOS_BLOCO_VALIDOS.includes(tipo)
+        !TIPOS_BLOCO_VALIDOS.includes(
+            tipo
+        )
     ) {
         return res.status(400).json({
-            erro: "Tipo de bloco inválido.",
-            tipoRecebido: tipo || null,
+            erro:
+                "Tipo de bloco inválido.",
+
+            tipoRecebido:
+                tipo || null,
+
             tiposPermitidos:
                 TIPOS_BLOCO_VALIDOS
         });
     }
 
+
     if (
-        dados !== undefined &&
+        dados !==
+            undefined &&
         (
-            typeof dados !== "object" ||
+            typeof dados !==
+                "object" ||
             dados === null ||
-            Array.isArray(dados)
+            Array.isArray(
+                dados
+            )
         )
     ) {
         return res.status(400).json({
@@ -395,9 +688,13 @@ function criarBloco(req, res) {
         });
     }
 
+
     conteudoPaginaModel.buscarPaginaPorId(
         paginaId,
-        (erroPagina, pagina) => {
+        (
+            erroPagina,
+            pagina
+        ) => {
             if (erroPagina) {
                 return erroBanco(
                     res,
@@ -406,6 +703,7 @@ function criarBloco(req, res) {
                 );
             }
 
+
             if (!pagina) {
                 return res.status(404).json({
                     erro:
@@ -413,12 +711,18 @@ function criarBloco(req, res) {
                 });
             }
 
+
             conteudoPaginaModel.criarBloco(
                 paginaId,
                 tipo,
-                Number(ordem) || 0,
+                Number(
+                    ordem
+                ) || 0,
                 dados || {},
-                (erro, bloco) => {
+                (
+                    erro,
+                    bloco
+                ) => {
                     if (erro) {
                         return erroBanco(
                             res,
@@ -427,9 +731,11 @@ function criarBloco(req, res) {
                         );
                     }
 
+
                     return res.status(201).json({
                         mensagem:
                             "Bloco criado com sucesso.",
+
                         bloco
                     });
                 }
@@ -438,42 +744,67 @@ function criarBloco(req, res) {
     );
 }
 
-function atualizarBloco(req, res) {
-    const id = Number(req.params.id);
+
+// =====================================================
+// BLOCO — ATUALIZAR
+// =====================================================
+
+function atualizarBloco(
+    req,
+    res
+) {
+    const id =
+        Number(
+            req.params.id
+        );
+
 
     if (
         !Number.isInteger(id) ||
         id <= 0
     ) {
         return res.status(400).json({
-            erro: "ID do bloco inválido."
+            erro:
+                "ID do bloco inválido."
         });
     }
+
 
     const dados = {
         ...(req.body || {})
     };
 
+
     if (
-        dados.tipo !== undefined &&
+        dados.tipo !==
+            undefined &&
         !TIPOS_BLOCO_VALIDOS.includes(
             dados.tipo
         )
     ) {
         return res.status(400).json({
-            erro: "Tipo de bloco inválido.",
-            tipoRecebido: dados.tipo,
+            erro:
+                "Tipo de bloco inválido.",
+
+            tipoRecebido:
+                dados.tipo,
+
             tiposPermitidos:
                 TIPOS_BLOCO_VALIDOS
         });
     }
 
+
     if (
-        dados.dados !== undefined &&
+        dados.dados !==
+            undefined &&
         (
-            typeof dados.dados !== "object" ||
+            typeof dados.dados !==
+                "object" ||
             dados.dados === null ||
-            Array.isArray(dados.dados)
+            Array.isArray(
+                dados.dados
+            )
         )
     ) {
         return res.status(400).json({
@@ -482,10 +813,14 @@ function atualizarBloco(req, res) {
         });
     }
 
+
     conteudoPaginaModel.atualizarBloco(
         id,
         dados,
-        (erro, bloco) => {
+        (
+            erro,
+            bloco
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -494,6 +829,7 @@ function atualizarBloco(req, res) {
                 );
             }
 
+
             if (!bloco) {
                 return res.status(404).json({
                     erro:
@@ -501,30 +837,49 @@ function atualizarBloco(req, res) {
                 });
             }
 
+
             return res.json({
                 mensagem:
                     "Bloco atualizado com sucesso.",
+
                 bloco
             });
         }
     );
 }
 
-function excluirBloco(req, res) {
-    const id = Number(req.params.id);
+
+// =====================================================
+// BLOCO — EXCLUIR
+// =====================================================
+
+function excluirBloco(
+    req,
+    res
+) {
+    const id =
+        Number(
+            req.params.id
+        );
+
 
     if (
         !Number.isInteger(id) ||
         id <= 0
     ) {
         return res.status(400).json({
-            erro: "ID do bloco inválido."
+            erro:
+                "ID do bloco inválido."
         });
     }
 
+
     conteudoPaginaModel.excluirBloco(
         id,
-        (erro, excluido) => {
+        (
+            erro,
+            excluido
+        ) => {
             if (erro) {
                 return erroBanco(
                     res,
@@ -533,12 +888,14 @@ function excluirBloco(req, res) {
                 );
             }
 
+
             if (!excluido) {
                 return res.status(404).json({
                     erro:
                         "Bloco de conteúdo não encontrado."
                 });
             }
+
 
             return res.json({
                 mensagem:
@@ -548,6 +905,7 @@ function excluirBloco(req, res) {
     );
 }
 
+
 module.exports = {
     listarPaginas,
     buscarPaginaPorId,
@@ -555,6 +913,7 @@ module.exports = {
     criarPagina,
     atualizarPagina,
     excluirPagina,
+
     listarBlocos,
     criarBloco,
     atualizarBloco,

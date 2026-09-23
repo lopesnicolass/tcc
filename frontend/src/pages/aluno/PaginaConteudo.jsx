@@ -1,51 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/cu.jsx';
+import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
+
+import BlocoQuestoes from './conteudos/BlocoQuestoes.jsx';
+import BlocoChecklist from './conteudos/BlocoChecklist.jsx';
+
 import '../../styles/aluno/PaginaConteudo.css';
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function obterToken() {
   return localStorage.getItem('etecamp_token');
-}
-
-function youtubeEmbed(url) {
-  if (!url) return '';
-
-  try {
-    const parsed = new URL(url);
-
-    if (
-      parsed.hostname.includes('youtube.com') &&
-      parsed.pathname === '/watch'
-    ) {
-      const id = parsed.searchParams.get('v');
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : '';
-    }
-
-    if (parsed.hostname === 'youtu.be') {
-      const id = parsed.pathname
-        .replace('/', '')
-        .trim();
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : '';
-    }
-
-    if (parsed.pathname.startsWith('/embed/')) {
-      return url;
-    }
-
-    return '';
-  } catch {
-    return '';
-  }
 }
 
 function normalizarDados(bloco) {
@@ -75,67 +42,164 @@ function formatarIds(valor) {
     return [];
   }
 
+  if (Array.isArray(valor)) {
+    return valor
+      .map((item) =>
+        String(item).trim()
+      )
+      .filter(Boolean);
+  }
+
   return String(valor)
     .split(',')
-    .map((item) => item.trim())
+    .map((item) =>
+      item.trim()
+    )
     .filter(Boolean);
 }
 
+function youtubeEmbed(url) {
+  if (!url) {
+    return '';
+  }
+
+  try {
+    const parsed =
+      new URL(url);
+
+    if (
+      parsed.hostname.includes(
+        'youtube.com'
+      ) &&
+      parsed.pathname === '/watch'
+    ) {
+      const id =
+        parsed.searchParams.get(
+          'v'
+        );
+
+      return id
+        ? `https://www.youtube.com/embed/${id}`
+        : '';
+    }
+
+    if (
+      parsed.hostname ===
+      'youtu.be'
+    ) {
+      const id =
+        parsed.pathname
+          .replace('/', '')
+          .trim();
+
+      return id
+        ? `https://www.youtube.com/embed/${id}`
+        : '';
+    }
+
+    if (
+      parsed.pathname.startsWith(
+        '/embed/'
+      )
+    ) {
+      return url;
+    }
+
+    return '';
+  } catch {
+    return '';
+  }
+}
+
 export default function PaginaConteudo() {
-  const { topicoId } = useParams();
-  const navigate = useNavigate();
+  const {
+    topicoId,
+  } = useParams();
 
-  const [pagina, setPagina] = useState(null);
-  const [blocos, setBlocos] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState('');
+  const navigate =
+    useNavigate();
 
-  const [estudado, setEstudado] = useState(false);
-  const [salvandoEstudo, setSalvandoEstudo] = useState(false);
+  const topicoNumero =
+    Number(topicoId);
 
-  /*
-   * =========================================================
-   * FLASHCARDS
-   * =========================================================
-   */
+  const [pagina, setPagina] =
+    useState(null);
 
-  const [flashcards, setFlashcards] = useState([]);
-  const [flashcardAtual, setFlashcardAtual] = useState(0);
-  const [mostrarResposta, setMostrarResposta] =
+  const [blocos, setBlocos] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState('');
+
+  const [estudado, setEstudado] =
     useState(false);
-  const [carregandoFlashcards, setCarregandoFlashcards] =
-    useState(false);
 
-  const topicoNumero = Number(topicoId);
+  const [
+    salvandoEstudo,
+    setSalvandoEstudo,
+  ] = useState(false);
 
-  /*
-   * =========================================================
-   * CARREGAR PÁGINA
-   * =========================================================
-   */
+  /* ========================================================
+     FLASHCARDS
+     ======================================================== */
+
+  const [
+    flashcards,
+    setFlashcards,
+  ] = useState([]);
+
+  const [
+    flashcardAtual,
+    setFlashcardAtual,
+  ] = useState(0);
+
+  const [
+    mostrarResposta,
+    setMostrarResposta,
+  ] = useState(false);
+
+  const [
+    carregandoFlashcards,
+    setCarregandoFlashcards,
+  ] = useState(false);
+
+  /* ========================================================
+     CARREGAR PÁGINA
+     ======================================================== */
 
   useEffect(() => {
+    let ativo = true;
+
     async function carregarPagina() {
       try {
         setCarregando(true);
         setErro('');
 
-        const token = obterToken();
+        const token =
+          obterToken();
 
-        const resposta = await fetch(
-          `${API_URL}/paginas-conteudo/topico/${topicoNumero}`,
-          {
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`,
-                }
-              : {},
-          }
-        );
+        const resposta =
+          await fetch(
+            `${API_URL}/paginas-conteudo/topico/${topicoNumero}`,
+            {
+              headers: token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`,
+                  }
+                : {},
+            }
+          );
 
-        const dados = await resposta
-          .json()
-          .catch(() => ({}));
+        const dados =
+          await resposta
+            .json()
+            .catch(
+              () => ({})
+            );
 
         if (!resposta.ok) {
           throw new Error(
@@ -145,21 +209,41 @@ export default function PaginaConteudo() {
           );
         }
 
-        if (!dados?.pagina) {
+        if (
+          !dados ||
+          !dados.pagina
+        ) {
+          if (!ativo) {
+            return;
+          }
+
           setPagina(null);
           setBlocos([]);
           setEstudado(false);
+
           return;
         }
 
-        setPagina(dados.pagina);
+        if (!ativo) {
+          return;
+        }
+
+        setPagina(
+          dados.pagina
+        );
 
         setBlocos(
-          Array.isArray(dados.blocos)
+          Array.isArray(
+            dados.blocos
+          )
             ? [...dados.blocos].sort(
                 (a, b) =>
-                  Number(a.ordem || 0) -
-                  Number(b.ordem || 0)
+                  Number(
+                    a.ordem || 0
+                  ) -
+                  Number(
+                    b.ordem || 0
+                  )
               )
             : []
         );
@@ -179,7 +263,9 @@ export default function PaginaConteudo() {
           const dadosProgresso =
             await respostaProgresso
               .json()
-              .catch(() => ({}));
+              .catch(
+                () => ({})
+              );
 
           if (
             respostaProgresso.ok &&
@@ -190,13 +276,19 @@ export default function PaginaConteudo() {
             const registro =
               dadosProgresso.topicos.find(
                 (item) =>
-                  Number(item.topico_id) ===
+                  Number(
+                    item.topico_id
+                  ) ===
                   topicoNumero
               );
 
-            setEstudado(
-              Boolean(registro?.estudado)
-            );
+            if (ativo) {
+              setEstudado(
+                Boolean(
+                  registro?.estudado
+                )
+              );
+            }
           }
         }
       } catch (error) {
@@ -205,52 +297,73 @@ export default function PaginaConteudo() {
           error
         );
 
-        setErro(
-          error.message ||
-            'Não foi possível carregar este conteúdo.'
-        );
+        if (ativo) {
+          setErro(
+            error.message ||
+              'Não foi possível carregar este conteúdo.'
+          );
+        }
       } finally {
-        setCarregando(false);
+        if (ativo) {
+          setCarregando(false);
+        }
       }
     }
 
     if (
-      Number.isInteger(topicoNumero) &&
+      Number.isInteger(
+        topicoNumero
+      ) &&
       topicoNumero > 0
     ) {
       carregarPagina();
     } else {
-      setErro('Tópico inválido.');
-      setCarregando(false);
-    }
-  }, [topicoNumero]);
-
-  /*
-   * =========================================================
-   * CARREGAR FLASHCARDS
-   * =========================================================
-   */
-
-  async function carregarFlashcards(idsSelecionados = []) {
-    try {
-      setCarregandoFlashcards(true);
-
-      const token = obterToken();
-
-      const resposta = await fetch(
-        `${API_URL}/flashcards`,
-        {
-          headers: token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : {},
-        }
+      setErro(
+        'Tópico inválido.'
       );
 
-      const dados = await resposta
-        .json()
-        .catch(() => ({}));
+      setCarregando(false);
+    }
+
+    return () => {
+      ativo = false;
+    };
+  }, [topicoNumero]);
+
+  /* ========================================================
+     FLASHCARDS
+     ======================================================== */
+
+  async function carregarFlashcards(
+    idsSelecionados = []
+  ) {
+    try {
+      setCarregandoFlashcards(
+        true
+      );
+
+      const token =
+        obterToken();
+
+      const resposta =
+        await fetch(
+          `${API_URL}/flashcards`,
+          {
+            headers: token
+              ? {
+                  Authorization:
+                    `Bearer ${token}`,
+                }
+              : {},
+          }
+        );
+
+      const dados =
+        await resposta
+          .json()
+          .catch(
+            () => ({})
+          );
 
       if (!resposta.ok) {
         throw new Error(
@@ -260,61 +373,76 @@ export default function PaginaConteudo() {
         );
       }
 
-      const lista = Array.isArray(dados)
-        ? dados
-        : Array.isArray(dados.flashcards)
-          ? dados.flashcards
-          : [];
+      const lista =
+        Array.isArray(dados)
+          ? dados
+          : Array.isArray(
+              dados.flashcards
+            )
+            ? dados.flashcards
+            : [];
 
-      let cardsAtivos = lista.filter(
-        (card) =>
-          card.ativo === 1 ||
-          card.ativo === true ||
-          card.ativo === undefined
-      );
-
-      /*
-       * Se o administrador informou IDs no bloco,
-       * usamos somente aqueles flashcards.
-       *
-       * Se não informou IDs, usamos todos os
-       * flashcards ativos.
-       */
-      if (idsSelecionados.length > 0) {
-        const ids = new Set(
-          idsSelecionados.map((id) =>
-            Number(id)
-          )
-        );
-
-        cardsAtivos = cardsAtivos.filter(
+      let cardsAtivos =
+        lista.filter(
           (card) =>
-            ids.has(Number(card.id))
+            card.ativo === 1 ||
+            card.ativo === true ||
+            card.ativo === undefined
         );
+
+      if (
+        idsSelecionados.length >
+        0
+      ) {
+        const ids =
+          new Set(
+            idsSelecionados.map(
+              (id) =>
+                Number(id)
+            )
+          );
+
+        cardsAtivos =
+          cardsAtivos.filter(
+            (card) =>
+              ids.has(
+                Number(card.id)
+              )
+          );
       }
 
       const cardsFormatados =
-        cardsAtivos.map((card) => ({
-          id: card.id,
-          materia: card.materia || '',
-          pergunta:
-            card.primario ||
-            card.pergunta ||
-            '',
-          resposta:
-            card.secundario ||
-            card.resposta ||
-            '',
-        }));
+        cardsAtivos.map(
+          (card) => ({
+            id: card.id,
 
-      setFlashcards(cardsFormatados);
-      setFlashcardAtual(0);
+            materia:
+              card.materia ||
+              '',
 
-      /*
-       * IMPORTANTE:
-       * sempre começa com a resposta escondida.
-       */
-      setMostrarResposta(false);
+            pergunta:
+              card.primario ||
+              card.pergunta ||
+              '',
+
+            resposta:
+              card.secundario ||
+              card.resposta ||
+              '',
+          })
+        );
+
+      setFlashcards(
+        cardsFormatados
+      );
+
+      setFlashcardAtual(
+        0
+      );
+
+      setMostrarResposta(
+        false
+      );
     } catch (error) {
       console.error(
         'Erro ao carregar flashcards:',
@@ -322,31 +450,42 @@ export default function PaginaConteudo() {
       );
 
       setFlashcards([]);
+      setFlashcardAtual(0);
+      setMostrarResposta(
+        false
+      );
     } finally {
-      setCarregandoFlashcards(false);
+      setCarregandoFlashcards(
+        false
+      );
     }
   }
 
-  /*
-   * Quando os blocos da página chegam,
-   * verifica se existe algum bloco de flashcards
-   * e carrega os cards relacionados.
-   */
   useEffect(() => {
-    if (!Array.isArray(blocos)) {
+    if (
+      !Array.isArray(
+        blocos
+      )
+    ) {
       return;
     }
 
     const blocoFlashcards =
       blocos.find(
         (bloco) =>
-          bloco.tipo === 'flashcards'
+          bloco.tipo ===
+          'flashcards'
       );
 
-    if (!blocoFlashcards) {
+    if (
+      !blocoFlashcards
+    ) {
       setFlashcards([]);
       setFlashcardAtual(0);
-      setMostrarResposta(false);
+      setMostrarResposta(
+        false
+      );
+
       return;
     }
 
@@ -356,27 +495,29 @@ export default function PaginaConteudo() {
       );
 
     const ids =
-      formatarIds(dados.ids);
+      formatarIds(
+        dados.flashcardIds ??
+          dados.ids
+      );
 
-    carregarFlashcards(ids);
+    carregarFlashcards(
+      ids
+    );
   }, [blocos]);
 
-  /*
-   * =========================================================
-   * FLASHCARD ATUAL
-   * =========================================================
-   */
-
   const cardAtual =
-    flashcards.length > 0
-      ? flashcards[flashcardAtual]
+    flashcards.length >
+    0
+      ? flashcards[
+          flashcardAtual
+        ]
       : null;
 
-  /*
-   * =========================================================
-   * MOSTRAR / ESCONDER RESPOSTA
-   * =========================================================
-   */
+  useEffect(() => {
+    setMostrarResposta(
+      false
+    );
+  }, [flashcardAtual]);
 
   function alternarResposta() {
     setMostrarResposta(
@@ -384,47 +525,39 @@ export default function PaginaConteudo() {
     );
   }
 
-  /*
-   * =========================================================
-   * PRÓXIMO FLASHCARD
-   * =========================================================
-   */
-
   function proximoFlashcard() {
     if (
-      flashcards.length === 0
+      flashcards.length ===
+      0
     ) {
       return;
     }
+
+    setMostrarResposta(
+      false
+    );
 
     setFlashcardAtual(
       (atual) =>
         Math.min(
           atual + 1,
-          flashcards.length - 1
+          flashcards.length -
+            1
         )
     );
-
-    /*
-     * CORREÇÃO:
-     * quando muda de card, a resposta
-     * obrigatoriamente volta a ficar escondida.
-     */
-    setMostrarResposta(false);
   }
-
-  /*
-   * =========================================================
-   * FLASHCARD ANTERIOR
-   * =========================================================
-   */
 
   function anteriorFlashcard() {
     if (
-      flashcards.length === 0
+      flashcards.length ===
+      0
     ) {
       return;
     }
+
+    setMostrarResposta(
+      false
+    );
 
     setFlashcardAtual(
       (atual) =>
@@ -433,28 +566,21 @@ export default function PaginaConteudo() {
           0
         )
     );
-
-    /*
-     * CORREÇÃO:
-     * quando volta de card, a resposta
-     * também começa escondida.
-     */
-    setMostrarResposta(false);
   }
 
-  /*
-   * =========================================================
-   * MARCAR COMO ESTUDADO
-   * =========================================================
-   */
+  /* ========================================================
+     PROGRESSO
+     ======================================================== */
 
   async function alternarEstudado() {
-    const token = obterToken();
+    const token =
+      obterToken();
 
     if (!token) {
       setErro(
         'Sua sessão expirou. Faça login novamente.'
       );
+
       return;
     }
 
@@ -462,30 +588,39 @@ export default function PaginaConteudo() {
       !estudado;
 
     try {
-      setSalvandoEstudo(true);
+      setSalvandoEstudo(
+        true
+      );
+
       setErro('');
 
-      const resposta = await fetch(
-        `${API_URL}/conteudos/progresso/${topicoNumero}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type':
-              'application/json',
-            Authorization:
-              `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            estudado:
-              novoStatus,
-          }),
-        }
-      );
+      const resposta =
+        await fetch(
+          `${API_URL}/conteudos/progresso/${topicoNumero}`,
+          {
+            method: 'PUT',
+
+            headers: {
+              'Content-Type':
+                'application/json',
+
+              Authorization:
+                `Bearer ${token}`,
+            },
+
+            body: JSON.stringify({
+              estudado:
+                novoStatus,
+            }),
+          }
+        );
 
       const dados =
         await resposta
           .json()
-          .catch(() => ({}));
+          .catch(
+            () => ({})
+          );
 
       if (!resposta.ok) {
         throw new Error(
@@ -509,40 +644,41 @@ export default function PaginaConteudo() {
           'Não foi possível atualizar seu progresso.'
       );
     } finally {
-      setSalvandoEstudo(false);
+      setSalvandoEstudo(
+        false
+      );
     }
   }
 
-  /*
-   * =========================================================
-   * ESTILO DA MATÉRIA
-   * =========================================================
-   */
+  /* ========================================================
+     MATÉRIA
+     ======================================================== */
 
   const materiaStyle =
-    useMemo(() => {
-      return getSubjectStyle(
-        pagina?.materia || ''
-      );
-    }, [pagina?.materia]);
+    useMemo(
+      () =>
+        getSubjectStyle(
+          pagina?.materia ||
+            ''
+        ),
+      [pagina?.materia]
+    );
 
-  /*
-   * =========================================================
-   * RENDERIZAR BLOCO
-   * =========================================================
-   */
+  /* ========================================================
+     RENDERIZAR BLOCOS
+     ======================================================== */
 
-  function renderBloco(bloco) {
+  function renderBloco(
+    bloco
+  ) {
     const dados =
-      normalizarDados(bloco);
+      normalizarDados(
+        bloco
+      );
 
-    switch (bloco.tipo) {
-      /*
-       * =====================================================
-       * TEXTO
-       * =====================================================
-       */
-
+    switch (
+      bloco.tipo
+    ) {
       case 'texto':
         return (
           <section
@@ -562,12 +698,6 @@ export default function PaginaConteudo() {
             )}
           </section>
         );
-
-      /*
-       * =====================================================
-       * DESTAQUE
-       * =====================================================
-       */
 
       case 'destaque':
         return (
@@ -598,12 +728,6 @@ export default function PaginaConteudo() {
             </div>
           </section>
         );
-
-      /*
-       * =====================================================
-       * VÍDEO
-       * =====================================================
-       */
 
       case 'video': {
         const videoUrl =
@@ -636,8 +760,7 @@ export default function PaginaConteudo() {
               </div>
             ) : (
               <div className="pagina-block-placeholder">
-                O vídeo deste conteúdo ainda
-                não foi configurado.
+                O vídeo deste conteúdo ainda não foi configurado.
               </div>
             )}
 
@@ -649,12 +772,6 @@ export default function PaginaConteudo() {
           </section>
         );
       }
-
-      /*
-       * =====================================================
-       * IMAGEM
-       * =====================================================
-       */
 
       case 'imagem':
         return (
@@ -688,18 +805,11 @@ export default function PaginaConteudo() {
               </figure>
             ) : (
               <div className="pagina-block-placeholder">
-                A imagem deste conteúdo ainda
-                não foi configurada.
+                A imagem deste conteúdo ainda não foi configurada.
               </div>
             )}
           </section>
         );
-
-      /*
-       * =====================================================
-       * PDF
-       * =====================================================
-       */
 
       case 'pdf':
         return (
@@ -739,8 +849,7 @@ export default function PaginaConteudo() {
                   </strong>
 
                   <small>
-                    O arquivo será aberto em
-                    uma nova aba.
+                    O arquivo será aberto em uma nova aba.
                   </small>
                 </span>
 
@@ -751,18 +860,11 @@ export default function PaginaConteudo() {
               </a>
             ) : (
               <div className="pagina-block-placeholder">
-                O PDF deste conteúdo ainda
-                não foi configurado.
+                O PDF deste conteúdo ainda não foi configurado.
               </div>
             )}
           </section>
         );
-
-      /*
-       * =====================================================
-       * LISTA
-       * =====================================================
-       */
 
       case 'lista':
         return (
@@ -783,7 +885,9 @@ export default function PaginaConteudo() {
                 {dados.itens
                   .filter(
                     (item) =>
-                      String(item).trim()
+                      String(
+                        item
+                      ).trim()
                   )
                   .map(
                     (
@@ -791,10 +895,13 @@ export default function PaginaConteudo() {
                       index
                     ) => (
                       <li
-                        key={index}
+                        key={
+                          index
+                        }
                       >
                         <span className="pagina-list-marker">
-                          {index + 1}
+                          {index +
+                            1}
                         </span>
 
                         <span>
@@ -807,12 +914,6 @@ export default function PaginaConteudo() {
             )}
           </section>
         );
-
-      /*
-       * =====================================================
-       * FLASHCARDS
-       * =====================================================
-       */
 
       case 'flashcards':
         return (
@@ -843,15 +944,18 @@ export default function PaginaConteudo() {
               <div className="pagina-flashcards-loading">
                 Carregando flashcards...
               </div>
-            ) : flashcards.length === 0 ? (
+            ) : flashcards.length ===
+              0 ? (
               <div className="pagina-block-placeholder">
                 Nenhum flashcard relacionado foi encontrado.
               </div>
             ) : (
               <div className="pagina-flashcards-player">
-
                 <div className="pagina-flashcards-counter">
-                  CARD {flashcardAtual + 1} DE{' '}
+                  CARD{' '}
+                  {flashcardAtual +
+                    1}{' '}
+                  DE{' '}
                   {flashcards.length}
                 </div>
 
@@ -878,7 +982,6 @@ export default function PaginaConteudo() {
                 </div>
 
                 <div className="pagina-flashcard-actions">
-
                   <button
                     type="button"
                     className="pagina-secondary-button"
@@ -892,7 +995,6 @@ export default function PaginaConteudo() {
                   </button>
 
                   <div className="pagina-flashcard-navigation">
-
                     <button
                       type="button"
                       className="pagina-secondary-button"
@@ -900,7 +1002,8 @@ export default function PaginaConteudo() {
                         anteriorFlashcard
                       }
                       disabled={
-                        flashcardAtual === 0
+                        flashcardAtual ===
+                        0
                       }
                     >
                       ← Anterior
@@ -914,93 +1017,33 @@ export default function PaginaConteudo() {
                       }
                       disabled={
                         flashcardAtual ===
-                        flashcards.length - 1
+                        flashcards.length -
+                          1
                       }
                     >
                       Próximo →
                     </button>
-
                   </div>
-
                 </div>
-
               </div>
             )}
           </section>
         );
 
-      /*
-       * =====================================================
-       * QUESTÕES
-       * =====================================================
-       */
+      case 'questoes':
+        return (
+          <BlocoQuestoes
+            bloco={bloco}
+          />
+        );
 
-      case 'questoes': {
-        const ids =
-          formatarIds(
-            dados.ids
+      case 'simulado': {
+        const simuladoId =
+          Number(
+            dados.simuladoId ??
+              dados.id
           );
 
-        return (
-          <section
-            className="pagina-content-block pagina-resource-block"
-            key={bloco.id}
-          >
-            <div className="pagina-resource-block-icon">
-              <Icon
-                name="question"
-                size={23}
-              />
-            </div>
-
-            <div className="pagina-resource-block-copy">
-              <h2>
-                {dados.titulo ||
-                  'Pratique'}
-              </h2>
-
-              <p>
-                {dados.descricao ||
-                  'Resolva questões para fixar o conteúdo estudado.'}
-              </p>
-
-              {ids.length > 0 && (
-                <div className="pagina-id-list">
-                  {ids.map(
-                    (id) => (
-                      <span
-                        key={id}
-                      >
-                        #{id}
-                      </span>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="pagina-secondary-button"
-              onClick={() =>
-                navigate(
-                  '/simulados'
-                )
-              }
-            >
-              Praticar
-            </button>
-          </section>
-        );
-      }
-
-      /*
-       * =====================================================
-       * SIMULADO
-       * =====================================================
-       */
-
-      case 'simulado':
         return (
           <section
             className="pagina-content-block pagina-resource-block"
@@ -1024,11 +1067,14 @@ export default function PaginaConteudo() {
                   'Continue seus estudos realizando um simulado.'}
               </p>
 
-              {dados.id && (
+              {simuladoId >
+                0 && (
                 <div className="pagina-id-list">
                   <span>
                     Simulado #
-                    {dados.id}
+                    {
+                      simuladoId
+                    }
                   </span>
                 </div>
               )}
@@ -1037,77 +1083,36 @@ export default function PaginaConteudo() {
             <button
               type="button"
               className="pagina-secondary-button"
-              onClick={() =>
-                navigate(
-                  '/simulados'
-                )
-              }
+              onClick={() => {
+                if (
+                  simuladoId >
+                  0
+                ) {
+                  navigate(
+                    `/simulados?simuladoId=${simuladoId}`
+                  );
+                } else {
+                  navigate(
+                    '/simulados'
+                  );
+                }
+              }}
             >
-              Fazer simulado
+              {simuladoId >
+              0
+                ? 'Fazer simulado'
+                : 'Ver simulados'}
             </button>
           </section>
         );
-
-      /*
-       * =====================================================
-       * CHECKLIST
-       * =====================================================
-       */
+      }
 
       case 'checklist':
         return (
-          <section
-            className="pagina-content-block"
-            key={bloco.id}
-          >
-            <h2>
-              {dados.titulo ||
-                'Checklist de revisão'}
-            </h2>
-
-            <div className="pagina-checklist">
-              {(
-                Array.isArray(
-                  dados.itens
-                )
-                  ? dados.itens
-                  : []
-              )
-                .filter(
-                  (item) =>
-                    String(item).trim()
-                )
-                .map(
-                  (
-                    item,
-                    index
-                  ) => (
-                    <div
-                      key={index}
-                      className="pagina-check-item"
-                    >
-                      <span className="pagina-check-icon">
-                        <Icon
-                          name="check"
-                          size={14}
-                        />
-                      </span>
-
-                      <span>
-                        {item}
-                      </span>
-                    </div>
-                  )
-                )}
-            </div>
-          </section>
+          <BlocoChecklist
+            bloco={bloco}
+          />
         );
-
-      /*
-       * =====================================================
-       * TIPO DESCONHECIDO
-       * =====================================================
-       */
 
       default:
         return (
@@ -1127,11 +1132,9 @@ export default function PaginaConteudo() {
     }
   }
 
-  /*
-   * =========================================================
-   * CARREGANDO PÁGINA
-   * =========================================================
-   */
+  /* ========================================================
+     CARREGANDO
+     ======================================================== */
 
   if (carregando) {
     return (
@@ -1156,11 +1159,9 @@ export default function PaginaConteudo() {
     );
   }
 
-  /*
-   * =========================================================
-   * ERRO
-   * =========================================================
-   */
+  /* ========================================================
+     ERRO
+     ======================================================== */
 
   if (erro) {
     return (
@@ -1202,11 +1203,9 @@ export default function PaginaConteudo() {
     );
   }
 
-  /*
-   * =========================================================
-   * SEM PÁGINA
-   * =========================================================
-   */
+  /* ========================================================
+     SEM PÁGINA
+     ======================================================== */
 
   if (!pagina) {
     return (
@@ -1241,23 +1240,20 @@ export default function PaginaConteudo() {
           </strong>
 
           <span>
-            Este tópico ainda não possui uma
-            página de estudo cadastrada.
+            Este tópico ainda não possui uma página de estudo cadastrada.
           </span>
         </div>
       </div>
     );
   }
 
-  /*
-   * =========================================================
-   * PÁGINA
-   * =========================================================
-   */
+  const mostrarTopico =
+    pagina.topico ||
+    pagina.nome ||
+    '';
 
   return (
     <div className="pagina-conteudo-page">
-
       <button
         type="button"
         className="pagina-back-button"
@@ -1280,27 +1276,31 @@ export default function PaginaConteudo() {
         style={{
           '--pagina-accent':
             materiaStyle.color,
+
           '--pagina-accent-bg':
             materiaStyle.bg,
         }}
       >
         <div className="pagina-hero-top">
-
           <div className="pagina-breadcrumb">
             <span>
               Conteúdos
             </span>
 
-            <span>›</span>
+            <span>
+              ›
+            </span>
 
             <span>
               {pagina.materia}
             </span>
 
-            <span>›</span>
+            <span>
+              ›
+            </span>
 
             <span>
-              {pagina.topico}
+              {mostrarTopico}
             </span>
           </div>
 
@@ -1309,6 +1309,7 @@ export default function PaginaConteudo() {
             style={{
               background:
                 materiaStyle.bg,
+
               color:
                 materiaStyle.color,
             }}
@@ -1322,22 +1323,20 @@ export default function PaginaConteudo() {
 
             {pagina.materia}
           </div>
-
         </div>
 
         <div className="pagina-hero-content">
-
           <div className="pagina-hero-icon">
             <SubjectIcon
               materia={
                 pagina.materia
               }
               size={28}
+              color="#fff"
             />
           </div>
 
           <div>
-
             <span className="pagina-kicker">
               MATERIAL DE ESTUDO
             </span>
@@ -1351,23 +1350,19 @@ export default function PaginaConteudo() {
                 {pagina.descricao}
               </p>
             )}
-
           </div>
-
         </div>
       </header>
 
       <div className="pagina-layout">
-
         <main className="pagina-main">
-
-          {blocos.length > 0 ? (
+          {blocos.length >
+          0 ? (
             blocos.map(
               renderBloco
             )
           ) : (
             <div className="pagina-state-card">
-
               <div className="pagina-state-icon">
                 <Icon
                   name="book"
@@ -1382,16 +1377,12 @@ export default function PaginaConteudo() {
               <span>
                 Volte mais tarde para conferir as explicações e materiais.
               </span>
-
             </div>
           )}
-
         </main>
 
         <aside className="pagina-aside">
-
           <div className="pagina-progress-card">
-
             <span className="pagina-aside-label">
               SEU PROGRESSO
             </span>
@@ -1410,13 +1401,11 @@ export default function PaginaConteudo() {
 
             <button
               type="button"
-              className={
-                `pagina-study-button ${
-                  estudado
-                    ? 'completed'
-                    : ''
-                }`
-              }
+              className={`pagina-study-button ${
+                estudado
+                  ? 'completed'
+                  : ''
+              }`}
               onClick={
                 alternarEstudado
               }
@@ -1435,11 +1424,9 @@ export default function PaginaConteudo() {
                   ? 'Marcar como não estudado'
                   : 'Marcar como estudado'}
             </button>
-
           </div>
 
           <div className="pagina-aside-card">
-
             <span className="pagina-aside-label">
               SOBRE ESTE TÓPICO
             </span>
@@ -1460,7 +1447,7 @@ export default function PaginaConteudo() {
               </span>
 
               <strong>
-                {pagina.topico}
+                {mostrarTopico}
               </strong>
             </div>
 
@@ -1473,11 +1460,8 @@ export default function PaginaConteudo() {
                 {blocos.length}
               </strong>
             </div>
-
           </div>
-
         </aside>
-
       </div>
     </div>
   );
