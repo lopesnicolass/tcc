@@ -4,6 +4,7 @@ const {
     listarUsuarios,
     excluirUsuario,
     buscarUsuarioPorId,
+    buscarSenhaPorId,
     buscarUsuarioPorEmail,
     atualizarPerfil,
     atualizarSenha,
@@ -211,12 +212,35 @@ async function editarPerfil(req, res) {
                         }
 
 
+                        const dadosSenha =
+                            await new Promise((resolve, reject) => {
+
+                                buscarSenhaPorId(
+                                    usuarioId,
+                                    (erroSenha, resultado) => {
+
+                                        if (erroSenha) {
+                                            return reject(erroSenha);
+                                        }
+
+                                        resolve(resultado);
+                                    }
+                                );
+                            });
+
+                        if (!dadosSenha || !dadosSenha.senha) {
+
+                            return res.status(404).json({
+                                mensagem: "Usuário não encontrado."
+                            });
+
+                        }
+
                         const senhaCorreta =
                             await bcrypt.compare(
                                 senhaAtual,
-                                usuario.senha
+                                dadosSenha.senha
                             );
-
 
                         if (!senhaCorreta) {
 

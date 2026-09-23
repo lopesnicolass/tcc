@@ -15,6 +15,25 @@ export function ListaSimulados({
   abrirSimulado,
   carregandoQuestoes
 }) {
+  const gruposPorMateria = Array.from(
+    simuladosVisiveis.reduce(
+      (mapa, simulado) => {
+        const materia =
+          simulado.materia ||
+          'Sem matéria';
+
+        if (!mapa.has(materia)) {
+          mapa.set(materia, []);
+        }
+
+        mapa.get(materia).push(simulado);
+
+        return mapa;
+      },
+      new Map()
+    )
+  );
+
   return (
     <div>
 
@@ -131,104 +150,179 @@ export function ListaSimulados({
       ) : (
 
         <div
-          className="simulado-grid"
           style={{
             marginTop: '25px'
           }}
         >
+          {gruposPorMateria.map(
+            ([materia, listaMateria]) => {
+              const gruposPorConteudo =
+                Array.from(
+                  listaMateria.reduce(
+                    (mapa, simulado) => {
+                      const chave =
+                        simulado.topico_id != null
+                          ? `topico-${simulado.topico_id}`
+                          : 'sem-conteudo';
 
-          {simuladosVisiveis.map(
-            (simulado) => (
+                      if (!mapa.has(chave)) {
+                        mapa.set(chave, {
+                          nome:
+                            simulado.topico ||
+                            'Conteúdo não definido',
+                          simulados: []
+                        });
+                      }
 
-              <div
-                className="simulado-card"
-                key={simulado.id}
-              >
+                      mapa
+                        .get(chave)
+                        .simulados.push(
+                          simulado
+                        );
 
-                <div className="simulado-top">
+                      return mapa;
+                    },
+                    new Map()
+                  )
+                );
 
-                  <span className="simulado-subject">
-                    {simulado.materia ||
-                      'Simulado'}
-                  </span>
-
-                  <span
-                    className={`status-badge ${simulado.status}`}
-                  >
-                    {
-                      STATUS_LABEL[
-                        simulado.status
-                      ]
-                    }
-                  </span>
-
-                </div>
-
-                <h2
+              return (
+                <section
+                  key={materia}
                   style={{
-                    marginTop: '15px',
-                    marginBottom: '10px'
+                    marginBottom: '35px'
                   }}
                 >
-                  {simulado.titulo}
-                </h2>
-
-                {simulado.descricao && (
-                  <p
+                  <h2
                     style={{
-                      marginBottom: '20px'
+                      marginBottom: '8px'
                     }}
                   >
-                    {simulado.descricao}
-                  </p>
-                )}
+                    {materia}
+                  </h2>
 
-                <div className="simulado-meta">
+                  {gruposPorConteudo.map(
+                    ([
+                      chave,
+                      grupo
+                    ]) => (
+                      <div
+                        key={chave}
+                        style={{
+                          marginTop: '20px'
+                        }}
+                      >
+                        <h3
+                          style={{
+                            marginBottom: '15px'
+                          }}
+                        >
+                          {grupo.nome}
+                        </h3>
 
-                  <span>
-                    📝{' '}
-                    {
-                      simulado.quantidade_questoes
-                    }{' '}
-                    questões
-                  </span>
+                        <div className="simulado-grid">
+                          {grupo.simulados.map(
+                            (simulado) => (
+                              <div
+                                className="simulado-card"
+                                key={
+                                  simulado.id
+                                }
+                              >
+                                <div className="simulado-top">
+                                  <span className="simulado-subject">
+                                    {
+                                      simulado.materia ||
+                                      'Simulado'
+                                    }
+                                  </span>
 
-                  <span>
-                    ⏱{' '}
-                    {
-                      simulado.tempo_limite
-                    }{' '}
-                    minutos
-                  </span>
+                                  <span
+                                    className={`status-badge ${simulado.status}`}
+                                  >
+                                    {
+                                      STATUS_LABEL[
+                                        simulado.status
+                                      ]
+                                    }
+                                  </span>
+                                </div>
 
-                </div>
+                                <h2
+                                  style={{
+                                    marginTop: '15px',
+                                    marginBottom:
+                                      '10px'
+                                  }}
+                                >
+                                  {
+                                    simulado.titulo
+                                  }
+                                </h2>
 
-                <button
-                  className="simulado-btn"
-                  onClick={() =>
-                    abrirSimulado(
-                      simulado
+                                {simulado.descricao && (
+                                  <p
+                                    style={{
+                                      marginBottom:
+                                        '20px'
+                                    }}
+                                  >
+                                    {
+                                      simulado.descricao
+                                    }
+                                  </p>
+                                )}
+
+                                <div className="simulado-meta">
+                                  <span>
+                                    📝{' '}
+                                    {
+                                      simulado.quantidade_questoes
+                                    }{' '}
+                                    questões
+                                  </span>
+
+                                  <span>
+                                    ⏱{' '}
+                                    {
+                                      simulado.tempo_limite
+                                    }{' '}
+                                    minutos
+                                  </span>
+                                </div>
+
+                                <button
+                                  className="simulado-btn"
+                                  onClick={() =>
+                                    abrirSimulado(
+                                      simulado
+                                    )
+                                  }
+                                  disabled={
+                                    carregandoQuestoes
+                                  }
+                                  style={{
+                                    marginTop:
+                                      '20px'
+                                  }}
+                                >
+                                  {carregandoQuestoes
+                                    ? 'Carregando...'
+                                    : BTN_LABEL[
+                                        simulado.status
+                                      ]}
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
                     )
-                  }
-                  disabled={
-                    carregandoQuestoes
-                  }
-                  style={{
-                    marginTop: '20px'
-                  }}
-                >
-                  {carregandoQuestoes
-                    ? 'Carregando...'
-                    : BTN_LABEL[
-                        simulado.status
-                      ]}
-                </button>
-
-              </div>
-
-            )
+                  )}
+                </section>
+              );
+            }
           )}
-
         </div>
 
       )}

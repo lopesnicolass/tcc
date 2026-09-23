@@ -23,21 +23,14 @@ function headerAuth(comJson = false) {
   return headers;
 }
 
-const MATERIAS = [
-  'Português',
-  'Matemática',
-  'História',
-  'Geografia',
-  'Ciências'
-];
-
 const MIN_QUESTOES = 10;
 
 const emptySimulado = {
   nome: '',
   limiteTempo: '',
   dificuldade: 'Média',
-  materia: 'Português'
+  materiaId: '',
+  topicoId: ''
 };
 
 const emptyQuestao = {
@@ -52,6 +45,7 @@ const emptyQuestao = {
 
 export default function AdminSimulados() {
   const [simulados, setSimulados] = useState([]);
+  const [materiasConteudos, setMateriasConteudos] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptySimulado);
@@ -74,6 +68,7 @@ export default function AdminSimulados() {
 
   useEffect(() => {
     carregarSimulados();
+    carregarMateriasConteudos();
   }, []);
 
   // =====================================================
@@ -104,6 +99,41 @@ export default function AdminSimulados() {
       );
     } finally {
       setCarregando(false);
+    }
+  }
+
+  // =====================================================
+  // CARREGAR MATÉRIAS E CONTEÚDOS
+  // =====================================================
+
+  async function carregarMateriasConteudos() {
+    try {
+      const resposta = await fetch(
+        `${API_URL}/conteudos`,
+        {
+          headers: headerAuth()
+        }
+      );
+
+      if (!resposta.ok) {
+        throw new Error(
+          'Erro ao carregar matérias e conteúdos.'
+        );
+      }
+
+      const dados = await resposta.json();
+
+      setMateriasConteudos(
+        Array.isArray(dados.materias)
+          ? dados.materias
+          : []
+      );
+    } catch (error) {
+      console.error(error);
+
+      setErro(
+        'Não foi possível carregar as matérias e conteúdos.'
+      );
     }
   }
 
@@ -172,14 +202,27 @@ export default function AdminSimulados() {
 
       setSimuladoEditando(simulado.id);
 
+      const materiaEncontrada =
+        materiasConteudos.find(
+          (materia) =>
+            String(materia.nome) ===
+            String(dadosSimulado.materia)
+        );
+
       setForm({
         nome: dadosSimulado.titulo || '',
         limiteTempo:
           dadosSimulado.tempo_limite || '',
         dificuldade:
           dadosSimulado.dificuldade || 'Média',
-        materia:
-          dadosSimulado.materia || 'Português'
+        materiaId:
+          materiaEncontrada
+            ? String(materiaEncontrada.id)
+            : '',
+        topicoId:
+          dadosSimulado.topico_id != null
+            ? String(dadosSimulado.topico_id)
+            : ''
       });
 
       setQuestoes(
@@ -233,7 +276,10 @@ export default function AdminSimulados() {
   function alterarForm(campo, valor) {
     setForm((prev) => ({
       ...prev,
-      [campo]: valor
+      [campo]: valor,
+      ...(campo === 'materiaId'
+        ? { topicoId: '' }
+        : {})
     }));
   }
 
@@ -442,8 +488,34 @@ export default function AdminSimulados() {
       return false;
     }
 
-    if (!form.materia) {
+    if (!form.materiaId) {
       alert('Selecione uma matéria.');
+      return false;
+    }
+
+    if (!form.topicoId) {
+      alert('Selecione um conteúdo.');
+      return false;
+    }
+
+    const materiaSelecionada =
+      materiasConteudos.find(
+        (materia) =>
+          String(materia.id) ===
+          String(form.materiaId)
+      );
+
+    const topicoSelecionado =
+      materiaSelecionada?.topicos?.find(
+        (topico) =>
+          String(topico.id) ===
+          String(form.topicoId)
+      );
+
+    if (!materiaSelecionada || !topicoSelecionado) {
+      alert(
+        'Selecione um conteúdo existente na matéria escolhida.'
+      );
       return false;
     }
 
@@ -467,6 +539,13 @@ export default function AdminSimulados() {
   // =====================================================
 
   async function criarSimulado() {
+    const materiaSelecionada =
+      materiasConteudos.find(
+        (materia) =>
+          String(materia.id) ===
+          String(form.materiaId)
+      );
+
     const respostaSimulado = await fetch(
       `${API_URL}/simulados`,
       {
@@ -477,7 +556,10 @@ export default function AdminSimulados() {
           descricao: '',
           tempoLimite: Number(form.limiteTempo),
           quantidadeQuestoes: questoes.length,
-          materia: form.materia,
+          materia:
+            materiaSelecionada.nome,
+          topicoId:
+            Number(form.topicoId),
           dificuldade: form.dificuldade,
           ativo: 1
         })
@@ -541,7 +623,7 @@ export default function AdminSimulados() {
               questao.correta,
 
             materia:
-              form.materia
+              materiaSelecionada.nome
           })
         }
       );
@@ -611,6 +693,13 @@ export default function AdminSimulados() {
     }
 
     // Atualizar informações do simulado
+    const materiaSelecionada =
+      materiasConteudos.find(
+        (materia) =>
+          String(materia.id) ===
+          String(form.materiaId)
+      );
+
     const respostaSimulado = await fetch(
       `${API_URL}/simulados/${simuladoId}`,
       {
@@ -621,7 +710,10 @@ export default function AdminSimulados() {
           descricao: '',
           tempoLimite: Number(form.limiteTempo),
           quantidadeQuestoes: questoes.length,
-          materia: form.materia,
+          materia:
+            materiaSelecionada.nome,
+          topicoId:
+            Number(form.topicoId),
           dificuldade: form.dificuldade,
           ativo: 1
         })
@@ -674,7 +766,7 @@ export default function AdminSimulados() {
                   questao.correta,
 
                 materia:
-                  form.materia
+                  materiaSelecionada.nome
               })
             }
           );
@@ -745,7 +837,7 @@ export default function AdminSimulados() {
                   questao.correta,
 
                 materia:
-                  form.materia
+                  materiaSelecionada.nome
               })
             }
           );
@@ -804,7 +896,7 @@ export default function AdminSimulados() {
 
   // =====================================================
   // POSTAR / SALVAR
-  // =====================================================
+  // ==========================================
 
   async function handlePostar(e) {
     e.preventDefault();
@@ -871,12 +963,7 @@ export default function AdminSimulados() {
       </div>
 
       {erro && (
-        <div
-          className="stat-card"
-          style={{
-            marginBottom: '20px'
-          }}
-        >
+        <div className="stat-card simulado-error">
           <p>{erro}</p>
         </div>
       )}
@@ -908,14 +995,9 @@ export default function AdminSimulados() {
                   {s.titulo}
                 </strong>
 
-                <div
-                  style={{
-                    marginTop: '5px',
-                    fontSize: '14px',
-                    opacity: 0.7
-                  }}
-                >
+                <div className="admin-simulado-meta">
                   {s.materia || 'Sem matéria'} •{' '}
+                  {s.topico || 'Sem conteúdo'} •{' '}
                   {s.dificuldade || 'Média'} •{' '}
                   {s.quantidade_questoes || 0}{' '}
                   questões •{' '}
@@ -1072,39 +1154,111 @@ export default function AdminSimulados() {
                     Matéria
                   </span>
 
-                  <div className="modal-materia-list">
-                    {MATERIAS.map((m) => (
-                      <button
-                        type="button"
-                        key={m}
-                        className={`materia-pill ${
-                          form.materia === m
-                            ? 'selected'
-                            : ''
-                        }`}
-                        onClick={() =>
-                          alterarForm(
-                            'materia',
-                            m
+                  {materiasConteudos.length === 0 ? (
+                    <p className="modal-note">
+                      Cadastre uma matéria e pelo menos
+                      um conteúdo antes de criar um simulado.
+                    </p>
+                  ) : (
+                    <div className="modal-materia-list">
+                      {materiasConteudos.map(
+                        (materia) => (
+                          <button
+                            type="button"
+                            key={materia.id}
+                            className={`materia-pill ${
+                              String(form.materiaId) ===
+                              String(materia.id)
+                                ? 'selected'
+                                : ''
+                            }`}
+                            onClick={() =>
+                              alterarForm(
+                                'materiaId',
+                                String(materia.id)
+                              )
+                            }
+                            disabled={
+                              salvando ||
+                              excluindo
+                            }
+                          >
+                            {materia.nome}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                  <div className="modal-input-group simulado-content-group">
+                    <label>
+                      Conteúdo
+                    </label>
+
+                    <select
+                      value={form.topicoId}
+                      onChange={(e) =>
+                        alterarForm(
+                          'topicoId',
+                          e.target.value
+                        )
+                      }
+                      disabled={
+                        salvando ||
+                        excluindo ||
+                        !form.materiaId
+                      }
+                    >
+                      <option value="">
+                        {!form.materiaId
+                          ? 'Selecione uma matéria primeiro'
+                          : 'Selecione um conteúdo'}
+                      </option>
+
+                      {(
+                        materiasConteudos.find(
+                          (materia) =>
+                            String(materia.id) ===
+                            String(form.materiaId)
+                        )?.topicos || []
+                      )
+                        .filter(
+                          (topico) =>
+                            Number(topico.ativo) !== 0
+                        )
+                        .map(
+                          (topico) => (
+                            <option
+                              key={topico.id}
+                              value={topico.id}
+                            >
+                              {topico.nome}
+                            </option>
                           )
-                        }
-                        disabled={
-                          salvando ||
-                          excluindo
-                        }
-                      >
-                        {m}
-                      </button>
-                    ))}
+                        )}
+                    </select>
+
+                    {form.materiaId &&
+                      (
+                        materiasConteudos.find(
+                          (materia) =>
+                            String(materia.id) ===
+                            String(form.materiaId)
+                        )?.topicos || []
+                      ).filter(
+                        (topico) =>
+                          Number(topico.ativo) !== 0
+                      ).length === 0 && (
+                        <small>
+                          Esta matéria ainda não possui
+                          conteúdos cadastrados.
+                        </small>
+                      )}
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  marginTop: '20px'
-                }}
-              >
+              <div className="simulado-questoes-header">
                 <button
                   type="button"
                   className="mural-btn secondary"
@@ -1120,11 +1274,7 @@ export default function AdminSimulados() {
                 </button>
               </div>
 
-              <div
-                style={{
-                  marginTop: '15px'
-                }}
-              >
+              <div className="simulado-question-count">
                 <span
                   className={`question-count-badge ${
                     questoes.length <
@@ -1145,13 +1295,7 @@ export default function AdminSimulados() {
               </div>
 
               {questoes.length > 0 && (
-                <div
-                  style={{
-                    marginTop: '15px',
-                    maxHeight: '220px',
-                    overflowY: 'auto'
-                  }}
-                >
+                <div className="simulado-question-list">
                   {questoes.map(
                     (questao, index) => (
                       <div
@@ -1159,19 +1303,7 @@ export default function AdminSimulados() {
                           questao.id ||
                           `nova-${index}`
                         }
-                        style={{
-                          display: 'flex',
-                          justifyContent:
-                            'space-between',
-                          alignItems:
-                            'center',
-                          gap: '10px',
-                          padding: '10px',
-                          marginBottom: '8px',
-                          border:
-                            '1px solid #ddd',
-                          borderRadius: '8px'
-                        }}
+                        className="simulado-question-item"
                       >
                         <span>
                           Questão {index + 1}{' '}
@@ -1179,14 +1311,10 @@ export default function AdminSimulados() {
                           {questao.correta}
                         </span>
 
-                        <div
-                          style={{
-                            display: 'flex',
-                            gap: '8px'
-                          }}
-                        >
+                        <div className="simulado-question-actions">
                           <button
                             type="button"
+                            className="simulado-edit-question"
                             onClick={() =>
                               abrirEditarQuestao(
                                 index
@@ -1196,22 +1324,13 @@ export default function AdminSimulados() {
                               salvando ||
                               excluindo
                             }
-                            style={{
-                              border:
-                                'none',
-                              background:
-                                'transparent',
-                              cursor:
-                                'pointer',
-                              color:
-                                '#2563eb'
-                            }}
                           >
                             Editar
                           </button>
 
                           <button
                             type="button"
+                            className="simulado-remove-question"
                             onClick={() =>
                               removerQuestao(
                                 index
@@ -1221,16 +1340,6 @@ export default function AdminSimulados() {
                               salvando ||
                               excluindo
                             }
-                            style={{
-                              border:
-                                'none',
-                              background:
-                                'transparent',
-                              cursor:
-                                'pointer',
-                              color:
-                                '#dc2626'
-                            }}
                           >
                             Remover
                           </button>
@@ -1241,20 +1350,12 @@ export default function AdminSimulados() {
                 </div>
               )}
 
-              <div
-                className="modal-actions"
-                style={{
-                  marginTop: '20px',
-                  display: 'flex',
-                  justifyContent:
-                    'space-between'
-                }}
-              >
+              <div className="modal-actions simulado-modal-actions">
                 <div>
                   {simuladoEditando && (
                     <button
                       type="button"
-                      className="mural-btn"
+                      className="mural-btn simulado-delete-button"
                       onClick={
                         excluirSimulado
                       }
@@ -1262,11 +1363,6 @@ export default function AdminSimulados() {
                         salvando ||
                         excluindo
                       }
-                      style={{
-                        background:
-                          '#dc2626',
-                        color: '#fff'
-                      }}
                     >
                       {excluindo
                         ? 'Excluindo...'
@@ -1275,12 +1371,7 @@ export default function AdminSimulados() {
                   )}
                 </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '10px'
-                  }}
-                >
+                <div className="simulado-footer-actions">
                   <button
                     type="button"
                     className="mural-btn ghost"
@@ -1353,10 +1444,7 @@ export default function AdminSimulados() {
                   </label>
 
                   <textarea
-                    className="modal-textarea"
-                    style={{
-                      height: '90px'
-                    }}
+                    className="modal-textarea simulado-enunciado"
                     value={
                       questaoForm.enunciado
                     }

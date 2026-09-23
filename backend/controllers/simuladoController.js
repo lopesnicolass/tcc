@@ -30,6 +30,9 @@ function cadastrarSimulado(req, res) {
         quantidadeQuestoes,
         quantidade_questoes,
 
+        topicoId,
+        topico_id,
+
         ativo
     } = req.body;
 
@@ -39,12 +42,18 @@ function cadastrarSimulado(req, res) {
     const quantidade =
         quantidadeQuestoes ?? quantidade_questoes;
 
+    const idTopico =
+        topicoId ?? topico_id;
+
     if (
         !titulo ||
         !materia ||
         !dificuldade ||
         tempo === undefined ||
-        quantidade === undefined
+        quantidade === undefined ||
+        idTopico === undefined ||
+        idTopico === null ||
+        Number(idTopico) <= 0
     ) {
         return res.status(400).json({
             mensagem:
@@ -73,12 +82,20 @@ function cadastrarSimulado(req, res) {
         dificuldade,
         Number(tempo),
         Number(quantidade),
+        Number(idTopico),
         (erro, resultado) => {
             if (erro) {
                 console.error(
                     "❌ Erro ao cadastrar simulado:",
                     erro
                 );
+
+                if (erro.code === "TOPICO_NOT_FOUND") {
+                    return res.status(400).json({
+                        mensagem:
+                            "O conteúdo selecionado não existe para a matéria escolhida."
+                    });
+                }
 
                 return res.status(500).json({
                     mensagem:
@@ -99,6 +116,8 @@ function cadastrarSimulado(req, res) {
                     tempo_limite: Number(tempo),
                     quantidade_questoes:
                         Number(quantidade),
+                    topico_id:
+                        Number(idTopico),
                     ativo: ativo ?? 1
                 }
             });
@@ -203,7 +222,10 @@ function editarSimulado(req, res) {
         tempo_limite,
 
         quantidadeQuestoes,
-        quantidade_questoes
+        quantidade_questoes,
+
+        topicoId,
+        topico_id
     } = req.body;
 
     const tempo =
@@ -213,16 +235,22 @@ function editarSimulado(req, res) {
         quantidadeQuestoes ??
         quantidade_questoes;
 
+    const idTopico =
+        topicoId ?? topico_id;
+
     if (
         !titulo ||
         !materia ||
         !dificuldade ||
         tempo === undefined ||
-        quantidade === undefined
+        quantidade === undefined ||
+        idTopico === undefined ||
+        idTopico === null ||
+        Number(idTopico) <= 0
     ) {
         return res.status(400).json({
             mensagem:
-                "Preencha todos os campos obrigatórios."
+                "Preencha todos os campos obrigatórios, incluindo o conteúdo."
         });
     }
 
@@ -248,12 +276,20 @@ function editarSimulado(req, res) {
         dificuldade,
         Number(tempo),
         Number(quantidade),
+        Number(idTopico),
         (erro, resultado) => {
             if (erro) {
                 console.error(
                     "❌ Erro ao atualizar simulado:",
                     erro
                 );
+
+                if (erro.code === "TOPICO_NOT_FOUND") {
+                    return res.status(400).json({
+                        mensagem:
+                            "O conteúdo selecionado não existe para a matéria escolhida."
+                    });
+                }
 
                 return res.status(500).json({
                     mensagem:

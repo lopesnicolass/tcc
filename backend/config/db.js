@@ -445,6 +445,10 @@ db.run(`
             dificuldade TEXT NOT NULL
                 DEFAULT 'Média',
 
+            topico_id INTEGER
+                REFERENCES topicos(id)
+                ON DELETE SET NULL,
+
             ativo INTEGER NOT NULL DEFAULT 1,
 
             data_criacao DATETIME
@@ -640,6 +644,16 @@ db.run(`
         ON flashcards(materia)
     `);
 
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_simulados_materia
+        ON simulados(materia)
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_simulados_topico
+        ON simulados(topico_id)
+    `);
+
 
     // =====================================================
     // MIGRAÇÃO — XP / STREAK
@@ -727,6 +741,34 @@ db.run(`
                     ALTER TABLE simulados
                     ADD COLUMN dificuldade TEXT
                     NOT NULL DEFAULT 'Média'
+                `);
+            }
+
+            if (!nomesColunas.includes("topico_id")) {
+
+                db.run(`
+                    ALTER TABLE simulados
+                    ADD COLUMN topico_id INTEGER
+                    REFERENCES topicos(id)
+                    ON DELETE SET NULL
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar topico_id aos simulados:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        db.run(`
+                            CREATE INDEX IF NOT EXISTS idx_simulados_topico
+                            ON simulados(topico_id)
+                        `);
+                    }
+                });
+            } else {
+                db.run(`
+                    CREATE INDEX IF NOT EXISTS idx_simulados_topico
+                    ON simulados(topico_id)
                 `);
             }
 

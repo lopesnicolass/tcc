@@ -4,6 +4,43 @@ const db = require("../config/db");
 // CRIAR SIMULADO
 // =====================================================
 
+function validarTopicoDaMateria(
+    topicoId,
+    materia,
+    callback
+) {
+    const sql = `
+        SELECT
+            t.id,
+            t.nome,
+            t.materia_id,
+            m.nome AS materia_nome
+        FROM topicos t
+        INNER JOIN materias m
+            ON m.id = t.materia_id
+        WHERE t.id = ?
+          AND m.nome = ?
+          AND t.ativo = 1
+          AND m.ativa = 1
+    `;
+
+    db.get(
+        sql,
+        [topicoId, materia],
+        (erro, topico) => {
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, topico);
+        }
+    );
+}
+
+// =====================================================
+// CRIAR SIMULADO
+// =====================================================
+
 function criarSimulado(
     titulo,
     descricao,
@@ -11,37 +48,62 @@ function criarSimulado(
     dificuldade,
     tempoLimite,
     quantidadeQuestoes,
+    topicoId,
     callback
 ) {
-    const sql = `
-        INSERT INTO simulados
-        (
-            titulo,
-            descricao,
-            materia,
-            dificuldade,
-            tempo_limite,
-            quantidade_questoes
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+    validarTopicoDaMateria(
+        topicoId,
+        materia,
+        (erroValidacao, topico) => {
+            if (erroValidacao) {
+                return callback(erroValidacao);
+            }
 
-    db.run(
-        sql,
-        [
-            titulo,
-            descricao,
-            materia,
-            dificuldade,
-            tempoLimite,
-            quantidadeQuestoes
-        ],
-        function (erro) {
-            if (erro) {
+            if (!topico) {
+                const erro =
+                    new Error(
+                        "O conteúdo informado não existe para a matéria selecionada."
+                    );
+
+                erro.code =
+                    "TOPICO_NOT_FOUND";
+
                 return callback(erro);
             }
 
-            callback(null, this);
+            const sql = `
+                INSERT INTO simulados
+                (
+                    titulo,
+                    descricao,
+                    materia,
+                    dificuldade,
+                    topico_id,
+                    tempo_limite,
+                    quantidade_questoes
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            db.run(
+                sql,
+                [
+                    titulo,
+                    descricao,
+                    materia,
+                    dificuldade,
+                    topicoId,
+                    tempoLimite,
+                    quantidadeQuestoes
+                ],
+                function (erro) {
+                    if (erro) {
+                        return callback(erro);
+                    }
+
+                    callback(null, this);
+                }
+            );
         }
     );
 }
@@ -52,10 +114,21 @@ function criarSimulado(
 
 function listarSimulados(callback) {
     const sql = `
-        SELECT *
-        FROM simulados
-        WHERE ativo = 1
-        ORDER BY id DESC
+        SELECT
+            s.*,
+            t.nome AS topico,
+            t.id AS topico_id,
+            COALESCE(
+                m.nome,
+                s.materia
+            ) AS materia
+        FROM simulados s
+        LEFT JOIN topicos t
+            ON t.id = s.topico_id
+        LEFT JOIN materias m
+            ON m.id = t.materia_id
+        WHERE s.ativo = 1
+        ORDER BY s.id DESC
     `;
 
     db.all(sql, [], callback);
@@ -87,37 +160,62 @@ function atualizarSimulado(
     dificuldade,
     tempoLimite,
     quantidadeQuestoes,
+    topicoId,
     callback
 ) {
-    const sql = `
-        UPDATE simulados
-        SET
-            titulo = ?,
-            descricao = ?,
-            materia = ?,
-            dificuldade = ?,
-            tempo_limite = ?,
-            quantidade_questoes = ?
-        WHERE id = ?
-    `;
+    validarTopicoDaMateria(
+        topicoId,
+        materia,
+        (erroValidacao, topico) => {
+            if (erroValidacao) {
+                return callback(erroValidacao);
+            }
 
-    db.run(
-        sql,
-        [
-            titulo,
-            descricao,
-            materia,
-            dificuldade,
-            tempoLimite,
-            quantidadeQuestoes,
-            id
-        ],
-        function (erro) {
-            if (erro) {
+            if (!topico) {
+                const erro =
+                    new Error(
+                        "O conteúdo informado não existe para a matéria selecionada."
+                    );
+
+                erro.code =
+                    "TOPICO_NOT_FOUND";
+
                 return callback(erro);
             }
 
-            callback(null, this);
+            const sql = `
+                UPDATE simulados
+                SET
+                    titulo = ?,
+                    descricao = ?,
+                    materia = ?,
+                    dificuldade = ?,
+                    topico_id = ?,
+                    tempo_limite = ?,
+                    quantidade_questoes = ?
+                WHERE id = ?
+            `;
+
+            db.run(
+                sql,
+                [
+                    titulo,
+                    descricao,
+                    materia,
+                    dificuldade,
+                    topicoId,
+                    tempoLimite,
+                    quantidadeQuestoes,
+                    id
+                ],
+                function (erro) {
+                    if (erro) {
+                        return callback(erro);
+                    }
+
+                    callback(null, this);
+                }
+            );
         }
     );
 }

@@ -41,6 +41,22 @@ function buscarUsuarioPorId(id, callback) {
 }
 
 // =====================================================
+// BUSCAR HASH DA SENHA POR ID
+// =====================================================
+
+function buscarSenhaPorId(id, callback) {
+
+    const sql = `
+        SELECT senha
+        FROM usuarios
+        WHERE id = ?
+    `;
+
+    db.get(sql, [id], callback);
+}
+
+
+// =====================================================
 // CRIAR USUÁRIO
 // =====================================================
 
@@ -278,6 +294,7 @@ function adicionarXP(
 module.exports = {
     buscarUsuarioPorEmail,
     buscarUsuarioPorId,
+    buscarSenhaPorId,
     criarUsuario,
     listarUsuarios,
     atualizarPerfil,
