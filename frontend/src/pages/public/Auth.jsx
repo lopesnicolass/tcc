@@ -210,9 +210,7 @@ setTimeout(() => {
                 </div>
                 <form onSubmit={handleLoginSubmit} noValidate>
                   {loginServerError && (
-                    <div className="field" style={{ marginBottom: 6 }}>
-                      <span style={{ color: '#C1462F', fontSize: 13.5, fontWeight: 600 }}>{loginServerError}</span>
-                    </div>
+                    <div className="form-error">{loginServerError}</div>
                   )}
                   <div className={`field ${loginErrors.email ? 'has-error' : ''}`}>
                     <label htmlFor="login-email">E-mail</label>
@@ -242,7 +240,7 @@ setTimeout(() => {
                     <button
                       type="button"
                       className="link-inline link-btn"
-                      onClick={() => fireToast('Envie um e-mail para suporte@prepararetecamp.com para redefinir sua senha.')}
+                      onClick={() => navigate('/esqueci-senha')}
                     >
                       Esqueceu a senha?
                     </button>

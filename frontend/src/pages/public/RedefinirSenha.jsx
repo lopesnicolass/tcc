@@ -137,11 +137,7 @@ export default function RedefinirSenha() {
 
                 <form onSubmit={handleSubmit} noValidate>
                   {erro && (
-                    <div className="field" style={{ marginBottom: 6 }}>
-                      <span style={{ color: '#C1462F', fontSize: 13.5, fontWeight: 600 }}>
-                        {erro}
-                      </span>
-                    </div>
+                    <div className="form-error">{erro}</div>
                   )}
 
                   <div className="field">

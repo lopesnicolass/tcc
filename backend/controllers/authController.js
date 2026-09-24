@@ -1,10 +1,19 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const {
     criarUsuario,
-    buscarUsuarioPorEmail
+    buscarUsuarioPorEmail,
+    salvarTokenRecuperacao,
+    buscarUsuarioPorTokenRecuperacao,
+    limparTokenRecuperacao,
+    atualizarSenha
 } = require("../models/usuarioModel");
+
+const {
+    enviarEmailRecuperacao
+} = require("../config/mailer");
 
 const {
     criarSessao
@@ -192,10 +201,205 @@ async function login(req, res) {
 
 
 // ============================
+// SOLICITAR RECUPERAÇÃO DE SENHA
+// ============================
+
+async function esqueciSenha(req, res) {
+
+    const email = String(req.body?.email || "")
+        .trim()
+        .toLowerCase();
+
+    if (!email) {
+        return res.status(400).json({
+            mensagem: "Informe seu e-mail."
+        });
+    }
+
+    const mensagemPadrao =
+        "Se o e-mail estiver cadastrado, enviaremos um link para redefinir sua senha.";
+
+    buscarUsuarioPorEmail(email, async (erro, usuario) => {
+
+        if (erro) {
+            console.error(erro);
+
+            return res.status(500).json({
+                mensagem: "Não foi possível processar a recuperação agora."
+            });
+        }
+
+        if (!usuario) {
+            return res.status(200).json({
+                mensagem: mensagemPadrao
+            });
+        }
+
+        try {
+            const token = crypto.randomBytes(32).toString("hex");
+            const tokenHash = crypto
+                .createHash("sha256")
+                .update(token)
+                .digest("hex");
+
+            const minutosValidade = 15;
+            const expiraEm = Date.now() + (minutosValidade * 60 * 1000);
+
+            salvarTokenRecuperacao(
+                usuario.id,
+                tokenHash,
+                expiraEm,
+                async (erroToken) => {
+
+                    if (erroToken) {
+                        console.error(erroToken);
+
+                        return res.status(500).json({
+                            mensagem: "Não foi possível gerar a recuperação agora."
+                        });
+                    }
+
+                    const baseUrl =
+                        process.env.FRONTEND_URL ||
+                        "http://localhost:5173";
+
+                    const link =
+                        `${baseUrl}/redefinir-senha?token=${token}`;
+
+                    try {
+                        await enviarEmailRecuperacao({
+                            destinatario: usuario.email,
+                            nome: usuario.nome,
+                            link
+                        });
+
+                        return res.status(200).json({
+                            mensagem: mensagemPadrao
+                        });
+                    } catch (erroEmail) {
+                        console.error(erroEmail);
+
+                        limparTokenRecuperacao(usuario.id, () => {});
+
+                        return res.status(500).json({
+                            mensagem: "Não foi possível enviar o e-mail de recuperação."
+                        });
+                    }
+                }
+            );
+
+        } catch (erroGeracao) {
+            console.error(erroGeracao);
+
+            return res.status(500).json({
+                mensagem: "Não foi possível processar a recuperação agora."
+            });
+        }
+    });
+}
+
+
+// ============================
+// REDEFINIR SENHA
+// ============================
+
+async function redefinirSenha(req, res) {
+
+    const token = String(req.body?.token || "");
+    const novaSenha = String(req.body?.novaSenha || "");
+
+    if (!token || !novaSenha) {
+        return res.status(400).json({
+            mensagem: "Dados de redefinição incompletos."
+        });
+    }
+
+    if (novaSenha.length < 6) {
+        return res.status(400).json({
+            mensagem: "A senha deve ter pelo menos 6 caracteres."
+        });
+    }
+
+    const tokenHash = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    buscarUsuarioPorTokenRecuperacao(
+        tokenHash,
+        Date.now(),
+        async (erro, usuario) => {
+
+            if (erro) {
+                console.error(erro);
+
+                return res.status(500).json({
+                    mensagem: "Não foi possível validar o link de recuperação."
+                });
+            }
+
+            if (!usuario) {
+                return res.status(400).json({
+                    mensagem: "Esse link de recuperação é inválido ou expirou."
+                });
+            }
+
+            try {
+                const senhaCriptografada =
+                    await bcrypt.hash(novaSenha, 10);
+
+                atualizarSenha(
+                    usuario.id,
+                    senhaCriptografada,
+                    (erroSenha) => {
+
+                        if (erroSenha) {
+                            console.error(erroSenha);
+
+                            return res.status(500).json({
+                                mensagem: "Não foi possível atualizar sua senha."
+                            });
+                        }
+
+                        limparTokenRecuperacao(
+                            usuario.id,
+                            (erroLimpeza) => {
+
+                                if (erroLimpeza) {
+                                    console.error(erroLimpeza);
+
+                                    return res.status(500).json({
+                                        mensagem: "Sua senha foi alterada, mas não foi possível finalizar a recuperação."
+                                    });
+                                }
+
+                                return res.status(200).json({
+                                    mensagem: "Senha redefinida com sucesso!"
+                                });
+                            }
+                        );
+                    }
+                );
+
+            } catch (erroHash) {
+                console.error(erroHash);
+
+                return res.status(500).json({
+                    mensagem: "Não foi possível atualizar sua senha."
+                });
+            }
+        }
+    );
+}
+
+
+// ============================
 // EXPORTAR
 // ============================
 
 module.exports = {
     cadastrar,
-    login
+    login,
+    esqueciSenha,
+    redefinirSenha
 };

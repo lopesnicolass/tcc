@@ -50,7 +50,11 @@ db.serialize(() => {
 
             last_active_date TEXT DEFAULT NULL,
 
-            foto_perfil TEXT DEFAULT NULL
+            foto_perfil TEXT DEFAULT NULL,
+
+            reset_senha_token_hash TEXT DEFAULT NULL,
+
+            reset_senha_expira_em INTEGER DEFAULT NULL
 
         )
     `);
@@ -91,6 +95,48 @@ db.serialize(() => {
                     } else {
                         console.log(
                             "Coluna foto_perfil_dados adicionada com sucesso."
+                        );
+                    }
+
+                });
+            }
+
+            if (!nomesColunas.includes("reset_senha_token_hash")) {
+
+                db.run(`
+                    ALTER TABLE usuarios
+                    ADD COLUMN reset_senha_token_hash TEXT DEFAULT NULL
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar reset_senha_token_hash:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        console.log(
+                            "Coluna reset_senha_token_hash adicionada com sucesso."
+                        );
+                    }
+
+                });
+            }
+
+            if (!nomesColunas.includes("reset_senha_expira_em")) {
+
+                db.run(`
+                    ALTER TABLE usuarios
+                    ADD COLUMN reset_senha_expira_em INTEGER DEFAULT NULL
+                `, (erroAlteracao) => {
+
+                    if (erroAlteracao) {
+                        console.error(
+                            "Erro ao adicionar reset_senha_expira_em:",
+                            erroAlteracao.message
+                        );
+                    } else {
+                        console.log(
+                            "Coluna reset_senha_expira_em adicionada com sucesso."
                         );
                     }
 

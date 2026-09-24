@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Landing from './pages/public/Landing.jsx';
 import Auth from './pages/public/Auth.jsx';
+import EsqueciSenha from './pages/public/EsqueciSenha.jsx';
+import RedefinirSenha from './pages/public/RedefinirSenha.jsx';
 
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
@@ -50,6 +52,16 @@ export default function App() {
         <Route
           path="/login"
           element={<Auth />}
+        />
+
+        <Route
+          path="/esqueci-senha"
+          element={<EsqueciSenha />}
+        />
+
+        <Route
+          path="/redefinir-senha"
+          element={<RedefinirSenha />}
         />
 
         {/* ÁREA PROTEGIDA */}

@@ -55,6 +55,63 @@ function buscarSenhaPorId(id, callback) {
     db.get(sql, [id], callback);
 }
 
+function salvarTokenRecuperacao(id, tokenHash, expiraEm, callback) {
+
+    const sql = `
+        UPDATE usuarios
+        SET
+            reset_senha_token_hash = ?,
+            reset_senha_expira_em = ?
+        WHERE id = ?
+    `;
+
+    db.run(
+        sql,
+        [tokenHash, expiraEm, id],
+        function (erro) {
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+function buscarUsuarioPorTokenRecuperacao(tokenHash, agora, callback) {
+
+    const sql = `
+        SELECT
+            id,
+            nome,
+            email
+        FROM usuarios
+        WHERE reset_senha_token_hash = ?
+          AND reset_senha_expira_em > ?
+    `;
+
+    db.get(sql, [tokenHash, agora], callback);
+}
+
+function limparTokenRecuperacao(id, callback) {
+
+    const sql = `
+        UPDATE usuarios
+        SET
+            reset_senha_token_hash = NULL,
+            reset_senha_expira_em = NULL
+        WHERE id = ?
+    `;
+
+    db.run(sql, [id], function (erro) {
+        if (erro) {
+            return callback(erro);
+        }
+
+        callback(null, this.changes);
+    });
+}
+
 
 // =====================================================
 // CRIAR USUÁRIO
@@ -295,6 +352,9 @@ module.exports = {
     buscarUsuarioPorEmail,
     buscarUsuarioPorId,
     buscarSenhaPorId,
+    salvarTokenRecuperacao,
+    buscarUsuarioPorTokenRecuperacao,
+    limparTokenRecuperacao,
     criarUsuario,
     listarUsuarios,
     atualizarPerfil,
