@@ -191,58 +191,32 @@ export default function AdminConstrutorConteudos() {
   }
 
   return (
-    <div className="admin-page">
-      <header className="page-header">
+    <div className="admin-page admin-builder-page">
+      <header className="page-header admin-builder-header">
         <div>
-          <span className="admin-section-kicker">
-            CMS / CONTEÚDO
-          </span>
-
+          <span className="admin-section-kicker">CMS / CONTEÚDO</span>
           <h1>Construir conteúdos</h1>
-
           <p>
-            Escolha um tópico para montar a página
-            de conteúdo que será exibida aos alunos.
+            Escolha um tópico para montar a página de conteúdo que será exibida aos alunos.
           </p>
         </div>
       </header>
 
       {erro && (
-        <div
-          style={{
-            marginBottom: '18px',
-            padding: '13px 15px',
-            borderRadius: '12px',
-            background: '#fff1f0',
-            border: '1px solid #ffc9c5',
-            color: '#b42318',
-            fontSize: '13px',
-            fontWeight: 700,
-          }}
-        >
+        <div className="admin-builder-error">
           {erro}
         </div>
       )}
 
       <section className="admin-content-stats">
         <article className="stat-card">
-          <div className="stat-value">
-            {materias.length}
-          </div>
-
-          <div className="stat-label">
-            Matérias
-          </div>
+          <div className="stat-value">{materias.length}</div>
+          <div className="stat-label">Matérias</div>
         </article>
 
         <article className="stat-card">
-          <div className="stat-value">
-            {totalTopicos}
-          </div>
-
-          <div className="stat-label">
-            Tópicos disponíveis
-          </div>
+          <div className="stat-value">{totalTopicos}</div>
+          <div className="stat-label">Tópicos disponíveis</div>
         </article>
 
         <article className="stat-card">
@@ -250,309 +224,79 @@ export default function AdminConstrutorConteudos() {
             {materias.reduce(
               (total, materia) =>
                 total +
-                (materia.topicos || []).filter(
-                  (topico) =>
-                    Boolean(topico.ativo)
-                ).length,
+                (materia.topicos || []).filter((topico) => Boolean(topico.ativo)).length,
               0
             )}
           </div>
-
-          <div className="stat-label">
-            Tópicos ativos
-          </div>
+          <div className="stat-label">Tópicos ativos</div>
         </article>
       </section>
 
-      <section
-        className="panel-card"
-        style={{
-          marginTop: '18px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <Icon
-            name="search"
-            size={19}
-          />
-
-          <input
-            type="text"
-            value={busca}
-            onChange={(event) =>
-              setBusca(event.target.value)
-            }
-            placeholder="Buscar matéria ou tópico..."
-            style={{
-              flex: 1,
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              font: 'inherit',
-              color: 'var(--ink)',
-            }}
-          />
-        </div>
+      <section className="panel-card admin-builder-search">
+        <Icon name="search" size={21} />
+        <input
+          type="text"
+          value={busca}
+          onChange={(event) => setBusca(event.target.value)}
+          placeholder="Buscar matéria ou tópico..."
+        />
       </section>
 
       {carregando ? (
-        <div
-          className="admin-content-empty large"
-          style={{
-            marginTop: '18px',
-          }}
-        >
-          <strong>
-            Carregando tópicos...
-          </strong>
-
-          <span>
-            Buscando os conteúdos cadastrados.
-          </span>
+        <div className="admin-content-empty large admin-builder-state">
+          <strong>Carregando tópicos...</strong>
+          <span>Buscando os conteúdos cadastrados.</span>
         </div>
       ) : materiasFiltradas.length === 0 ? (
-        <div
-          className="admin-content-empty large"
-          style={{
-            marginTop: '18px',
-          }}
-        >
-          <strong>
-            Nenhum tópico encontrado
-          </strong>
-
-          <span>
-            Tente pesquisar por outro nome.
-          </span>
+        <div className="admin-content-empty large admin-builder-state">
+          <strong>Nenhum tópico encontrado</strong>
+          <span>Tente pesquisar por outro nome.</span>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '14px',
-            marginTop: '18px',
-          }}
-        >
+        <div className="admin-builder-materias">
           {materiasFiltradas.map((materia) => (
-            <section
-              key={materia.id}
-              className="panel-card"
-              style={{
-                padding: '0',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '13px',
-                  padding: '18px 20px',
-                  borderBottom:
-                    '1px solid var(--line)',
-                }}
-              >
+            <section key={materia.id} className="panel-card admin-builder-materia">
+              <div className="admin-builder-materia-header">
                 <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background:
-                      materia.cor ||
-                      'var(--accent)',
-                    color: '#fff',
-                    flexShrink: 0,
-                  }}
+                  className="admin-builder-materia-icon"
+                  style={{ background: materia.cor || 'var(--accent)' }}
                 >
-                  <Icon
-                    name="book"
-                    size={20}
-                  />
+                  <Icon name="book" size={23} />
                 </div>
 
-                <div
-                  style={{
-                    minWidth: 0,
-                    flex: 1,
-                  }}
-                >
-                  <h3
-                    style={{
-                      margin: 0,
-                      color: 'var(--ink)',
-                    }}
-                  >
-                    {materia.nome}
-                  </h3>
-
-                  <p
-                    style={{
-                      margin: '4px 0 0',
-                      color: 'var(--muted)',
-                      fontSize: '12px',
-                    }}
-                  >
-                    {materia.topicos?.length || 0}{' '}
-                    tópico(s)
-                  </p>
+                <div className="admin-builder-materia-title">
+                  <h3>{materia.nome}</h3>
+                  <p>{materia.topicos?.length || 0} tópico(s)</p>
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                  padding: '12px',
-                }}
-              >
-                {(materia.topicos || []).map(
-                  (topico, index) => (
-                    <button
-                      key={topico.id}
-                      type="button"
-                      onClick={() =>
-                        setTopicoSelecionado(
-                          topico
-                        )
-                      }
-                      disabled={
-                        !Boolean(
-                          topico.ativo
-                        )
-                      }
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding:
-                          '13px 14px',
-                        border:
-                          '1px solid var(--line)',
-                        borderRadius: '11px',
-                        background:
-                          '#fff',
-                        cursor:
-                          topico.ativo
-                            ? 'pointer'
-                            : 'not-allowed',
-                        textAlign: 'left',
-                        opacity:
-                          topico.ativo
-                            ? 1
-                            : 0.55,
-                      }}
-                    >
-                      <span
-                        style={{
-                          minWidth: '30px',
-                          height: '30px',
-                          borderRadius:
-                            '9px',
-                          display: 'flex',
-                          alignItems:
-                            'center',
-                          justifyContent:
-                            'center',
-                          background:
-                            '#f1f3f2',
-                          color:
-                            'var(--muted)',
-                          fontSize: '11px',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {String(
-                          topico.ordem ||
-                            index + 1
-                        ).padStart(
-                          2,
-                          '0'
-                        )}
-                      </span>
+              <div className="admin-builder-topicos">
+                {(materia.topicos || []).map((topico, index) => (
+                  <button
+                    key={topico.id}
+                    type="button"
+                    className={`admin-builder-topico ${topico.ativo ? '' : 'is-disabled'}`}
+                    onClick={() => setTopicoSelecionado(topico)}
+                    disabled={!Boolean(topico.ativo)}
+                  >
+                    <span className="admin-builder-topico-number">
+                      {String(topico.ordem || index + 1).padStart(2, '0')}
+                    </span>
 
-                      <span
-                        style={{
-                          flex: 1,
-                          minWidth: 0,
-                        }}
-                      >
-                        <strong
-                          style={{
-                            display:
-                              'block',
-                            color:
-                              'var(--ink)',
-                            fontSize:
-                              '13px',
-                          }}
-                        >
-                          {topico.nome}
-                        </strong>
+                    <span className="admin-builder-topico-main">
+                      <strong>{topico.nome}</strong>
+                      {topico.descricao && (
+                        <small>{topico.descricao}</small>
+                      )}
+                    </span>
 
-                        {topico.descricao && (
-                          <small
-                            style={{
-                              display:
-                                'block',
-                              marginTop:
-                                '3px',
-                              color:
-                                'var(--muted)',
-                              fontSize:
-                                '11px',
-                            }}
-                          >
-                            {
-                              topico.descricao
-                            }
-                          </small>
-                        )}
-                      </span>
-
-                      <span
-                        style={{
-                          display:
-                            'flex',
-                          alignItems:
-                            'center',
-                          gap: '8px',
-                          color:
-                            'var(--accent-dark)',
-                          fontSize:
-                            '11px',
-                          fontWeight:
-                            800,
-                          whiteSpace:
-                            'nowrap',
-                        }}
-                      >
-                        <Icon
-                          name="edit"
-                          size={15}
-                        />
-
-                        Construir
-
-                        <Icon
-                          name="chevron"
-                          size={16}
-                        />
-                      </span>
-                    </button>
-                  )
-                )}
+                    <span className="admin-builder-topico-action">
+                      <Icon name="edit" size={18} />
+                      <span>Construir</span>
+                      <Icon name="chevron" size={19} />
+                    </span>
+                  </button>
+                ))}
               </div>
             </section>
           ))}

@@ -1,71 +1,72 @@
 /* =========================================================
    CONSTRUTOR DE CONTEÚDOS — ADMIN
+   Visual mais amplo e confortável
    ========================================================= */
 
-.admin-page {
+.admin-builder-page {
   width: 100%;
 }
 
-/* Cabeçalho */
-
-.page-header {
-  margin-bottom: 22px;
+.admin-builder-header {
+  margin-bottom: 26px;
 }
 
-.page-header > div {
-  max-width: 850px;
+.admin-builder-header > div {
+  max-width: 920px;
 }
 
-.admin-section-kicker {
-  display: inline-block;
-  margin-bottom: 8px;
-  color: var(--accent-dark, #0D47A1);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-}
-
-.page-header h1 {
+.admin-builder-header h1 {
   margin: 0;
   color: var(--ink, #173A5E);
-  font-size: 32px;
-  line-height: 1.1;
+  font-size: 38px;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
 }
 
-.page-header p {
-  margin: 8px 0 0;
+.admin-builder-header p {
+  max-width: 760px;
+  margin: 10px 0 0;
   color: var(--muted, #6B849A);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.65;
 }
 
-/* =========================================================
-   CARDS DE ESTATÍSTICAS
-   ========================================================= */
+.admin-builder-error {
+  margin-bottom: 20px;
+  padding: 15px 17px;
+  border: 1px solid #ffc9c5;
+  border-radius: 13px;
+  background: #fff1f0;
+  color: #b42318;
+  font-size: 14px;
+  font-weight: 700;
+}
 
 .admin-content-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
+  margin-bottom: 20px;
 }
 
 .stat-card {
   position: relative;
   overflow: hidden;
-  padding: 20px;
+  min-height: 126px;
+  padding: 24px;
   border: 1px solid var(--line, #e4e8e5);
-  border-radius: 16px;
+  border-radius: 18px;
   background: #fff;
-  box-shadow: 0 8px 24px rgba(25, 45, 35, 0.04);
+  box-shadow: 0 10px 28px rgba(25, 45, 35, 0.05);
 }
 
 .stat-card::after {
   content: '';
   position: absolute;
-  right: -22px;
-  bottom: -30px;
-  width: 90px;
-  height: 90px;
+  right: -26px;
+  bottom: -36px;
+  width: 110px;
+  height: 110px;
   border-radius: 50%;
   background: rgba(33, 110, 74, 0.06);
 }
@@ -74,162 +75,265 @@
   position: relative;
   z-index: 1;
   color: var(--ink, #173A5E);
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 34px;
+  font-weight: 850;
   line-height: 1;
 }
 
 .stat-label {
   position: relative;
   z-index: 1;
-  margin-top: 7px;
+  margin-top: 10px;
   color: var(--muted, #6B849A);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
 }
-
-/* =========================================================
-   PAINEL DE BUSCA
-   ========================================================= */
 
 .panel-card {
   border: 1px solid var(--line, #e4e8e5);
-  border-radius: 16px;
+  border-radius: 18px;
   background: #fff;
-  box-shadow: 0 8px 24px rgba(25, 45, 35, 0.04);
+  box-shadow: 0 10px 28px rgba(25, 45, 35, 0.045);
 }
 
-.panel-card input {
-  font-family: inherit;
+.admin-builder-search {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 58px;
+  margin-bottom: 20px;
+  padding: 0 18px;
+  color: #68756e;
 }
 
-.panel-card input::placeholder {
+.admin-builder-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink, #173A5E);
+  font: inherit;
+  font-size: 15px;
+}
+
+.admin-builder-search input::placeholder {
   color: #9ba39f;
 }
 
-/* =========================================================
-   LISTA DE MATÉRIAS
-   ========================================================= */
-
-.panel-card .panel-card {
-  box-shadow: none;
+.admin-builder-state {
+  min-height: 260px;
+  margin-top: 0;
 }
 
-.panel-card h3 {
-  font-weight: 800;
-}
-
-.panel-card button {
-  font-family: inherit;
-}
-
-.panel-card button:not(:disabled) {
-  transition:
-    border-color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.panel-card button:not(:disabled):hover {
-  border-color: rgba(33, 110, 74, 0.25) !important;
-  background: #fbfdfc !important;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(25, 45, 35, 0.05);
-}
-
-.panel-card button:not(:disabled):focus-visible {
-  outline: 3px solid rgba(33, 110, 74, 0.16);
-  outline-offset: 2px;
-}
-
-/* Ícone da matéria */
-
-.panel-card > div:first-child > div:first-child {
-  transition: transform 160ms ease;
-}
-
-.panel-card:hover > div:first-child > div:first-child {
-  transform: translateY(-1px);
-}
-
-/* =========================================================
-   TÓPICOS
-   ========================================================= */
-
-.panel-card button strong {
-  line-height: 1.35;
-}
-
-.panel-card button small {
-  line-height: 1.45;
-}
-
-/* =========================================================
-   ESTADOS VAZIOS / CARREGAMENTO
-   ========================================================= */
-
-.admin-content-empty {
-  border: 1px dashed #d8dfdb;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.admin-content-empty.large {
-  min-height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 30px;
-  text-align: center;
-}
-
+.admin-builder-state strong,
 .admin-content-empty strong {
   color: var(--ink, #173A5E);
+  font-size: 16px;
+}
+
+.admin-builder-state span,
+.admin-content-empty span {
+  margin-top: 7px;
+  color: var(--muted, #6B849A);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.admin-builder-materias {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-builder-materia {
+  overflow: hidden;
+}
+
+.admin-builder-materia-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line, #e4e8e5);
+}
+
+.admin-builder-materia-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(25, 45, 35, 0.1);
+}
+
+.admin-builder-materia-title {
+  min-width: 0;
+}
+
+.admin-builder-materia-title h3 {
+  margin: 0;
+  color: var(--ink, #173A5E);
+  font-size: 20px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.admin-builder-materia-title p {
+  margin: 5px 0 0;
+  color: var(--muted, #6B849A);
   font-size: 14px;
 }
 
-.admin-content-empty span {
-  margin-top: 6px;
-  color: var(--muted, #6B849A);
-  font-size: 12px;
+.admin-builder-topicos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
 }
 
-/* =========================================================
-   RESPONSIVIDADE
-   ========================================================= */
+.admin-builder-topico {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 16px;
+  border: 1px solid var(--line, #e1e6e3);
+  border-radius: 14px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
 
-@media (max-width: 900px) {
+.admin-builder-topico:hover:not(:disabled) {
+  border-color: rgba(33, 110, 74, 0.24);
+  background: #fbfdfc;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(25, 45, 35, 0.06);
+}
+
+.admin-builder-topico:focus-visible {
+  outline: 3px solid rgba(33, 110, 74, 0.13);
+  outline-offset: 2px;
+}
+
+.admin-builder-topico.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-builder-topico-number {
+  min-width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #f0f3f2;
+  color: var(--muted, #6B849A);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.admin-builder-topico-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-builder-topico-main strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink, #173A5E);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+}
+
+.admin-builder-topico-main small {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--muted, #6B849A);
+  font-size: 13px;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-builder-topico-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--accent-dark, #0D47A1);
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.admin-builder-topico-action svg:first-child {
+  opacity: 0.9;
+}
+
+@media (max-width: 1000px) {
   .admin-content-stats {
     grid-template-columns: 1fr;
   }
+}
 
-  .page-header h1 {
-    font-size: 28px;
+@media (max-width: 700px) {
+  .admin-builder-header h1 {
+    font-size: 31px;
+  }
+
+  .admin-builder-header p {
+    font-size: 14px;
+  }
+
+  .admin-builder-materia-header {
+    padding: 18px;
+  }
+
+  .admin-builder-materia-title h3 {
+    font-size: 18px;
+  }
+
+  .admin-builder-topico {
+    align-items: flex-start;
+  }
+
+  .admin-builder-topico-action span {
+    display: none;
   }
 }
 
-@media (max-width: 640px) {
-  .page-header h1 {
-    font-size: 25px;
+@media (max-width: 520px) {
+  .admin-builder-search {
+    min-height: 54px;
   }
 
-  .page-header p {
+  .admin-builder-topicos {
+    padding: 11px;
+  }
+
+  .admin-builder-topico {
+    gap: 11px;
+    padding: 13px;
+  }
+
+  .admin-builder-topico-main strong {
+    font-size: 14px;
+  }
+
+  .admin-builder-topico-main small {
     font-size: 12px;
-  }
-
-  .stat-card {
-    padding: 17px;
-  }
-
-  .stat-value {
-    font-size: 25px;
-  }
-
-  .panel-card button {
-    padding: 11px !important;
+    white-space: normal;
   }
 }
-/* Refinamento visual TENNA — seleção de tópicos */
-.admin-page{max-width:1180px;margin:0 auto}.page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.stat-card{border-color:rgba(13,71,161,.10);box-shadow:0 8px 25px -24px rgba(13,71,161,.55)}.stat-card::after{background:rgba(33,150,243,.07)}.panel-card{border-color:rgba(13,71,161,.10);box-shadow:0 9px 26px -25px rgba(13,71,161,.55)}.panel-card button:not(:disabled):hover{border-color:rgba(33,150,243,.22)!important;background:#f8fbfe!important;box-shadow:0 7px 18px -15px rgba(13,71,161,.35)}

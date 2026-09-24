@@ -1113,3 +1113,463 @@
     justify-content: flex-start;
   }
 }
+
+/* =========================================================
+   REFINAMENTO VISUAL — CONSTRUTOR / EDITOR
+   ========================================================= */
+
+.editor-page-header {
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+.editor-page-header h1 {
+  font-size: 36px !important;
+  line-height: 1.15;
+}
+
+.editor-page-header > div:first-child > p {
+  max-width: 760px;
+  margin-top: 10px;
+  font-size: 15px !important;
+  line-height: 1.65;
+}
+
+.editor-back-button {
+  margin-bottom: 12px;
+  font-size: 14px !important;
+}
+
+.editor-layout {
+  grid-template-columns: minmax(0, 1fr) 330px !important;
+  gap: 22px !important;
+}
+
+.editor-main {
+  gap: 20px;
+}
+
+.editor-sidebar {
+  gap: 18px;
+  top: 22px;
+}
+
+.editor-panel {
+  padding: 24px !important;
+  border-radius: 20px !important;
+}
+
+.editor-panel-title {
+  margin-bottom: 20px;
+}
+
+.editor-panel-title h2,
+.editor-sidebar h2 {
+  font-size: 20px !important;
+  line-height: 1.3;
+}
+
+.editor-panel-kicker {
+  margin-bottom: 7px;
+  font-size: 11px !important;
+}
+
+.editor-page-fields {
+  gap: 16px;
+}
+
+.editor-field {
+  gap: 8px;
+}
+
+.editor-field-label {
+  font-size: 14px !important;
+}
+
+.editor-field input,
+.editor-field select {
+  height: 46px;
+  padding: 0 14px;
+  font-size: 15px !important;
+  border-radius: 11px;
+}
+
+.editor-field textarea {
+  min-height: 125px;
+  padding: 13px 14px;
+  font-size: 15px !important;
+  line-height: 1.55;
+  border-radius: 11px;
+}
+
+.editor-field-help {
+  font-size: 12px !important;
+  line-height: 1.45;
+}
+
+.editor-primary-button,
+.editor-secondary-button,
+.editor-danger-button,
+.editor-add-button,
+.editor-small-button {
+  font-size: 14px !important;
+}
+
+.editor-primary-button,
+.editor-secondary-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 11px;
+}
+
+.editor-danger-button {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+}
+
+.editor-header-actions {
+  gap: 10px;
+}
+
+.editor-publication-status {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font-size: 13px !important;
+}
+
+.editor-success,
+.editor-error {
+  margin-bottom: 18px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+.editor-block-list {
+  gap: 14px;
+}
+
+.editor-block {
+  border-radius: 15px !important;
+}
+
+.editor-block-header {
+  padding: 15px 16px;
+  gap: 14px;
+}
+
+.editor-block-name {
+  gap: 10px;
+}
+
+.editor-block-number {
+  width: 31px;
+  height: 31px;
+  border-radius: 9px;
+  font-size: 11px;
+}
+
+.editor-block-icon {
+  width: 35px;
+  height: 35px;
+  border-radius: 10px;
+}
+
+.editor-block-name strong {
+  font-size: 14px !important;
+}
+
+.editor-block-name small {
+  margin-top: 3px;
+  font-size: 11px !important;
+}
+
+.editor-block-actions {
+  gap: 6px;
+}
+
+.editor-icon-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.editor-block-body {
+  padding: 19px;
+}
+
+.editor-block-body h3 {
+  margin-bottom: 9px;
+  font-size: 16px !important;
+}
+
+.editor-block-body p {
+  font-size: 14px !important;
+  line-height: 1.75;
+}
+
+.editor-block-placeholder {
+  padding: 22px;
+  border-radius: 11px;
+  font-size: 13px !important;
+  line-height: 1.5;
+}
+
+.editor-block-highlight {
+  gap: 6px;
+  padding: 14px 15px;
+  border-radius: 10px;
+}
+
+.editor-block-highlight strong {
+  font-size: 14px !important;
+}
+
+.editor-block-highlight span {
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+
+.editor-preview-list {
+  font-size: 14px !important;
+  line-height: 1.9;
+}
+
+.editor-preview-tag {
+  padding: 7px 9px;
+  border-radius: 8px;
+  font-size: 11px !important;
+}
+
+.editor-resource {
+  padding: 10px 12px;
+  font-size: 13px !important;
+  border-radius: 9px;
+}
+
+.editor-sidebar-description {
+  margin: 8px 0 16px;
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+
+.editor-types {
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.editor-type {
+  min-height: 60px;
+  gap: 11px !important;
+  padding: 11px 12px !important;
+  border-radius: 11px !important;
+}
+
+.editor-type > span {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+}
+
+.editor-type strong {
+  font-size: 14px !important;
+}
+
+.editor-type small {
+  margin-top: 4px;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.editor-full-button {
+  min-height: 46px;
+  margin-top: 14px;
+}
+
+.editor-danger-panel p {
+  margin: 8px 0 14px;
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+
+.editor-empty,
+.editor-loading {
+  padding: 46px 24px;
+}
+
+.editor-empty-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 15px;
+}
+
+.editor-empty strong,
+.editor-loading strong {
+  font-size: 17px !important;
+}
+
+.editor-empty > span,
+.editor-loading span {
+  max-width: 460px;
+  margin: 7px 0 16px;
+  font-size: 13px !important;
+  line-height: 1.65;
+}
+
+.editor-add-button {
+  min-height: 46px;
+  margin-top: 14px;
+  border-radius: 11px;
+}
+
+.editor-items {
+  gap: 9px;
+}
+
+.editor-items-header > span {
+  font-size: 14px !important;
+}
+
+.editor-small-button {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 12px !important;
+}
+
+.editor-item-row {
+  grid-template-columns: 32px minmax(0, 1fr) 36px;
+  gap: 8px;
+}
+
+.editor-item-row > span {
+  font-size: 12px;
+}
+
+.editor-item-row input {
+  height: 43px;
+  padding: 0 11px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.editor-preview {
+  border-radius: 11px;
+}
+
+.editor-preview > span {
+  padding: 9px 11px;
+  font-size: 11px;
+}
+
+.editor-preview iframe {
+  height: 260px;
+}
+
+.editor-modal-overlay {
+  padding: 24px;
+}
+
+.editor-modal {
+  width: min(780px, 100%);
+  border-radius: 20px !important;
+}
+
+.editor-modal-header {
+  padding: 20px 22px;
+}
+
+.editor-modal-header h2 {
+  font-size: 20px;
+}
+
+.editor-modal-body {
+  padding: 22px;
+  gap: 17px;
+}
+
+.editor-modal-footer {
+  gap: 10px;
+  padding: 16px 22px;
+}
+
+.editor-related {
+  gap: 12px;
+}
+
+.editor-related-header strong {
+  font-size: 14px !important;
+}
+
+.editor-related-header span {
+  font-size: 12px !important;
+}
+
+.editor-search {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+}
+
+.editor-search input {
+  font-size: 13px !important;
+}
+
+.editor-related-list {
+  gap: 8px;
+  max-height: 340px;
+}
+
+.editor-related-item {
+  gap: 10px !important;
+  padding: 11px !important;
+  border-radius: 10px !important;
+}
+
+.editor-related-check {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+}
+
+.editor-related-item strong {
+  font-size: 13px;
+}
+
+.editor-related-item small {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.editor-related-empty {
+  padding: 22px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+  .editor-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .editor-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  .editor-page-header h1 {
+    font-size: 31px !important;
+  }
+
+  .editor-page-header > div:first-child > p {
+    font-size: 14px !important;
+  }
+
+  .editor-panel {
+    padding: 19px !important;
+  }
+}
