@@ -106,6 +106,9 @@ export default function Cronograma() {
   const [activities, setActivities] =
     useState([]);
 
+  const [datasImportantes, setDatasImportantes] =
+    useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -243,8 +246,28 @@ export default function Cronograma() {
     }
   }
 
+  async function carregarDatasImportantes() {
+    try {
+      const data = await request('/calendario/datas-importantes');
+
+      setDatasImportantes(
+        Array.isArray(data?.datas)
+          ? data.datas
+          : []
+      );
+    } catch (erro) {
+      console.error(
+        'Erro ao carregar datas importantes:',
+        erro
+      );
+
+      setDatasImportantes([]);
+    }
+  }
+
   useEffect(() => {
     carregarCronograma();
+    carregarDatasImportantes();
   }, [usuarioId]);
 
   const monthTitle =
@@ -304,6 +327,21 @@ export default function Cronograma() {
           b.horario || ''
         )
       );
+
+  const selectedImportantDates =
+    datasImportantes.filter(
+      (item) => item.data === selectedDate
+    );
+
+  const monthImportantDates =
+    datasImportantes.filter(
+      (item) =>
+        item.data?.startsWith(
+          `${currentMonth.getFullYear()}-${pad(
+            currentMonth.getMonth() + 1
+          )}`
+        )
+    );
 
   const monthPrefix =
     `${currentMonth.getFullYear()}-${pad(
@@ -790,7 +828,8 @@ export default function Cronograma() {
 
         <p>
           Toque em um dia do calendário
-          para ver ou adicionar atividades.
+          para ver suas atividades e as datas importantes
+          do Vestibulinho.
         </p>
 
         <div className="calendar-actions-buttons">
@@ -916,26 +955,22 @@ export default function Cronograma() {
 
         <div className="calendar-overview-tip">
 
-          <span
-            style={{
-              color:
-                'var(--accent-dark)'
-            }}
-          >
+          <span className="calendar-important-summary-icon">
             <Icon
-              name="bulb"
+              name="calendar"
               size={22}
             />
           </span>
 
           <p>
-            Use o{' '}
+            Este mês tem{' '}
             <strong>
-              Plano automático
+              {monthImportantDates.length}{' '}
+              {monthImportantDates.length === 1
+                ? 'data importante'
+                : 'datas importantes'}
             </strong>{' '}
-            para receber uma sugestão
-            de rotina e trazer o plano
-            para o calendário.
+            definidas pela administração.
           </p>
 
         </div>
@@ -1012,6 +1047,17 @@ export default function Cronograma() {
                       key
                   );
 
+                const dayImportantDates =
+                  datasImportantes.filter(
+                    (item) =>
+                      item.data ===
+                      key
+                  );
+
+                const totalDayEvents =
+                  dayActivities.length +
+                  dayImportantDates.length;
+
                 const inMonth =
                   day.getMonth() ===
                   currentMonth.getMonth();
@@ -1054,8 +1100,20 @@ export default function Cronograma() {
                       {day.getDate()}
                     </span>
 
+                    {dayImportantDates
+                      .slice(0, 2)
+                      .map((item) => (
+                        <span
+                          key={`important-${item.id}`}
+                          className="calendar-event calendar-important-event"
+                        >
+                          <span className="calendar-event-icon">📌</span>
+                          {item.titulo}
+                        </span>
+                      ))}
+
                     {dayActivities
-                      .slice(0, 3)
+                      .slice(0, Math.max(0, 3 - dayImportantDates.length))
                       .map((a) => {
 
                         const style =
@@ -1085,14 +1143,12 @@ export default function Cronograma() {
                           >
 
                             <span className="calendar-event-icon">
-
                               <SubjectIcon
                                 materia={
                                   a.materia
                                 }
                                 size={11}
                               />
-
                             </span>
 
                             {a.nome}
@@ -1102,16 +1158,12 @@ export default function Cronograma() {
                         );
                       })}
 
-                    {dayActivities.length >
-                      3 && (
+                    {totalDayEvents > 3 && (
 
                       <span className="calendar-more">
-
                         +
-                        {dayActivities.length -
-                          3}{' '}
+                        {totalDayEvents - 3}{' '}
                         mais
-
                       </span>
 
                     )}
@@ -1164,6 +1216,28 @@ export default function Cronograma() {
             </button>
 
           </div>
+
+          {selectedImportantDates.length > 0 && (
+            <div className="calendar-important-list">
+              <span className="calendar-important-list-label">
+                DATAS IMPORTANTES
+              </span>
+
+              {selectedImportantDates.map((item) => (
+                <article
+                  className="calendar-important-card"
+                  key={item.id}
+                >
+                  <span className="calendar-important-pin">📌</span>
+                  <div>
+                    <strong>{item.titulo}</strong>
+                    {item.tipo && <span>{item.tipo}</span>}
+                    {item.descricao && <p>{item.descricao}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
 
           <div className="calendar-task-list">
 

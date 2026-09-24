@@ -293,3 +293,89 @@
     flex: 1;
   }
 }
+/* =========================================================
+   DATAS IMPORTANTES DO VESTIBULINHO
+   ========================================================= */
+
+.calendar-important-summary-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #fff1df;
+  color: #b26a13;
+}
+
+.calendar-important-event {
+  background: #fff4e5;
+  border-left-color: #c87920;
+  color: #a85f10;
+  font-weight: 800;
+}
+
+.calendar-important-list {
+  padding: 15px 0 3px;
+  border-bottom: 1px solid var(--line);
+}
+
+.calendar-important-list-label {
+  display: block;
+  margin-bottom: 9px;
+  color: #b26a13;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.calendar-important-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 9px;
+  padding: 11px;
+  border: 1px solid #f1d8b9;
+  border-radius: 13px;
+  background: #fffaf3;
+}
+
+.calendar-important-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 27px;
+  border-radius: 9px;
+  background: #fff0da;
+  font-size: 14px;
+}
+
+.calendar-important-card > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.calendar-important-card strong {
+  display: block;
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.calendar-important-card > div > span {
+  display: block;
+  margin-top: 3px;
+  color: #b26a13;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.calendar-important-card p {
+  margin: 5px 0 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.45;
+}

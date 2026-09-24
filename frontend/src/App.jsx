@@ -31,6 +31,7 @@ import AdminFlashCards from './pages/adm/AdminFlashCards.jsx';
 import AdminProvas from './pages/adm/AdminProvas.jsx';
 import AdminConteudos from './pages/adm/AdminConteudos.jsx';
 import AdminCronogramas from './pages/adm/AdminCronogramas.jsx';
+import AdminCalendario from './pages/adm/AdminCalendario.jsx';
 
 import XPToast from './components/XPToast.jsx';
 
@@ -167,6 +168,11 @@ export default function App() {
               <Route
                 path="cronogramas"
                 element={<AdminCronogramas />}
+              />
+
+              <Route
+                path="calendario"
+                element={<AdminCalendario />}
               />
 
               <Route

@@ -44,6 +44,9 @@ const flashcardRoutes =
 const cronogramaRoutes =
     require("./routes/cronogramaRoutes");
 
+const calendarioRoutes =
+    require("./routes/calendarioRoutes");
+
 const resultadoFlashcardRoutes =
     require("./routes/resultadoFlashcardRoutes");
 
@@ -60,6 +63,7 @@ const checklistRoutes =
 // Cria a estrutura adicional do checklist.
 // Não apaga nem recria o banco existente.
 require("./config/ensureChecklist");
+require("./config/ensureCalendario");
 
 // =====================================================
 // APP
@@ -152,6 +156,11 @@ app.use(
 app.use(
     "/cronograma",
     cronogramaRoutes
+);
+
+app.use(
+    "/calendario",
+    calendarioRoutes
 );
 
 app.use(

@@ -361,6 +361,27 @@ db.run(`
     db.run(`CREATE INDEX IF NOT EXISTS idx_cronograma_usuario_data ON cronograma_atividades(usuario_id, data)`);
 
     // =====================================================
+    // DATAS IMPORTANTES DO VESTIBULINHO
+    // =====================================================
+
+    db.run(`
+        CREATE TABLE IF NOT EXISTS datas_importantes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            tipo TEXT NOT NULL DEFAULT 'Outro',
+            data TEXT NOT NULL,
+            descricao TEXT DEFAULT '',
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    db.run(`
+        CREATE INDEX IF NOT EXISTS idx_datas_importantes_data
+        ON datas_importantes(data)
+    `);
+
+    // =====================================================
     // ÍNDICES — PLANOS AUTOMÁTICOS
     // =====================================================
 

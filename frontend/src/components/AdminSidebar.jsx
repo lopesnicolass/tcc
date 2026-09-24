@@ -22,11 +22,6 @@ const NAV_SECTIONS = [
         icon: 'book',
       },
       {
-        to: '/admin/conteudos/construir',
-        label: 'Construir conteúdos',
-        icon: 'book',
-      },
-      {
         to: '/admin/simulados',
         label: 'Simulados',
         icon: 'check',
@@ -39,6 +34,11 @@ const NAV_SECTIONS = [
       {
         to: '/admin/cronogramas',
         label: 'Cronogramas',
+        icon: 'calendar',
+      },
+      {
+        to: '/admin/calendario',
+        label: 'Calendário',
         icon: 'calendar',
       },
       {
