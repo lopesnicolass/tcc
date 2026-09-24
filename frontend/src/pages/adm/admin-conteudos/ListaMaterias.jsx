@@ -14,6 +14,7 @@ export function ListaMaterias({
   excluirMateria,
   abrirNovoTopico,
   abrirEditarTopico,
+  abrirConstrutor,
   alternarTopico,
   excluirTopico,
 }) {
@@ -506,6 +507,22 @@ export function ListaMaterias({
                                   ? 'ATIVO'
                                   : 'INATIVO'}
                               </span>
+
+                              <button
+                                type="button"
+                                className="mural-btn admin-topic-build"
+                                onClick={() =>
+                                  abrirConstrutor(
+                                    topico
+                                  )
+                                }
+                              >
+                                <Icon
+                                  name="edit"
+                                  size={14}
+                                />
+                                Construir
+                              </button>
 
                               <button
                                 type="button"

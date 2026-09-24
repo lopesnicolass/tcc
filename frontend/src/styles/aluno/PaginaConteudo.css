@@ -1960,3 +1960,211 @@
     margin-top: 12px;
   }
 }
+/* =========================================================
+   MELHORIAS DA TELA DE CONTEÚDO DO ALUNO
+   ========================================================= */
+
+.dashboard-sem-sidebar {
+  background:
+    radial-gradient(circle at top right, rgba(33, 150, 243, 0.08), transparent 34%),
+    var(--paper);
+}
+
+.dashboard-sem-sidebar .dashboard-content {
+  width: 100%;
+  padding: clamp(28px, 4vw, 54px) clamp(24px, 5vw, 72px);
+}
+
+.dashboard-sem-sidebar .pagina-conteudo-page {
+  max-width: 1320px;
+  padding-bottom: 72px;
+}
+
+.dashboard-sem-sidebar .pagina-back-button {
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.dashboard-sem-sidebar .pagina-hero {
+  margin-bottom: 28px;
+  padding: 32px 36px;
+  border-radius: 26px;
+  box-shadow: 0 20px 42px -28px rgba(13, 71, 161, 0.55);
+}
+
+.dashboard-sem-sidebar .pagina-hero-top {
+  margin-bottom: 28px;
+}
+
+.dashboard-sem-sidebar .pagina-breadcrumb {
+  gap: 8px;
+  font-size: 12px;
+}
+
+.dashboard-sem-sidebar .pagina-materia-badge {
+  padding: 9px 13px;
+  font-size: 12px;
+}
+
+.dashboard-sem-sidebar .pagina-hero-content {
+  gap: 19px;
+}
+
+.dashboard-sem-sidebar .pagina-hero-icon {
+  width: 68px;
+  height: 68px;
+  flex-basis: 68px;
+  border-radius: 20px;
+}
+
+.dashboard-sem-sidebar .pagina-kicker {
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+.dashboard-sem-sidebar .pagina-hero h1 {
+  max-width: 980px;
+  font-size: clamp(34px, 4vw, 48px);
+}
+
+.dashboard-sem-sidebar .pagina-hero p {
+  max-width: 920px;
+  margin-top: 12px;
+  font-size: 15px;
+}
+
+.dashboard-sem-sidebar .pagina-layout {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+}
+
+.dashboard-sem-sidebar .pagina-main {
+  gap: 18px;
+}
+
+.dashboard-sem-sidebar .pagina-content-block,
+.dashboard-sem-sidebar .pagina-progress-card,
+.dashboard-sem-sidebar .pagina-aside-card {
+  border-radius: 21px;
+  box-shadow: 0 12px 30px -24px rgba(13, 71, 161, 0.5);
+}
+
+.dashboard-sem-sidebar .pagina-content-block {
+  padding: 29px 31px;
+}
+
+.dashboard-sem-sidebar .pagina-content-block h2 {
+  margin-bottom: 14px;
+  font-size: 22px;
+}
+
+.dashboard-sem-sidebar .pagina-rich-text {
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.dashboard-sem-sidebar .pagina-muted {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.dashboard-sem-sidebar .pagina-video {
+  border-radius: 18px;
+}
+
+.dashboard-sem-sidebar .pagina-image img {
+  max-height: 680px;
+  border-radius: 17px;
+}
+
+.dashboard-sem-sidebar .pagina-flashcard {
+  min-height: 285px;
+  padding: 42px;
+  border-radius: 22px;
+}
+
+.dashboard-sem-sidebar .pagina-flashcard-content strong {
+  font-size: clamp(22px, 3vw, 30px);
+}
+
+.dashboard-sem-sidebar .pagina-aside {
+  gap: 15px;
+  top: 24px;
+}
+
+.dashboard-sem-sidebar .pagina-progress-card,
+.dashboard-sem-sidebar .pagina-aside-card {
+  padding: 22px;
+}
+
+.dashboard-sem-sidebar .pagina-aside-label {
+  font-size: 10.5px;
+}
+
+.dashboard-sem-sidebar .pagina-progress-card strong {
+  font-size: 18px;
+}
+
+.dashboard-sem-sidebar .pagina-progress-card p {
+  margin-bottom: 17px;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.dashboard-sem-sidebar .pagina-study-button {
+  padding: 13px 14px;
+  font-size: 12.5px;
+}
+
+.dashboard-sem-sidebar .pagina-topic-info span {
+  font-size: 11px;
+}
+
+.dashboard-sem-sidebar .pagina-topic-info strong {
+  font-size: 13.5px;
+}
+
+@media (max-width: 1020px) {
+  .dashboard-sem-sidebar .pagina-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sem-sidebar .pagina-aside {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-sem-sidebar .dashboard-content {
+    padding: 22px 16px 40px;
+  }
+
+  .dashboard-sem-sidebar .pagina-conteudo-page {
+    padding-bottom: 40px;
+  }
+
+  .dashboard-sem-sidebar .pagina-hero {
+    padding: 24px 22px;
+    border-radius: 22px;
+  }
+
+  .dashboard-sem-sidebar .pagina-hero-icon {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+  }
+
+  .dashboard-sem-sidebar .pagina-hero h1 {
+    font-size: 30px;
+  }
+
+  .dashboard-sem-sidebar .pagina-content-block {
+    padding: 22px 20px;
+  }
+
+  .dashboard-sem-sidebar .pagina-aside {
+    grid-template-columns: 1fr;
+  }
+}

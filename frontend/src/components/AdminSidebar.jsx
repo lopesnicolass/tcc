@@ -1,4 +1,4 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import logoIcon from '../assets/tenna_logo.png';
 
 const NAV_SECTIONS = [
@@ -90,8 +90,8 @@ const ICONS = {
     <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" />
   ),
 
-  arrowLeft: (
-    <path d="M19 12H5m7-7-7 7 7 7" />
+  eye: (
+    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
   ),
 
   shield: (
@@ -118,6 +118,13 @@ function Icon({ name, size = 20 }) {
 }
 
 export default function AdminSidebar() {
+  const navigate = useNavigate();
+
+  const abrirVisaoEstudante = () => {
+    sessionStorage.setItem('etecamp_admin_preview', 'true');
+    navigate('/home');
+  };
+
   return (
     <aside className="sidebar admin-sidebar">
 
@@ -128,69 +135,22 @@ export default function AdminSidebar() {
           src={logoIcon}
           alt="Tenna"
           className="admin-sidebar-logo"
-          style={{
-            width: '145px',
-            height: 'auto',
-            display: 'block',
-            objectFit: 'contain',
-          }}
         />
       </div>
 
       {/* STATUS */}
 
-      <div
-        className="admin-sidebar-status"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '10px 12px',
-          borderRadius: '12px',
-          background: 'rgba(255,255,255,0.07)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
-      >
-        <div
-          style={{
-            width: '30px',
-            height: '30px',
-            borderRadius: '9px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(33,150,243,0.18)',
-            color: '#90CAF9',
-            flexShrink: 0,
-          }}
-        >
+      <div className="admin-sidebar-status">
+        <div className="admin-sidebar-status-icon">
           <Icon name="shield" size={16} />
         </div>
 
-        <div
-          style={{
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <strong
-            style={{
-              color: '#fff',
-              fontSize: '12.5px',
-              lineHeight: '1.2',
-            }}
-          >
+        <div className="admin-sidebar-status-copy">
+          <strong className="admin-sidebar-status-title">
             Área administrativa
           </strong>
 
-          <span
-            style={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '10.5px',
-              marginTop: '3px',
-            }}
-          >
+          <span className="admin-sidebar-status-subtitle">
             Acesso autorizado
           </span>
         </div>
@@ -198,40 +158,19 @@ export default function AdminSidebar() {
 
       {/* NAVEGAÇÃO */}
 
-      <div
-        className="admin-sidebar-navigation"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '22px',
-          flex: 1,
-        }}
-      >
+      <div className="admin-sidebar-navigation">
         {NAV_SECTIONS.map((section) => (
           <div
             className="admin-nav-section"
             key={section.title}
           >
-            <div
-              className="admin-nav-section-title"
-              style={{
-                padding: '0 12px',
-                marginBottom: '8px',
-                color: 'rgba(255,255,255,0.38)',
-                fontSize: '10px',
-                fontWeight: 700,
-                letterSpacing: '0.12em',
-              }}
-            >
+            <div className="admin-nav-section-title">
               {section.title}
             </div>
 
             <nav
               className="sidebar-nav admin-sidebar-nav"
               aria-label={section.title}
-              style={{
-                gap: '4px',
-              }}
             >
               {section.items.map((item) => (
                 <NavLink
@@ -247,17 +186,7 @@ export default function AdminSidebar() {
                     }`
                   }
                 >
-                  <span
-                    className="admin-sidebar-icon"
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '20px',
-                      height: '20px',
-                      flexShrink: 0,
-                    }}
-                  >
+                  <span className="admin-sidebar-icon">
                     <Icon
                       name={item.icon}
                       size={19}
@@ -274,43 +203,26 @@ export default function AdminSidebar() {
         ))}
       </div>
 
-      {/* RODAPÉ */}
+      {/* VISUALIZAÇÃO DO ESTUDANTE */}
 
-      <div
-        className="admin-sidebar-footer"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          paddingTop: '12px',
-          borderTop:
-            '1px solid rgba(255,255,255,0.08)',
-        }}
-      >
-        <Link
-          to="/home"
-          className="sidebar-link admin-back-link"
+      <div className="admin-sidebar-footer">
+        <button
+          type="button"
+          className="sidebar-link admin-preview-link"
+          onClick={abrirVisaoEstudante}
+          title="Visualizar o site como estudante"
         >
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '20px',
-              height: '20px',
-              flexShrink: 0,
-            }}
-          >
+          <span className="admin-preview-icon">
             <Icon
-              name="arrowLeft"
+              name="eye"
               size={19}
             />
           </span>
 
           <span className="label">
-            Voltar ao sistema
+            Visualizar como estudante
           </span>
-        </Link>
+        </button>
       </div>
 
     </aside>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import EditorConteudo from './EditorConteudo.jsx';
 import '../../styles/adm/AdminConteudos.css';
 
 import { request } from './admin-conteudos/api.js';
@@ -53,6 +54,9 @@ export default function AdminConteudos() {
   const [formTopico, setFormTopico] =
     useState(EMPTY_TOPICO);
 
+  const [topicoSelecionado, setTopicoSelecionado] =
+    useState(null);
+
   async function carregarMaterias() {
     try {
       setCarregando(true);
@@ -83,6 +87,17 @@ export default function AdminConteudos() {
   useEffect(() => {
     carregarMaterias();
   }, []);
+
+  function abrirConstrutor(topico) {
+    setErro('');
+    setSucesso('');
+    setTopicoSelecionado(topico);
+  }
+
+  function voltarDaConstrucao() {
+    setTopicoSelecionado(null);
+    carregarMaterias();
+  }
 
   function mostrarSucesso(
     mensagem
@@ -568,6 +583,16 @@ export default function AdminConteudos() {
       0
     );
 
+  if (topicoSelecionado) {
+    return (
+      <EditorConteudo
+        topicoId={topicoSelecionado.id}
+        topicoNome={topicoSelecionado.nome}
+        aoVoltar={voltarDaConstrucao}
+      />
+    );
+  }
+
   return (
     <div className="admin-page">
 
@@ -707,6 +732,7 @@ export default function AdminConteudos() {
         excluirMateria={excluirMateria}
         abrirNovoTopico={abrirNovoTopico}
         abrirEditarTopico={abrirEditarTopico}
+        abrirConstrutor={abrirConstrutor}
         alternarTopico={alternarTopico}
         excluirTopico={excluirTopico}
       />

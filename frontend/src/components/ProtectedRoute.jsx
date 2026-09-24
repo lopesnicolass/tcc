@@ -4,6 +4,7 @@ export default function ProtectedRoute() {
   const usuarioSalvo = localStorage.getItem('etecamp_usuario');
 
   if (!usuarioSalvo) {
+    sessionStorage.removeItem('etecamp_admin_preview');
     return <Navigate to="/login" replace />;
   }
 
@@ -12,6 +13,7 @@ export default function ProtectedRoute() {
 
     if (!usuario || !usuario.id) {
       localStorage.removeItem('etecamp_usuario');
+      sessionStorage.removeItem('etecamp_admin_preview');
       return <Navigate to="/login" replace />;
     }
 
@@ -20,6 +22,7 @@ export default function ProtectedRoute() {
     console.error('Sessão inválida:', erro);
 
     localStorage.removeItem('etecamp_usuario');
+    sessionStorage.removeItem('etecamp_admin_preview');
 
     return <Navigate to="/login" replace />;
   }

@@ -111,7 +111,7 @@ fireToast(
 setTimeout(() => {
   navigate(
     dados.usuario?.tipo === 'admin'
-      ? '/admin/usuarios'
+      ? '/admin'
       : '/home'
   );
 }, 900);

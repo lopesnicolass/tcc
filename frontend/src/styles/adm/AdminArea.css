@@ -1,0 +1,645 @@
+/* =========================================================
+   ÁREA ADMINISTRATIVA — REFINO VISUAL GERAL
+   Mantém a estrutura das páginas e apenas melhora escala,
+   aproveitamento horizontal e legibilidade.
+   ========================================================= */
+
+.admin-area .dashboard-content {
+  padding: 34px clamp(28px, 3vw, 48px) 56px;
+}
+
+/* O administrador aproveita a largura disponível, como na área do estudante. */
+.admin-area .dashboard-content > * {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-area .admin-page,
+.admin-area .admin-overview-page,
+.admin-area .admin-dashboard-page,
+.admin-area .admin-provas-page,
+.admin-area .admin-cronogramas {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.admin-area .admin-sidebar {
+  width: 290px;
+  padding: 30px 20px;
+  gap: 28px;
+}
+
+.admin-area .admin-sidebar-brand {
+  padding: 4px 8px 10px;
+}
+
+.admin-area .admin-sidebar-logo {
+  width: 158px;
+}
+
+.admin-area .admin-sidebar-status {
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+
+.admin-area .admin-sidebar-status-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.admin-area .admin-sidebar-status-title {
+  font-size: 13.5px;
+}
+
+.admin-area .admin-sidebar-status-subtitle {
+  font-size: 11.5px;
+}
+
+.admin-area .admin-sidebar-navigation {
+  gap: 24px;
+}
+
+.admin-area .admin-nav-section-title {
+  padding: 0 13px;
+  margin-bottom: 9px;
+  font-size: 11px;
+}
+
+.admin-area .admin-sidebar-nav {
+  gap: 5px;
+}
+
+.admin-area .admin-sidebar-link {
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  font-size: 16px;
+}
+
+.admin-area .admin-sidebar-icon,
+.admin-area .admin-back-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.admin-area .admin-preview-link {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-area .admin-preview-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-area .admin-sidebar-footer {
+  gap: 8px;
+  padding-top: 14px;
+}
+
+/* =========================================================
+   CABEÇALHOS E TEXTOS
+   ========================================================= */
+
+.admin-area .page-header {
+  margin-bottom: 28px;
+}
+
+.admin-area .page-header h1 {
+  font-size: clamp(32px, 3vw, 40px);
+  line-height: 1.08;
+}
+
+.admin-area .page-header p {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.admin-area .admin-section-kicker,
+.admin-area .admin-eyebrow {
+  font-size: 10.5px;
+}
+
+/* =========================================================
+   DASHBOARD DO ADMIN
+   ========================================================= */
+
+.admin-area .admin-overview-hero {
+  padding: 30px 32px;
+  margin-bottom: 12px;
+}
+
+.admin-area .admin-overview-header h1 {
+  font-size: clamp(34px, 3vw, 44px);
+}
+
+.admin-area .admin-overview-header p {
+  font-size: 15px;
+}
+
+.admin-area .admin-connection-badge strong {
+  font-size: 13px;
+}
+
+.admin-area .admin-connection-badge small {
+  font-size: 10.5px;
+}
+
+.admin-area .admin-refresh-btn {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.admin-area .admin-primary-card {
+  padding: 28px 30px;
+}
+
+.admin-area .admin-section-heading h2 {
+  font-size: 24px;
+}
+
+.admin-area .admin-section-heading p {
+  font-size: 14px;
+}
+
+.admin-area .admin-quick-grid {
+  gap: 14px;
+}
+
+.admin-area .admin-quick-action {
+  min-height: 88px;
+  padding: 15px;
+  gap: 12px;
+}
+
+.admin-area .admin-quick-copy strong {
+  font-size: 13px;
+}
+
+.admin-area .admin-quick-copy small {
+  font-size: 11px;
+}
+
+.admin-area .admin-stats-heading h2 {
+  font-size: 21px;
+}
+
+.admin-area .admin-stats-heading > span {
+  font-size: 11px;
+}
+
+.admin-area .admin-stats-cards {
+  gap: 16px;
+}
+
+.admin-area .admin-overview-stat {
+  padding: 21px 20px 18px;
+}
+
+.admin-area .admin-overview-stat-value {
+  font-size: 32px;
+}
+
+.admin-area .admin-overview-stat-label {
+  font-size: 13px;
+}
+
+.admin-area .admin-stat-detail {
+  font-size: 10.5px;
+}
+
+.admin-area .admin-recent-card,
+.admin-area .admin-system-card {
+  padding: 24px 26px;
+}
+
+/* =========================================================
+   CONTEÚDOS / CONSTRUTOR
+   ========================================================= */
+
+.admin-area .admin-content-stats,
+.admin-area .admin-content-stat,
+.admin-area .stat-card {
+  min-width: 0;
+}
+
+.admin-area .stat-card {
+  padding: 22px 22px;
+  border-radius: 18px;
+}
+
+.admin-area .stat-value {
+  font-size: 30px;
+}
+
+.admin-area .stat-label {
+  font-size: 13px;
+}
+
+.admin-area .admin-content-stat {
+  min-height: 94px;
+  padding: 18px 20px;
+}
+
+.admin-area .admin-content-stat strong {
+  font-size: 26px;
+}
+
+.admin-area .admin-content-stat span:not(.admin-content-stat-icon) {
+  font-size: 12.5px;
+}
+
+.admin-area .admin-content-toolbar input,
+.admin-area .admin-content-toolbar select {
+  font-size: 14px;
+}
+
+.admin-area .admin-content-info-bar {
+  font-size: 12.5px;
+}
+
+.admin-area .admin-subject-head {
+  padding: 20px 21px;
+}
+
+.admin-area .admin-subject-title-row h2 {
+  font-size: 18px;
+}
+
+.admin-area .admin-subject-main p {
+  font-size: 13px;
+}
+
+.admin-area .admin-subject-count {
+  font-size: 12px;
+}
+
+.admin-area .admin-status {
+  font-size: 11px;
+}
+
+.admin-area .admin-topic-area {
+  padding: 0 21px 20px 88px;
+}
+
+.admin-area .admin-topic-heading strong {
+  font-size: 13px;
+}
+
+.admin-area .admin-topic-heading span {
+  font-size: 11px;
+}
+
+.admin-area .admin-topic-row {
+  padding: 12px 13px;
+}
+
+.admin-area .admin-topic-name strong {
+  font-size: 13px;
+}
+
+.admin-area .admin-topic-name span {
+  font-size: 11px;
+}
+
+.admin-area .admin-topic-action {
+  font-size: 12px;
+}
+
+.admin-area .admin-field > span {
+  font-size: 13px;
+}
+
+.admin-area .admin-field input,
+.admin-area .admin-field textarea,
+.admin-area .admin-field select {
+  font-size: 14px;
+}
+
+/* =========================================================
+   SIMULADOS / FLASHCARDS / USUÁRIOS / PROVAS
+   ========================================================= */
+
+.admin-area .admin-list-item {
+  padding: 18px 24px;
+  font-size: 17px;
+}
+
+.admin-area .admin-edit-btn,
+.admin-area .btn-delete-user {
+  font-size: 14px;
+}
+
+.admin-area .admin-simulado-meta {
+  font-size: 15px;
+}
+
+.admin-area .admin-flashcard-item {
+  min-height: 132px;
+  padding: 22px;
+}
+
+.admin-area .admin-flashcard-item strong {
+  font-size: 16px;
+}
+
+.admin-area .admin-flashcard-materia,
+.admin-area .admin-flashcard-conteudo {
+  font-size: 12.5px;
+}
+
+.admin-area .user-row {
+  padding: 20px 24px;
+}
+
+.admin-area .user-info strong {
+  font-size: 18px;
+}
+
+.admin-area .user-info span {
+  font-size: 14.5px;
+}
+
+.admin-area .admin-provas-card {
+  padding: 30px 32px;
+  border-radius: 22px;
+}
+
+.admin-area .admin-provas-card-header h2 {
+  font-size: 21px;
+}
+
+.admin-area .admin-provas-card-header p,
+.admin-area .admin-provas-field label,
+.admin-area .admin-provas-field input,
+.admin-area .admin-provas-message {
+  font-size: 14.5px;
+}
+
+.admin-area .admin-provas-file,
+.admin-area .prova-row {
+  padding: 18px 22px;
+}
+
+.admin-area .prova-title {
+  font-size: 17px;
+}
+
+.admin-area .prova-links a {
+  font-size: 13.5px;
+}
+
+/* =========================================================
+   CRONOGRAMAS
+   ========================================================= */
+
+.admin-area .admin-cronogramas {
+  padding: 0;
+}
+
+.admin-area .admin-cronogramas-header {
+  margin-bottom: 30px;
+}
+
+.admin-area .admin-cronogramas-header h1 {
+  font-size: 34px;
+}
+
+.admin-area .admin-cronogramas-header p {
+  font-size: 15px;
+}
+
+.admin-area .cronograma-admin-grid {
+  gap: 24px;
+}
+
+.admin-area .cronograma-admin-card {
+  padding: 26px;
+  border-radius: 18px;
+}
+
+.admin-area .cronograma-card-header h2,
+.admin-area .cronograma-lista-header h2 {
+  font-size: 21px;
+}
+
+.admin-area .cronograma-card-header p,
+.admin-area .cronograma-lista-header p,
+.admin-area .cronograma-form-group label,
+.admin-area .cronograma-form input,
+.admin-area .cronograma-form select,
+.admin-area .cronograma-select {
+  font-size: 14.5px;
+}
+
+.admin-area .cronograma-tabela th {
+  font-size: 12px;
+}
+
+.admin-area .cronograma-tabela td {
+  font-size: 14px;
+}
+
+/* =========================================================
+   EDITOR DE CONTEÚDO
+   ========================================================= */
+
+.admin-area .editor-panel {
+  padding: 22px;
+}
+
+.admin-area .editor-panel-title h2,
+.admin-area .editor-sidebar h2 {
+  font-size: 18px;
+}
+
+.admin-area .editor-field-label {
+  font-size: 13px;
+}
+
+.admin-area .editor-field input,
+.admin-area .editor-field textarea,
+.admin-area .editor-field select {
+  font-size: 14px;
+}
+
+.admin-area .editor-primary-button,
+.admin-area .editor-secondary-button,
+.admin-area .editor-danger-button,
+.admin-area .editor-add-button,
+.admin-area .editor-small-button {
+  font-size: 13.5px;
+}
+
+/* =========================================================
+   MODAIS — maiores, sem transformar em cards de página
+   ========================================================= */
+
+.admin-area .modal-card {
+  max-width: 700px;
+  padding: 34px;
+}
+
+.admin-area .admin-flashcard-modal {
+  max-width: 640px;
+}
+
+.admin-area .modal-header h2 {
+  font-size: 24px;
+}
+
+.admin-area .modal-header p,
+.admin-area .modal-input-group label,
+.admin-area .modal-input-group input,
+.admin-area .modal-input-group select {
+  font-size: 14.5px;
+}
+
+.admin-area .modal-textarea {
+  font-size: 17px;
+}
+
+.admin-area .mural-btn {
+  font-size: 14px;
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+
+@media (max-width: 1150px) {
+  .admin-area .admin-overview-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-area .admin-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-area .dashboard-content {
+    padding: 28px 24px 44px;
+  }
+
+  .admin-area .admin-content-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-area .admin-topic-area {
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-area .admin-sidebar {
+    width: 100%;
+    padding: 14px 18px;
+  }
+
+  .admin-area .dashboard-content {
+    padding: 22px 18px 36px;
+  }
+
+  .admin-area .page-header h1,
+  .admin-area .admin-cronogramas-header h1 {
+    font-size: 30px;
+  }
+
+  .admin-area .admin-content-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-area .admin-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-area .admin-refresh-btn {
+    width: 100%;
+  }
+
+  .admin-area .admin-quick-grid,
+  .admin-area .admin-stats-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* detalhes do menu lateral */
+.admin-area .admin-sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.admin-area .admin-sidebar-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(33,150,243,0.18);
+  color: #90CAF9;
+  flex-shrink: 0;
+}
+
+.admin-area .admin-sidebar-status-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-area .admin-sidebar-status-title {
+  color: #fff;
+  line-height: 1.2;
+}
+
+.admin-area .admin-sidebar-status-subtitle {
+  color: rgba(255,255,255,0.5);
+  margin-top: 3px;
+}
+
+.admin-area .admin-sidebar-navigation {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.admin-area .admin-nav-section-title {
+  color: rgba(255,255,255,0.38);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.admin-area .admin-sidebar-icon,
+.admin-area .admin-back-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.admin-area .admin-sidebar-logo {
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
