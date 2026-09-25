@@ -87,13 +87,24 @@ app.use(
 // =====================================================
 // UPLOADS
 // =====================================================
+//
+// Só a pasta "provas" é pública de propósito (provas de
+// vestibulinhos anteriores, não é dado sensível — ver
+// comentário em provaRoutes.js). As fotos de perfil NÃO
+// passam mais por aqui: elas ficam salvas como BLOB no
+// banco (usuarios.foto_perfil_dados) e só são entregues
+// pelo endpoint autenticado /usuarios/meu-perfil. Por isso
+// servimos só "/uploads/provas", e não a pasta "uploads"
+// inteira — assim "uploads/perfis" (com fotos antigas de
+// antes dessa mudança) não fica acessível publicamente.
 
 app.use(
-    "/uploads",
+    "/uploads/provas",
     express.static(
         path.join(
             __dirname,
-            "uploads"
+            "uploads",
+            "provas"
         )
     )
 );
