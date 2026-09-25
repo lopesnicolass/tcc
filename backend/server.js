@@ -44,6 +44,9 @@ const flashcardRoutes =
 const cronogramaRoutes =
     require("./routes/cronogramaRoutes");
 
+const cronogramaModeloRoutes =
+    require("./routes/cronogramaModeloRoutes");
+
 const calendarioRoutes =
     require("./routes/calendarioRoutes");
 
@@ -64,6 +67,7 @@ const checklistRoutes =
 // Não apaga nem recria o banco existente.
 require("./config/ensureChecklist");
 require("./config/ensureCalendario");
+require("./config/ensureCronogramasModelos");
 
 // =====================================================
 // APP
@@ -156,6 +160,11 @@ app.use(
 app.use(
     "/cronograma",
     cronogramaRoutes
+);
+
+app.use(
+    "/cronogramas-modelos",
+    cronogramaModeloRoutes
 );
 
 app.use(

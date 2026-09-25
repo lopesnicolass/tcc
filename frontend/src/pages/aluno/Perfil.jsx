@@ -891,14 +891,6 @@ export default function Perfil() {
 
         </form>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}
-        >
-
           <div className="perfil-avatar-card perfil-profile-card">
 
             <div className="perfil-side-heading">
@@ -1083,7 +1075,6 @@ export default function Perfil() {
 
       </div>
 
-    </div>
 
   );
 }

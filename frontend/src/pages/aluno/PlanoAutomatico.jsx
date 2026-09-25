@@ -1,9 +1,7 @@
 import '../../styles/aluno/PlanoAutomatico.css';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TOPICS_BANK } from './Conteudos.jsx';
 import { useGamification } from "../../context/GamificationContext.jsx";
-import { getSubjectStyle } from "../../utils/subjects.js";
 import SubjectIcon from "../../components/SubjectIcon.jsx";
 import Icon from "../../components/Icon.jsx";
 
@@ -18,170 +16,120 @@ const DAYS_BY_COUNT = {
   4: ['Segunda', 'Terça', 'Quinta', 'Sexta'],
   5: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'],
   6: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
-  7: [
-    'Segunda',
-    'Terça',
-    'Quarta',
-    'Quinta',
-    'Sexta',
-    'Sábado',
-    'Domingo'
-  ]
+  7: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
 };
 
-const SUBJECTS =
-  Object.keys(TOPICS_BANK);
+const STORAGE_KEY = 'tenna_plano_automatico';
 
-const STORAGE_KEY =
-  'tenna_plano_automatico';
-
-const pad = (n) =>
-  String(n).padStart(2, '0');
+const pad = (n) => String(n).padStart(2, '0');
 
 function getUser() {
   try {
-    return JSON.parse(
-      localStorage.getItem(
-        'etecamp_usuario'
-      ) || '{}'
-    );
+    return JSON.parse(localStorage.getItem('etecamp_usuario') || '{}');
   } catch {
     return {};
   }
 }
 
 function getUserKey() {
-  const usuario =
-    getUser();
-
-  return String(
-    usuario.id ||
-      usuario.usuarioId ||
-      'anonimo'
-  );
+  const usuario = getUser();
+  return String(usuario.id || usuario.usuarioId || 'anonimo');
 }
 
 function getToken() {
   return (
-    localStorage.getItem(
-      'etecamp_token'
-    ) ||
+    localStorage.getItem('etecamp_token') ||
     localStorage.getItem('token') ||
-    localStorage.getItem(
-      'accessToken'
-    ) ||
+    localStorage.getItem('accessToken') ||
     ''
   );
 }
 
-function generatePlan(
-  months,
-  days
-) {
-  const daysList =
-    DAYS_BY_COUNT[days] ||
-    DAYS_BY_COUNT[3];
+function agruparItensPorSemana(sessoes) {
+  const mapa = new Map();
 
-  let subjectIndex = 0;
+  (Array.isArray(sessoes) ? sessoes : []).forEach((item) => {
+    const chave = `${item.mes}-${item.semana}`;
+    const lista = mapa.get(chave) || [];
+    lista.push(item);
+    mapa.set(chave, lista);
+  });
 
-  const positions =
-    Object.fromEntries(
-      SUBJECTS.map((s) => [
-        s,
-        0
-      ])
-    );
+  mapa.forEach((lista) => {
+    lista.sort((a, b) => Number(a.sessao) - Number(b.sessao));
+  });
 
-  const now =
-    new Date();
+  return mapa;
+}
 
-  return Array.from(
-    {
-      length: months
-    },
-    (_, mi) => {
+function listarSemanasFaltantes(cronograma, months) {
+  const mapa = agruparItensPorSemana(cronograma?.sessoes);
+  const faltantes = [];
 
-      const d =
-        new Date(
-          now.getFullYear(),
-          now.getMonth() + mi,
-          1
-        );
+  for (let mes = 1; mes <= months; mes += 1) {
+    for (let semana = 1; semana <= 4; semana += 1) {
+      const itens = mapa.get(`${mes}-${semana}`) || [];
+      if (!itens.length) {
+        faltantes.push({ mes, semana });
+      }
+    }
+  }
 
-      const semanas =
-        Array.from(
-          {
-            length: 4
-          },
-          (_, wi) => ({
-            number:
-              wi + 1,
+  return faltantes;
+}
 
-            days:
-              daysList.map(
-                (day) => {
+function distribuirItensNosDias(itens, quantidadeDias) {
+  const dias = Array.from({ length: quantidadeDias }, () => []);
 
-                  const subject =
-                    SUBJECTS[
-                      subjectIndex++ %
-                        SUBJECTS.length
-                    ];
+  itens.forEach((item, index) => {
+    dias[index % quantidadeDias].push(item);
+  });
 
-                  const pos =
-                    positions[
-                      subject
-                    ]++;
+  return dias;
+}
 
-                  const topics =
-                    TOPICS_BANK[
-                      subject
-                    ];
+function generatePlan(months, days, sessoes) {
+  if (!Array.isArray(sessoes) || !sessoes.length) {
+    return [];
+  }
 
-                  const topico =
-                    topics[
-                      pos %
-                        topics.length
-                    ];
+  const daysList = DAYS_BY_COUNT[days] || DAYS_BY_COUNT[3];
+  const semanasPorMes = agruparItensPorSemana(sessoes);
+  const now = new Date();
 
-                  return {
-                    day,
-                    materia:
-                      subject,
-                    topico,
-                    key:
-                      `${subject}::${topico}`
-                  };
-                }
-              )
-          })
-        );
+  return Array.from({ length: months }, (_, monthIndex) => {
+    const date = new Date(now.getFullYear(), now.getMonth() + monthIndex, 1);
+
+    const semanas = Array.from({ length: 4 }, (_, weekIndex) => {
+      const itensSemana = semanasPorMes.get(`${monthIndex + 1}-${weekIndex + 1}`) || [];
+      const distribuicao = distribuirItensNosDias(itensSemana, daysList.length);
 
       return {
-        numero:
-          mi + 1,
-
-        nome:
-          d.toLocaleDateString(
-            'pt-BR',
-            {
-              month:
-                'long',
-              year:
-                'numeric'
-            }
-          ),
-
-        semanas
+        number: weekIndex + 1,
+        days: daysList.map((day, dayIndex) => ({
+          day,
+          items: distribuicao[dayIndex].map((item) => ({
+            materia: item.materia,
+            materiaId: item.materia_id,
+            topico: item.topico,
+            topicoId: item.topico_id,
+            descricao: item.topico_descricao || '',
+            key: `topico:${item.topico_id}`
+          }))
+        }))
       };
-    }
-  );
+    });
+
+    return {
+      numero: monthIndex + 1,
+      nome: date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+      semanas
+    };
+  });
 }
 
 function savePlan(plan) {
-  localStorage.setItem(
-    `${STORAGE_KEY}_${getUserKey()}`,
-    JSON.stringify(plan)
-  );
+  localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify(plan));
 }
 
 export default function PlanoAutomatico() {
@@ -217,6 +165,59 @@ export default function PlanoAutomatico() {
   const [syncError, setSyncError] =
     useState('');
 
+  const [cronogramaModelo, setCronogramaModelo] =
+    useState(null);
+
+  const [carregandoModelo, setCarregandoModelo] =
+    useState(true);
+
+  const [modeloError, setModeloError] =
+    useState('');
+
+  useEffect(() => {
+    async function carregarCronogramaModelo() {
+      setCarregandoModelo(true);
+      setModeloError('');
+      setCronogramaModelo(null);
+      setPlan(null);
+
+      try {
+        const response = await fetch(
+          `${API_URL}/cronogramas-modelos/ativo`,
+          {
+            headers: {
+              ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {})
+            }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.mensagem ||
+              'O administrador ainda não configurou o cronograma de estudos.'
+          );
+        }
+
+        const modelo = data.cronograma || null;
+        setCronogramaModelo(modelo);
+        setMonths(Number(modelo?.meses || 1));
+      } catch (error) {
+        console.error('Erro ao carregar cronograma automático:', error);
+        setCronogramaModelo(null);
+        setModeloError(
+          error.message ||
+            'Não foi possível carregar o cronograma automático.'
+        );
+      } finally {
+        setCarregandoModelo(false);
+      }
+    }
+
+    carregarCronogramaModelo();
+  }, []);
+
   const phases = [
     'Fundamentos',
     'Construção de conhecimento',
@@ -250,15 +251,10 @@ export default function PlanoAutomatico() {
 
         const keys = [
           ...new Set(
-            plan.flatMap(
-              (m) =>
-                m.semanas.flatMap(
-                  (w) =>
-                    w.days.map(
-                      (d) =>
-                        d.key
-                    )
-                )
+            plan.flatMap((m) =>
+              m.semanas.flatMap((w) =>
+                w.days.flatMap((d) => d.items.map((item) => item.key))
+              )
             )
           )
         ];
@@ -280,10 +276,7 @@ export default function PlanoAutomatico() {
     }, [plan]);
 
   function montarAtividadesDoPlano(p) {
-
-    const hoje =
-      new Date();
-
+    const hoje = new Date();
     const nomesDias = [
       'Domingo',
       'Segunda',
@@ -294,161 +287,111 @@ export default function PlanoAutomatico() {
       'Sábado'
     ];
 
-    const domingo =
-      new Date(hoje);
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay());
 
-    domingo.setDate(
-      hoje.getDate() -
-        hoje.getDay()
-    );
-
-    const atividades =
-      [];
+    const atividades = [];
 
     p.forEach((month) => {
+      month.semanas.forEach((week) => {
+        week.days.forEach((day) => {
+          if (!day.items.length) return;
 
-      month.semanas.forEach(
-        (week) => {
+          const indiceDia = nomesDias.indexOf(day.day);
+          const alvo = new Date(domingo);
 
-          week.days.forEach(
-            (day) => {
-
-              const indiceDia =
-                nomesDias.indexOf(
-                  day.day
-                );
-
-              const alvo =
-                new Date(
-                  domingo
-                );
-
-              alvo.setDate(
-                domingo.getDate() +
-                  indiceDia +
-                  7 *
-                    (month.numero - 1) +
-                  7 *
-                    (week.number - 1)
-              );
-
-              const dataFinal =
-                day.data ||
-                `${alvo.getFullYear()}-${pad(
-                  alvo.getMonth() + 1
-                )}-${pad(
-                  alvo.getDate()
-                )}`;
-
-              atividades.push({
-                data:
-                  dataFinal,
-                horario:
-                  '08:00',
-                nome:
-                  day.topico,
-                materia:
-                  day.materia,
-                topicoId:
-                  day.topicoId ||
-                  null,
-                done:
-                  false,
-                origem:
-                  'plano-automatico'
-              });
-            }
+          alvo.setDate(
+            domingo.getDate() +
+              indiceDia +
+              7 * (month.numero - 1) +
+              7 * (week.number - 1)
           );
-        }
-      );
+
+          const dataFinal =
+            day.data ||
+            `${alvo.getFullYear()}-${pad(alvo.getMonth() + 1)}-${pad(alvo.getDate())}`;
+
+          day.items.forEach((item) => {
+            atividades.push({
+              data: dataFinal,
+              horario: '08:00',
+              nome: item.topico,
+              materia: item.materia,
+              topicoId: item.topicoId || null,
+              done: false,
+              origem: 'plano-automatico'
+            });
+          });
+        });
+      });
     });
 
     return atividades;
   }
 
   async function generate() {
-    const p =
-      generatePlan(
-        months,
-        days
+    if (!cronogramaModelo || !cronogramaModelo.sessoes?.length) {
+      setSyncError('O administrador ainda não configurou o cronograma de estudos.');
+      return;
+    }
+
+    const faltantes = listarSemanasFaltantes(cronogramaModelo, months);
+
+    if (faltantes.length) {
+      const primeiro = faltantes[0];
+      setSyncError(
+        `O cronograma ainda não está completo até o mês ${months}. Falta configurar a semana ${primeiro.semana} do mês ${primeiro.mes}.`
       );
+      return;
+    }
+
+    const mesesDoCronograma = Number(cronogramaModelo.meses || 0);
+    if (!mesesDoCronograma) {
+      setSyncError('O cronograma do administrador ainda não possui a quantidade de meses configurada.');
+      return;
+    }
+
+    const p = generatePlan(mesesDoCronograma, days, cronogramaModelo.sessoes);
 
     setPlan(p);
-
     setSelected(1);
-
-    setOpenWeeks(
-      new Set(['1-1'])
-    );
-
+    setOpenWeeks(new Set(['1-1']));
     savePlan(p);
 
-    addXP(
-      20,
-      'plano automático gerado'
-    );
+    addXP(20, 'plano automático gerado');
 
-    const usuarioId =
-      Number(
-        getUser().id ||
-          getUser().usuarioId ||
-          0
-      );
-
-    const token =
-      getToken();
+    const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
+    const token = getToken();
 
     if (!usuarioId) {
       return;
     }
 
-    const atividades =
-      montarAtividadesDoPlano(p);
+    const atividades = montarAtividadesDoPlano(p);
 
     if (!atividades.length) {
       return;
     }
 
     try {
-
       setSyncingPlan(true);
-
       setSyncError('');
 
-      const response =
-        await fetch(
-          `${API_URL}/cronograma/${usuarioId}/lote`,
-          {
-            method:
-              'POST',
-
-            headers: {
-              'Content-Type':
-                'application/json',
-
-              ...(token
-                ? {
-                    Authorization:
-                      `Bearer ${token}`
-                  }
-                : {})
-            },
-
-            body:
-              JSON.stringify({
-                atividades,
-
-                substituirOrigem:
-                  'plano-automatico'
-              })
-          }
-        );
+      const response = await fetch(`${API_URL}/cronograma/${usuarioId}/lote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          atividades,
+          substituirOrigem: 'plano-automatico'
+        })
+      });
 
       let data = {};
-
       try {
-        data =
-          await response.json();
+        data = await response.json();
       } catch {
         data = {};
       }
@@ -459,173 +402,86 @@ export default function PlanoAutomatico() {
             'Não foi possível salvar o plano no cronograma.'
         );
       }
-
     } catch (erro) {
-
-      console.error(
-        'Erro ao salvar plano no cronograma:',
-        erro
-      );
-
+      console.error('Erro ao salvar plano no cronograma:', erro);
       setSyncError(
         erro.message ||
-        'O plano foi gerado, mas não foi possível salvá-lo no cronograma.'
+          'O plano foi gerado, mas não foi possível salvá-lo no cronograma.'
       );
-
     } finally {
-
       setSyncingPlan(false);
     }
   }
 
-  async function addWeek(
-    month,
-    week
-  ) {
-    const usuarioId =
-      Number(
-        getUser().id ||
-          getUser().usuarioId ||
-          0
+  async function addWeek(month, week) {
+    const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
+    const token = getToken();
+
+    if (!usuarioId) return;
+
+    const hoje = new Date();
+    const nomesDias = [
+      'Domingo',
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado'
+    ];
+    const domingo = new Date(hoje);
+    domingo.setDate(hoje.getDate() - hoje.getDay());
+    const atividades = [];
+
+    week.days.forEach((day) => {
+      if (!day.items.length) return;
+
+      const indiceDia = nomesDias.indexOf(day.day);
+      const alvo = new Date(domingo);
+      alvo.setDate(
+        domingo.getDate() +
+          indiceDia +
+          7 * (month.numero - 1) +
+          7 * (week.number - 1)
       );
 
-    const token =
-      getToken();
+      const dataFinal =
+        day.data ||
+        `${alvo.getFullYear()}-${pad(alvo.getMonth() + 1)}-${pad(alvo.getDate())}`;
 
-    if (!usuarioId) {
-      return;
-    }
-
-    const atividades =
-      [];
-
-    week.days.forEach(
-      (day, index) => {
-
-        const data =
-          day.data ||
-          null;
-
-        /*
-         * Como o plano atual já trabalha
-         * por dias da semana, calculamos
-         * a próxima ocorrência daquela
-         * data a partir do início da semana.
-         */
-
-        const hoje =
-          new Date();
-
-        const alvo =
-          new Date(
-            hoje
-          );
-
-        const nomesDias = [
-          'Domingo',
-          'Segunda',
-          'Terça',
-          'Quarta',
-          'Quinta',
-          'Sexta',
-          'Sábado'
-        ];
-
-        const indiceDia =
-          nomesDias.indexOf(
-            day.day
-          );
-
-        const domingo =
-          new Date(
-            hoje
-          );
-
-        domingo.setDate(
-          hoje.getDate() -
-            hoje.getDay()
-        );
-
-        alvo.setTime(
-          domingo.getTime()
-        );
-
-        alvo.setDate(
-          domingo.getDate() +
-            indiceDia +
-            7 *
-              (month.numero - 1) +
-            7 *
-              (week.number - 1)
-        );
-
-        const dataFinal =
-          data ||
-          `${alvo.getFullYear()}-${pad(
-            alvo.getMonth() + 1
-          )}-${pad(
-            alvo.getDate()
-          )}`;
-
+      day.items.forEach((item) => {
         atividades.push({
-          data:
-            dataFinal,
-          horario:
-            '08:00',
-          nome:
-            day.topico,
-          materia:
-            day.materia,
-          topicoId:
-            day.topicoId ||
-            null,
-          done:
-            false,
-          origem:
-            'plano-automatico'
+          data: dataFinal,
+          horario: '08:00',
+          nome: item.topico,
+          materia: item.materia,
+          topicoId: item.topicoId || null,
+          done: false,
+          origem: 'plano-automatico'
         });
-      }
-    );
+      });
+    });
+
+    if (!atividades.length) return;
 
     try {
-      setAddingWeek(
-        `${month.numero}-${week.number}`
-      );
+      setAddingWeek(`${month.numero}-${week.number}`);
 
-      const response =
-        await fetch(
-          `${API_URL}/cronograma/${usuarioId}/lote`,
-          {
-            method:
-              'POST',
-
-            headers: {
-              'Content-Type':
-                'application/json',
-
-              ...(token
-                ? {
-                    Authorization:
-                      `Bearer ${token}`
-                  }
-                : {})
-            },
-
-            body:
-              JSON.stringify({
-                atividades,
-
-                substituirOrigem:
-                  null
-              })
-          }
-        );
+      const response = await fetch(`${API_URL}/cronograma/${usuarioId}/lote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          atividades,
+          substituirOrigem: null
+        })
+      });
 
       let data = {};
-
       try {
-        data =
-          await response.json();
+        data = await response.json();
       } catch {
         data = {};
       }
@@ -637,49 +493,26 @@ export default function PlanoAutomatico() {
         );
       }
 
-      addXP(
-        10,
-        'semana adicionada ao calendário'
-      );
-
-      navigate(
-        '/cronograma'
-      );
-
+      addXP(10, 'semana adicionada ao calendário');
+      navigate('/cronograma');
     } catch (erro) {
-      console.error(
-        'Erro ao adicionar semana:',
-        erro
-      );
-
+      console.error('Erro ao adicionar semana:', erro);
       window.alert(
         erro.message ||
           'Não foi possível adicionar a semana ao calendário.'
       );
-
     } finally {
-      setAddingWeek(
-        null
-      );
+      setAddingWeek(null);
     }
   }
 
-  const focoMateria =
-    current
-      ?.semanas[0]
-      ?.days[0]
-      ?.materia;
+  const focoItem =
+    current?.semanas
+      ?.flatMap((week) => week.days.flatMap((day) => day.items))
+      ?.find(Boolean);
 
-  const focoTopico =
-    current
-      ?.semanas[0]
-      ?.days[0]
-      ?.topico;
-
-  const focoStyle =
-    getSubjectStyle(
-      focoMateria
-    );
+  const focoMateria = focoItem?.materia;
+  const focoTopico = focoItem?.topico;
 
   return (
     <div className="tenna-auto-plan">
@@ -701,9 +534,9 @@ export default function PlanoAutomatico() {
 
           <p>
             O Tenna organiza os conteúdos
-            para o Vestibulinho em etapas.
-            Você escolhe seu ritmo e recebe
-            um caminho de estudo simples.
+            para o Vestibulinho em meses e semanas.
+            Você escolhe seu ritmo depois e o sistema
+            distribui esses conteúdos pelos seus dias de estudo.
           </p>
 
         </div>
@@ -737,7 +570,7 @@ export default function PlanoAutomatico() {
     </h3>
 
     <p>
-      Escolha quanto tempo você tem e quantos dias consegue estudar.
+      O administrador definiu o período do cronograma. Você só precisa escolher quantos dias consegue estudar por semana.
     </p>
 
     {plan && (
@@ -760,10 +593,10 @@ export default function PlanoAutomatico() {
             </div>
 
             <div className="tenna-auto-personalized-copy">
-              <strong>Seu plano será personalizado</strong>
-              <span>✓ Organiza seu tempo de estudo</span>
-              <span>✓ Equilibra as matérias</span>
-              <span>✓ Ajuda você a evoluir no seu ritmo</span>
+              <strong>Seu plano será adaptado ao seu ritmo</strong>
+              <span>✓ Aproveita o cronograma definido pelo administrador</span>
+              <span>✓ Divide os conteúdos das semanas pelos dias escolhidos</span>
+              <span>✓ Mantém a ordem de meses e semanas do cronograma</span>
             </div>
 
             <div className="tenna-auto-personalized-deco" aria-hidden="true">✦</div>
@@ -776,44 +609,14 @@ export default function PlanoAutomatico() {
           <div className="tenna-auto-option-group">
 
             <span className="tenna-auto-label">
-              Tempo até a prova
+              Período do cronograma
             </span>
 
             <div className="tenna-auto-pills">
-
-              {[12, 9, 6, 5, 4, 3, 2, 1].map(
-                (m) => (
-
-                  <button
-                    key={m}
-                    type="button"
-                    className={
-                      `tenna-auto-pill ${
-                        months === m
-                          ? 'selected'
-                          : ''
-                      }`
-                    }
-                    onClick={() =>
-                      setMonths(m)
-                    }
-                  >
-
-                    <strong>
-                      {m}
-                    </strong>
-
-                    <span>
-                      {m === 1
-                        ? 'mês'
-                        : 'meses'}
-                    </span>
-
-                  </button>
-
-                )
-              )}
-
+              <div className="tenna-auto-pill selected" aria-label="Período definido pelo administrador">
+                <strong>{months}</strong>
+                <span>{months === 1 ? 'mês definido' : 'meses definidos'}</span>
+              </div>
             </div>
 
           </div>
@@ -865,23 +668,29 @@ export default function PlanoAutomatico() {
 
         <div className="tenna-auto-config-bottom">
 
-          <span className="tenna-auto-config-note">
-
-            <Icon
-              name="book"
-              size={14}
-              color="var(--accent-dark)"
-            />
-
-            A base de conteúdos é a mesma
-            da área <strong>Conteúdos</strong>.
-
-          </span>
+          <div className="tenna-auto-config-note-wrap">
+            {carregandoModelo ? (
+              <span className="tenna-auto-config-note">
+                <Icon name="book" size={14} color="var(--accent-dark)" />
+                Carregando o cronograma definido pelo administrador...
+              </span>
+            ) : cronogramaModelo ? (
+              <span className="tenna-auto-config-note">
+                <Icon name="book" size={14} color="var(--accent-dark)" />
+                Cronograma oficial: <strong>{cronogramaModelo.nome}</strong> · {cronogramaModelo.meses} {cronogramaModelo.meses === 1 ? 'mês' : 'meses'} · {cronogramaModelo.sessoes_preenchidas} conteúdos distribuídos por mês e semana
+              </span>
+            ) : (
+              <span className="tenna-auto-config-note error">
+                <Icon name="book" size={14} color="var(--accent-dark)" />
+                {modeloError || 'O administrador ainda não configurou um cronograma automático.'}
+              </span>
+            )}
+          </div>
 
           <button
             className="mural-btn primary"
             onClick={generate}
-            disabled={syncingPlan}
+            disabled={syncingPlan || carregandoModelo || !cronogramaModelo}
           >
             {syncingPlan
               ? 'Gerando e salvando...'
@@ -889,11 +698,9 @@ export default function PlanoAutomatico() {
           </button>
 
           {syncError && (
-
             <span className="tenna-auto-error">
               {syncError}
             </span>
-
           )}
 
         </div>
@@ -906,15 +713,7 @@ export default function PlanoAutomatico() {
 
           <section className="tenna-auto-next">
 
-            <div
-              className="tenna-auto-next-icon"
-              style={{
-                background:
-                  focoStyle.bg,
-                color:
-                  focoStyle.color
-              }}
-            >
+            <div className="tenna-auto-next-icon">
               <SubjectIcon
                 materia={
                   focoMateria
@@ -976,13 +775,9 @@ export default function PlanoAutomatico() {
 
                   <p>
                     {months}{' '}
-                    {months === 1
-                      ? 'mês'
-                      : 'meses'}
+                    {months === 1 ? 'mês' : 'meses'}
                     {' · '}
-                    {months * 4 * days}
-                    {' sessões'}
-
+                    {days}x por semana
                   </p>
 
                 </div>
@@ -1114,7 +909,7 @@ export default function PlanoAutomatico() {
                     {current.semanas.reduce(
                       (n, w) =>
                         n +
-                        w.days.length,
+                        w.days.filter((day) => day.items.length).length,
                       0
                     )}
                     {' dias de estudo organizados'}
@@ -1207,8 +1002,8 @@ export default function PlanoAutomatico() {
                           </strong>
 
                           <small>
-                            {w.days.length}
-                            {' dias de estudo'}
+                            {w.days.filter((day) => day.items.length).length}
+                            {' dias com conteúdo'}
                           </small>
 
                         </span>
@@ -1235,59 +1030,40 @@ export default function PlanoAutomatico() {
 
                             {w.days.map(
                               (d, i) => {
-
-                                const dStyle =
-                                  getSubjectStyle(
-                                    d.materia
-                                  );
+                                const primeiroItem = d.items[0];
 
                                 return (
-
                                   <div
-                                    className="tenna-auto-day"
+                                    className={`tenna-auto-day ${d.items.length ? '' : 'empty'}`}
                                     key={i}
                                   >
-
                                     <div className="tenna-auto-day-name">
-                                      {d.day
-                                        .slice(
-                                          0,
-                                          3
-                                        )
-                                        .toUpperCase()}
+                                      {d.day.slice(0, 3).toUpperCase()}
                                     </div>
 
-                                    <div
-                                      className="tenna-auto-day-icon"
-                                      style={{
-                                        background:
-                                          dStyle.bg,
-                                        color:
-                                          dStyle.color
-                                      }}
-                                    >
+                                    <div className="tenna-auto-day-icon">
                                       <SubjectIcon
-                                        materia={
-                                          d.materia
-                                        }
+                                        materia={primeiroItem?.materia || 'Estudo'}
                                         size={16}
                                       />
                                     </div>
 
                                     <div className="tenna-auto-day-content">
-
-                                      <strong>
-                                        {d.materia}
-                                      </strong>
-
-                                      <span>
-                                        {d.topico}
-                                      </span>
-
+                                      {d.items.length ? (
+                                        d.items.map((item, itemIndex) => (
+                                          <div className="tenna-auto-day-item" key={itemIndex}>
+                                            <strong>{item.materia}</strong>
+                                            <span>{item.topico}</span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="tenna-auto-day-item vazio">
+                                          <strong>Dia reservado</strong>
+                                          <span>Nenhum conteúdo foi distribuído para este dia.</span>
+                                        </div>
+                                      )}
                                     </div>
-
                                   </div>
-
                                 );
                               }
                             )}

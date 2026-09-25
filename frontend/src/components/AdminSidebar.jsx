@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import logoIcon from '../assets/tenna_logo.png';
+import ThemeToggle from './ThemeToggle.jsx';
 
 const NAV_SECTIONS = [
   {
@@ -206,6 +207,10 @@ export default function AdminSidebar() {
       {/* VISUALIZAÇÃO DO ESTUDANTE */}
 
       <div className="admin-sidebar-footer">
+        <div className="admin-theme-toggle-wrap">
+          <ThemeToggle className="admin-theme-toggle" />
+        </div>
+
         <button
           type="button"
           className="sidebar-link admin-preview-link"

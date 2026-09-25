@@ -1230,3 +1230,55 @@
     font-size: 12px;
   }
 }
+
+.tenna-auto-config-note-wrap {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.tenna-auto-config-note.error {
+  color: #b24a4a;
+}
+
+
+/* Um dia pode receber mais de um conteúdo quando o cronograma semanal
+   possui vários itens e o estudante escolhe poucos dias para estudar. */
+.tenna-auto-day-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tenna-auto-day-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tenna-auto-day-item strong {
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--text, #252a32);
+}
+
+.tenna-auto-day-item span {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted, #737a85);
+}
+
+.tenna-auto-day-item.vazio {
+  opacity: 0.72;
+}
+
+.tenna-auto-day.empty {
+  background: #fafbfc;
+}
+
+@media (max-width: 700px) {
+  .tenna-auto-day {
+    grid-template-columns: 34px 34px 1fr;
+  }
+}

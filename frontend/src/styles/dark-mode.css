@@ -1,0 +1,560 @@
+/* =========================================================
+   TENNA — MODO ESCURO
+   A preferência é controlada por html[data-theme="dark"].
+   ========================================================= */
+
+:root {
+  --dark-bg: #0b1220;
+  --dark-surface: #121c2b;
+  --dark-surface-2: #172538;
+  --dark-surface-3: #1c2b40;
+  --dark-text: #e7eef7;
+  --dark-text-soft: #afc0d4;
+  --dark-border: rgba(157, 190, 224, 0.16);
+  --dark-shadow: rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --ink: #8fc4ff;
+  --ink-soft: rgba(201, 222, 246, 0.76);
+  --paper: #0b1220;
+  --card: #121c2b;
+  --accent: #42a5f5;
+  --accent-dark: #8fc4ff;
+  --accent-light: #2d5f94;
+  --line: rgba(157, 190, 224, 0.16);
+  --muted: rgba(200, 216, 234, 0.64);
+  --error: #ff927f;
+}
+
+html[data-theme='dark'] body {
+  background: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .dashboard,
+html[data-theme='dark'] .dashboard-content,
+html[data-theme='dark'] .page {
+  background: var(--dark-bg);
+}
+
+html[data-theme='dark'] .dashboard-content {
+  color: var(--dark-text);
+}
+
+/* ---------------------------------------------------------
+   CONTROLE DE TEMA
+   --------------------------------------------------------- */
+.theme-toggle {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 13px 0 10px;
+  border: 1px solid rgba(13, 71, 161, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  box-shadow: 0 12px 30px rgba(13, 71, 161, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font: 700 12px/1 "IBM Plex Sans", sans-serif;
+  cursor: pointer;
+  transition: transform .18s var(--bouncy), background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(13, 71, 161, 0.22);
+}
+
+.theme-toggle-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--accent-dark);
+}
+
+.theme-toggle-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+html[data-theme='dark'] .theme-toggle {
+  border-color: rgba(143, 196, 255, 0.18);
+  background: rgba(18, 28, 43, 0.94);
+  color: var(--dark-text);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme='dark'] .theme-toggle-icon {
+  background: rgba(66, 165, 245, 0.13);
+  color: #ffd66e;
+}
+
+/* ---------------------------------------------------------
+   ÁREAS DE NAVEGAÇÃO
+   --------------------------------------------------------- */
+html[data-theme='dark'] .sidebar {
+  background: #09284f;
+  color: #fff;
+}
+
+html[data-theme='dark'] .sidebar-link {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+html[data-theme='dark'] .sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+html[data-theme='dark'] .sidebar-link.active {
+  background: #2389df;
+  color: #fff;
+}
+
+html[data-theme='dark'] .admin-preview-banner {
+  background: rgba(18, 28, 43, 0.97);
+  border-color: var(--dark-border);
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme='dark'] .admin-preview-banner-copy {
+  color: var(--dark-text);
+}
+
+/* ---------------------------------------------------------
+   TEXTO GERAL DA ÁREA PROTEGIDA
+   --------------------------------------------------------- */
+html[data-theme='dark'] .dashboard-content h1,
+html[data-theme='dark'] .dashboard-content h2,
+html[data-theme='dark'] .dashboard-content h3,
+html[data-theme='dark'] .dashboard-content h4,
+html[data-theme='dark'] .dashboard-content h5,
+html[data-theme='dark'] .dashboard-content h6,
+html[data-theme='dark'] .dashboard-content p,
+html[data-theme='dark'] .dashboard-content label,
+html[data-theme='dark'] .dashboard-content strong,
+html[data-theme='dark'] .dashboard-content small,
+html[data-theme='dark'] .dashboard-content li,
+html[data-theme='dark'] .dashboard-content span,
+html[data-theme='dark'] .dashboard-content a {
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .dashboard-content p,
+html[data-theme='dark'] .dashboard-content small,
+html[data-theme='dark'] .dashboard-content .muted,
+html[data-theme='dark'] .dashboard-content [class*='muted'],
+html[data-theme='dark'] .dashboard-content [class*='description'],
+html[data-theme='dark'] .dashboard-content [class*='subtitle'],
+html[data-theme='dark'] .dashboard-content [class*='hint'] {
+  color: var(--dark-text-soft);
+}
+
+/* ---------------------------------------------------------
+   FORMULÁRIOS / CAMPOS
+   --------------------------------------------------------- */
+html[data-theme='dark'] .dashboard-content input,
+html[data-theme='dark'] .dashboard-content select,
+html[data-theme='dark'] .dashboard-content textarea {
+  background: #0f1928;
+  color: var(--dark-text);
+  border-color: var(--dark-border);
+}
+
+html[data-theme='dark'] .dashboard-content input::placeholder,
+html[data-theme='dark'] .dashboard-content textarea::placeholder {
+  color: #8095ac;
+}
+
+html[data-theme='dark'] .dashboard-content input:focus,
+html[data-theme='dark'] .dashboard-content select:focus,
+html[data-theme='dark'] .dashboard-content textarea:focus {
+  background: #111f32;
+  border-color: rgba(66, 165, 245, 0.72);
+}
+
+/* ---------------------------------------------------------
+   SUPERFÍCIES CLARAS MAIS USADAS NO ALUNO / ADMIN
+   --------------------------------------------------------- */
+html[data-theme='dark'] .stat-card,
+html[data-theme='dark'] .prova-row,
+html[data-theme='dark'] .materia-tab,
+html[data-theme='dark'] .modal-card,
+html[data-theme='dark'] .materia-pill,
+html[data-theme='dark'] .auto-choice,
+html[data-theme='dark'] .auto-progress-card,
+html[data-theme='dark'] .auto-month-v2,
+html[data-theme='dark'] .auto-week-v2,
+html[data-theme='dark'] .auto-week-toggle-v2,
+html[data-theme='dark'] .auto-study-icon,
+html[data-theme='dark'] .content-subject-card,
+html[data-theme='dark'] .content-subject-header,
+html[data-theme='dark'] .pagina-content-block,
+html[data-theme='dark'] .pagina-progress-card,
+html[data-theme='dark'] .pagina-aside-card,
+html[data-theme='dark'] .pagina-question-card,
+html[data-theme='dark'] .pagina-question-option,
+html[data-theme='dark'] .mural-btn.secondary,
+html[data-theme='dark'] .mural-btn.ghost,
+html[data-theme='dark'] .mural-filter-select,
+html[data-theme='dark'] .perfil-avatar-card,
+html[data-theme='dark'] .btn-logout,
+html[data-theme='dark'] .tenna-auto-config,
+html[data-theme='dark'] .tenna-auto-pill,
+html[data-theme='dark'] .tenna-auto-next,
+html[data-theme='dark'] .tenna-auto-journey,
+html[data-theme='dark'] .tenna-auto-month,
+html[data-theme='dark'] .tenna-auto-week,
+html[data-theme='dark'] .tenna-auto-week-head,
+html[data-theme='dark'] .tenna-auto-day-icon,
+html[data-theme='dark'] .flashcards-search,
+html[data-theme='dark'] .flashcard-face.front,
+html[data-theme='dark'] .flashcards-vazio,
+html[data-theme='dark'] .flashcards-erro,
+html[data-theme='dark'] .flashcards-game-banner,
+html[data-theme='dark'] .flashcard-game-front,
+html[data-theme='dark'] .flashcards-result,
+html[data-theme='dark'] .study-block,
+html[data-theme='dark'] .study-side-card,
+html[data-theme='dark'] .week-nav button,
+html[data-theme='dark'] .day-column,
+html[data-theme='dark'] .calendar-overview > div,
+html[data-theme='dark'] .calendar-card,
+html[data-theme='dark'] .calendar-sidebar-card,
+html[data-theme='dark'] .calendar-month-nav button,
+html[data-theme='dark'] .calendar-today,
+html[data-theme='dark'] .calendar-day,
+html[data-theme='dark'] .calendar-check,
+html[data-theme='dark'] .simulado-card,
+html[data-theme='dark'] .simulado-cronometro,
+html[data-theme='dark'] .admin-content-toolbar,
+html[data-theme='dark'] .admin-subject-card,
+html[data-theme='dark'] .admin-topic-row,
+html[data-theme='dark'] .admin-modal,
+html[data-theme='dark'] .admin-content-empty,
+html[data-theme='dark'] .user-row,
+html[data-theme='dark'] .btn-delete-user,
+html[data-theme='dark'] .admin-list-item,
+html[data-theme='dark'] .cronograma-admin-card,
+html[data-theme='dark'] .cronograma-item-row,
+html[data-theme='dark'] .cronograma-modal,
+html[data-theme='dark'] .cronograma-semana-block,
+html[data-theme='dark'] .panel-card,
+html[data-theme='dark'] .admin-builder-topico,
+html[data-theme='dark'] .editor-secondary-button,
+html[data-theme='dark'] .editor-block,
+html[data-theme='dark'] .editor-icon-button,
+html[data-theme='dark'] .editor-type,
+html[data-theme='dark'] .editor-add-button,
+html[data-theme='dark'] .editor-small-button,
+html[data-theme='dark'] .editor-modal,
+html[data-theme='dark'] .editor-search,
+html[data-theme='dark'] .editor-related-item,
+html[data-theme='dark'] .editor-related-check,
+html[data-theme='dark'] .editor-publication-status,
+html[data-theme='dark'] .admin-flashcard-item,
+html[data-theme='dark'] .admin-provas-card,
+html[data-theme='dark'] .file-button,
+html[data-theme='dark'] .admin-delete-prova,
+html[data-theme='dark'] .admin-calendar-stats article,
+html[data-theme='dark'] .admin-calendar-month-card,
+html[data-theme='dark'] .admin-calendar-form-card,
+html[data-theme='dark'] .admin-calendar-month-actions button,
+html[data-theme='dark'] .admin-calendar-day,
+html[data-theme='dark'] .admin-calendar-secondary,
+html[data-theme='dark'] .admin-overview-card,
+html[data-theme='dark'] .admin-quick-action,
+html[data-theme='dark'] .admin-overview-stat,
+html[data-theme='dark'] .admin-health-row,
+html[data-theme='dark'] .admin-refresh-btn {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  box-shadow: 0 8px 24px -22px var(--dark-shadow);
+}
+
+html[data-theme='dark'] .content-topic,
+html[data-theme='dark'] .pagina-check-item,
+html[data-theme='dark'] .pagina-questions-summary,
+html[data-theme='dark'] .tenna-auto-step,
+html[data-theme='dark'] .tenna-auto-ready,
+html[data-theme='dark'] .tenna-auto-next-icon,
+html[data-theme='dark'] .flashcards-game-warning,
+html[data-theme='dark'] .study-highlight,
+html[data-theme='dark'] .calendar-weekdays,
+html[data-theme='dark'] .simulado-meta span,
+html[data-theme='dark'] .admin-provas-icon,
+html[data-theme='dark'] .file-icon,
+html[data-theme='dark'] .admin-quick-icon,
+html[data-theme='dark'] .admin-overview-stat-icon,
+html[data-theme='dark'] .admin-health-icon,
+html[data-theme='dark'] .admin-pdf-badge,
+html[data-theme='dark'] .admin-role-badge,
+html[data-theme='dark'] .admin-section-hint,
+html[data-theme='dark'] .cronograma-estatisticas > div {
+  background: var(--dark-surface-2);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+/* Blocos internos e hovers */
+html[data-theme='dark'] .content-topic:hover,
+html[data-theme='dark'] .tenna-auto-timeline-item:hover,
+html[data-theme='dark'] .tenna-auto-week-head:hover,
+html[data-theme='dark'] .pagina-check-item.interactive:hover:not(:disabled),
+html[data-theme='dark'] .calendar-day:hover,
+html[data-theme='dark'] .admin-quick-action:hover,
+html[data-theme='dark'] .admin-overview-stat:hover,
+html[data-theme='dark'] .admin-health-row:hover,
+html[data-theme='dark'] .cronograma-mes-card:hover {
+  background: var(--dark-surface-3);
+}
+
+html[data-theme='dark'] .editor-block-header,
+html[data-theme='dark'] .editor-modal-footer,
+html[data-theme='dark'] .editor-add-button,
+html[data-theme='dark'] .editor-block-placeholder,
+html[data-theme='dark'] .editor-related-empty,
+html[data-theme='dark'] .editor-success,
+html[data-theme='dark'] .admin-calendar-weekdays,
+html[data-theme='dark'] .cronograma-mes-card,
+html[data-theme='dark'] .cronograma-semana-top,
+html[data-theme='dark'] .cronograma-btn.secundario {
+  background: var(--dark-surface-2);
+  border-color: var(--dark-border);
+}
+
+/* Texto secundário / links dentro de cards */
+html[data-theme='dark'] .dashboard-content a,
+html[data-theme='dark'] .dashboard-content .admin-see-all,
+html[data-theme='dark'] .dashboard-content .admin-inline-action,
+html[data-theme='dark'] .dashboard-content .study-side-list a,
+html[data-theme='dark'] .dashboard-content .study-side-list a span,
+html[data-theme='dark'] .dashboard-content .sidebar-title {
+  color: var(--dark-text-soft);
+}
+
+html[data-theme='dark'] .dashboard-content .admin-section-kicker,
+html[data-theme='dark'] .dashboard-content .admin-see-all:hover,
+html[data-theme='dark'] .dashboard-content .admin-inline-action:hover {
+  color: #7bbcff;
+}
+
+/* ---------------------------------------------------------
+   LANDING / LOGIN / PÁGINAS PÚBLICAS
+   --------------------------------------------------------- */
+html[data-theme='dark'] .landing {
+  background: #0b1220;
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .landing-nav {
+  background: rgba(11, 18, 32, 0.96);
+  border-bottom-color: var(--dark-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme='dark'] .landing-features {
+  background: #0f1928;
+}
+
+html[data-theme='dark'] .landing-subject-card,
+html[data-theme='dark'] .landing-feature-card,
+html[data-theme='dark'] .landing-step,
+  background: #121c2b;
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .landing-steps {
+  background: #0f1928;
+}
+
+html[data-theme='dark'] .landing-feature-card {
+  border-color: var(--dark-border);
+}
+
+html[data-theme='dark'] .landing-step h3 {
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .landing-step p,
+html[data-theme='dark'] .landing-hero-copy p,
+html[data-theme='dark'] .landing-section-label {
+  color: var(--dark-text-soft);
+}
+
+html[data-theme='dark'] .landing-subject-card .subject-name,
+html[data-theme='dark'] .landing-subject-card .pct {
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .landing-feature-icon {
+  color: #9ecbfa;
+}
+
+html[data-theme='dark'] .page .app {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .panel-form {
+  background: var(--dark-surface);
+}
+
+html[data-theme='dark'] .back-btn {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.42);
+}
+
+html[data-theme='dark'] .tab-switch {
+  background: var(--dark-surface-2);
+}
+
+html[data-theme='dark'] .field input:focus {
+  background: #111f32;
+}
+
+/* ---------------------------------------------------------
+   ELEMENTOS QUE PRECISAM FICAR CLAROS EM FUNDOS AZUIS
+   --------------------------------------------------------- */
+html[data-theme='dark'] .sidebar,
+html[data-theme='dark'] .sidebar .sidebar-link,
+html[data-theme='dark'] .sidebar .sidebar-link:hover,
+html[data-theme='dark'] .sidebar .sidebar-link.active,
+html[data-theme='dark'] .admin-overview-hero,
+html[data-theme='dark'] .tenna-auto-intro,
+html[data-theme='dark'] .landing-hero-full,
+html[data-theme='dark'] .panel-visual {
+  color: #fff;
+}
+
+html[data-theme='dark'] .sidebar .sidebar-link svg,
+html[data-theme='dark'] .admin-overview-hero svg,
+html[data-theme='dark'] .tenna-auto-intro svg {
+  color: currentColor;
+}
+
+/* ---------------------------------------------------------
+   LOCALIZAÇÃO DO CONTROLE DE TEMA
+   --------------------------------------------------------- */
+.admin-theme-toggle-wrap {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.student-theme-toggle-wrap {
+  width: 100%;
+  margin: 6px 0 10px;
+  display: flex;
+}
+
+.student-theme-toggle-wrap .theme-toggle {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 42px;
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.88);
+  box-shadow: none;
+}
+
+.student-theme-toggle-wrap .theme-toggle:hover {
+  background: rgba(255,255,255,.14);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .student-theme-toggle-wrap .theme-toggle {
+  border-color: rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .student-theme-toggle-wrap .theme-toggle:hover {
+  background: rgba(255,255,255,.14);
+}
+
+.admin-theme-toggle-wrap .theme-toggle {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 42px;
+}
+
+@media (max-width: 700px) {
+  .admin-theme-toggle-wrap .theme-toggle {
+    min-height: 42px;
+    width: 100%;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   TERRÁRIO
+   --------------------------------------------------------- */
+html[data-theme='dark'] .terrario-page .terrario-level,
+html[data-theme='dark'] .terrario-page .terrario-game-card {
+  background: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme='dark'] .terrario-page .terrario-header h1,
+html[data-theme='dark'] .terrario-page .terrario-game-top strong,
+html[data-theme='dark'] .terrario-page .terrario-stat strong {
+  color: var(--dark-text);
+}
+
+html[data-theme='dark'] .terrario-page .terrario-header p,
+html[data-theme='dark'] .terrario-page .terrario-level span,
+html[data-theme='dark'] .terrario-page .terrario-level small,
+html[data-theme='dark'] .terrario-page .terrario-stat small,
+html[data-theme='dark'] .terrario-page .terrario-game-top span {
+  color: var(--dark-text-soft);
+}
+
+html[data-theme='dark'] .terrario-page .terrario-game-top {
+  border-bottom-color: var(--dark-border);
+}
+
+
+/* ---------------------------------------------------------
+   CONTROLE DE TEMA — ADMIN / SIDEBAR DO ESTUDANTE
+   --------------------------------------------------------- */
+
+/* Tema na sidebar do estudante */
+.sidebar-collapsed .student-theme-toggle-wrap {
+  width: 42px;
+  margin: 6px auto 10px;
+}
+
+.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle {
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle-label {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .student-theme-toggle-wrap .theme-toggle {
+    min-height: 42px;
+    width: 100%;
+  }
+}

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 import Landing from './pages/public/Landing.jsx';
 import Auth from './pages/public/Auth.jsx';
@@ -36,6 +37,18 @@ import AdminCalendario from './pages/adm/AdminCalendario.jsx';
 import XPToast from './components/XPToast.jsx';
 
 export default function App() {
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('tenna_theme');
+      const theme = saved === 'dark' ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    } catch {
+      document.documentElement.dataset.theme = 'light';
+      document.documentElement.style.colorScheme = 'light';
+    }
+  }, []);
+
   return (
     <>
       <XPToast />

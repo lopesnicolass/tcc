@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { useGamification } from '../context/GamificationContext.jsx';
 import logoIcon from '../assets/tenna_logo.png';
+import ThemeToggle from './ThemeToggle.jsx';
 
 
 const NAV_ITEMS = [
@@ -73,6 +74,10 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="student-theme-toggle-wrap">
+        <ThemeToggle className="student-theme-toggle" />
+      </div>
 
 {(() => {
         const streakValue = Math.max(0, Number(streak) || 0);
