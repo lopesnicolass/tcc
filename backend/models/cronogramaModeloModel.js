@@ -44,6 +44,7 @@ function buscarItens(programacaoId, callback) {
         s.mes,
         s.semana,
         s.sessao,
+        s.dia_estudo,
         s.materia_id,
         m.nome AS materia,
         s.topico_id,
@@ -150,6 +151,7 @@ function validarItens(sessoes, meses, callback) {
     mes: Number(item.mes),
     semana: Number(item.semana),
     sessao: Number(item.sessao),
+    diaEstudo: Number(item.diaEstudo || 1),
     materiaId: Number(item.materiaId),
     topicoId: Number(item.topicoId)
   }));
@@ -167,6 +169,10 @@ function validarItens(sessoes, meses, callback) {
 
     if (item.sessao < 1) {
       return callback(new Error('A ordem do conteúdo precisa ser maior que zero.'));
+    }
+
+    if (item.diaEstudo < 1 || item.diaEstudo > 7) {
+      return callback(new Error('O dia de estudo precisa estar entre 1 e 7.'));
     }
 
     if (!item.materiaId || !item.topicoId) {
@@ -229,10 +235,10 @@ function inserirItens(programacaoId, sessoes, callback) {
     db.run(
       `
         INSERT INTO cronogramas_programados_sessoes
-          (programacao_id, mes, semana, sessao, materia_id, topico_id, atualizado_em)
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+          (programacao_id, mes, semana, sessao, dia_estudo, materia_id, topico_id, atualizado_em)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `,
-      [item.programacaoId || programacaoId, item.mes, item.semana, item.sessao, item.materiaId, item.topicoId],
+      [item.programacaoId || programacaoId, item.mes, item.semana, item.sessao, item.diaEstudo, item.materiaId, item.topicoId],
       (erro) => {
         if (erro) return callback(erro);
         proximo();

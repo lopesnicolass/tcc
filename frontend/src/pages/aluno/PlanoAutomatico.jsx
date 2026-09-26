@@ -56,7 +56,12 @@ function agruparItensPorSemana(sessoes) {
   });
 
   mapa.forEach((lista) => {
-    lista.sort((a, b) => Number(a.sessao) - Number(b.sessao));
+    lista.sort((a, b) => {
+      const diaA = Number(a.dia_estudo || 1);
+      const diaB = Number(b.dia_estudo || 1);
+      if (diaA !== diaB) return diaA - diaB;
+      return Number(a.sessao) - Number(b.sessao);
+    });
   });
 
   return mapa;
@@ -81,8 +86,10 @@ function listarSemanasFaltantes(cronograma, months) {
 function distribuirItensNosDias(itens, quantidadeDias) {
   const dias = Array.from({ length: quantidadeDias }, () => []);
 
-  itens.forEach((item, index) => {
-    dias[index % quantidadeDias].push(item);
+  itens.forEach((item) => {
+    const diaAdministrado = Number(item.dia_estudo || 1);
+    if (diaAdministrado < 1 || diaAdministrado > quantidadeDias) return;
+    dias[diaAdministrado - 1].push(item);
   });
 
   return dias;
@@ -114,7 +121,8 @@ function generatePlan(months, days, sessoes) {
             topico: item.topico,
             topicoId: item.topico_id,
             descricao: item.topico_descricao || '',
-            key: `topico:${item.topico_id}`
+            key: `topico:${item.topico_id}`,
+            diaEstudo: Number(item.dia_estudo || dayIndex + 1)
           }))
         }))
       };
@@ -535,8 +543,8 @@ export default function PlanoAutomatico() {
           <p>
             O Tenna organiza os conteúdos
             para o Vestibulinho em meses e semanas.
-            Você escolhe seu ritmo depois e o sistema
-            distribui esses conteúdos pelos seus dias de estudo.
+            O administrador também define o Dia 1, Dia 2 e assim por diante,
+            e você escolhe quantos dias consegue estudar por semana.
           </p>
 
         </div>
@@ -595,8 +603,8 @@ export default function PlanoAutomatico() {
             <div className="tenna-auto-personalized-copy">
               <strong>Seu plano será adaptado ao seu ritmo</strong>
               <span>✓ Aproveita o cronograma definido pelo administrador</span>
-              <span>✓ Divide os conteúdos das semanas pelos dias escolhidos</span>
-              <span>✓ Mantém a ordem de meses e semanas do cronograma</span>
+              <span>✓ Usa a distribuição de Dias 1 a 7 definida pelo administrador</span>
+              <span>✓ Relaciona esses dias aos seus dias de estudo da semana</span>
             </div>
 
             <div className="tenna-auto-personalized-deco" aria-hidden="true">✦</div>
@@ -677,7 +685,7 @@ export default function PlanoAutomatico() {
             ) : cronogramaModelo ? (
               <span className="tenna-auto-config-note">
                 <Icon name="book" size={14} color="var(--accent-dark)" />
-                Cronograma oficial: <strong>{cronogramaModelo.nome}</strong> · {cronogramaModelo.meses} {cronogramaModelo.meses === 1 ? 'mês' : 'meses'} · {cronogramaModelo.sessoes_preenchidas} conteúdos distribuídos por mês e semana
+                Cronograma oficial: <strong>{cronogramaModelo.nome}</strong> · {cronogramaModelo.meses} {cronogramaModelo.meses === 1 ? 'mês' : 'meses'} · {cronogramaModelo.sessoes_preenchidas} conteúdos organizados por mês, semana e dia de estudo
               </span>
             ) : (
               <span className="tenna-auto-config-note error">

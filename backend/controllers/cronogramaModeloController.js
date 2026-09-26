@@ -19,6 +19,7 @@ function prepararDados(req) {
           mes: Number(item.mes),
           semana: Number(item.semana),
           sessao: Number(item.sessao),
+          diaEstudo: Number(item.diaEstudo || 1),
           materiaId: Number(item.materiaId),
           topicoId: Number(item.topicoId)
         }))

@@ -1,50 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import EditorConteudo from './EditorConteudo.jsx';
 import '../../styles/adm/AdminConstrutorConteudos.css';
-
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function obterToken() {
-  return localStorage.getItem('etecamp_token');
-}
-
-async function request(url, options = {}) {
-  const token = obterToken();
-
-  const resposta = await fetch(`${API_URL}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {}),
-      ...(options.headers || {}),
-    },
-  });
-
-  const texto = await resposta.text();
-
-  let dados = {};
-
-  try {
-    dados = texto ? JSON.parse(texto) : {};
-  } catch {
-    dados = {};
-  }
-
-  if (!resposta.ok) {
-    throw new Error(
-      dados.erro ||
-        dados.message ||
-        'Não foi possível realizar a operação.'
-    );
-  }
-
-  return dados;
-}
+import { request } from '../../services/api.js';
 
 function Icon({ name, size = 20 }) {
   const paths = {

@@ -4,6 +4,7 @@ import '../../styles/adm/AdminCronogramas.css';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const TOTAL_MESES = 12;
 const TOTAL_SEMANAS = 4;
+const DIAS_ESTUDO = Array.from({ length: 7 }, (_, index) => index + 1);
 
 function getToken() {
   return (
@@ -37,7 +38,8 @@ function preencherGrade(modelo) {
     semana.itens.push({
       ordem: Number(item.sessao),
       materiaId: String(item.materia_id),
-      topicoId: String(item.topico_id)
+      topicoId: String(item.topico_id),
+      diaEstudo: Number(item.dia_estudo || 1)
     });
   });
 
@@ -158,6 +160,30 @@ export default function AdminCronogramas() {
     }
   }
 
+  function alterarDiaItem(mesNumero, semanaNumero, itemOrdem, diaEstudo) {
+    setGrade((atual) =>
+      atual.map((mes) => {
+        if (mes.mes !== mesNumero) return mes;
+
+        return {
+          ...mes,
+          semanas: mes.semanas.map((semana) => {
+            if (semana.semana !== semanaNumero) return semana;
+
+            return {
+              ...semana,
+              itens: semana.itens.map((item) =>
+                item.ordem === itemOrdem
+                  ? { ...item, diaEstudo: Number(diaEstudo) || 1 }
+                  : item
+              )
+            };
+          })
+        };
+      })
+    );
+  }
+
   function alterarItem(mesNumero, semanaNumero, itemOrdem, topicoId) {
     setGrade((atual) =>
       atual.map((mes) => {
@@ -209,7 +235,8 @@ export default function AdminCronogramas() {
                 {
                   ordem: proximaOrdem,
                   materiaId: '',
-                  topicoId: ''
+                  topicoId: '',
+                  diaEstudo: 1
                 }
               ]
             };
@@ -327,6 +354,7 @@ export default function AdminCronogramas() {
             mes: mes.mes,
             semana: semana.semana,
             sessao: item.ordem,
+            diaEstudo: Number(item.diaEstudo || 1),
             materiaId: Number(item.materiaId),
             topicoId: Number(item.topicoId)
           }))
@@ -545,7 +573,7 @@ export default function AdminCronogramas() {
             <div>
               <span className="cronograma-section-kicker">MÊS {mesSelecionado}</span>
               <h2>Organização das semanas</h2>
-              <p>Adicione os conteúdos que deverão ser estudados em cada semana. A divisão por dias será feita depois, no plano do estudante.</p>
+              <p>Adicione os conteúdos da semana e escolha para cada um o dia de estudo (Dia 1, Dia 2... até Dia 7). O estudante depois escolhe a quantidade de dias, e essas posições são vinculadas aos dias disponíveis.</p>
             </div>
             <span className="cronograma-item-count">{mesAtual ? `${contarItensMes(grade, mesSelecionado)} conteúdos` : 'Selecione um mês'}</span>
           </div>
@@ -587,6 +615,20 @@ export default function AdminCronogramas() {
                     {semana.itens.map((item) => (
                       <div className="cronograma-item-row" key={item.ordem}>
                         <span className="cronograma-item-numero">{item.ordem}</span>
+                        <div className="cronograma-item-dia-wrap">
+                          <span>Dia de estudo</span>
+                          <select
+                            value={item.diaEstudo || 1}
+                            onChange={(event) => alterarDiaItem(mesSelecionado, semana.semana, item.ordem, event.target.value)}
+                            aria-label={`Dia de estudo do conteúdo ${item.ordem}`}
+                          >
+                            {DIAS_ESTUDO.map((dia) => (
+                              <option key={dia} value={dia}>
+                                Dia {dia}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <div className="cronograma-item-select-wrap">
                           <span>Conteúdo da semana</span>
                           <select

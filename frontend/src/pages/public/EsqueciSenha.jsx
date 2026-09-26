@@ -2,8 +2,7 @@ import '../../styles/public/Auth.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logoWordmark from '../../assets/tenna_logo.png';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 export default function EsqueciSenha() {
   const navigate = useNavigate();
@@ -30,25 +29,20 @@ export default function EsqueciSenha() {
     setLoading(true);
 
     try {
-      const resposta = await fetch(`${API_URL}/auth/esqueci-senha`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailNormalizado }),
-      });
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        setErro(dados.mensagem || 'Não foi possível solicitar a recuperação.');
-        setLoading(false);
-        return;
-      }
+      await request(
+        '/auth/esqueci-senha',
+        {
+          method: 'POST',
+          body: JSON.stringify({ email: emailNormalizado }),
+        },
+        'Não foi possível solicitar a recuperação.'
+      );
 
       setEnviado(true);
       setLoading(false);
     } catch (erroFetch) {
       console.error(erroFetch);
-      setErro('Não foi possível conectar ao servidor.');
+      setErro(erroFetch.message || 'Não foi possível conectar ao servidor.');
       setLoading(false);
     }
   }

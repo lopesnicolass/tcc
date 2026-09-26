@@ -275,7 +275,7 @@
 
 .cronograma-item-row {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 40px;
+  grid-template-columns: 34px 130px minmax(0, 1fr) 40px;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -295,15 +295,33 @@
   font-weight: 800;
 }
 
-.cronograma-item-select-wrap {
+.cronograma-item-dia-wrap {
   display: grid;
   gap: 6px;
 }
 
-.cronograma-item-select-wrap > span {
-  color: #6f7681;
-  font-size: 0.76rem;
-  font-weight: 800;
+.cronograma-item-dia-wrap > span,
+.cronograma-item-dia-wrap select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dfe3e9;
+  background: #fbfcfd;
+  border-radius: 12px;
+  padding: 12px 10px;
+  color: #242a32;
+  font: inherit;
+  outline: none;
+}
+
+.cronograma-item-dia-wrap select:focus {
+  border-color: var(--accent-dark);
+  box-shadow: 0 0 0 3px rgba(61, 104, 255, 0.1);
+  background: #fff;
+}
+
+.cronograma-item-select-wrap {
+  display: grid;
+  gap: 6px;
 }
 
 .cronograma-item-remover {

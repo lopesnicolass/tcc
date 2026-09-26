@@ -2,8 +2,7 @@ import '../../styles/public/Auth.css';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoWordmark from '../../assets/tenna_logo.png';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -65,60 +64,48 @@ export default function Auth() {
     setLoginLoading(true);
 
     try {
-      const resposta = await fetch(`${API_URL}/auth/login`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    email,
-    senha
-  }),
-});
+      const dados = await request(
+        '/auth/login',
+        {
+          method: 'POST',
+          body: JSON.stringify({ email, senha }),
+        },
+        'Não foi possível entrar.'
+      );
 
-const dados = await resposta.json();
+      localStorage.setItem(
+        'etecamp_usuario',
+        JSON.stringify(dados.usuario)
+      );
 
-console.log("RESPOSTA DO LOGIN:", dados);
+      localStorage.setItem(
+        'etecamp_token',
+        dados.token
+      );
 
-if (!resposta.ok) {
-  setLoginServerError(dados.mensagem || 'Não foi possível entrar.');
-  setLoginLoading(false);
-  return;
-}
+      localStorage.setItem('token', dados.token);
 
-localStorage.setItem(
-  'etecamp_usuario',
-  JSON.stringify(dados.usuario)
-);
+      window.dispatchEvent(
+        new Event('etecamp-login')
+      );
 
-localStorage.setItem(
-  'etecamp_token',
-  dados.token
-);
+      setLoginLoading(false);
 
-localStorage.setItem('token', dados.token);
+      fireToast(
+        dados.mensagem || 'Login realizado! Redirecionando para o painel...'
+      );
 
-window.dispatchEvent(
-  new Event('etecamp-login')
-);
-
-setLoginLoading(false);
-
-fireToast(
-  dados.mensagem || 'Login realizado! Redirecionando para o painel...'
-);
-
-setTimeout(() => {
-  navigate(
-    dados.usuario?.tipo === 'admin'
-      ? '/admin'
-      : '/home'
-  );
-}, 900);
+      setTimeout(() => {
+        navigate(
+          dados.usuario?.tipo === 'admin'
+            ? '/admin'
+            : '/home'
+        );
+      }, 900);
 
     } catch (erro) {
       console.error(erro);
-      setLoginServerError('Não foi possível conectar ao servidor.');
+      setLoginServerError(erro.message || 'Não foi possível conectar ao servidor.');
       setLoginLoading(false);
     }
   }
@@ -140,19 +127,14 @@ setTimeout(() => {
     setCadLoading(true);
 
     try {
-      const resposta = await fetch(`${API_URL}/auth/cadastro`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nome, email, senha }),
-      });
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        setCadServerError(dados.mensagem || 'Não foi possível criar a conta.');
-        setCadLoading(false);
-        return;
-      }
+      const dados = await request(
+        '/auth/cadastro',
+        {
+          method: 'POST',
+          body: JSON.stringify({ nome, email, senha }),
+        },
+        'Não foi possível criar a conta.'
+      );
 
       setCadLoading(false);
       fireToast(dados.mensagem || 'Conta criada com sucesso! Bem-vindo(a).');
@@ -160,7 +142,7 @@ setTimeout(() => {
 
     } catch (erro) {
       console.error(erro);
-      setCadServerError('Não foi possível conectar ao servidor.');
+      setCadServerError(erro.message || 'Não foi possível conectar ao servidor.');
       setCadLoading(false);
     }
   }

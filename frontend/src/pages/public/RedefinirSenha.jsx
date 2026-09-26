@@ -2,8 +2,7 @@ import '../../styles/public/Auth.css';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import logoWordmark from '../../assets/tenna_logo.png';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 export default function RedefinirSenha() {
   const navigate = useNavigate();
@@ -34,19 +33,14 @@ export default function RedefinirSenha() {
     setLoading(true);
 
     try {
-      const resposta = await fetch(`${API_URL}/auth/redefinir-senha`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, novaSenha }),
-      });
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        setErro(dados.mensagem || 'Não foi possível redefinir sua senha.');
-        setLoading(false);
-        return;
-      }
+      await request(
+        '/auth/redefinir-senha',
+        {
+          method: 'POST',
+          body: JSON.stringify({ token, novaSenha }),
+        },
+        'Não foi possível redefinir sua senha.'
+      );
 
       setSucesso(true);
       setLoading(false);
@@ -55,7 +49,7 @@ export default function RedefinirSenha() {
 
     } catch (erro) {
       console.error(erro);
-      setErro('Não foi possível conectar ao servidor.');
+      setErro(erro.message || 'Não foi possível conectar ao servidor.');
       setLoading(false);
     }
   }
