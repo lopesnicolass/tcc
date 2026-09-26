@@ -1240,10 +1240,11 @@
 
 .sidebar-collapsed .sidebar-streak{
   justify-content:center;
-  padding:11px 8px;
+  padding:0;
 }
 
-.sidebar-collapsed .sidebar-streak > div{
+.sidebar-collapsed .sidebar-streak-content,
+.sidebar-collapsed .sidebar-streak-arrow{
   display:none;
 }
 
@@ -1529,4 +1530,34 @@
     margin-top:0;
     margin-left:auto;
   }
+}
+
+
+/* ===== Sidebar recolhida — ajuste visual ===== */
+.sidebar-collapsed{
+  gap:24px;
+}
+
+.sidebar-collapsed .sidebar-nav{
+  gap:7px;
+}
+
+.sidebar-collapsed .sidebar-link{
+  min-height:44px;
+  border-radius:13px;
+}
+
+.sidebar-collapsed .student-theme-toggle-wrap{
+  margin-top:2px;
+  margin-bottom:2px;
+}
+
+.sidebar-collapsed .sidebar-streak{
+  min-height:54px;
+  height:54px;
+  margin-top:auto;
+}
+
+.sidebar-collapsed .sidebar-streak-visual{
+  display:flex;
 }
