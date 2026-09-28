@@ -1,8 +1,8 @@
 const db = require("../config/db");
 
-// ============================
+// =====================================================
 // CRIAR RESULTADO
-// ============================
+// =====================================================
 
 function criarResultado(
     usuarioId,
@@ -43,18 +43,19 @@ function criarResultado(
     );
 }
 
-
-// ============================
+// =====================================================
 // BUSCAR RESULTADOS DO USUÁRIO
-// ============================
+// =====================================================
 
-function buscarResultadosPorUsuario(usuarioId, callback) {
-
+function buscarResultadosPorUsuario(
+    usuarioId,
+    callback
+) {
     const sql = `
         SELECT *
         FROM resultados
         WHERE usuario_id = ?
-        ORDER BY data_realizacao DESC
+        ORDER BY data_realizacao DESC, id DESC
     `;
 
     db.all(
@@ -64,13 +65,14 @@ function buscarResultadosPorUsuario(usuarioId, callback) {
     );
 }
 
-
-// ============================
+// =====================================================
 // BUSCAR DESEMPENHO
-// ============================
+// =====================================================
 
-function buscarDesempenhoPorUsuario(usuarioId, callback) {
-
+function buscarDesempenhoPorUsuario(
+    usuarioId,
+    callback
+) {
     const sql = `
         SELECT
             COUNT(*) AS totalSimulados,
@@ -111,7 +113,6 @@ function buscarDesempenhoPorUsuario(usuarioId, callback) {
         callback
     );
 }
-
 
 module.exports = {
     criarResultado,

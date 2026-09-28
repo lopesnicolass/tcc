@@ -1893,48 +1893,97 @@
    O player deve ficar abaixo do título/descrição.
    ========================================================= */
 
-.pagina-flashcards-block {
+/* =========================================================
+   CORREÇÃO — BLOCO DE FLASHCARDS
+   ========================================================= */
+
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block {
   display: grid;
-  grid-template-columns: 47px minmax(0, 1fr);
+
+  grid-template-columns:
+    47px
+    minmax(0, 1fr);
+
   column-gap: 14px;
   row-gap: 0;
+
   align-items: start;
+
+  overflow: hidden;
 }
 
-.pagina-flashcards-block > .pagina-resource-block-icon {
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-resource-block-icon {
   grid-column: 1;
   grid-row: 1;
+
   width: 47px;
   height: 47px;
+
+  margin: 0;
 }
 
-.pagina-flashcards-block > .pagina-resource-block-copy {
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-resource-block-copy {
   grid-column: 2;
   grid-row: 1;
+
   min-width: 0;
 }
 
-.pagina-flashcards-block > .pagina-flashcards-player,
-.pagina-flashcards-block > .pagina-flashcards-loading,
-.pagina-flashcards-block > .pagina-block-placeholder {
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-flashcards-player,
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-flashcards-loading,
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-block-placeholder {
   grid-column: 1 / -1;
   width: 100%;
 }
 
-.pagina-flashcards-block > .pagina-flashcards-player {
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-flashcards-player {
   margin-top: 22px;
 }
 
-.pagina-flashcards-loading {
+.pagina-content-block.pagina-resource-block.pagina-flashcards-block
+  > .pagina-flashcards-loading {
   margin-top: 20px;
-  padding: 18px;
-  border-radius: 14px;
-  background: var(--paper);
-  color: var(--muted);
-  text-align: center;
-  font-size: 13px;
 }
 
+
+/* =========================================================
+   FLASHCARDS — MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-resource-block-icon,
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-resource-block-copy,
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-flashcards-player,
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-flashcards-loading,
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-block-placeholder {
+    grid-column: 1;
+  }
+
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-resource-block-icon {
+    grid-row: auto;
+  }
+
+  .pagina-content-block.pagina-resource-block.pagina-flashcards-block
+    > .pagina-resource-block-copy {
+    margin-top: 12px;
+  }
+}
 /* =========================================================
    RESPONSIVO
    ========================================================= */

@@ -5,10 +5,9 @@ const {
 } = require("../models/resultadoModel");
 
 
-// ==========================================
+// =====================================================
 // VERIFICAR SE O USUÁRIO PODE ACESSAR
-// OS DADOS DE :usuarioId (DONO OU ADMIN)
-// ==========================================
+// =====================================================
 
 function usuarioPodeAcessar(req, usuarioId) {
 
@@ -16,17 +15,48 @@ function usuarioPodeAcessar(req, usuarioId) {
         return false;
     }
 
+    // Administrador pode consultar qualquer usuário
     if (req.usuario.tipo === "admin") {
         return true;
     }
 
-    return Number(req.usuario.id) === usuarioId;
+    const usuarioLogadoId = Number(
+        req.usuario.id ||
+        req.usuario.usuarioId
+    );
+
+    return (
+        Number.isInteger(usuarioLogadoId) &&
+        usuarioLogadoId === usuarioId
+    );
 }
 
 
-// ============================
+// =====================================================
+// IDENTIFICAR USUÁRIO LOGADO
+// =====================================================
+
+function obterUsuarioLogado(req) {
+
+    const usuarioId = Number(
+        req.usuario?.id ||
+        req.usuario?.usuarioId
+    );
+
+    if (
+        !Number.isInteger(usuarioId) ||
+        usuarioId <= 0
+    ) {
+        return null;
+    }
+
+    return usuarioId;
+}
+
+
+// =====================================================
 // CRIAR RESULTADO
-// ============================
+// =====================================================
 
 function cadastrarResultado(req, res) {
 
@@ -34,65 +64,88 @@ function cadastrarResultado(req, res) {
         acertos,
         erros,
         totalQuestoes
-    } = req.body;
+    } = req.body || {};
 
-    // O usuário do resultado é sempre o dono do token logado,
-    // nunca o que vier (ou não) no corpo da requisição — isso
-    // evita que alguém registre resultados em nome de outra pessoa.
-    const usuario = Number(req.usuario.id);
+    const usuarioId =
+        obterUsuarioLogado(req);
+
+    if (!usuarioId) {
+
+        return res.status(401).json({
+            mensagem:
+                "Usuário inválido ou não autenticado."
+        });
+    }
 
 
-    // ============================
-    // VALIDAÇÕES
-    // ============================
+    // -----------------------------------------
+    // VALIDAR CAMPOS
+    // -----------------------------------------
 
     if (
         acertos === undefined ||
         erros === undefined ||
         totalQuestoes === undefined
     ) {
+
         return res.status(400).json({
-            mensagem: "Preencha todos os campos."
+            mensagem:
+                "Preencha todos os campos."
         });
     }
 
 
-    const acertosNumero = Number(acertos);
-    const errosNumero = Number(erros);
-    const totalNumero = Number(totalQuestoes);
+    const acertosNumero =
+        Number(acertos);
+
+    const errosNumero =
+        Number(erros);
+
+    const totalNumero =
+        Number(totalQuestoes);
 
 
-    if (!Number.isInteger(usuario) || usuario <= 0) {
-        return res.status(400).json({
-            mensagem: "Usuário inválido."
-        });
-    }
-
+    // -----------------------------------------
+    // VALIDAR ACERTOS
+    // -----------------------------------------
 
     if (
         !Number.isInteger(acertosNumero) ||
         acertosNumero < 0
     ) {
+
         return res.status(400).json({
-            mensagem: "Quantidade de acertos inválida."
+            mensagem:
+                "Quantidade de acertos inválida."
         });
     }
 
+
+    // -----------------------------------------
+    // VALIDAR ERROS
+    // -----------------------------------------
 
     if (
         !Number.isInteger(errosNumero) ||
         errosNumero < 0
     ) {
+
         return res.status(400).json({
-            mensagem: "Quantidade de erros inválida."
+            mensagem:
+                "Quantidade de erros inválida."
         });
     }
 
+
+    // -----------------------------------------
+    // VALIDAR TOTAL
+    // -----------------------------------------
 
     if (
         !Number.isInteger(totalNumero) ||
         totalNumero <= 0
     ) {
+
         return res.status(400).json({
             mensagem:
                 "O total de questões deve ser maior que zero."
@@ -100,9 +153,15 @@ function cadastrarResultado(req, res) {
     }
 
 
+    // -----------------------------------------
+    // VALIDAR SOMA
+    // -----------------------------------------
+
     if (
-        acertosNumero + errosNumero !== totalNumero
+        acertosNumero + errosNumero !==
+        totalNumero
     ) {
+
         return res.status(400).json({
             mensagem:
                 "A quantidade de acertos e erros não corresponde ao total de questões."
@@ -110,24 +169,25 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // ============================
+    // -----------------------------------------
     // CALCULAR PORCENTAGEM
-    // ============================
+    // -----------------------------------------
 
     const porcentagem =
         (acertosNumero / totalNumero) * 100;
 
 
-    // ============================
-    // SALVAR NO BANCO
-    // ============================
+    // -----------------------------------------
+    // SALVAR
+    // -----------------------------------------
 
     criarResultado(
-        usuario,
+        usuarioId,
         acertosNumero,
         errosNumero,
         totalNumero,
         porcentagem,
+
         (erro, resultado) => {
 
             if (erro) {
@@ -151,15 +211,20 @@ function cadastrarResultado(req, res) {
 
                 resultado: {
 
-                    id: resultado.lastID,
+                    id:
+                        resultado.lastID,
 
-                    usuarioId: usuario,
+                    usuarioId:
+                        usuarioId,
 
-                    acertos: acertosNumero,
+                    acertos:
+                        acertosNumero,
 
-                    erros: errosNumero,
+                    erros:
+                        errosNumero,
 
-                    totalQuestoes: totalNumero,
+                    totalQuestoes:
+                        totalNumero,
 
                     porcentagem:
                         Number(
@@ -172,15 +237,20 @@ function cadastrarResultado(req, res) {
 }
 
 
-// ============================
-// BUSCAR RESULTADOS DO USUÁRIO
-// ============================
+// =====================================================
+// LISTAR RESULTADOS POR USUÁRIO
+// =====================================================
 
 function listarResultados(req, res) {
 
-    const usuarioId = Number(req.params.usuarioId);
+    const usuarioId =
+        Number(req.params.usuarioId);
 
-    if (!usuarioId) {
+
+    if (
+        !Number.isInteger(usuarioId) ||
+        usuarioId <= 0
+    ) {
 
         return res.status(400).json({
             mensagem:
@@ -188,15 +258,24 @@ function listarResultados(req, res) {
         });
     }
 
-    if (!usuarioPodeAcessar(req, usuarioId)) {
+
+    if (
+        !usuarioPodeAcessar(
+            req,
+            usuarioId
+        )
+    ) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para ver esses resultados."
+            mensagem:
+                "Você não tem permissão para ver esses resultados."
         });
     }
 
 
     buscarResultadosPorUsuario(
         usuarioId,
+
         (erro, resultados) => {
 
             if (erro) {
@@ -214,22 +293,81 @@ function listarResultados(req, res) {
 
 
             return res.status(200).json({
-                resultados
+                resultados:
+                    resultados || []
             });
         }
     );
 }
 
 
-// ============================
-// BUSCAR DESEMPENHO
-// ============================
+// =====================================================
+// LISTAR MEUS RESULTADOS
+// =====================================================
 
-function buscarDesempenho(req, res) {
+function listarMeusResultados(
+    req,
+    res
+) {
 
-    const usuarioId = Number(req.params.usuarioId);
+    const usuarioId =
+        obterUsuarioLogado(req);
+
 
     if (!usuarioId) {
+
+        return res.status(401).json({
+            mensagem:
+                "Usuário não autenticado."
+        });
+    }
+
+
+    buscarResultadosPorUsuario(
+        usuarioId,
+
+        (erro, resultados) => {
+
+            if (erro) {
+
+                console.error(
+                    "❌ Erro ao buscar meus resultados:",
+                    erro
+                );
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao buscar resultados."
+                });
+            }
+
+
+            return res.status(200).json({
+                resultados:
+                    resultados || []
+            });
+        }
+    );
+}
+
+
+// =====================================================
+// BUSCAR DESEMPENHO POR USUÁRIO
+// =====================================================
+
+function buscarDesempenho(
+    req,
+    res
+) {
+
+    const usuarioId =
+        Number(req.params.usuarioId);
+
+
+    if (
+        !Number.isInteger(usuarioId) ||
+        usuarioId <= 0
+    ) {
 
         return res.status(400).json({
             mensagem:
@@ -237,15 +375,24 @@ function buscarDesempenho(req, res) {
         });
     }
 
-    if (!usuarioPodeAcessar(req, usuarioId)) {
+
+    if (
+        !usuarioPodeAcessar(
+            req,
+            usuarioId
+        )
+    ) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para ver esse desempenho."
+            mensagem:
+                "Você não tem permissão para ver esse desempenho."
         });
     }
 
 
     buscarDesempenhoPorUsuario(
         usuarioId,
+
         (erro, resultado) => {
 
             if (erro) {
@@ -263,15 +410,94 @@ function buscarDesempenho(req, res) {
 
 
             return res.status(200).json({
-                desempenho: resultado
+
+                desempenho:
+                    resultado || {
+                        totalSimulados: 0,
+                        mediaPorcentagem: 0,
+                        totalAcertos: 0,
+                        totalErros: 0,
+                        totalQuestoes: 0,
+                        melhorResultado: 0
+                    }
             });
         }
     );
 }
 
 
+// =====================================================
+// BUSCAR MEU DESEMPENHO
+// =====================================================
+
+function buscarMeuDesempenho(
+    req,
+    res
+) {
+
+    const usuarioId =
+        obterUsuarioLogado(req);
+
+
+    if (!usuarioId) {
+
+        return res.status(401).json({
+            mensagem:
+                "Usuário não autenticado."
+        });
+    }
+
+
+    buscarDesempenhoPorUsuario(
+        usuarioId,
+
+        (erro, resultado) => {
+
+            if (erro) {
+
+                console.error(
+                    "❌ Erro ao buscar meu desempenho:",
+                    erro
+                );
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao buscar desempenho."
+                });
+            }
+
+
+            return res.status(200).json({
+
+                desempenho:
+                    resultado || {
+                        totalSimulados: 0,
+                        mediaPorcentagem: 0,
+                        totalAcertos: 0,
+                        totalErros: 0,
+                        totalQuestoes: 0,
+                        melhorResultado: 0
+                    }
+            });
+        }
+    );
+}
+
+
+// =====================================================
+// EXPORTS
+// =====================================================
+
 module.exports = {
+
     cadastrarResultado,
+
     listarResultados,
-    buscarDesempenho
+
+    listarMeusResultados,
+
+    buscarDesempenho,
+
+    buscarMeuDesempenho
+
 };

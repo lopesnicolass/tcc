@@ -655,3 +655,173 @@
     padding: 13px 14px;
   }
 }
+/* =====================================================
+   HOME — COMPLEMENTOS DINÂMICOS
+   ===================================================== */
+
+.home-hero-kicker,
+.home-extra-kicker {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.home-hero-kicker {
+  margin-bottom: 8px;
+}
+
+.home-inline-error {
+  margin: -10px 0 22px;
+  padding: 12px 15px;
+  border: 1px solid rgba(184, 70, 47, 0.18);
+  border-radius: 14px;
+  background: #fff7f5;
+  color: #9b3c29;
+  font-size: 13px;
+}
+
+.home-stats-row {
+  margin-bottom: 22px;
+}
+
+.home-panel-heading .home-panel-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--accent-dark);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.home-panel-heading .home-panel-link:hover {
+  text-decoration: underline;
+}
+
+.home-subject-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.home-subject-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.performance-count {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.home-extra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.home-next-card,
+.home-result-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  min-width: 0;
+}
+
+.home-extra-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--accent-dark);
+  background: var(--accent-light);
+}
+
+.home-result-icon {
+  color: #8a5b00;
+  background: #fff4c7;
+}
+
+.home-extra-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.home-extra-copy .home-extra-kicker {
+  margin-bottom: 7px;
+  color: var(--muted);
+}
+
+.home-extra-copy h3 {
+  margin: 0 0 5px;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.home-extra-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.home-extra-button {
+  margin-top: 14px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.18s var(--bouncy), background 0.15s ease;
+}
+
+.home-extra-button:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.home-result-score {
+  margin-bottom: 2px;
+  color: var(--accent-dark);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .home-extra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-hero-kicker {
+    margin-bottom: 5px;
+  }
+
+  .home-panel-heading {
+    gap: 12px;
+  }
+
+  .home-panel-heading .home-panel-link {
+    font-size: 11px;
+  }
+}

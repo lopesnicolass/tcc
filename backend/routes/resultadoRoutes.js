@@ -3,7 +3,9 @@ const express = require("express");
 const {
     cadastrarResultado,
     listarResultados,
-    buscarDesempenho
+    listarMeusResultados,
+    buscarDesempenho,
+    buscarMeuDesempenho
 } = require("../controllers/resultadoController");
 
 const autenticarToken =
@@ -11,12 +13,9 @@ const autenticarToken =
 
 const router = express.Router();
 
-
-// ============================
+// =====================================================
 // SALVAR RESULTADO
-// (o usuário é sempre o dono do token,
-// não é mais aceito no corpo da requisição)
-// ============================
+// =====================================================
 
 router.post(
     "/",
@@ -24,11 +23,26 @@ router.post(
     cadastrarResultado
 );
 
+// =====================================================
+// RESULTADOS DO USUÁRIO LOGADO
+// Essas rotas vêm antes de /:usuarioId para evitar conflito.
+// =====================================================
 
-// ============================
-// BUSCAR DESEMPENHO
-// IMPORTANTE: vem antes de /:usuarioId
-// ============================
+router.get(
+    "/me/desempenho",
+    autenticarToken,
+    buscarMeuDesempenho
+);
+
+router.get(
+    "/me",
+    autenticarToken,
+    listarMeusResultados
+);
+
+// =====================================================
+// RESULTADOS POR USUÁRIO
+// =====================================================
 
 router.get(
     "/:usuarioId/desempenho",
@@ -36,16 +50,10 @@ router.get(
     buscarDesempenho
 );
 
-
-// ============================
-// BUSCAR RESULTADOS
-// ============================
-
 router.get(
     "/:usuarioId",
     autenticarToken,
     listarResultados
 );
-
 
 module.exports = router;

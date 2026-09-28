@@ -18,29 +18,13 @@ export default function Desempenho() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
-  function obterUsuarioId() {
-    const usuarioSalvo = localStorage.getItem('etecamp_usuario');
-
-    if (!usuarioSalvo) {
-      return null;
-    }
-
-    try {
-      const usuario = JSON.parse(usuarioSalvo);
-
-      if (usuario.id) {
-        return Number(usuario.id);
-      }
-
-      if (usuario.usuarioId) {
-        return Number(usuario.usuarioId);
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Erro ao ler usuário:', error);
-      return null;
-    }
+  function obterToken() {
+    return (
+      localStorage.getItem('etecamp_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('accessToken') ||
+      ''
+    );
   }
 
   useEffect(() => {
@@ -49,37 +33,29 @@ export default function Desempenho() {
         setCarregando(true);
         setErro('');
 
-        const usuarioId = obterUsuarioId();
+        const token = obterToken();
 
-        if (!usuarioId) {
+        if (!token) {
           throw new Error(
-            'Não foi possível identificar o usuário logado.'
+            'Sua sessão não foi encontrada. Faça login novamente.'
           );
         }
 
-        const token =
-          localStorage.getItem('etecamp_token') ||
-          localStorage.getItem('token');
+        const headers = {
+          Authorization: `Bearer ${token}`
+        };
 
         const [
           respostaDesempenho,
           respostaResultados
         ] = await Promise.all([
           fetch(
-            `${API_URL}/resultados/${usuarioId}/desempenho`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
+            `${API_URL}/resultados/me/desempenho`,
+            { headers }
           ),
           fetch(
-            `${API_URL}/resultados/${usuarioId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            }
+            `${API_URL}/resultados/me`,
+            { headers }
           )
         ]);
 

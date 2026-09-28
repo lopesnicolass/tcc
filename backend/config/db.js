@@ -261,6 +261,22 @@ db.run(`
     )
 `);
 
+// Registros com estudado = 0 não são necessários:
+// a ausência do registro já representa "não estudado".
+// Remove apenas registros antigos dessa forma, sem tocar
+// nos registros realmente concluídos.
+db.run(`
+    DELETE FROM conteudos_estudados
+    WHERE estudado = 0
+`, (erroLimpezaProgresso) => {
+    if (erroLimpezaProgresso) {
+        console.error(
+            "Erro ao limpar registros antigos de progresso:",
+            erroLimpezaProgresso.message
+        );
+    }
+});
+
 
 
 

@@ -210,6 +210,46 @@ export default function Conteudos() {
   const [estudados, setEstudados] = useState({});
   const [salvandoTopico, setSalvandoTopico] = useState(null);
 
+  async function carregarProgresso(tokenAtual = obterToken()) {
+    if (!tokenAtual) {
+      setEstudados({});
+      return;
+    }
+
+    const resposta = await fetch(
+      `${API_URL}/conteudos/progresso`,
+      {
+        headers: {
+          Authorization: `Bearer ${tokenAtual}`
+        }
+      }
+    );
+
+    const dados = await resposta
+      .json()
+      .catch(() => ({}));
+
+    if (!resposta.ok) {
+      throw new Error(
+        dados.erro ||
+        dados.mensagem ||
+        'Não foi possível carregar seu progresso.'
+      );
+    }
+
+    const mapa = {};
+
+    (Array.isArray(dados.topicos)
+      ? dados.topicos
+      : []
+    ).forEach((item) => {
+      mapa[String(item.topico_id)] =
+        Boolean(item.estudado);
+    });
+
+    setEstudados(mapa);
+  }
+
   useEffect(() => {
     let ativo = true;
 
@@ -261,51 +301,9 @@ export default function Conteudos() {
           );
         });
 
-        const token =
-  localStorage.getItem('etecamp_token');
+        const token = obterToken();
 
-        if (!token) {
-          setEstudados({});
-          return;
-        }
-
-        const respostaProgresso =
-          await fetch(
-            `${API_URL}/conteudos/progresso`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
-            }
-          );
-
-        const dadosProgresso =
-          await respostaProgresso
-            .json()
-            .catch(() => ({}));
-
-        if (
-          respostaProgresso.ok &&
-          Array.isArray(
-            dadosProgresso.topicos
-          )
-        ) {
-          const mapa = {};
-
-          dadosProgresso.topicos.forEach(
-            (item) => {
-              mapa[String(item.topico_id)] =
-                Boolean(item.estudado);
-            }
-          );
-
-          if (ativo) {
-            setEstudados(mapa);
-          }
-        } else {
-          setEstudados({});
-        }
+        await carregarProgresso(token);
 
       } catch (error) {
         console.error(
@@ -425,10 +423,7 @@ export default function Conteudos() {
       return;
     }
 
-    const token =
-      localStorage.getItem(
-        'etecamp_token'
-      );
+    const token = obterToken();
 
     if (!token) {
       setErro(
@@ -482,11 +477,7 @@ export default function Conteudos() {
         );
       }
 
-      setEstudados((prev) => ({
-        ...prev,
-        [String(topicoId)]:
-          novoStatus
-      }));
+      await carregarProgresso(token);
 
     } catch (error) {
       console.error(
@@ -505,10 +496,7 @@ export default function Conteudos() {
   }
 
   async function marcarTodosComoNaoEstudados() {
-    const token =
-      localStorage.getItem(
-        'etecamp_token'
-      );
+    const token = obterToken();
 
     if (!token) {
       setErro(

@@ -1,38 +1,147 @@
 import '../../styles/aluno/Home.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import {
   LEVEL_TITLES,
   xpForLevel
 } from '../../context/GamificationContext.jsx';
+import Icon from '../../components/Icon.jsx';
+import SubjectIcon from '../../components/SubjectIcon.jsx';
+import { getSubjectStyle } from '../../utils/subjects.js';
 
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const DESEMPENHOS_INICIAIS = [
-  {
-    materia: 'Português',
-    percentual: 68
-  },
-  {
-    materia: 'Matemática',
-    percentual: 54
-  },
-  {
-    materia: 'Ciências',
-    percentual: 63
-  },
-  {
-    materia: 'História',
-    percentual: 71
-  },
-  {
-    materia: 'Geografia',
-    percentual: 59
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
+
+function obterUsuario() {
+  try {
+    return JSON.parse(
+      localStorage.getItem('etecamp_usuario') || '{}'
+    );
+  } catch {
+    return {};
   }
-];
+}
+
+function normalizarTopicos(materias) {
+  return (Array.isArray(materias) ? materias : []).flatMap(
+    (materia) =>
+      (Array.isArray(materia.topicos)
+        ? materia.topicos
+        : []
+      ).map((topico) => ({
+        ...topico,
+        materia: materia.nome,
+        materiaId: materia.id
+      }))
+  );
+}
+
+function criarDataAtividade(atividade) {
+  if (!atividade?.data) {
+    return null;
+  }
+
+  const texto = String(atividade.data).trim();
+
+  let ano;
+  let mes;
+  let dia;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
+    [ano, mes, dia] = texto.split('-').map(Number);
+  } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
+    [dia, mes, ano] = texto.split('/').map(Number);
+  } else {
+    return null;
+  }
+
+  const [horaTexto, minutoTexto] = String(
+    atividade.horario || '23:59'
+  ).split(':');
+
+  const resultado = new Date(
+    ano,
+    mes - 1,
+    dia,
+    Number(horaTexto) || 0,
+    Number(minutoTexto) || 0,
+    0,
+    0
+  );
+
+  return Number.isNaN(resultado.getTime())
+    ? null
+    : resultado;
+}
+
+function formatarData(data) {
+  if (!data) {
+    return '';
+  }
+
+  const texto = String(data).trim();
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
+    const [ano, mes, dia] = texto.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
+    return texto;
+  }
+
+  return texto;
+}
+
+function obterStatusData(atividade) {
+  const data = criarDataAtividade(atividade);
+
+  if (!data) {
+    return '';
+  }
+
+  const agora = new Date();
+  const hoje = new Date(
+    agora.getFullYear(),
+    agora.getMonth(),
+    agora.getDate()
+  );
+
+  const dataSemHorario = new Date(
+    data.getFullYear(),
+    data.getMonth(),
+    data.getDate()
+  );
+
+  const diferenca = Math.round(
+    (dataSemHorario.getTime() - hoje.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+
+  if (diferenca === 0) {
+    return 'Hoje';
+  }
+
+  if (diferenca === 1) {
+    return 'Amanhã';
+  }
+
+  return '';
+}
 
 export default function Home() {
+  const navigate = useNavigate();
+
   const {
     level,
     title,
@@ -42,63 +151,138 @@ export default function Home() {
   } = useGamification();
 
   const [showLevels, setShowLevels] = useState(false);
+  const [carregandoResumo, setCarregandoResumo] = useState(true);
+  const [erroResumo, setErroResumo] = useState('');
+
+  const [materiasData, setMateriasData] = useState([]);
+  const [estudados, setEstudados] = useState({});
+  const [desempenho, setDesempenho] = useState(null);
+  const [resultados, setResultados] = useState([]);
   const [proximasAtividades, setProximasAtividades] = useState([]);
-  const [carregandoAtividades, setCarregandoAtividades] =
-    useState(true);
 
-  const usuarioSalvo =
-    localStorage.getItem('etecamp_usuario');
-
-  const usuario = usuarioSalvo
-    ? JSON.parse(usuarioSalvo)
-    : null;
-
+  const usuario = obterUsuario();
   const primeiroNome =
     usuario?.nome?.split(' ')[0] || 'Aluno';
-
-  const usuarioId = usuario?.id;
+  const usuarioId = Number(
+    usuario?.id || usuario?.usuarioId || 0
+  );
 
   useEffect(() => {
-    async function carregarProximasAtividades() {
-      if (!usuarioId) {
-        setProximasAtividades([]);
-        setCarregandoAtividades(false);
-        return;
-      }
+    let ativo = true;
 
+    async function carregarResumo() {
       try {
-        const token =
-          localStorage.getItem('etecamp_token');
+        setCarregandoResumo(true);
+        setErroResumo('');
 
-        const resposta = await fetch(
-          `${API_URL}/cronograma/${usuarioId}`,
-          {
-            headers: token
-              ? {
-                  Authorization: `Bearer ${token}`
-                }
-              : {}
-          }
-        );
+        const token = obterToken();
 
-        if (!resposta.ok) {
+        if (!token) {
           throw new Error(
-            `Erro ao carregar cronograma: ${resposta.status}`
+            'Sua sessão não foi encontrada. Faça login novamente.'
           );
         }
 
-        const dados = await resposta.json();
+        const headers = {
+          Authorization: `Bearer ${token}`
+        };
+
+        const requisicoes = [
+          fetch(`${API_URL}/conteudos/publico`),
+          fetch(`${API_URL}/conteudos/progresso`, { headers }),
+          fetch(`${API_URL}/resultados/me/desempenho`, { headers }),
+          fetch(`${API_URL}/resultados/me`, { headers })
+        ];
+
+        if (usuarioId > 0) {
+          requisicoes.push(
+            fetch(`${API_URL}/cronograma/${usuarioId}`, {
+              headers
+            })
+          );
+        }
+
+        const respostas = await Promise.all(requisicoes);
+        const [
+          respostaConteudos,
+          respostaProgresso,
+          respostaDesempenho,
+          respostaResultados,
+          respostaCronograma
+        ] = respostas;
+
+        const [
+          dadosConteudos,
+          dadosProgresso,
+          dadosDesempenho,
+          dadosResultados,
+          dadosCronograma
+        ] = await Promise.all(
+          respostas.map((resposta) =>
+            resposta.json().catch(() => ({}))
+          )
+        );
+
+        if (!respostaConteudos.ok) {
+          throw new Error(
+            dadosConteudos.erro ||
+              dadosConteudos.mensagem ||
+              'Não foi possível carregar os conteúdos.'
+          );
+        }
+
+        if (!respostaProgresso.ok) {
+          throw new Error(
+            dadosProgresso.erro ||
+              dadosProgresso.mensagem ||
+              'Não foi possível carregar seu progresso.'
+          );
+        }
+
+        if (!respostaDesempenho.ok) {
+          throw new Error(
+            dadosDesempenho.mensagem ||
+              'Não foi possível carregar seu desempenho.'
+          );
+        }
+
+        if (!respostaResultados.ok) {
+          throw new Error(
+            dadosResultados.mensagem ||
+              'Não foi possível carregar seu histórico.'
+          );
+        }
+
+        if (!ativo) {
+          return;
+        }
+
+        const materias = Array.isArray(
+          dadosConteudos?.materias
+        )
+          ? dadosConteudos.materias
+          : [];
+
+        const mapaProgresso = {};
+
+        (Array.isArray(dadosProgresso?.topicos)
+          ? dadosProgresso.topicos
+          : []
+        ).forEach((item) => {
+          mapaProgresso[String(item.topico_id)] =
+            Boolean(item.estudado);
+        });
 
         let atividades = [];
 
-        if (Array.isArray(dados)) {
-          atividades = dados;
-        } else if (Array.isArray(dados.atividades)) {
-          atividades = dados.atividades;
-        } else if (Array.isArray(dados.cronograma)) {
-          atividades = dados.cronograma;
-        } else if (Array.isArray(dados.data)) {
-          atividades = dados.data;
+        if (Array.isArray(dadosCronograma)) {
+          atividades = dadosCronograma;
+        } else if (Array.isArray(dadosCronograma?.atividades)) {
+          atividades = dadosCronograma.atividades;
+        } else if (Array.isArray(dadosCronograma?.cronograma)) {
+          atividades = dadosCronograma.cronograma;
+        } else if (Array.isArray(dadosCronograma?.data)) {
+          atividades = dadosCronograma.data;
         }
 
         const agora = new Date();
@@ -115,196 +299,166 @@ export default function Home() {
               atividade.concluida === '1' ||
               atividade.done === true;
 
-            if (concluida) {
-              return false;
-            }
+            const data = criarDataAtividade(atividade);
 
-            return dataDaAtividadeAindaVigente(
-              atividade,
-              agora
-            );
+            return !concluida && data && data >= agora;
           })
-          .sort((a, b) => {
-            return obterDataOrdenacao(a)
-              - obterDataOrdenacao(b);
-          })
+          .sort(
+            (a, b) =>
+              (criarDataAtividade(a)?.getTime() ||
+                Number.MAX_SAFE_INTEGER) -
+              (criarDataAtividade(b)?.getTime() ||
+                Number.MAX_SAFE_INTEGER)
+          )
           .slice(0, 4);
 
+        setMateriasData(materias);
+        setEstudados(mapaProgresso);
+        setDesempenho(
+          dadosDesempenho?.desempenho || null
+        );
+        setResultados(
+          Array.isArray(dadosResultados?.resultados)
+            ? dadosResultados.resultados
+            : []
+        );
         setProximasAtividades(futuras);
-      } catch (erro) {
+      } catch (error) {
         console.error(
-          'Erro ao carregar próximas atividades:',
-          erro
+          'Erro ao carregar resumo da home:',
+          error
         );
 
-        setProximasAtividades([]);
+        if (ativo) {
+          setErroResumo(
+            error.message ||
+              'Não foi possível carregar os dados da Home.'
+          );
+        }
       } finally {
-        setCarregandoAtividades(false);
+        if (ativo) {
+          setCarregandoResumo(false);
+        }
       }
     }
 
-    carregarProximasAtividades();
+    carregarResumo();
+
+    const atualizar = () => {
+      carregarResumo();
+    };
+
+    window.addEventListener(
+      'etecamp-login',
+      atualizar
+    );
+
+    return () => {
+      ativo = false;
+      window.removeEventListener(
+        'etecamp-login',
+        atualizar
+      );
+    };
   }, [usuarioId]);
 
-  function dataDaAtividadeAindaVigente(
-    atividade,
-    agora
-  ) {
-    const dataAtividade =
-      criarDataAtividade(atividade);
+  const topicos = useMemo(
+    () => normalizarTopicos(materiasData),
+    [materiasData]
+  );
 
-    if (!dataAtividade) {
-      return false;
+  const totalConteudos = topicos.length;
+
+  const totalEstudados = topicos.filter(
+    (topico) =>
+      Boolean(estudados[String(topico.id)])
+  ).length;
+
+  const progressoGeral =
+    totalConteudos > 0
+      ? Math.round(
+          (totalEstudados / totalConteudos) * 100
+        )
+      : 0;
+
+  const progressoPorMateria = materiasData.map(
+    (materia) => {
+      const lista = Array.isArray(materia.topicos)
+        ? materia.topicos
+        : [];
+
+      const estudadosMateria = lista.filter(
+        (topico) =>
+          Boolean(estudados[String(topico.id)])
+      ).length;
+
+      const percentual =
+        lista.length > 0
+          ? Math.round(
+              (estudadosMateria / lista.length) *
+                100
+            )
+          : 0;
+
+      return {
+        ...materia,
+        total: lista.length,
+        estudados: estudadosMateria,
+        percentual
+      };
     }
+  );
 
-    return dataAtividade >= agora;
-  }
+  const totalSimulados = Number(
+    desempenho?.totalSimulados || 0
+  );
 
-  function criarDataAtividade(atividade) {
-    if (!atividade?.data) {
-      return null;
-    }
+  const mediaGeral = Math.round(
+    Number(desempenho?.mediaPorcentagem || 0)
+  );
 
-    const dataTexto =
-      String(atividade.data).trim();
+  const melhorResultado = Math.round(
+    Number(desempenho?.melhorResultado || 0)
+  );
 
-    let ano;
-    let mes;
-    let dia;
+  const proximoTopico = topicos.find(
+    (topico) =>
+      !estudados[String(topico.id)]
+  );
 
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dataTexto)) {
-      [ano, mes, dia] =
-        dataTexto.split('-').map(Number);
-    } else if (
-      /^\d{2}\/\d{2}\/\d{4}$/.test(dataTexto)
-    ) {
-      [dia, mes, ano] =
-        dataTexto.split('/').map(Number);
-    } else {
-      return null;
-    }
+  const ultimoResultado = resultados[0] || null;
 
-    const horario =
-      String(
-        atividade.horario || '23:59'
-      );
-
-    const [horaTexto, minutoTexto] =
-      horario.split(':');
-
-    const hora =
-      Number(horaTexto) || 0;
-
-    const minuto =
-      Number(minutoTexto) || 0;
-
-    const resultado =
-      new Date(
-        ano,
-        mes - 1,
-        dia,
-        hora,
-        minuto,
-        0,
-        0
-      );
-
-    if (Number.isNaN(resultado.getTime())) {
-      return null;
-    }
-
-    return resultado;
-  }
-
-  function obterDataOrdenacao(atividade) {
-    const data =
-      criarDataAtividade(atividade);
-
-    return data
-      ? data.getTime()
-      : Number.MAX_SAFE_INTEGER;
-  }
-
-  function formatarData(data) {
+  function formatarDataResultado(data) {
     if (!data) {
       return '';
     }
 
-    const texto =
-      String(data).trim();
+    const objeto = new Date(data);
 
-    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
-      const [ano, mes, dia] =
-        texto.split('-');
-
-      return `${dia}/${mes}`;
-    }
-
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
-      return texto.slice(0, 5);
-    }
-
-    return texto;
-  }
-
-  function obterStatusData(atividade) {
-    const data =
-      criarDataAtividade(atividade);
-
-    if (!data) {
+    if (Number.isNaN(objeto.getTime())) {
       return '';
     }
 
-    const agora = new Date();
-
-    const hoje =
-      new Date(
-        agora.getFullYear(),
-        agora.getMonth(),
-        agora.getDate()
-      );
-
-    const dataSemHorario =
-      new Date(
-        data.getFullYear(),
-        data.getMonth(),
-        data.getDate()
-      );
-
-    const diferenca =
-      Math.round(
-        (
-          dataSemHorario.getTime()
-          - hoje.getTime()
-        ) /
-        (1000 * 60 * 60 * 24)
-      );
-
-    if (diferenca === 0) {
-      return 'Hoje';
-    }
-
-    if (diferenca === 1) {
-      return 'Amanhã';
-    }
-
-    return '';
+    return objeto.toLocaleDateString(
+      'pt-BR'
+    );
   }
 
   return (
     <div className="home-page">
-      {/* =====================================================
-          HERO
-          ===================================================== */}
-
+      {/* HERO */}
       <div className="home-hero">
         <div className="home-hero-text">
+          <span className="home-hero-kicker">
+            PREPARA ETECAMP
+          </span>
+
           <h1>
             Olá, {primeiroNome}!
           </h1>
 
           <p>
-            Continue seus estudos e alcance seus objetivos!
+            Continue seus estudos e acompanhe sua evolução até o Vestibulinho.
           </p>
         </div>
 
@@ -328,13 +482,8 @@ export default function Home() {
             </div>
 
             <div className="home-hero-level-text">
-              <strong>
-                {title}
-              </strong>
-
-              <span>
-                Nível {level}
-              </span>
+              <strong>{title}</strong>
+              <span>Nível {level}</span>
             </div>
           </div>
 
@@ -354,10 +503,7 @@ export default function Home() {
                 className="home-hero-xp-fill"
                 style={{
                   width: `${Math.min(
-                    (
-                      xpIntoLevel /
-                      xpForNext
-                    ) * 100,
+                    (xpIntoLevel / xpForNext) * 100,
                     100
                   )}%`
                 }}
@@ -367,50 +513,39 @@ export default function Home() {
         </div>
       </div>
 
-      {/* =====================================================
-          ESTATÍSTICAS
-          ===================================================== */}
+      {erroResumo && (
+        <div className="home-inline-error">
+          {erroResumo}
+        </div>
+      )}
 
-      <div className="stats-row">
+      {/* ESTATÍSTICAS REAIS */}
+      <div className="stats-row home-stats-row">
         <div className="stat-card">
           <div className="stat-icon">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <path d="M4 9h16M7 3v4M17 3v4M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
-            </svg>
+            <Icon name="book" size={20} />
           </div>
 
           <div className="stat-value">
-            45
+            {carregandoResumo
+              ? '—'
+              : `${totalEstudados}/${totalConteudos}`}
           </div>
 
           <div className="stat-label">
-            Dias até o Vestibulinho
+            Conteúdos estudados
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <path d="M8 21h8M12 17v4M6 4h12v3a6 6 0 0 1-12 0V4Z" />
-            </svg>
+            <Icon name="checkSquare" size={20} />
           </div>
 
           <div className="stat-value">
-            3
+            {carregandoResumo
+              ? '—'
+              : totalSimulados}
           </div>
 
           <div className="stat-label">
@@ -420,115 +555,144 @@ export default function Home() {
 
         <div className="stat-card">
           <div className="stat-icon">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="9"
-              />
-
-              <path d="M9 12.5 11 14.5 15.5 10" />
-            </svg>
+            <Icon name="chart" size={20} />
           </div>
 
           <div className="stat-value">
-            61%
+            {carregandoResumo
+              ? '—'
+              : `${mediaGeral}%`}
           </div>
 
           <div className="stat-label">
-            Progresso geral
+            Média nos simulados
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Icon name="trophy" size={20} />
+          </div>
+
+          <div className="stat-value">
+            {carregandoResumo
+              ? '—'
+              : `${melhorResultado}%`}
+          </div>
+
+          <div className="stat-label">
+            Melhor resultado
           </div>
         </div>
       </div>
 
-      {/* =====================================================
-          CONTEÚDO DA HOME
-          ===================================================== */}
-
+      {/* CONTEÚDO PRINCIPAL */}
       <div className="home-grid">
-        {/* ===================================================
-            PROGRESSO POR MATÉRIA
-            =================================================== */}
-
         <div className="panel-card home-performance-card">
           <div className="home-panel-heading">
             <div>
-              <h3>
-                Progresso por matéria
-              </h3>
-
+              <h3>Progresso por matéria</h3>
               <p>
-                Seu desempenho inicial em cada área
+                Quanto dos conteúdos disponíveis você já revisou.
               </p>
             </div>
+
+            <button
+              type="button"
+              className="home-panel-link"
+              onClick={() => navigate('/conteudos')}
+            >
+              Ver conteúdos →
+            </button>
           </div>
 
-          <div className="performance-chart">
-            {DESEMPENHOS_INICIAIS.map(
-              (item) => (
-                <div
-                  className="performance-row"
-                  key={item.materia}
-                >
-                  <div className="performance-row-top">
-                    <span className="performance-subject">
-                      {item.materia}
-                    </span>
+          {carregandoResumo ? (
+            <div className="activities-empty-message">
+              Carregando seu progresso...
+            </div>
+          ) : progressoPorMateria.length === 0 ? (
+            <div className="activities-empty-message">
+              Nenhum conteúdo disponível ainda.
+            </div>
+          ) : (
+            <div className="performance-chart">
+              {progressoPorMateria.map(
+                (item) => {
+                  const style =
+                    getSubjectStyle(item.nome);
 
-                    <span className="performance-value">
-                      {item.percentual}%
-                    </span>
-                  </div>
-
-                  <div className="performance-track">
+                  return (
                     <div
-                      className="performance-fill"
-                      style={{
-                        width:
-                          `${item.percentual}%`
-                      }}
-                    />
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        </div>
+                      className="performance-row"
+                      key={item.id || item.nome}
+                    >
+                      <div className="performance-row-top">
+                        <div className="home-subject-label">
+                          <span
+                            className="home-subject-dot"
+                            style={{
+                              background: style.color
+                            }}
+                          />
 
-        {/* ===================================================
-            PRÓXIMAS ATIVIDADES
-            =================================================== */}
+                          <span className="performance-subject">
+                            {item.nome}
+                          </span>
+                        </div>
+
+                        <span className="performance-value">
+                          {item.percentual}%
+                        </span>
+                      </div>
+
+                      <div className="performance-track">
+                        <div
+                          className="performance-fill"
+                          style={{
+                            width: `${item.percentual}%`,
+                            background: style.color
+                          }}
+                        />
+                      </div>
+
+                      <small className="performance-count">
+                        {item.estudados} de {item.total} conteúdos
+                      </small>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="panel-card home-activities-card">
           <div className="home-panel-heading">
             <div>
-              <h3>
-                Próximas atividades
-              </h3>
-
+              <h3>Próximas atividades</h3>
               <p>
-                O que está programado para você
+                O que está programado para você.
               </p>
             </div>
+
+            <button
+              type="button"
+              className="home-panel-link"
+              onClick={() => navigate('/cronograma')}
+            >
+              Abrir cronograma →
+            </button>
           </div>
 
-          {carregandoAtividades ? (
+          {carregandoResumo ? (
             <div className="activities-empty-message">
-              <span>
-                Carregando suas próximas atividades...
-              </span>
+              Carregando suas atividades...
             </div>
           ) : proximasAtividades.length === 0 ? (
             <div className="activities-empty-message">
+              <strong>Nenhuma atividade próxima.</strong>
               <span>
-                Você não tem próximas atividades.
+                Organize seu próximo estudo no cronograma.
               </span>
             </div>
           ) : (
@@ -536,9 +700,7 @@ export default function Home() {
               {proximasAtividades.map(
                 (atividade) => {
                   const status =
-                    obterStatusData(
-                      atividade
-                    );
+                    obterStatusData(atividade);
 
                   return (
                     <div
@@ -551,7 +713,7 @@ export default function Home() {
                         </span>
 
                         <span className="activity-subject">
-                          {atividade.materia}
+                          {atividade.materia || 'Estudo'}
                         </span>
                       </div>
 
@@ -563,9 +725,7 @@ export default function Home() {
                         )}
 
                         <span className="date">
-                          {formatarData(
-                            atividade.data
-                          )}
+                          {formatarData(atividade.data)}
                         </span>
 
                         {atividade.horario && (
@@ -583,38 +743,129 @@ export default function Home() {
         </div>
       </div>
 
-      {/* =====================================================
-          MODAL DE NÍVEIS
-          ===================================================== */}
+      {/* DETALHES EXTRAS */}
+      <div className="home-extra-grid">
+        <div className="panel-card home-next-card">
+          <div className="home-extra-icon">
+            <Icon name="book" size={22} />
+          </div>
 
+          <div className="home-extra-copy">
+            <span className="home-extra-kicker">
+              CONTINUE ESTUDANDO
+            </span>
+
+            {proximoTopico ? (
+              <>
+                <h3>{proximoTopico.nome}</h3>
+                <p>
+                  {proximoTopico.materia}
+                </p>
+
+                <button
+                  type="button"
+                  className="home-extra-button"
+                  onClick={() =>
+                    navigate(
+                      `/conteudos/${proximoTopico.id}`
+                    )
+                  }
+                >
+                  Abrir conteúdo →
+                </button>
+              </>
+            ) : (
+              <>
+                <h3>Você revisou tudo!</h3>
+                <p>
+                  Continue praticando com simulados e flashcards.
+                </p>
+
+                <button
+                  type="button"
+                  className="home-extra-button"
+                  onClick={() => navigate('/simulados')}
+                >
+                  Fazer um simulado →
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="panel-card home-result-card">
+          <div className="home-extra-icon home-result-icon">
+            <Icon name="trophy" size={22} />
+          </div>
+
+          <div className="home-extra-copy">
+            <span className="home-extra-kicker">
+              ÚLTIMO RESULTADO
+            </span>
+
+            {ultimoResultado ? (
+              <>
+                <div className="home-result-score">
+                  {Number(
+                    ultimoResultado.porcentagem || 0
+                  ).toFixed(0)}%
+                </div>
+
+                <h3>
+                  {ultimoResultado.simulado_nome ||
+                    'Simulado realizado'}
+                </h3>
+
+                <p>
+                  {ultimoResultado.acertos} acertos de{' '}
+                  {ultimoResultado.total_questoes} questões
+                  {' · '}
+                  {formatarDataResultado(
+                    ultimoResultado.data_realizacao
+                  )}
+                </p>
+              </>
+            ) : (
+              <>
+                <h3>Ainda não há resultados.</h3>
+                <p>
+                  Faça seu primeiro simulado para começar a acompanhar sua evolução.
+                </p>
+              </>
+            )}
+
+            <button
+              type="button"
+              className="home-extra-button"
+              onClick={() => navigate('/desempenho')}
+            >
+              Ver desempenho →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL DE NÍVEIS */}
       {showLevels && (
         <div
           className="modal-overlay"
-          onClick={() =>
-            setShowLevels(false)
-          }
+          onClick={() => setShowLevels(false)}
         >
           <div
             className="modal-card levels-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="modal-header">
-              <h2>
-                Níveis e XP
-              </h2>
-
+              <h2>Níveis e XP</h2>
               <p>
-                Veja quanto XP falta pra subir de nível.
+                Veja quanto XP falta para subir de nível.
               </p>
             </div>
 
             <div className="levels-list">
               {LEVEL_TITLES.map(
                 (nivelTitulo, index) => {
-                  const nivel =
-                    index + 1;
+                  const nivel = index + 1;
 
                   return (
                     <div
@@ -630,13 +881,8 @@ export default function Home() {
                       </div>
 
                       <div className="levels-row-info">
-                        <strong>
-                          {nivelTitulo}
-                        </strong>
-
-                        <span>
-                          Nível {nivel}
-                        </span>
+                        <strong>{nivelTitulo}</strong>
+                        <span>Nível {nivel}</span>
                       </div>
 
                       <div className="levels-row-xp">
@@ -651,9 +897,7 @@ export default function Home() {
             <div className="modal-actions">
               <button
                 className="btn-primary landing-cta"
-                onClick={() =>
-                  setShowLevels(false)
-                }
+                onClick={() => setShowLevels(false)}
               >
                 Fechar
               </button>

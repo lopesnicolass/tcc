@@ -668,8 +668,20 @@ function marcarTopicoEstudado(
                 erroTopico.code =
                     "TOPICO_NOT_FOUND";
 
-                return callback(
-                    erroTopico
+                return callback(erroTopico);
+            }
+
+            // A ausência do registro representa "não estudado".
+            // Por isso, quando o aluno desmarca, removemos a linha.
+            if (!estudado) {
+                return db.run(
+                    `
+                        DELETE FROM conteudos_estudados
+                        WHERE usuario_id = ?
+                          AND topico_id = ?
+                    `,
+                    [usuarioId, topicoId],
+                    callback
                 );
             }
 
@@ -682,7 +694,7 @@ function marcarTopicoEstudado(
                         estudado,
                         data_estudo
                     )
-                    VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+                    VALUES (?, ?, 1, CURRENT_TIMESTAMP)
 
                     ON CONFLICT (
                         usuario_id,
@@ -690,14 +702,12 @@ function marcarTopicoEstudado(
                     )
 
                     DO UPDATE SET
-                        estudado = excluded.estudado,
-                        data_estudo =
-                            CURRENT_TIMESTAMP
+                        estudado = 1,
+                        data_estudo = CURRENT_TIMESTAMP
                 `,
                 [
                     usuarioId,
-                    topicoId,
-                    estudado ? 1 : 0
+                    topicoId
                 ],
                 callback
             );
