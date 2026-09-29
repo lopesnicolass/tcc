@@ -5,33 +5,50 @@ const db = require("../config/db");
 // =====================================================
 
 function listarAtividades(usuarioId, callback) {
+
     const sql = `
         SELECT *
         FROM cronograma_atividades
         WHERE usuario_id = ?
-        ORDER BY data ASC, horario ASC
+        ORDER BY
+            data ASC,
+            horario ASC,
+            id ASC
     `;
 
-    db.all(sql, [usuarioId], callback);
+    db.all(
+        sql,
+        [usuarioId],
+        callback
+    );
 }
+
 
 // =====================================================
 // BUSCAR UMA ATIVIDADE POR ID
-// (usado para checar o dono antes de editar/excluir)
 // =====================================================
 
-function buscarAtividadePorId(id, callback) {
+function buscarAtividadePorId(
+    id,
+    callback
+) {
+
     const sql = `
         SELECT *
         FROM cronograma_atividades
         WHERE id = ?
     `;
 
-    db.get(sql, [id], callback);
+    db.get(
+        sql,
+        [id],
+        callback
+    );
 }
 
+
 // =====================================================
-// CRIAR UMA ATIVIDADE
+// INSERIR UMA ATIVIDADE
 // =====================================================
 
 function criarAtividade(
@@ -39,6 +56,7 @@ function criarAtividade(
     dados,
     callback
 ) {
+
     const sql = `
         INSERT INTO cronograma_atividades
         (
@@ -59,7 +77,7 @@ function criarAtividade(
         [
             usuarioId,
             dados.data,
-            dados.horario,
+            dados.horario || "08:00",
             dados.nome,
             dados.materia,
             dados.concluida ? 1 : 0,
@@ -67,18 +85,251 @@ function criarAtividade(
             dados.topicoId || null
         ],
         function (erro) {
+
             if (erro) {
                 return callback(erro);
             }
 
-            callback(null, this);
+            callback(
+                null,
+                this
+            );
         }
     );
 }
 
+
 // =====================================================
-// CRIAR VÁRIAS ATIVIDADES DE UMA VEZ
-// (usado pelo Plano Automático)
+// INSERIR VÁRIAS ATIVIDADES
+// =====================================================
+
+function inserirAtividades(
+    usuarioId,
+    listaAtividades,
+    callback
+) {
+
+    if (
+        !Array.isArray(listaAtividades) ||
+        !listaAtividades.length
+    ) {
+        return callback(
+            null,
+            []
+        );
+    }
+
+
+    const idsCriados = [];
+    let indice = 0;
+
+
+    const stmt = db.prepare(`
+        INSERT INTO cronograma_atividades
+        (
+            usuario_id,
+            data,
+            horario,
+            nome,
+            materia,
+            concluida,
+            origem,
+            topico_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+
+    function proximo() {
+
+        if (
+            indice >=
+            listaAtividades.length
+        ) {
+
+            return stmt.finalize(
+                (erroFinalize) => {
+
+                    if (erroFinalize) {
+                        return callback(
+                            erroFinalize
+                        );
+                    }
+
+                    callback(
+                        null,
+                        idsCriados
+                    );
+                }
+            );
+        }
+
+
+        const atividade =
+            listaAtividades[indice++];
+
+
+        stmt.run(
+            [
+                usuarioId,
+                atividade.data,
+                atividade.horario || "08:00",
+                atividade.nome,
+                atividade.materia,
+                atividade.concluida ? 1 : 0,
+                atividade.origem || null,
+                atividade.topicoId || null
+            ],
+            function (erro) {
+
+                if (erro) {
+
+                    return stmt.finalize(
+                        () => callback(erro)
+                    );
+                }
+
+
+                idsCriados.push(
+                    this.lastID
+                );
+
+                proximo();
+            }
+        );
+    }
+
+
+    proximo();
+}
+
+
+// =====================================================
+// CRIAR VÁRIAS ATIVIDADES EM LOTE
+//
+// A substituição da origem e a inserção acontecem
+// na MESMA transação.
+// =====================================================
+
+function salvarAtividadesEmLote(
+    usuarioId,
+    listaAtividades,
+    origemParaSubstituir,
+    callback
+) {
+
+    if (
+        !Array.isArray(listaAtividades) ||
+        !listaAtividades.length
+    ) {
+
+        return callback(
+            new Error(
+                "Nenhuma atividade foi enviada."
+            )
+        );
+    }
+
+
+    db.serialize(() => {
+
+        db.run(
+            "BEGIN IMMEDIATE TRANSACTION",
+            (erroInicio) => {
+
+                if (erroInicio) {
+                    return callback(
+                        erroInicio
+                    );
+                }
+
+
+                function rollback(erro) {
+
+                    db.run(
+                        "ROLLBACK",
+                        () => callback(
+                            erro
+                        )
+                    );
+                }
+
+
+                function inserir() {
+
+                    inserirAtividades(
+                        usuarioId,
+                        listaAtividades,
+                        (erroInsercao, ids) => {
+
+                            if (erroInsercao) {
+
+                                return rollback(
+                                    erroInsercao
+                                );
+                            }
+
+
+                            db.run(
+                                "COMMIT",
+                                (erroCommit) => {
+
+                                    if (erroCommit) {
+                                        return rollback(
+                                            erroCommit
+                                        );
+                                    }
+
+
+                                    callback(
+                                        null,
+                                        ids
+                                    );
+                                }
+                            );
+                        }
+                    );
+                }
+
+
+                if (
+                    !origemParaSubstituir
+                ) {
+                    return inserir();
+                }
+
+
+                db.run(
+                    `
+                        DELETE FROM cronograma_atividades
+                        WHERE usuario_id = ?
+                          AND origem = ?
+                    `,
+                    [
+                        usuarioId,
+                        origemParaSubstituir
+                    ],
+                    (erroExclusao) => {
+
+                        if (erroExclusao) {
+
+                            return rollback(
+                                erroExclusao
+                            );
+                        }
+
+
+                        inserir();
+                    }
+                );
+            }
+        );
+    });
+}
+
+
+// =====================================================
+// COMPATIBILIDADE
 // =====================================================
 
 function criarAtividadesEmLote(
@@ -86,78 +337,18 @@ function criarAtividadesEmLote(
     listaAtividades,
     callback
 ) {
-    if (!listaAtividades.length) {
-        return callback(null, []);
-    }
 
-    const criadas = [];
-    let houveErro = null;
-
-    db.serialize(() => {
-
-        db.run("BEGIN TRANSACTION");
-
-        const stmt = db.prepare(`
-            INSERT INTO cronograma_atividades
-            (
-                usuario_id,
-                data,
-                horario,
-                nome,
-                materia,
-                concluida,
-                origem,
-                topico_id
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-        listaAtividades.forEach((atividade) => {
-
-            stmt.run(
-                [
-                    usuarioId,
-                    atividade.data,
-                    atividade.horario || "08:00",
-                    atividade.nome,
-                    atividade.materia,
-                    atividade.concluida ? 1 : 0,
-                    atividade.origem || null,
-                    atividade.topicoId || null
-                ],
-                function (erro) {
-                    if (erro) {
-                        houveErro = erro;
-                        return;
-                    }
-
-                    criadas.push(this.lastID);
-                }
-            );
-        });
-
-        stmt.finalize((erroFinalize) => {
-
-            if (erroFinalize || houveErro) {
-                db.run("ROLLBACK");
-                return callback(erroFinalize || houveErro);
-            }
-
-            db.run("COMMIT", (erroCommit) => {
-
-                if (erroCommit) {
-                    return callback(erroCommit);
-                }
-
-                callback(null, criadas);
-            });
-        });
-    });
+    salvarAtividadesEmLote(
+        usuarioId,
+        listaAtividades,
+        null,
+        callback
+    );
 }
+
 
 // =====================================================
 // ATUALIZAR ATIVIDADE
-// (atualização parcial — só troca o que for enviado)
 // =====================================================
 
 function atualizarAtividade(
@@ -165,79 +356,143 @@ function atualizarAtividade(
     dados,
     callback
 ) {
+
     const campos = [];
     const valores = [];
 
-    if (dados.nome !== undefined) {
-        campos.push("nome = ?");
-        valores.push(dados.nome);
-    }
 
-    if (dados.materia !== undefined) {
-        campos.push("materia = ?");
-        valores.push(dados.materia);
-    }
+    if (
+        dados.nome !== undefined
+    ) {
+        campos.push(
+            "nome = ?"
+        );
 
-    if (dados.data !== undefined) {
-        campos.push("data = ?");
-        valores.push(dados.data);
-    }
-
-    if (dados.horario !== undefined) {
-        campos.push("horario = ?");
-        valores.push(dados.horario);
-    }
-
-    if (dados.concluida !== undefined) {
-        campos.push("concluida = ?");
-        valores.push(dados.concluida ? 1 : 0);
-    }
-
-    if (!campos.length) {
-        return callback(
-            new Error("Nenhum campo para atualizar.")
+        valores.push(
+            dados.nome
         );
     }
 
+
+    if (
+        dados.materia !== undefined
+    ) {
+        campos.push(
+            "materia = ?"
+        );
+
+        valores.push(
+            dados.materia
+        );
+    }
+
+
+    if (
+        dados.data !== undefined
+    ) {
+        campos.push(
+            "data = ?"
+        );
+
+        valores.push(
+            dados.data
+        );
+    }
+
+
+    if (
+        dados.horario !== undefined
+    ) {
+        campos.push(
+            "horario = ?"
+        );
+
+        valores.push(
+            dados.horario
+        );
+    }
+
+
+    if (
+        dados.concluida !== undefined
+    ) {
+        campos.push(
+            "concluida = ?"
+        );
+
+        valores.push(
+            dados.concluida ? 1 : 0
+        );
+    }
+
+
+    if (!campos.length) {
+
+        return callback(
+            new Error(
+                "Nenhum campo para atualizar."
+            )
+        );
+    }
+
+
     valores.push(id);
 
-    const sql = `
-        UPDATE cronograma_atividades
-        SET ${campos.join(", ")}
-        WHERE id = ?
-    `;
 
-    db.run(sql, valores, function (erro) {
-        if (erro) {
-            return callback(erro);
+    db.run(
+        `
+            UPDATE cronograma_atividades
+            SET ${campos.join(", ")}
+            WHERE id = ?
+        `,
+        valores,
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(
+                null,
+                this
+            );
         }
-
-        callback(null, this);
-    });
+    );
 }
+
 
 // =====================================================
 // EXCLUIR UMA ATIVIDADE
 // =====================================================
 
-function excluirAtividade(id, callback) {
-    const sql = `
-        DELETE FROM cronograma_atividades
-        WHERE id = ?
-    `;
+function excluirAtividade(
+    id,
+    callback
+) {
 
-    db.run(sql, [id], function (erro) {
-        if (erro) {
-            return callback(erro);
+    db.run(
+        `
+            DELETE FROM cronograma_atividades
+            WHERE id = ?
+        `,
+        [id],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(
+                null,
+                this
+            );
         }
-
-        callback(null, this);
-    });
+    );
 }
 
+
 // =====================================================
-// EXCLUIR TODAS AS ATIVIDADES DE UMA ORIGEM
-// (ex.: apagar tudo que veio do plano automático)
+// EXCLUIR TODAS DE UMA ORIGEM
 // =====================================================
 
 function excluirAtividadesPorOrigem(
@@ -245,26 +500,38 @@ function excluirAtividadesPorOrigem(
     origem,
     callback
 ) {
-    const sql = `
-        DELETE FROM cronograma_atividades
-        WHERE usuario_id = ?
-        AND origem = ?
-    `;
 
-    db.run(sql, [usuarioId, origem], function (erro) {
-        if (erro) {
-            return callback(erro);
+    db.run(
+        `
+            DELETE FROM cronograma_atividades
+            WHERE usuario_id = ?
+              AND origem = ?
+        `,
+        [
+            usuarioId,
+            origem
+        ],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(
+                null,
+                this
+            );
         }
-
-        callback(null, this);
-    });
+    );
 }
+
 
 module.exports = {
     listarAtividades,
     buscarAtividadePorId,
     criarAtividade,
     criarAtividadesEmLote,
+    salvarAtividadesEmLote,
     atualizarAtividade,
     excluirAtividade,
     excluirAtividadesPorOrigem

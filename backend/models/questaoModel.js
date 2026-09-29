@@ -1,5 +1,4 @@
-const db =
-    require("../config/db");
+const db = require("../config/db");
 
 // =====================================================
 // CRIAR QUESTÃO
@@ -16,6 +15,7 @@ function criarQuestao(
     materia,
     callback
 ) {
+
     const sql = `
         INSERT INTO questoes
         (
@@ -44,27 +44,23 @@ function criarQuestao(
             materia
         ],
         function (erro) {
+
             if (erro) {
-                return callback(
-                    erro
-                );
+                return callback(erro);
             }
 
-            callback(
-                null,
-                this
-            );
+            callback(null, this);
         }
     );
 }
+
 
 // =====================================================
 // LISTAR QUESTÕES — ADMIN
 // =====================================================
 
-function listarQuestoes(
-    callback
-) {
+function listarQuestoes(callback) {
+
     const sql = `
         SELECT *
         FROM questoes
@@ -78,14 +74,16 @@ function listarQuestoes(
     );
 }
 
+
 // =====================================================
-// BUSCAR QUESTÃO
+// BUSCAR QUESTÃO POR ID
 // =====================================================
 
 function buscarQuestaoPorId(
     id,
     callback
 ) {
+
     const sql = `
         SELECT *
         FROM questoes
@@ -99,19 +97,46 @@ function buscarQuestaoPorId(
     );
 }
 
+
 // =====================================================
-// LISTAR QUESTÕES PELOS IDs — ALUNO
-// NÃO RETORNA A RESPOSTA CORRETA
+// NORMALIZAR IDS
+// =====================================================
+
+function normalizarIds(ids) {
+
+    if (!Array.isArray(ids)) {
+        return [];
+    }
+
+    return ids
+        .map(Number)
+        .filter(
+            id =>
+                Number.isInteger(id) &&
+                id > 0
+        );
+}
+
+
+// =====================================================
+// LISTAR QUESTÕES PARA O ALUNO
+//
+// IMPORTANTE:
+// A resposta correta NÃO é enviada.
 // =====================================================
 
 function listarQuestoesPorIds(
     ids,
     callback
 ) {
+
+    const idsNumericos =
+        normalizarIds(ids);
+
     if (
-        !Array.isArray(ids) ||
-        ids.length === 0
+        idsNumericos.length === 0
     ) {
+
         return callback(
             null,
             []
@@ -119,10 +144,8 @@ function listarQuestoesPorIds(
     }
 
     const placeholders =
-        ids
-            .map(
-                () => "?"
-            )
+        idsNumericos
+            .map(() => "?")
             .join(",");
 
     const sql = `
@@ -135,21 +158,18 @@ function listarQuestoesPorIds(
             alternativa_d,
             alternativa_e,
             materia
-
         FROM questoes
-
-        WHERE id IN (
-            ${placeholders}
-        )
+        WHERE id IN (${placeholders})
     `;
 
     db.all(
         sql,
-        ids,
+        idsNumericos,
         (
             erro,
             questoes
         ) => {
+
             if (erro) {
                 return callback(
                     erro
@@ -157,20 +177,16 @@ function listarQuestoesPorIds(
             }
 
             /*
-             * Mantém a mesma ordem
-             * em que o administrador
-             * selecionou as questões.
+             * O banco pode devolver as questões
+             * em uma ordem diferente da enviada.
+             *
+             * Aqui restauramos a ordem original.
              */
 
             const mapa =
                 new Map(
-                    (
-                        questoes ||
-                        []
-                    ).map(
-                        (
-                            questao
-                        ) => [
+                    (questoes || []).map(
+                        questao => [
                             Number(
                                 questao.id
                             ),
@@ -180,18 +196,12 @@ function listarQuestoesPorIds(
                 );
 
             const ordenadas =
-                ids
+                idsNumericos
                     .map(
-                        (id) =>
-                            mapa.get(
-                                Number(
-                                    id
-                                )
-                            )
+                        id =>
+                            mapa.get(id)
                     )
-                    .filter(
-                        Boolean
-                    );
+                    .filter(Boolean);
 
             callback(
                 null,
@@ -201,8 +211,12 @@ function listarQuestoesPorIds(
     );
 }
 
+
 // =====================================================
 // CORRIGIR QUESTÕES
+//
+// A resposta correta é consultada SOMENTE
+// no backend.
 // =====================================================
 
 function corrigirQuestoesPorIds(
@@ -210,10 +224,14 @@ function corrigirQuestoesPorIds(
     respostas,
     callback
 ) {
+
+    const idsNumericos =
+        normalizarIds(ids);
+
     if (
-        !Array.isArray(ids) ||
-        ids.length === 0
+        idsNumericos.length === 0
     ) {
+
         return callback(
             null,
             []
@@ -221,29 +239,26 @@ function corrigirQuestoesPorIds(
     }
 
     const placeholders =
-        ids
-            .map(
-                () => "?"
-            )
+        idsNumericos
+            .map(() => "?")
             .join(",");
 
+    const sql = `
+        SELECT
+            id,
+            correta
+        FROM questoes
+        WHERE id IN (${placeholders})
+    `;
+
     db.all(
-        `
-            SELECT
-                id,
-                correta
-
-            FROM questoes
-
-            WHERE id IN (
-                ${placeholders}
-            )
-        `,
-        ids,
+        sql,
+        idsNumericos,
         (
             erro,
             questoes
         ) => {
+
             if (erro) {
                 return callback(
                     erro
@@ -252,13 +267,8 @@ function corrigirQuestoesPorIds(
 
             const mapa =
                 new Map(
-                    (
-                        questoes ||
-                        []
-                    ).map(
-                        (
-                            questao
-                        ) => [
+                    (questoes || []).map(
+                        questao => [
                             Number(
                                 questao.id
                             ),
@@ -268,40 +278,40 @@ function corrigirQuestoesPorIds(
                 );
 
             const detalhes =
-                ids
+                idsNumericos
                     .map(
-                        (id) =>
-                            mapa.get(
-                                Number(
-                                    id
-                                )
-                            )
+                        id =>
+                            mapa.get(id)
                     )
-                    .filter(
-                        Boolean
-                    )
+                    .filter(Boolean)
                     .map(
-                        (
-                            questao
-                        ) => {
+                        questao => {
+
                             const respostaUsuario =
                                 respostas &&
                                 respostas[
-                                    questao.id
+                                    String(
+                                        questao.id
+                                    )
                                 ] != null
                                     ? String(
                                           respostas[
-                                              questao.id
+                                              String(
+                                                  questao.id
+                                              )
                                           ]
-                                      ).toUpperCase()
-                                    : null;
+                                      ).trim().toUpperCase()
+                                    : "";
 
                             const respostaCorreta =
                                 String(
-                                    questao.correta
-                                ).toUpperCase();
+                                    questao.correta || ""
+                                )
+                                    .trim()
+                                    .toUpperCase();
 
                             return {
+
                                 questaoId:
                                     Number(
                                         questao.id
@@ -312,8 +322,9 @@ function corrigirQuestoesPorIds(
                                 respostaCorreta,
 
                                 acertou:
+                                    respostaUsuario !== "" &&
                                     respostaUsuario ===
-                                    respostaCorreta
+                                        respostaCorreta
                             };
                         }
                     );
@@ -326,8 +337,9 @@ function corrigirQuestoesPorIds(
     );
 }
 
+
 // =====================================================
-// ATUALIZAR
+// ATUALIZAR QUESTÃO
 // =====================================================
 
 function atualizarQuestao(
@@ -342,6 +354,7 @@ function atualizarQuestao(
     materia,
     callback
 ) {
+
     const sql = `
         UPDATE questoes
 
@@ -372,6 +385,7 @@ function atualizarQuestao(
             id
         ],
         function (erro) {
+
             if (erro) {
                 return callback(
                     erro
@@ -386,21 +400,24 @@ function atualizarQuestao(
     );
 }
 
+
 // =====================================================
-// EXCLUIR
+// EXCLUIR QUESTÃO
 // =====================================================
 
 function excluirQuestao(
     id,
     callback
 ) {
+
     db.run(
         `
-            DELETE FROM questoes
-            WHERE id = ?
+        DELETE FROM questoes
+        WHERE id = ?
         `,
         [id],
         function (erro) {
+
             if (erro) {
                 return callback(
                     erro
@@ -415,163 +432,25 @@ function excluirQuestao(
     );
 }
 
-// =====================================================
-// LISTAR QUESTÕES PARA O ALUNO
-// Não envia a resposta correta.
-// =====================================================
-
-function listarQuestoesPorIds(
-    ids,
-    callback
-) {
-    if (!Array.isArray(ids) || ids.length === 0) {
-        return callback(null, []);
-    }
-
-    const idsNumericos = ids
-        .map(Number)
-        .filter(
-            (id) =>
-                Number.isInteger(id) &&
-                id > 0
-        );
-
-    if (idsNumericos.length === 0) {
-        return callback(null, []);
-    }
-
-    const placeholders =
-        idsNumericos
-            .map(() => "?")
-            .join(",");
-
-    const sql = `
-        SELECT
-            id,
-            pergunta,
-            alternativa_a,
-            alternativa_b,
-            alternativa_c,
-            alternativa_d,
-            alternativa_e,
-            materia
-        FROM questoes
-        WHERE id IN (${placeholders})
-        ORDER BY id ASC
-    `;
-
-    db.all(
-        sql,
-        idsNumericos,
-        callback
-    );
-}
-
 
 // =====================================================
-// CORRIGIR QUESTÕES DO ALUNO
+// EXPORTAÇÕES
 // =====================================================
-
-function corrigirQuestoesPorIds(
-    ids,
-    respostas,
-    callback
-) {
-    if (
-        !Array.isArray(ids) ||
-        ids.length === 0
-    ) {
-        return callback(
-            null,
-            []
-        );
-    }
-
-    const idsNumericos = ids
-        .map(Number)
-        .filter(
-            (id) =>
-                Number.isInteger(id) &&
-                id > 0
-        );
-
-    if (idsNumericos.length === 0) {
-        return callback(
-            null,
-            []
-        );
-    }
-
-    const placeholders =
-        idsNumericos
-            .map(() => "?")
-            .join(",");
-
-    const sql = `
-        SELECT
-            id,
-            correta
-        FROM questoes
-        WHERE id IN (${placeholders})
-    `;
-
-    db.all(
-        sql,
-        idsNumericos,
-        (erro, questoes) => {
-            if (erro) {
-                return callback(
-                    erro
-                );
-            }
-
-            const lista =
-                (questoes || []).map(
-                    (questao) => {
-                        const respostaUsuario =
-                            String(
-                                respostas?.[
-                                    String(
-                                        questao.id
-                                    )
-                                ] ?? ''
-                            ).toUpperCase();
-
-                        const respostaCorreta =
-                            String(
-                                questao.correta || ''
-                            ).toUpperCase();
-
-                        return {
-                            questaoId:
-                                questao.id,
-
-                            respostaUsuario,
-
-                            respostaCorreta,
-
-                            acertou:
-                                respostaUsuario !== '' &&
-                                respostaUsuario ===
-                                    respostaCorreta
-                        };
-                    }
-                );
-
-            callback(
-                null,
-                lista
-            );
-        }
-    );
-}
 
 module.exports = {
+
     criarQuestao,
+
     listarQuestoes,
+
     buscarQuestaoPorId,
+
     listarQuestoesPorIds,
+
     corrigirQuestoesPorIds,
+
     atualizarQuestao,
+
     excluirQuestao
+
 };

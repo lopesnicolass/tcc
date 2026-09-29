@@ -17,30 +17,36 @@ import {
 
 // =====================================================
 // ROTA PROTEGIDA
-//
-// Não confiamos somente no localStorage.
+// =====================================================
 //
 // O frontend verifica:
 //
 // 1. se existe token;
 // 2. se existe usuário salvo;
 // 3. se o token ainda é aceito pelo backend;
-// 4. se o usuário ainda existe no SQLite.
+// 4. se o usuário ainda existe no banco.
 //
-// Se tudo estiver certo, atualiza o usuário salvo
-// com os dados reais vindos do banco.
+// Se estiver tudo certo, mantém o acesso à rota.
 // =====================================================
 
 export default function ProtectedRoute() {
 
-    const [status, setStatus] =
-        useState('carregando');
+    const [
+        status,
+        setStatus
+    ] = useState(
+        'carregando'
+    );
 
 
     useEffect(() => {
 
         let ativo = true;
 
+
+        // =================================================
+        // VALIDAR SESSÃO
+        // =================================================
 
         async function validarSessao() {
 
@@ -53,9 +59,9 @@ export default function ProtectedRoute() {
                 );
 
 
-            // -------------------------------------------------
+            // ---------------------------------------------
             // NÃO EXISTE SESSÃO LOCAL
-            // -------------------------------------------------
+            // ---------------------------------------------
 
             if (
                 !token ||
@@ -65,18 +71,20 @@ export default function ProtectedRoute() {
                 limparSessao();
 
                 if (ativo) {
+
                     setStatus(
                         'nao-autenticado'
                     );
+
                 }
 
                 return;
             }
 
 
-            // -------------------------------------------------
-            // VALIDAR JSON DO USUÁRIO SALVO
-            // -------------------------------------------------
+            // ---------------------------------------------
+            // VALIDAR USUÁRIO SALVO
+            // ---------------------------------------------
 
             try {
 
@@ -106,18 +114,20 @@ export default function ProtectedRoute() {
                 limparSessao();
 
                 if (ativo) {
+
                     setStatus(
                         'nao-autenticado'
                     );
+
                 }
 
                 return;
             }
 
 
-            // -------------------------------------------------
-            // VALIDAR TOKEN + USUÁRIO NO BACKEND
-            // -------------------------------------------------
+            // ---------------------------------------------
+            // VALIDAR TOKEN NO BACKEND
+            // ---------------------------------------------
 
             try {
 
@@ -144,10 +154,9 @@ export default function ProtectedRoute() {
                 }
 
 
-                // -------------------------------------------------
-                // ATUALIZA O USUÁRIO LOCAL
-                // COM A VERSÃO OFICIAL DO BANCO
-                // -------------------------------------------------
+                // -----------------------------------------
+                // ATUALIZAR USUÁRIO LOCAL
+                // -----------------------------------------
 
                 localStorage.setItem(
                     'etecamp_usuario',
@@ -188,8 +197,16 @@ export default function ProtectedRoute() {
         }
 
 
+        // =================================================
+        // EXECUTAR
+        // =================================================
+
         validarSessao();
 
+
+        // =================================================
+        // LIMPEZA
+        // =================================================
 
         return () => {
 
@@ -201,11 +218,12 @@ export default function ProtectedRoute() {
 
 
     // =====================================================
-    // ENQUANTO VALIDA
+    // VALIDANDO SESSÃO
     // =====================================================
 
     if (
-        status === 'carregando'
+        status ===
+        'carregando'
     ) {
 
         return null;
@@ -218,7 +236,8 @@ export default function ProtectedRoute() {
     // =====================================================
 
     if (
-        status === 'nao-autenticado'
+        status ===
+        'nao-autenticado'
     ) {
 
         return (
@@ -238,4 +257,4 @@ export default function ProtectedRoute() {
     return (
         <Outlet />
     );
-}ensureResultados.js
+}

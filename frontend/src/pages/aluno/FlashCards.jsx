@@ -7,28 +7,24 @@ const API_URL =
 
 const TOTAL_CARDS_SESSAO = 10;
 
-
-// =====================================================
-// FUNÇÃO PARA EMBARALHAR
-// =====================================================
+function obterToken() {
+  return (
+    localStorage.getItem('etecamp_token') ||
+    localStorage.getItem('token') ||
+    localStorage.getItem('accessToken') ||
+    ''
+  );
+}
 
 function embaralharCards(lista) {
   const copia = [...lista];
 
-  for (
-    let i = copia.length - 1;
-    i > 0;
-    i--
-  ) {
-    const j =
-      Math.floor(
-        Math.random() * (i + 1)
-      );
+  for (let i = copia.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(
+      Math.random() * (i + 1)
+    );
 
-    [
-      copia[i],
-      copia[j],
-    ] = [
+    [copia[i], copia[j]] = [
       copia[j],
       copia[i],
     ];
@@ -37,15 +33,29 @@ function embaralharCards(lista) {
   return copia;
 }
 
+async function lerJsonSeguro(resposta) {
+  const texto = await resposta.text();
+
+  if (!texto) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(texto);
+  } catch {
+    throw new Error(
+      `O servidor não retornou JSON. Status: ${resposta.status}.`
+    );
+  }
+}
 
 export default function FlashCards() {
 
   // =====================================================
-  // CARDS NORMAIS
+  // FLASHCARDS NORMAIS
   // =====================================================
 
-  const [cards, setCards] =
-    useState([]);
+  const [cards, setCards] = useState([]);
 
   const [flipped, setFlipped] =
     useState(new Set());
@@ -126,70 +136,107 @@ export default function FlashCards() {
       setErro('');
 
       const token =
-        localStorage.getItem(
-          'etecamp_token'
-        );
+        obterToken();
 
       const resposta =
         await fetch(
           `${API_URL}/flashcards`,
           {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
+            headers:
+              token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`,
+                  }
+                : {},
           }
         );
 
       const dados =
-        await resposta.json();
+        await lerJsonSeguro(
+          resposta
+        );
 
       if (!resposta.ok) {
+
         throw new Error(
           dados.erro ||
+          dados.mensagem ||
           'Erro ao carregar flashcards.'
         );
+
       }
 
-      const flashcards =
+      const lista =
         Array.isArray(dados)
           ? dados
           : dados.flashcards || [];
 
       const cardsFormatados =
-        flashcards
+        lista
           .filter(
             (card) =>
               card.ativo === 1 ||
               card.ativo === true
           )
-          .map((card) => ({
-            id: card.id,
-            subject: card.materia,
-            subjectId: card.materia_id || null,
-            contentId: card.topico_id || null,
-            content: card.conteudo || '',
-            front: card.primario,
-            back: card.secundario,
-          }));
+          .map(
+            (card) => ({
+              id:
+                Number(card.id),
 
-      setCards(cardsFormatados);
+              subject:
+                card.materia ||
+                'Sem matéria',
 
-    } catch (erro) {
+              subjectId:
+                card.materia_id ||
+                null,
+
+              contentId:
+                card.topico_id ||
+                null,
+
+              content:
+                card.conteudo ||
+                '',
+
+              front:
+                card.primario ||
+                '',
+
+              back:
+                card.secundario ||
+                '',
+            })
+          )
+          .filter(
+            (card) =>
+              card.front ||
+              card.back
+          );
+
+      setCards(
+        cardsFormatados
+      );
+
+    } catch (error) {
 
       console.error(
         'Erro ao carregar flashcards:',
-        erro
+        error
       );
 
       setErro(
+        error.message ||
         'Não foi possível carregar os flashcards.'
       );
 
     } finally {
 
       setCarregando(false);
+
     }
+
   }
 
 
@@ -199,30 +246,29 @@ export default function FlashCards() {
 
   function toggle(id) {
 
-    if (flipped.has(id)) {
+    setFlipped(
+      (atual) => {
 
-      setFlipped((prev) => {
+        const novo =
+          new Set(atual);
 
-        const next =
-          new Set(prev);
+        if (
+          novo.has(id)
+        ) {
 
-        next.delete(id);
+          novo.delete(id);
 
-        return next;
-      });
+        } else {
 
-      return;
-    }
+          novo.add(id);
 
-    setFlipped((prev) => {
+        }
 
-      const next =
-        new Set(prev);
+        return novo;
 
-      next.add(id);
+      }
+    );
 
-      return next;
-    });
   }
 
 
@@ -250,62 +296,74 @@ export default function FlashCards() {
       setErro('');
 
       const token =
-        localStorage.getItem(
-          'etecamp_token'
-        );
+        obterToken();
 
       const selecionados =
-        embaralharCards(cards)
-          .slice(
-            0,
-            TOTAL_CARDS_SESSAO
-          );
+        embaralharCards(
+          cards
+        ).slice(
+          0,
+          TOTAL_CARDS_SESSAO
+        );
 
       const resposta =
         await fetch(
           `${API_URL}/flashcards/resultados/sessoes`,
           {
-            method: 'POST',
+            method:
+              'POST',
 
             headers: {
               'Content-Type':
                 'application/json',
 
-              Authorization:
-                `Bearer ${token}`,
+              ...(token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`,
+                  }
+                : {}),
             },
 
-            body: JSON.stringify({
-              totalCards:
-                selecionados.length,
-            }),
+            body:
+              JSON.stringify({
+                totalCards:
+                  selecionados.length,
+              }),
           }
         );
 
- const texto = await resposta.text();
+      const dados =
+        await lerJsonSeguro(
+          resposta
+        );
 
-let dados = {};
+      if (
+        !resposta.ok
+      ) {
 
-try {
-  dados = texto
-    ? JSON.parse(texto)
-    : {};
-} catch {
-  throw new Error(
-    `O servidor não retornou JSON. Status: ${resposta.status}. Verifique se a rota de resultados dos flashcards existe no backend.`
-  );
-}
+        throw new Error(
+          dados.erro ||
+          dados.mensagem ||
+          'Não foi possível iniciar a sessão.'
+        );
 
-if (!resposta.ok) {
-  throw new Error(
-    dados.erro ||
-    dados.mensagem ||
-    'Não foi possível iniciar a sessão.'
-  );
-}
+      }
+
+      if (
+        !dados.sessao?.id
+      ) {
+
+        throw new Error(
+          'O servidor não retornou o ID da sessão de flashcards.'
+        );
+
+      }
 
       setSessaoId(
-        dados.sessao.id
+        Number(
+          dados.sessao.id
+        )
       );
 
       setCardsDaSessao(
@@ -323,22 +381,24 @@ if (!resposta.ok) {
 
       setModoJogo(true);
 
-    } catch (erro) {
+    } catch (error) {
 
       console.error(
         'Erro ao iniciar sessão:',
-        erro
+        error
       );
 
       setErro(
-        erro.message ||
+        error.message ||
         'Não foi possível iniciar a sessão.'
       );
 
     } finally {
 
       setIniciandoSessao(false);
+
     }
+
   }
 
 
@@ -356,8 +416,59 @@ if (!resposta.ok) {
     }
 
     setCardVirado(
-      (prev) => !prev
+      (atual) => !atual
     );
+
+  }
+
+
+  // =====================================================
+  // FINALIZAR SESSÃO NO BACKEND
+  // =====================================================
+
+  async function finalizarSessao() {
+
+    if (!sessaoId) {
+      return;
+    }
+
+    const token =
+      obterToken();
+
+    const resposta =
+      await fetch(
+        `${API_URL}/flashcards/resultados/sessoes/${sessaoId}/finalizar`,
+        {
+          method:
+            'PUT',
+
+          headers:
+            token
+              ? {
+                  Authorization:
+                    `Bearer ${token}`,
+                }
+              : {},
+        }
+      );
+
+    const dados =
+      await lerJsonSeguro(
+        resposta
+      );
+
+    if (
+      !resposta.ok
+    ) {
+
+      throw new Error(
+        dados.erro ||
+        dados.mensagem ||
+        'Erro ao finalizar sessão.'
+      );
+
+    }
+
   }
 
 
@@ -365,7 +476,9 @@ if (!resposta.ok) {
   // REGISTRAR RESPOSTA
   // =====================================================
 
-  async function responderCard(acertou) {
+  async function responderCard(
+    acertou
+  ) {
 
     if (
       !sessaoId ||
@@ -373,11 +486,15 @@ if (!resposta.ok) {
       registrandoResposta ||
       finalizado
     ) {
+
       return;
+
     }
 
     const cardAtual =
-      cardsDaSessao[indiceAtual];
+      cardsDaSessao[
+        indiceAtual
+      ];
 
     if (!cardAtual) {
       return;
@@ -389,60 +506,62 @@ if (!resposta.ok) {
       setErro('');
 
       const token =
-        localStorage.getItem(
-          'etecamp_token'
-        );
+        obterToken();
 
       const resposta =
         await fetch(
           `${API_URL}/flashcards/resultados/sessoes/${sessaoId}/respostas`,
           {
-            method: 'POST',
+            method:
+              'POST',
 
             headers: {
               'Content-Type':
                 'application/json',
 
-              Authorization:
-                `Bearer ${token}`,
+              ...(token
+                ? {
+                    Authorization:
+                      `Bearer ${token}`,
+                  }
+                : {}),
             },
 
-            body: JSON.stringify({
-              flashcardId:
-                cardAtual.id,
+            body:
+              JSON.stringify({
 
-              materia:
-                cardAtual.subject,
+                flashcardId:
+                  cardAtual.id,
 
-              acertou,
-            }),
+                materia:
+                  cardAtual.subject,
+
+                acertou,
+
+              }),
           }
         );
 
-   const texto = await resposta.text();
+      const dados =
+        await lerJsonSeguro(
+          resposta
+        );
 
-let dados = {};
+      if (
+        !resposta.ok
+      ) {
 
-try {
-  dados = texto
-    ? JSON.parse(texto)
-    : {};
-} catch {
-  throw new Error(
-    `O servidor não retornou JSON. Status: ${resposta.status}.`
-  );
-}
+        throw new Error(
+          dados.erro ||
+          dados.mensagem ||
+          'Não foi possível registrar a resposta.'
+        );
 
-if (!resposta.ok) {
-  throw new Error(
-    dados.erro ||
-    dados.mensagem ||
-    'Não foi possível registrar a resposta.'
-  );
-}
+      }
 
       const novasRespostas = [
         ...respostasSessao,
+
         {
           flashcardId:
             cardAtual.id,
@@ -481,86 +600,27 @@ if (!resposta.ok) {
         );
 
         setCardVirado(false);
+
       }
 
-    } catch (erro) {
+    } catch (error) {
 
       console.error(
         'Erro ao registrar resposta:',
-        erro
+        error
       );
 
       setErro(
-        erro.message ||
+        error.message ||
         'Não foi possível registrar sua resposta.'
       );
 
     } finally {
 
       setRegistrandoResposta(false);
-    }
-  }
 
-
-  // =====================================================
-  // FINALIZAR SESSÃO
-  // =====================================================
-
-  async function finalizarSessao() {
-
-    if (!sessaoId) {
-      return;
     }
 
-    try {
-
-      const token =
-        localStorage.getItem(
-          'etecamp_token'
-        );
-
-      const resposta =
-        await fetch(
-          `${API_URL}/flashcards/resultados/sessoes/${sessaoId}/finalizar`,
-          {
-            method: 'PUT',
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-const texto = await resposta.text();
-
-let dados = {};
-
-try {
-  dados = texto
-    ? JSON.parse(texto)
-    : {};
-} catch {
-  throw new Error(
-    `O servidor não retornou JSON. Status: ${resposta.status}.`
-  );
-}
-
-if (!resposta.ok) {
-  throw new Error(
-    dados.erro ||
-    dados.mensagem ||
-    'Erro ao finalizar sessão.'
-  );
-}
-
-    } catch (erro) {
-
-      console.error(
-        'Erro ao finalizar sessão:',
-        erro
-      );
-    }
   }
 
 
@@ -571,16 +631,27 @@ if (!resposta.ok) {
   function sairDoJogo() {
 
     setModoJogo(false);
+
     setSessaoId(null);
+
     setCardsDaSessao([]);
+
     setIndiceAtual(0);
+
     setCardVirado(false);
+
     setRespostasSessao([]);
+
     setFinalizado(false);
 
     setInicioArrasto(null);
+
     setDeslocamento(0);
+
     setArrastando(false);
+
+    setErro('');
+
   }
 
 
@@ -590,9 +661,24 @@ if (!resposta.ok) {
 
   async function jogarNovamente() {
 
-    sairDoJogo();
+    setModoJogo(false);
+
+    setSessaoId(null);
+
+    setCardsDaSessao([]);
+
+    setIndiceAtual(0);
+
+    setCardVirado(false);
+
+    setRespostasSessao([]);
+
+    setFinalizado(false);
+
+    setErro('');
 
     await iniciarHoraDosFlashcards();
+
   }
 
 
@@ -607,7 +693,9 @@ if (!resposta.ok) {
       registrandoResposta ||
       finalizado
     ) {
+
       return;
+
     }
 
     setArrastando(true);
@@ -620,6 +708,7 @@ if (!resposta.ok) {
     event.currentTarget.setPointerCapture?.(
       event.pointerId
     );
+
   }
 
 
@@ -633,16 +722,16 @@ if (!resposta.ok) {
       !arrastando ||
       !inicioArrasto
     ) {
+
       return;
+
     }
 
-    const distancia =
-      event.clientX -
-      inicioArrasto.x;
-
     setDeslocamento(
-      distancia
+      event.clientX -
+      inicioArrasto.x
     );
+
   }
 
 
@@ -656,7 +745,9 @@ if (!resposta.ok) {
       !arrastando ||
       !inicioArrasto
     ) {
+
       return;
+
     }
 
     const distancia =
@@ -664,28 +755,37 @@ if (!resposta.ok) {
       inicioArrasto.x;
 
     setArrastando(false);
+
     setInicioArrasto(null);
 
     const limite = 120;
 
     if (
-      Math.abs(distancia) <
-      limite
+      Math.abs(
+        distancia
+      ) < limite
     ) {
 
       setDeslocamento(0);
 
       return;
+
     }
 
-    if (distancia < 0) {
+    setDeslocamento(0);
+
+    if (
+      distancia < 0
+    ) {
 
       responderCard(true);
 
     } else {
 
       responderCard(false);
+
     }
+
   }
 
 
@@ -696,44 +796,71 @@ if (!resposta.ok) {
   function cancelarArrasto() {
 
     setArrastando(false);
+
     setInicioArrasto(null);
+
     setDeslocamento(0);
+
   }
 
 
   // =====================================================
-  // MATÉRIAS DISPONÍVEIS
+  // MATÉRIAS
   // =====================================================
 
   const materiasDisponiveis =
-    useMemo(() => {
-      const nomes = [];
-      const vistos = new Set();
+    useMemo(
+      () => {
 
-      cards.forEach((card) => {
-        if (
-          card.subject &&
-          !vistos.has(card.subject)
-        ) {
-          vistos.add(card.subject);
-          nomes.push(card.subject);
-        }
-      });
+        const nomes = [];
 
-      return nomes;
-    }, [cards]);
+        const vistos =
+          new Set();
+
+        cards.forEach(
+          (card) => {
+
+            if (
+              card.subject &&
+              !vistos.has(
+                card.subject
+              )
+            ) {
+
+              vistos.add(
+                card.subject
+              );
+
+              nomes.push(
+                card.subject
+              );
+
+            }
+
+          }
+        );
+
+        return nomes;
+
+      },
+      [cards]
+    );
 
 
   // =====================================================
   // CONTAGEM POR MATÉRIA
   // =====================================================
 
-  function contarPorMateria(materia) {
+  function contarPorMateria(
+    materia
+  ) {
 
     return cards.filter(
       (card) =>
-        card.subject === materia
+        card.subject ===
+        materia
     ).length;
+
   }
 
 
@@ -742,32 +869,64 @@ if (!resposta.ok) {
   // =====================================================
 
   const cardsFiltrados =
-    useMemo(() => {
+    useMemo(
+      () => {
 
-      const termo =
-        busca.trim().toLowerCase();
+        const termo =
+          busca
+            .trim()
+            .toLowerCase();
 
-      return cards.filter((card) => {
+        return cards.filter(
+          (card) => {
 
-        const correspondeMateria =
-          filtro === 'Todas' ||
-          card.subject === filtro;
+            const correspondeMateria =
+              filtro === 'Todas' ||
+              card.subject ===
+                filtro;
 
-        const correspondeBusca =
-          !termo ||
-          card.front.toLowerCase().includes(termo) ||
-          card.back.toLowerCase().includes(termo) ||
-          card.subject.toLowerCase().includes(termo) ||
-          card.content.toLowerCase().includes(termo);
+            const correspondeBusca =
+              !termo ||
 
-        return correspondeMateria && correspondeBusca;
-      });
+              card.front
+                .toLowerCase()
+                .includes(
+                  termo
+                ) ||
 
-    }, [
-      cards,
-      filtro,
-      busca,
-    ]);
+              card.back
+                .toLowerCase()
+                .includes(
+                  termo
+                ) ||
+
+              card.subject
+                .toLowerCase()
+                .includes(
+                  termo
+                ) ||
+
+              card.content
+                .toLowerCase()
+                .includes(
+                  termo
+                );
+
+            return (
+              correspondeMateria &&
+              correspondeBusca
+            );
+
+          }
+        );
+
+      },
+      [
+        cards,
+        filtro,
+        busca,
+      ]
+    );
 
 
   // =====================================================
@@ -805,35 +964,44 @@ if (!resposta.ok) {
   // =====================================================
 
   function renderGrid(
-    cardsParaExibir
+    lista
   ) {
 
-    if (
-      cardsParaExibir.length === 0
-    ) {
+    if (!lista.length) {
 
       return (
         <p className="flashcards-vazio">
           Nenhum flashcard encontrado.
         </p>
       );
+
     }
 
     return (
       <div className="flashcard-grid">
 
-        {cardsParaExibir.map(
+        {lista.map(
           (card) => (
 
             <div
-              className={`flashcard ${
-                flipped.has(card.id)
-                  ? 'flipped'
-                  : ''
-              }`}
-              key={card.id}
+              className={
+                `flashcard ${
+                  flipped.has(
+                    card.id
+                  )
+                    ? 'flipped'
+                    : ''
+                }`
+              }
+
+              key={
+                card.id
+              }
+
               onClick={() =>
-                toggle(card.id)
+                toggle(
+                  card.id
+                )
               }
             >
 
@@ -856,75 +1024,616 @@ if (!resposta.ok) {
 
       </div>
     );
+
   }
 
 
   // =====================================================
-  // LISTAGEM POR MATÉRIA E CONTEÚDO
+  // LISTAGEM ORGANIZADA
   // =====================================================
 
   function renderFlashcardsOrganizados(
-    cardsParaExibir
+    lista
   ) {
-    if (!cardsParaExibir.length) {
+
+    if (!lista.length) {
+
       return (
         <p className="flashcards-vazio">
           Nenhum flashcard encontrado.
         </p>
       );
+
     }
 
-    const grupos = new Map();
+    const grupos =
+      new Map();
 
-    cardsParaExibir.forEach((card) => {
-      const materia =
-        card.subject || 'Sem matéria';
-      const conteudo =
-        card.content || 'Conteúdo não definido';
+    lista.forEach(
+      (card) => {
 
-      if (!grupos.has(materia)) {
-        grupos.set(materia, new Map());
+        const materia =
+          card.subject ||
+          'Sem matéria';
+
+        const conteudo =
+          card.content ||
+          'Conteúdo não definido';
+
+        if (
+          !grupos.has(
+            materia
+          )
+        ) {
+
+          grupos.set(
+            materia,
+            new Map()
+          );
+
+        }
+
+        const porConteudo =
+          grupos.get(
+            materia
+          );
+
+        if (
+          !porConteudo.has(
+            conteudo
+          )
+        ) {
+
+          porConteudo.set(
+            conteudo,
+            []
+          );
+
+        }
+
+        porConteudo
+          .get(conteudo)
+          .push(card);
+
       }
+    );
 
-      const gruposConteudo =
-        grupos.get(materia);
+    return Array.from(
+      grupos.entries()
+    ).map(
+      ([
+        materia,
+        conteudos,
+      ]) => (
 
-      if (!gruposConteudo.has(conteudo)) {
-        gruposConteudo.set(conteudo, []);
-      }
-
-      gruposConteudo
-        .get(conteudo)
-        .push(card);
-    });
-
-    return Array.from(grupos.entries()).map(
-      ([materia, conteudos]) => (
         <section
           className="materia-section"
-          key={materia}
+          key={
+            materia
+          }
         >
+
           <h2 className="materia-section-title">
             {materia}
           </h2>
 
           {Array.from(
             conteudos.entries()
-          ).map(([conteudo, cardsDoConteudo]) => (
-            <div
-              className="flashcards-content-section"
-              key={`${materia}-${conteudo}`}
-            >
-              <h3 className="flashcards-content-title">
-                {conteudo}
-              </h3>
+          ).map(
+            ([
+              conteudo,
+              cardsDoConteudo,
+            ]) => (
 
-              {renderGrid(cardsDoConteudo)}
-            </div>
-          ))}
+              <div
+                className="flashcards-content-section"
+                key={
+                  `${materia}-${conteudo}`
+                }
+              >
+
+                <h3 className="flashcards-content-title">
+                  {conteudo}
+                </h3>
+
+                {renderGrid(
+                  cardsDoConteudo
+                )}
+
+              </div>
+
+            )
+          )}
+
         </section>
+
       )
     );
+
+  }
+
+
+  // =====================================================
+  // CARREGANDO
+  // =====================================================
+
+  if (carregando) {
+
+    return (
+      <div className="flashcards-erro">
+
+        <p>
+          Carregando flashcards...
+        </p>
+
+      </div>
+    );
+
+  }
+
+
+  // =====================================================
+  // TELA DE RESULTADO
+  // =====================================================
+
+  if (
+    modoJogo &&
+    finalizado
+  ) {
+
+    return (
+      <div className="flashcards-game-page">
+
+        <div className="flashcards-game-header">
+
+          <button
+            type="button"
+            className="flashcards-back-button"
+            onClick={
+              sairDoJogo
+            }
+          >
+            ← Voltar para os flashcards
+          </button>
+
+          <div className="flashcards-game-title">
+
+            <span>
+              Hora dos Flashcards
+            </span>
+
+            <strong>
+              Resultado da sessão
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div className="flashcards-progress">
+
+          <div
+            className="flashcards-progress-bar"
+            style={{
+              width:
+                '100%',
+            }}
+          />
+
+        </div>
+
+
+        <section className="flashcards-result">
+
+          <div className="flashcards-result-icon">
+            ✓
+          </div>
+
+
+          <h1>
+            Sessão finalizada!
+          </h1>
+
+
+          <p>
+            Você respondeu aos 10
+            flashcards da sessão.
+          </p>
+
+
+          <div className="flashcards-result-score">
+
+            <strong>
+              {porcentagem}%
+            </strong>
+
+            <span>
+              de aproveitamento
+            </span>
+
+          </div>
+
+
+          <div className="flashcards-result-stats">
+
+            <div className="flashcards-result-stat">
+
+              <span>
+                Acertos
+              </span>
+
+              <strong>
+                {acertos}
+              </strong>
+
+            </div>
+
+
+            <div className="flashcards-result-stat">
+
+              <span>
+                Erros
+              </span>
+
+              <strong>
+                {erros}
+              </strong>
+
+            </div>
+
+
+            <div className="flashcards-result-stat">
+
+              <span>
+                Respondidos
+              </span>
+
+              <strong>
+                {totalRespondido}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          {erro && (
+
+            <p className="flashcards-game-error">
+              {erro}
+            </p>
+
+          )}
+
+
+          <div className="flashcards-result-actions">
+
+            <button
+              type="button"
+              className="flashcards-btn-secondary"
+              onClick={
+                sairDoJogo
+              }
+            >
+              Ver flashcards
+            </button>
+
+
+            <button
+              type="button"
+              className="flashcards-btn-primary"
+              onClick={
+                jogarNovamente
+              }
+              disabled={
+                iniciandoSessao
+              }
+            >
+              {iniciandoSessao
+                ? 'Iniciando...'
+                : 'Jogar novamente'}
+            </button>
+
+          </div>
+
+        </section>
+
+      </div>
+    );
+
+  }
+
+
+  // =====================================================
+  // TELA DO JOGO
+  // =====================================================
+
+  if (modoJogo) {
+
+    const cardAtual =
+      cardsDaSessao[
+        indiceAtual
+      ];
+
+
+    if (!cardAtual) {
+
+      return (
+        <div className="flashcards-erro">
+
+          <p>
+            Não foi possível carregar
+            o flashcard atual.
+          </p>
+
+          <button
+            type="button"
+            className="flashcards-btn-primary"
+            onClick={
+              sairDoJogo
+            }
+          >
+            Voltar
+          </button>
+
+        </div>
+      );
+
+    }
+
+
+    const progresso =
+      Math.round(
+        (
+          indiceAtual /
+          cardsDaSessao.length
+        ) * 100
+      );
+
+
+    return (
+
+      <div className="flashcards-game-page">
+
+        <div className="flashcards-game-header">
+
+          <button
+            type="button"
+            className="flashcards-back-button"
+            onClick={
+              sairDoJogo
+            }
+            disabled={
+              registrandoResposta
+            }
+          >
+            ← Sair
+          </button>
+
+
+          <div className="flashcards-game-title">
+
+            <span>
+              Hora dos Flashcards
+            </span>
+
+            <strong>
+              {indiceAtual + 1} de{' '}
+              {cardsDaSessao.length}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div className="flashcards-progress">
+
+          <div
+            className="flashcards-progress-bar"
+            style={{
+              width:
+                `${Math.max(
+                  0,
+                  progresso
+                )}%`,
+            }}
+          />
+
+        </div>
+
+
+        <div className="flashcards-game-content">
+
+          <p className="flashcards-game-subtitle">
+            Toque no card para revelar
+            a resposta.
+          </p>
+
+
+          <div
+            className={
+              `flashcard-game-card ${
+                cardVirado
+                  ? 'is-flipped'
+                  : ''
+              }`
+            }
+
+            style={{
+              transform:
+                `translateX(${deslocamento}px) rotate(${deslocamento * 0.04}deg)`,
+            }}
+
+            onClick={
+              virarCardDoJogo
+            }
+
+            onPointerDown={
+              iniciarArrasto
+            }
+
+            onPointerMove={
+              moverArrasto
+            }
+
+            onPointerUp={
+              finalizarArrasto
+            }
+
+            onPointerCancel={
+              cancelarArrasto
+            }
+
+            role="button"
+
+            tabIndex={0}
+
+            onKeyDown={
+              (event) => {
+
+                if (
+                  event.key ===
+                    'Enter' ||
+                  event.key ===
+                    ' '
+                ) {
+
+                  event.preventDefault();
+
+                  virarCardDoJogo();
+
+                }
+
+              }
+            }
+
+          >
+
+            <div className="flashcard-game-inner">
+
+
+              <div className="flashcard-game-face flashcard-game-front">
+
+                <span className="flashcard-game-label">
+                  PERGUNTA
+                </span>
+
+
+                <p>
+                  {cardAtual.front}
+                </p>
+
+
+                <small>
+                  {cardAtual.subject}
+                </small>
+
+              </div>
+
+
+              <div className="flashcard-game-face flashcard-game-back">
+
+                <span className="flashcard-game-label">
+                  RESPOSTA
+                </span>
+
+
+                <p>
+                  {cardAtual.back}
+                </p>
+
+
+                <small>
+                  {
+                    cardAtual.content ||
+                    cardAtual.subject
+                  }
+                </small>
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+          <div className="flashcards-swipe-hint">
+
+            <span>
+              ← Acertei
+            </span>
+
+            <span>
+              Errei →
+            </span>
+
+          </div>
+
+
+          <div className="flashcards-game-actions">
+
+            <button
+              type="button"
+              className="flashcards-answer-button correct"
+              onClick={() =>
+                responderCard(true)
+              }
+              disabled={
+                !cardVirado ||
+                registrandoResposta
+              }
+            >
+              {
+                registrandoResposta
+                  ? 'Registrando...'
+                  : 'Acertei'
+              }
+            </button>
+
+
+            <button
+              type="button"
+              className="flashcards-answer-button wrong"
+              onClick={() =>
+                responderCard(false)
+              }
+              disabled={
+                !cardVirado ||
+                registrandoResposta
+              }
+            >
+              Errei
+            </button>
+
+          </div>
+
+
+          {!cardVirado && (
+
+            <p className="flashcards-game-error">
+              Vire o card para liberar
+              sua resposta.
+            </p>
+
+          )}
+
+
+          {erro && (
+
+            <p className="flashcards-game-error">
+              {erro}
+            </p>
+
+          )}
+
+        </div>
+
+      </div>
+    );
+
   }
 
 
@@ -933,20 +1642,48 @@ if (!resposta.ok) {
   // =====================================================
 
   return (
+
     <div>
+
 
       <section className="flashcards-hero">
 
         <div className="flashcards-hero-content">
-          <span className="flashcards-hero-eyebrow">REVISÃO RÁPIDA</span>
-          <h1>Flash Cards</h1>
-          <p>Revise os conteúdos de forma rápida e teste seus conhecimentos para o Vestibulinho.</p>
+
+          <span className="flashcards-hero-eyebrow">
+            REVISÃO RÁPIDA
+          </span>
+
+          <h1>
+            Flash Cards
+          </h1>
+
+          <p>
+            Revise os conteúdos de forma rápida
+            e teste seus conhecimentos para o
+            Vestibulinho.
+          </p>
+
         </div>
 
-        <div className="flashcards-hero-badge" aria-hidden="true">
-          <span>✦</span>
-          <strong>{cards.length}</strong>
-          <small>cards disponíveis</small>
+
+        <div
+          className="flashcards-hero-badge"
+          aria-hidden="true"
+        >
+
+          <span>
+            ✦
+          </span>
+
+          <strong>
+            {cards.length}
+          </strong>
+
+          <small>
+            cards disponíveis
+          </small>
+
         </div>
 
       </section>
@@ -991,9 +1728,11 @@ if (!resposta.ok) {
                 TOTAL_CARDS_SESSAO
             }
           >
-            {iniciandoSessao
-              ? 'Iniciando...'
-              : 'Começar'}
+            {
+              iniciandoSessao
+                ? 'Iniciando...'
+                : 'Começar'
+            }
           </button>
 
         </div>
@@ -1013,48 +1752,71 @@ if (!resposta.ok) {
 
 
       {/* =================================================
-          PESQUISA E FILTROS
+          PESQUISA
       ================================================= */}
 
       <div className="flashcards-search">
 
-        <span className="flashcards-search-icon" aria-hidden="true">
+        <span
+          className="flashcards-search-icon"
+          aria-hidden="true"
+        >
           ⌕
         </span>
+
 
         <input
           type="search"
           value={busca}
-          onChange={(event) =>
-            setBusca(event.target.value)
+          onChange={
+            (event) =>
+              setBusca(
+                event.target.value
+              )
           }
           placeholder="Pesquisar flashcards..."
           aria-label="Pesquisar flashcards"
         />
 
+
         {busca && (
+
           <button
             type="button"
             className="flashcards-search-clear"
-            onClick={() => setBusca('')}
+            onClick={() =>
+              setBusca('')
+            }
             aria-label="Limpar pesquisa"
           >
             ×
           </button>
+
         )}
 
       </div>
 
+
+      {/* =================================================
+          MATÉRIAS
+      ================================================= */}
+
       <div className="materia-tabs">
 
         <button
-          className={`materia-tab ${
-            filtro === 'Todas'
-              ? 'active'
-              : ''
-          }`}
+          type="button"
+          className={
+            `materia-tab ${
+              filtro ===
+              'Todas'
+                ? 'active'
+                : ''
+            }`
+          }
           onClick={() =>
-            setFiltro('Todas')
+            setFiltro(
+              'Todas'
+            )
           }
         >
           Todas{' '}
@@ -1070,22 +1832,31 @@ if (!resposta.ok) {
           (materia) => (
 
             <button
+              type="button"
               key={materia}
-              className={`materia-tab ${
-                filtro === materia
-                  ? 'active'
-                  : ''
-              }`}
+              className={
+                `materia-tab ${
+                  filtro ===
+                  materia
+                    ? 'active'
+                    : ''
+                }`
+              }
               onClick={() =>
-                setFiltro(materia)
+                setFiltro(
+                  materia
+                )
               }
             >
+
               {materia}{' '}
 
               <span className="materia-tab-count">
-                {contarPorMateria(
-                  materia
-                )}
+                {
+                  contarPorMateria(
+                    materia
+                  )
+                }
               </span>
 
             </button>
@@ -1097,13 +1868,43 @@ if (!resposta.ok) {
 
 
       {/* =================================================
-          LISTAGEM NORMAL
+          ERRO
       ================================================= */}
 
-      {filtro === 'Todas' && !busca.trim()
-        ? renderFlashcardsOrganizados(cardsFiltrados)
-        : renderFlashcardsOrganizados(cardsFiltrados)}
+      {erro && (
+
+        <div className="flashcards-erro">
+
+          <p>
+            {erro}
+          </p>
+
+          <button
+            type="button"
+            className="flashcards-btn-primary"
+            onClick={
+              carregarFlashcards
+            }
+          >
+            Tentar novamente
+          </button>
+
+        </div>
+
+      )}
+
+
+      {/* =================================================
+          LISTAGEM
+      ================================================= */}
+
+      {!erro &&
+        renderFlashcardsOrganizados(
+          cardsFiltrados
+        )}
 
     </div>
+
   );
+
 }

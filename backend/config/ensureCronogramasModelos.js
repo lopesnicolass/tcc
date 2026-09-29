@@ -1,9 +1,19 @@
 const db = require('./db');
 
-// Estrutura dos cronogramas que o administrador monta por frequência,
-// mês, semana e sessão. Mantemos as tabelas antigas intactas para evitar
-// perda de dados de versões anteriores do projeto.
+// =====================================================
+// CRONOGRAMA BASE DO PLANO AUTOMÁTICO
+// =====================================================
+
+// O projeto usa um único cronograma-base definido pelo administrador.
+// Mantemos frequencia_dias = 0 para compatibilidade com versões anteriores.
+const CRONOGRAMA_BASE = 0;
+
+
 db.serialize(() => {
+  // ===================================================
+  // CRONOGRAMA PRINCIPAL
+  // ===================================================
+
   db.run(`
     CREATE TABLE IF NOT EXISTS cronogramas_programados (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,9 +26,38 @@ db.serialize(() => {
     )
   `, (erro) => {
     if (erro) {
-      console.error('Erro ao garantir tabela cronogramas_programados:', erro.message);
+      console.error(
+        '❌ Erro ao garantir tabela cronogramas_programados:',
+        erro.message
+      );
     }
   });
+
+  // ===================================================
+  // CONFIGURAÇÃO DO NÚMERO DE MESES
+  // ===================================================
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS cronogramas_programados_config (
+      programacao_id INTEGER PRIMARY KEY,
+      meses INTEGER NOT NULL DEFAULT 12,
+      atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (programacao_id)
+        REFERENCES cronogramas_programados(id)
+        ON DELETE CASCADE
+    )
+  `, (erro) => {
+    if (erro) {
+      console.error(
+        '❌ Erro ao garantir tabela cronogramas_programados_config:',
+        erro.message
+      );
+    }
+  });
+
+  // ===================================================
+  // SESSÕES / CONTEÚDOS DO CRONOGRAMA
+  // ===================================================
 
   db.run(`
     CREATE TABLE IF NOT EXISTS cronogramas_programados_sessoes (
@@ -45,41 +84,74 @@ db.serialize(() => {
     )
   `, (erro) => {
     if (erro) {
-      console.error('Erro ao garantir tabela cronogramas_programados_sessoes:', erro.message);
+      console.error(
+        '❌ Erro ao garantir tabela cronogramas_programados_sessoes:',
+        erro.message
+      );
     }
   });
 
-  db.all(`PRAGMA table_info(cronogramas_programados_sessoes)`, (erroInfo, colunas) => {
-    if (erroInfo) {
-      console.error('Erro ao verificar estrutura de sessões do cronograma:', erroInfo.message);
-      return;
-    }
+  // ===================================================
+  // MIGRAÇÃO — DIA DE ESTUDO
+  // ===================================================
 
-    const possuiDiaEstudo = (colunas || []).some((coluna) => coluna.name === 'dia_estudo');
-    if (possuiDiaEstudo) return;
-
-    db.run(
-      `ALTER TABLE cronogramas_programados_sessoes ADD COLUMN dia_estudo INTEGER NOT NULL DEFAULT 1`,
-      (erroAlteracao) => {
-        if (erroAlteracao) {
-          console.error('Erro ao adicionar dia_estudo às sessões do cronograma:', erroAlteracao.message);
-          return;
-        }
-
-        // Dados antigos continuam válidos: distribuímos as posições existentes
-        // entre os 7 dias para preservar o comportamento anterior até o admin revisar.
-        db.run(
-          `UPDATE cronogramas_programados_sessoes
-           SET dia_estudo = ((sessao - 1) % 7) + 1`,
-          (erroAtualizacao) => {
-            if (erroAtualizacao) {
-              console.error('Erro ao migrar os dias das sessões do cronograma:', erroAtualizacao.message);
-            }
-          }
+  db.all(
+    `PRAGMA table_info(cronogramas_programados_sessoes)`,
+    (erroInfo, colunas) => {
+      if (erroInfo) {
+        console.error(
+          '❌ Erro ao verificar estrutura das sessões:',
+          erroInfo.message
         );
+        return;
       }
-    );
-  });
+
+      const possuiDiaEstudo =
+        (colunas || []).some(
+          (coluna) => coluna.name === 'dia_estudo'
+        );
+
+      if (possuiDiaEstudo) {
+        return;
+      }
+
+      db.run(
+        `
+          ALTER TABLE cronogramas_programados_sessoes
+          ADD COLUMN dia_estudo INTEGER NOT NULL DEFAULT 1
+        `,
+        (erroAlteracao) => {
+          if (erroAlteracao) {
+            console.error(
+              '❌ Erro ao adicionar dia_estudo:',
+              erroAlteracao.message
+            );
+            return;
+          }
+
+          // Preserva dados antigos distribuindo as sessões pelos dias 1..7.
+          db.run(
+            `
+              UPDATE cronogramas_programados_sessoes
+              SET dia_estudo = ((sessao - 1) % 7) + 1
+            `,
+            (erroAtualizacao) => {
+              if (erroAtualizacao) {
+                console.error(
+                  '❌ Erro ao migrar dias das sessões:',
+                  erroAtualizacao.message
+                );
+              }
+            }
+          );
+        }
+      );
+    }
+  );
+
+  // ===================================================
+  // ÍNDICES
+  // ===================================================
 
   db.run(`
     CREATE INDEX IF NOT EXISTS idx_cronogramas_programados_frequencia
@@ -87,9 +159,31 @@ db.serialize(() => {
   `);
 
   db.run(`
+    CREATE INDEX IF NOT EXISTS idx_cronogramas_programados_ativo
+    ON cronogramas_programados(ativo)
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_cronogramas_programados_config_meses
+    ON cronogramas_programados_config(meses)
+  `);
+
+  db.run(`
     CREATE INDEX IF NOT EXISTS idx_cronogramas_programados_sessoes_programacao
-    ON cronogramas_programados_sessoes(programacao_id, mes, semana, sessao)
+    ON cronogramas_programados_sessoes(
+      programacao_id,
+      mes,
+      semana,
+      sessao
+    )
+  `);
+
+  db.run(`
+    CREATE INDEX IF NOT EXISTS idx_cronogramas_programados_sessoes_topico
+    ON cronogramas_programados_sessoes(topico_id)
   `);
 });
 
-module.exports = db;
+module.exports = {
+  CRONOGRAMA_BASE
+};
