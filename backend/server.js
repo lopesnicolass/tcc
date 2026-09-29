@@ -63,11 +63,10 @@ const checklistRoutes =
 // INICIALIZAÇÕES
 // =====================================================
 
-// Cria a estrutura adicional do checklist.
-// Não apaga nem recria o banco existente.
 require("./config/ensureChecklist");
 require("./config/ensureCalendario");
 require("./config/ensureCronogramasModelos");
+require("./config/ensureResultados");
 
 // =====================================================
 // APP
@@ -87,16 +86,6 @@ app.use(
 // =====================================================
 // UPLOADS
 // =====================================================
-//
-// Só a pasta "provas" é pública de propósito (provas de
-// vestibulinhos anteriores, não é dado sensível — ver
-// comentário em provaRoutes.js). As fotos de perfil NÃO
-// passam mais por aqui: elas ficam salvas como BLOB no
-// banco (usuarios.foto_perfil_dados) e só são entregues
-// pelo endpoint autenticado /usuarios/meu-perfil. Por isso
-// servimos só "/uploads/provas", e não a pasta "uploads"
-// inteira — assim "uploads/perfis" (com fotos antigas de
-// antes dessa mudança) não fica acessível publicamente.
 
 app.use(
     "/uploads/provas",
@@ -205,10 +194,12 @@ app.use(
 app.get(
     "/",
     (req, res) => {
+
         res.json({
             mensagem:
                 "API do Vestibulinho funcionando!"
         });
+
     }
 );
 
@@ -222,8 +213,10 @@ const PORT =
 app.listen(
     PORT,
     () => {
+
         console.log(
             `Servidor rodando na porta ${PORT}`
         );
+
     }
 );

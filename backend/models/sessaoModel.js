@@ -25,6 +25,36 @@ function criarSessao(usuarioId, callback) {
 
 
 // =====================================================
+// BUSCAR SESSÃO ATIVA POR ID
+// =====================================================
+
+function buscarSessaoAtivaPorId(sessaoId, callback) {
+
+    const sql = `
+        SELECT
+            sessoes.id,
+            sessoes.usuario_id
+        FROM sessoes
+        INNER JOIN usuarios
+            ON sessoes.usuario_id = usuarios.id
+        WHERE sessoes.id = ?
+        AND sessoes.ativo = 1
+        LIMIT 1
+    `;
+
+    db.get(sql, [sessaoId], (erro, sessao) => {
+
+        if (erro) {
+            console.error("❌ Erro ao validar sessão:", erro);
+            return callback(erro);
+        }
+
+        callback(null, sessao || null);
+    });
+}
+
+
+// =====================================================
 // LISTAR SESSÕES ATIVAS
 // =====================================================
 
@@ -61,10 +91,6 @@ function listarSessoesAtivas(callback) {
 // ENCERRAR SESSÃO
 // =====================================================
 
-// =====================================================
-// ENCERRAR SESSÃO
-// =====================================================
-
 function encerrarSessao(usuarioId, callback) {
 
     const sql = `
@@ -92,8 +118,41 @@ function encerrarSessao(usuarioId, callback) {
 }
 
 
+// =====================================================
+// ENCERRAR SESSÃO ATUAL
+// =====================================================
+
+function encerrarSessaoPorId(sessaoId, callback) {
+
+    const sql = `
+        UPDATE sessoes
+        SET
+            ativo = 0,
+            logout_em = CURRENT_TIMESTAMP
+        WHERE id = ?
+        AND ativo = 1
+    `;
+
+    db.run(sql, [sessaoId], function (erro) {
+
+        if (erro) {
+            console.error(
+                "❌ Erro ao encerrar sessão atual:",
+                erro
+            );
+
+            return callback(erro);
+        }
+
+        callback(null);
+    });
+}
+
+
 module.exports = {
     criarSessao,
+    buscarSessaoAtivaPorId,
     listarSessoesAtivas,
+    encerrarSessaoPorId,
     encerrarSessao
 };

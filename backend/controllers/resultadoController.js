@@ -9,24 +9,31 @@ const {
 // VERIFICAR SE O USUÁRIO PODE ACESSAR
 // =====================================================
 
-function usuarioPodeAcessar(req, usuarioId) {
+function usuarioPodeAcessar(
+    req,
+    usuarioId
+) {
 
     if (!req.usuario) {
         return false;
     }
 
-    // Administrador pode consultar qualquer usuário
-    if (req.usuario.tipo === "admin") {
+    if (
+        req.usuario.tipo === "admin"
+    ) {
         return true;
     }
 
-    const usuarioLogadoId = Number(
-        req.usuario.id ||
-        req.usuario.usuarioId
-    );
+    const usuarioLogadoId =
+        Number(
+            req.usuario.id ||
+            req.usuario.usuarioId
+        );
 
     return (
-        Number.isInteger(usuarioLogadoId) &&
+        Number.isInteger(
+            usuarioLogadoId
+        ) &&
         usuarioLogadoId === usuarioId
     );
 }
@@ -38,15 +45,17 @@ function usuarioPodeAcessar(req, usuarioId) {
 
 function obterUsuarioLogado(req) {
 
-    const usuarioId = Number(
-        req.usuario?.id ||
-        req.usuario?.usuarioId
-    );
+    const usuarioId =
+        Number(
+            req.usuario?.id ||
+            req.usuario?.usuarioId
+        );
 
     if (
         !Number.isInteger(usuarioId) ||
         usuarioId <= 0
     ) {
+
         return null;
     }
 
@@ -58,9 +67,13 @@ function obterUsuarioLogado(req) {
 // CRIAR RESULTADO
 // =====================================================
 
-function cadastrarResultado(req, res) {
+function cadastrarResultado(
+    req,
+    res
+) {
 
     const {
+        simuladoId,
         acertos,
         erros,
         totalQuestoes
@@ -78,11 +91,12 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // VALIDAR CAMPOS
-    // -----------------------------------------
+    // =================================================
 
     if (
+        simuladoId === undefined ||
         acertos === undefined ||
         erros === undefined ||
         totalQuestoes === undefined
@@ -95,6 +109,9 @@ function cadastrarResultado(req, res) {
     }
 
 
+    const simuladoNumero =
+        Number(simuladoId);
+
     const acertosNumero =
         Number(acertos);
 
@@ -105,9 +122,25 @@ function cadastrarResultado(req, res) {
         Number(totalQuestoes);
 
 
-    // -----------------------------------------
+    // =================================================
+    // VALIDAR SIMULADO
+    // =================================================
+
+    if (
+        !Number.isInteger(simuladoNumero) ||
+        simuladoNumero <= 0
+    ) {
+
+        return res.status(400).json({
+            mensagem:
+                "Simulado inválido."
+        });
+    }
+
+
+    // =================================================
     // VALIDAR ACERTOS
-    // -----------------------------------------
+    // =================================================
 
     if (
         !Number.isInteger(acertosNumero) ||
@@ -121,9 +154,9 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // VALIDAR ERROS
-    // -----------------------------------------
+    // =================================================
 
     if (
         !Number.isInteger(errosNumero) ||
@@ -137,9 +170,9 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // VALIDAR TOTAL
-    // -----------------------------------------
+    // =================================================
 
     if (
         !Number.isInteger(totalNumero) ||
@@ -153,9 +186,9 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // VALIDAR SOMA
-    // -----------------------------------------
+    // =================================================
 
     if (
         acertosNumero + errosNumero !==
@@ -169,26 +202,33 @@ function cadastrarResultado(req, res) {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // CALCULAR PORCENTAGEM
-    // -----------------------------------------
+    // =================================================
 
     const porcentagem =
-        (acertosNumero / totalNumero) * 100;
+        (
+            acertosNumero /
+            totalNumero
+        ) * 100;
 
 
-    // -----------------------------------------
+    // =================================================
     // SALVAR
-    // -----------------------------------------
+    // =================================================
 
     criarResultado(
         usuarioId,
+        simuladoNumero,
         acertosNumero,
         errosNumero,
         totalNumero,
         porcentagem,
 
-        (erro, resultado) => {
+        (
+            erro,
+            resultado
+        ) => {
 
             if (erro) {
 
@@ -217,6 +257,9 @@ function cadastrarResultado(req, res) {
                     usuarioId:
                         usuarioId,
 
+                    simuladoId:
+                        simuladoNumero,
+
                     acertos:
                         acertosNumero,
 
@@ -232,6 +275,7 @@ function cadastrarResultado(req, res) {
                         )
                 }
             });
+
         }
     );
 }
@@ -241,11 +285,15 @@ function cadastrarResultado(req, res) {
 // LISTAR RESULTADOS POR USUÁRIO
 // =====================================================
 
-function listarResultados(req, res) {
+function listarResultados(
+    req,
+    res
+) {
 
     const usuarioId =
-        Number(req.params.usuarioId);
-
+        Number(
+            req.params.usuarioId
+        );
 
     if (
         !Number.isInteger(usuarioId) ||
@@ -276,7 +324,10 @@ function listarResultados(req, res) {
     buscarResultadosPorUsuario(
         usuarioId,
 
-        (erro, resultados) => {
+        (
+            erro,
+            resultados
+        ) => {
 
             if (erro) {
 
@@ -313,7 +364,6 @@ function listarMeusResultados(
     const usuarioId =
         obterUsuarioLogado(req);
 
-
     if (!usuarioId) {
 
         return res.status(401).json({
@@ -326,7 +376,10 @@ function listarMeusResultados(
     buscarResultadosPorUsuario(
         usuarioId,
 
-        (erro, resultados) => {
+        (
+            erro,
+            resultados
+        ) => {
 
             if (erro) {
 
@@ -361,8 +414,9 @@ function buscarDesempenho(
 ) {
 
     const usuarioId =
-        Number(req.params.usuarioId);
-
+        Number(
+            req.params.usuarioId
+        );
 
     if (
         !Number.isInteger(usuarioId) ||
@@ -393,7 +447,10 @@ function buscarDesempenho(
     buscarDesempenhoPorUsuario(
         usuarioId,
 
-        (erro, resultado) => {
+        (
+            erro,
+            resultado
+        ) => {
 
             if (erro) {
 
@@ -420,6 +477,7 @@ function buscarDesempenho(
                         totalQuestoes: 0,
                         melhorResultado: 0
                     }
+
             });
         }
     );
@@ -438,7 +496,6 @@ function buscarMeuDesempenho(
     const usuarioId =
         obterUsuarioLogado(req);
 
-
     if (!usuarioId) {
 
         return res.status(401).json({
@@ -451,7 +508,10 @@ function buscarMeuDesempenho(
     buscarDesempenhoPorUsuario(
         usuarioId,
 
-        (erro, resultado) => {
+        (
+            erro,
+            resultado
+        ) => {
 
             if (erro) {
 
@@ -478,6 +538,7 @@ function buscarMeuDesempenho(
                         totalQuestoes: 0,
                         melhorResultado: 0
                     }
+
             });
         }
     );

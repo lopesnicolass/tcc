@@ -6,34 +6,39 @@ const db = require("../config/db");
 
 function criarResultado(
     usuarioId,
+    simuladoId,
     acertos,
     erros,
     totalQuestoes,
     porcentagem,
     callback
 ) {
+
     const sql = `
         INSERT INTO resultados
         (
             usuario_id,
+            simulado_id,
             acertos,
             erros,
             total_questoes,
             porcentagem
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     db.run(
         sql,
         [
             usuarioId,
+            simuladoId,
             acertos,
             erros,
             totalQuestoes,
             porcentagem
         ],
         function (erro) {
+
             if (erro) {
                 return callback(erro);
             }
@@ -43,6 +48,7 @@ function criarResultado(
     );
 }
 
+
 // =====================================================
 // BUSCAR RESULTADOS DO USUÁRIO
 // =====================================================
@@ -51,11 +57,30 @@ function buscarResultadosPorUsuario(
     usuarioId,
     callback
 ) {
+
     const sql = `
-        SELECT *
-        FROM resultados
-        WHERE usuario_id = ?
-        ORDER BY data_realizacao DESC, id DESC
+        SELECT
+            r.id,
+            r.usuario_id,
+            r.simulado_id,
+            r.acertos,
+            r.erros,
+            r.total_questoes,
+            r.porcentagem,
+            r.data_realizacao,
+
+            s.titulo AS simulado_nome
+
+        FROM resultados r
+
+        LEFT JOIN simulados s
+            ON s.id = r.simulado_id
+
+        WHERE r.usuario_id = ?
+
+        ORDER BY
+            r.data_realizacao DESC,
+            r.id DESC
     `;
 
     db.all(
@@ -65,6 +90,7 @@ function buscarResultadosPorUsuario(
     );
 }
 
+
 // =====================================================
 // BUSCAR DESEMPENHO
 // =====================================================
@@ -73,8 +99,10 @@ function buscarDesempenhoPorUsuario(
     usuarioId,
     callback
 ) {
+
     const sql = `
         SELECT
+
             COUNT(*) AS totalSimulados,
 
             COALESCE(
@@ -113,6 +141,11 @@ function buscarDesempenhoPorUsuario(
         callback
     );
 }
+
+
+// =====================================================
+// EXPORTAÇÕES
+// =====================================================
 
 module.exports = {
     criarResultado,

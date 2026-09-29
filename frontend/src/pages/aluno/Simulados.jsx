@@ -1131,64 +1131,72 @@ export default function Simulados() {
   // ==========================================
   // SALVAR RESULTADO
   // ==========================================
+async function salvarResultado(
+  resultado
+) {
+  const usuarioId =
+    obterUsuarioId();
 
-  async function salvarResultado(
-    resultado
-  ) {
-    const usuarioId =
-      obterUsuarioId();
-
-    if (!usuarioId) {
-      throw new Error(
-        'Não foi possível identificar o usuário logado.'
-      );
-    }
-
-    const resposta =
-      await fetch(
-        `${API_URL}/resultados`,
-        {
-          method:
-            'POST',
-
-          headers: {
-            'Content-Type':
-              'application/json',
-
-            Authorization:
-              `Bearer ${obterToken()}`
-          },
-
-          body:
-            JSON.stringify({
-              usuarioId,
-
-              acertos:
-                resultado.acertos,
-
-              erros:
-                resultado.erros,
-
-              totalQuestoes:
-                resultado.totalQuestoes
-            })
-        }
-      );
-
-    const dados =
-      await resposta.json();
-
-    if (
-      !resposta.ok
-    ) {
-      throw new Error(
-        dados.mensagem ||
-          'Erro ao salvar resultado.'
-      );
-    }
-
-    return dados;
+  if (!usuarioId) {
+    throw new Error(
+      'Não foi possível identificar o usuário logado.'
+    );
   }
+
+  if (!simuladoSelecionado?.id) {
+    throw new Error(
+      'Não foi possível identificar o simulado realizado.'
+    );
+  }
+
+  const resposta =
+    await fetch(
+      `${API_URL}/resultados`,
+      {
+        method:
+          'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json',
+
+          Authorization:
+            `Bearer ${obterToken()}`
+        },
+
+        body:
+          JSON.stringify({
+
+            simuladoId:
+              simuladoSelecionado.id,
+
+            acertos:
+              resultado.acertos,
+
+            erros:
+              resultado.erros,
+
+            totalQuestoes:
+              resultado.totalQuestoes
+
+          })
+      }
+    );
+
+  const dados =
+    await resposta.json();
+
+  if (
+    !resposta.ok
+  ) {
+    throw new Error(
+      dados.mensagem ||
+        'Erro ao salvar resultado.'
+    );
+  }
+
+  return dados;
+}
 
   // ==========================================
   // FINALIZAR SIMULADO
