@@ -13,6 +13,10 @@ const {
     removerTodasQuestoesDoSimulado
 } = require("../models/simuladoModel");
 
+const {
+    criarResultado
+} = require("../models/resultadoModel");
+
 // =====================================================
 // CADASTRAR SIMULADO
 // =====================================================
@@ -633,15 +637,61 @@ function corrigirSimulado(req, res) {
                     )
                     : 0;
 
-            return res.status(200).json({
-                resultado: {
-                    acertos,
-                    erros,
-                    totalQuestoes,
-                    porcentagem
-                },
-                detalhes
-            });
+            // =============================================
+            // SALVAR O RESULTADO NO SERVIDOR
+            //
+            // O resultado é salvo aqui, a partir dos números
+            // que o PRÓPRIO SERVIDOR acabou de calcular contra
+            // o gabarito real — nunca a partir de números que
+            // o cliente possa enviar. Isso evita que alguém
+            // forje um resultado chamando POST /resultados
+            // diretamente, sem ter respondido ao simulado.
+            // =============================================
+
+            const usuarioId = Number(
+                req.usuario?.id ||
+                req.usuario?.usuarioId
+            );
+
+            if (!usuarioId) {
+                return res.status(401).json({
+                    mensagem:
+                        "Usuário não autenticado."
+                });
+            }
+
+            criarResultado(
+                usuarioId,
+                Number(id),
+                acertos,
+                erros,
+                totalQuestoes,
+                porcentagem,
+                (erroResultado, resultadoSalvo) => {
+                    if (erroResultado) {
+                        console.error(
+                            "❌ Erro ao salvar resultado do simulado:",
+                            erroResultado
+                        );
+
+                        return res.status(500).json({
+                            mensagem:
+                                "O simulado foi corrigido, mas não foi possível salvar o resultado."
+                        });
+                    }
+
+                    return res.status(200).json({
+                        resultado: {
+                            id: resultadoSalvo.lastID,
+                            acertos,
+                            erros,
+                            totalQuestoes,
+                            porcentagem
+                        },
+                        detalhes
+                    });
+                }
+            );
         }
     );
 }
