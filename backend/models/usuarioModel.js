@@ -312,6 +312,31 @@ function buscarGamificacao(id, callback) {
 }
 
 
+function registrarAtividade(id, streak, dataAtividade, callback) {
+
+    const sql = `
+        UPDATE usuarios
+        SET
+            streak = ?,
+            last_active_date = ?
+        WHERE id = ?
+    `;
+
+    db.run(
+        sql,
+        [streak, dataAtividade, id],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+
 function adicionarXP(
     id,
     quantidade,
@@ -362,5 +387,6 @@ module.exports = {
     atualizarFoto,
     excluirUsuario,
     buscarGamificacao,
+    registrarAtividade,
     adicionarXP
 };

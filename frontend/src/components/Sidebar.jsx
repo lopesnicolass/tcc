@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
 import { useGamification } from '../context/GamificationContext.jsx';
 import logoIcon from '../assets/tenna_logo.png';
 import ThemeToggle from './ThemeToggle.jsx';
@@ -40,8 +41,27 @@ const ICONS = {
 };
 
 export default function Sidebar() {
-  const { streak } = useGamification();
+  const { streak, lastActiveDate } = useGamification();
   const [collapsed, setCollapsed] = useState(false);
+  const [streakOpen, setStreakOpen] = useState(false);
+
+  useEffect(() => {
+    if (!streakOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setStreakOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [streakOpen]);
+
+  useEffect(() => {
+    document.body.classList.toggle('streak-modal-open', streakOpen);
+    return () => document.body.classList.remove('streak-modal-open');
+  }, [streakOpen]);
 
   return (
     <aside className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
@@ -86,11 +106,15 @@ export default function Sidebar() {
         const progressPercent = (streakProgress / 7) * 100;
 
         return (
-          <div
+          <button
+            type="button"
             className={`sidebar-streak ${streakValue >= 7 ? 'sidebar-streak-complete' : ''}`}
             title={streakValue >= 7
-              ? 'Meta de 7 dias alcançada!'
+              ? 'Meta de 7 dias alcançada! Clique para ver sua sequência.'
               : `Faltam ${streakRemaining} dias para 7`}
+            onClick={() => setStreakOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={streakOpen}
           >
             <div className="sidebar-streak-visual" aria-hidden="true">
               <svg className="sidebar-streak-flame" viewBox="0 0 48 56" fill="none">
@@ -138,9 +162,120 @@ export default function Sidebar() {
             </div>
 
             <span className="sidebar-streak-arrow" aria-hidden="true">›</span>
-          </div>
+          </button>
         );
       })()}
+
+      {streakOpen && createPortal((() => {
+        const streakValue = Math.max(0, Number(streak) || 0);
+        const hoje = new Intl.DateTimeFormat('sv-SE').format(new Date());
+        const ultimaAtividade = lastActiveDate || null;
+        const ativoHoje = ultimaAtividade === hoje;
+        const proximaMeta = streakValue < 7 ? 7 : Math.ceil((streakValue + 1) / 7) * 7;
+        const faltamParaMeta = Math.max(proximaMeta - streakValue, 0);
+        const progressoMeta = streakValue < 7 ? streakValue : (streakValue % 7);
+        const fimSemana = new Date();
+        const diasSemana = Array.from({ length: 7 }, (_, index) => {
+          const data = new Date(fimSemana);
+          data.setDate(fimSemana.getDate() - (6 - index));
+          const chave = new Intl.DateTimeFormat('sv-SE').format(data);
+          const dataFinal = ultimaAtividade ? new Date(`${ultimaAtividade}T12:00:00`) : null;
+          const dataInicio = dataFinal
+            ? new Date(dataFinal.getTime() - Math.max(streakValue - 1, 0) * 86400000)
+            : null;
+          const completo = Boolean(
+            dataFinal &&
+            dataInicio &&
+            data >= dataInicio &&
+            data <= dataFinal
+          );
+
+          return {
+            chave,
+            rotulo: new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(data).replace('.', ''),
+            completo,
+            hoje: chave === hoje
+          };
+        });
+
+        return (
+          <div
+            className="streak-modal-backdrop"
+            role="presentation"
+            onClick={() => setStreakOpen(false)}
+          >
+            <section
+              className="streak-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="streak-modal-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                type="button"
+                className="streak-modal-close"
+                onClick={() => setStreakOpen(false)}
+                aria-label="Fechar detalhes da sequência"
+              >
+                ×
+              </button>
+
+              <div className="streak-modal-hero">
+                <div className="streak-modal-flame" aria-hidden="true">🔥</div>
+                <div>
+                  <span className="streak-modal-kicker">SUA SEQUÊNCIA</span>
+                  <h2 id="streak-modal-title">{streakValue} {streakValue === 1 ? 'dia' : 'dias'}</h2>
+                  <p>{ativoHoje ? 'Hoje você já interagiu com o site. Seu fogo está seguro!' : 'Faça uma interação hoje para manter seu fogo.'}</p>
+                </div>
+              </div>
+
+              <div className="streak-modal-section">
+                <div className="streak-modal-section-head">
+                  <strong>Últimos 7 dias</strong>
+                  <span>{ativoHoje ? 'Ativo hoje' : 'Hoje pendente'}</span>
+                </div>
+                <div className="streak-week">
+                  {diasSemana.map((dia) => (
+                    <div className="streak-day" key={dia.chave}>
+                      <span className="streak-day-label">{dia.rotulo}</span>
+                      <span
+                        className={`streak-day-dot ${dia.completo ? 'is-complete' : ''} ${dia.hoje ? 'is-today' : ''}`}
+                        aria-label={`${dia.rotulo}: ${dia.completo ? 'atividade registrada' : 'sem atividade'}`}
+                      >
+                        {dia.completo ? '🔥' : '•'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="streak-modal-section">
+                <div className="streak-modal-section-head">
+                  <strong>Próxima conquista</strong>
+                  <span>{faltamParaMeta === 0 ? 'Concluída!' : `${faltamParaMeta} ${faltamParaMeta === 1 ? 'dia' : 'dias'}`}</span>
+                </div>
+
+                <div className="streak-modal-goal">
+                  <div>
+                    <span className="streak-modal-goal-icon">🔥</span>
+                    <div>
+                      <strong>{proximaMeta} dias</strong>
+                      <span>meta de sequência</span>
+                    </div>
+                  </div>
+                  <div className={`streak-modal-goal-track streak-goal-progress-${progressoMeta}`} aria-hidden="true">
+                    {Array.from({ length: 7 }, (_, index) => (
+                      <span key={index} className={index < progressoMeta ? 'is-complete' : ''} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <p className="streak-modal-tip">💡 Qualquer interação válida com o site ajuda a manter sua sequência ativa.</p>
+            </section>
+          </div>
+        );
+      })(), document.body)}
 
     </aside>
   );

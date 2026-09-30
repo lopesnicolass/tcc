@@ -66,11 +66,15 @@ export function GamificationProvider({ children }) {
   // Evita duas requisições idênticas simultâneas causadas por
   // duplo clique ou por uma mesma ação disparada duas vezes.
   const requestsEmAndamento = useRef(new Set());
+  const atividadeRegistradaData = useRef(null);
+  const registrarAtividadeEmAndamento = useRef(false);
 
   const carregarGamificacao = useCallback(async () => {
     const token = obterToken();
 
     if (!token) {
+      atividadeRegistradaData.current = null;
+      registrarAtividadeEmAndamento.current = false;
       setState({ xp: 0, streak: 0, lastActiveDate: null });
       return;
     }
@@ -93,7 +97,11 @@ export function GamificationProvider({ children }) {
   }, [carregarGamificacao]);
 
   useEffect(() => {
-    const atualizarGamificacao = () => carregarGamificacao();
+    const atualizarGamificacao = () => {
+      atividadeRegistradaData.current = null;
+      registrarAtividadeEmAndamento.current = false;
+      carregarGamificacao();
+    };
 
     window.addEventListener('etecamp-login', atualizarGamificacao);
 
@@ -101,6 +109,64 @@ export function GamificationProvider({ children }) {
       window.removeEventListener('etecamp-login', atualizarGamificacao);
     };
   }, [carregarGamificacao]);
+
+  useEffect(() => {
+    const registrarInteracao = () => {
+      const token = obterToken();
+      if (!token) return;
+      registrarAtividade();
+    };
+
+    window.addEventListener('pointerdown', registrarInteracao, { passive: true });
+    window.addEventListener('keydown', registrarInteracao);
+    window.addEventListener('scroll', registrarInteracao, { passive: true });
+    window.addEventListener('input', registrarInteracao);
+
+    return () => {
+      window.removeEventListener('pointerdown', registrarInteracao);
+      window.removeEventListener('keydown', registrarInteracao);
+      window.removeEventListener('scroll', registrarInteracao);
+      window.removeEventListener('input', registrarInteracao);
+    };
+  }, []);
+
+
+  async function registrarAtividade() {
+    const token = obterToken();
+
+    const agora = new Date();
+    const hojeNoCliente = [
+      agora.getFullYear(),
+      String(agora.getMonth() + 1).padStart(2, '0'),
+      String(agora.getDate()).padStart(2, '0')
+    ].join('-');
+
+    if (!token || atividadeRegistradaData.current === hojeNoCliente || registrarAtividadeEmAndamento.current) {
+      return;
+    }
+
+    registrarAtividadeEmAndamento.current = true;
+
+    try {
+      const dados = await request('/gamificacao/atividade', {
+        method: 'POST'
+      });
+
+      atividadeRegistradaData.current = hojeNoCliente;
+
+      setState((atual) => ({
+        ...atual,
+        xp: Number(dados.xp) || atual.xp || 0,
+        streak: Number(dados.streak) || 0,
+        lastActiveDate: dados.lastActiveDate || null
+      }));
+    } catch (erro) {
+      console.error('Erro ao registrar atividade:', erro);
+    } finally {
+      registrarAtividadeEmAndamento.current = false;
+    }
+  }
+
 
   async function addXP(amount, reason) {
     const token = obterToken();
@@ -170,6 +236,7 @@ export function GamificationProvider({ children }) {
         xpIntoLevel,
         xpForNext,
         addXP,
+        registrarAtividade,
         toast,
         clearToast: () => setToast(null),
         recarregarGamificacao: carregarGamificacao

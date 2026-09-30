@@ -1,5 +1,6 @@
 const {
     buscarGamificacao,
+    registrarAtividade,
     adicionarXP
 } = require("../models/usuarioModel");
 
@@ -59,6 +60,72 @@ function buscar(req, res) {
 }
 
 
+function calcularStreak(dados) {
+    const hoje = obterHoje();
+    const ontem = obterOntem();
+    let streak = Number(dados.streak) || 0;
+
+    if (dados.last_active_date !== hoje) {
+        streak = dados.last_active_date === ontem
+            ? streak + 1
+            : 1;
+    }
+
+    return { hoje, streak };
+}
+
+
+function registrar(req, res) {
+    const usuarioId = req.usuario.id;
+
+    buscarGamificacao(usuarioId, (erro, dados) => {
+        if (erro) {
+            console.error(erro);
+            return res.status(500).json({
+                mensagem: "Erro ao consultar sequência."
+            });
+        }
+
+        if (!dados) {
+            return res.status(404).json({
+                mensagem: "Usuário não encontrado."
+            });
+        }
+
+        const { hoje, streak } = calcularStreak(dados);
+
+        registrarAtividade(
+            usuarioId,
+            streak,
+            hoje,
+            (erro) => {
+                if (erro) {
+                    console.error(erro);
+                    return res.status(500).json({
+                        mensagem: "Erro ao registrar atividade."
+                    });
+                }
+
+                buscarGamificacao(usuarioId, (erro, atualizado) => {
+                    if (erro) {
+                        console.error(erro);
+                        return res.status(500).json({
+                            mensagem: "Erro ao atualizar sequência."
+                        });
+                    }
+
+                    res.json({
+                        xp: Number(atualizado.xp) || 0,
+                        streak: Number(atualizado.streak) || 0,
+                        lastActiveDate: atualizado.last_active_date || null
+                    });
+                });
+            }
+        );
+    });
+}
+
+
 function ganharXP(req, res) {
     const usuarioId = req.usuario.id;
     const { action } = req.body || {};
@@ -84,15 +151,7 @@ function ganharXP(req, res) {
             });
         }
 
-        const hoje = obterHoje();
-        const ontem = obterOntem();
-        let streak = Number(dados.streak) || 0;
-
-        if (dados.last_active_date !== hoje) {
-            streak = dados.last_active_date === ontem
-                ? streak + 1
-                : 1;
-        }
+        const { hoje, streak } = calcularStreak(dados);
 
         adicionarXP(
             usuarioId,
@@ -130,5 +189,6 @@ function ganharXP(req, res) {
 
 module.exports = {
     buscar,
+    registrar,
     ganharXP
 };

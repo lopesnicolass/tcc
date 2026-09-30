@@ -8,6 +8,7 @@ const autenticarToken =
 
 const {
     buscar,
+    registrar,
     ganharXP
 } = require("../controllers/gamificacaoController");
 
@@ -17,6 +18,15 @@ router.get(
     "/",
     autenticarToken,
     buscar
+);
+
+
+// Registrar uma interação/atividade do usuário.
+// Não concede XP; apenas mantém a sequência diária.
+router.post(
+    "/atividade",
+    autenticarToken,
+    registrar
 );
 
 

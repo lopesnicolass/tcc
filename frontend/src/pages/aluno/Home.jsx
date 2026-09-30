@@ -520,7 +520,7 @@ export default function Home() {
       )}
 
       {/* ESTATÍSTICAS REAIS */}
-      <div className="stats-row home-stats-row">
+      <div className="home-stats-row">
         <div className="stat-card">
           <div className="stat-icon">
             <Icon name="book" size={20} />
