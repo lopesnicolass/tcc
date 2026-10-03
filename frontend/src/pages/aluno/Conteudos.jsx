@@ -404,6 +404,23 @@ export default function Conteudos() {
       );
     }, [busca, filtro, materiasData]);
 
+  const totalResultados = useMemo(
+    () =>
+      Object.values(conteudosFiltrados).reduce(
+        (sum, topics) => sum + topics.length,
+        0
+      ),
+    [conteudosFiltrados]
+  );
+
+  const filtrosAtivos =
+    Boolean(busca.trim()) || filtro !== 'Todas';
+
+  function limparFiltros() {
+    setBusca('');
+    setFiltro('Todas');
+  }
+
   function toggleMateria(materia) {
     setAbertos((prev) => {
       const next = new Set(prev);
@@ -416,6 +433,23 @@ export default function Conteudos() {
 
       return next;
     });
+  }
+
+  useEffect(() => {
+    const nomesComResultado = Object.keys(conteudosFiltrados);
+
+    if (busca.trim()) {
+      setAbertos(new Set(nomesComResultado));
+      return;
+    }
+
+    if (filtro !== 'Todas' && nomesComResultado.includes(filtro)) {
+      setAbertos((prev) => new Set(prev).add(filtro));
+    }
+  }, [busca, filtro, conteudosFiltrados]);
+
+  function limparBusca() {
+    setBusca('');
   }
 
   async function toggleEstudado(topico) {
@@ -655,7 +689,7 @@ export default function Conteudos() {
 
         <div className="content-search-wrap">
 
-          <span>⌕</span>
+          <span aria-hidden="true">⌕</span>
 
           <input
             value={busca}
@@ -665,6 +699,18 @@ export default function Conteudos() {
             placeholder="Buscar conteúdo..."
             aria-label="Buscar conteúdo"
           />
+
+          {busca && (
+            <button
+              type="button"
+              className="content-search-clear"
+              onClick={limparBusca}
+              aria-label="Limpar busca"
+              title="Limpar busca"
+            >
+              ×
+            </button>
+          )}
 
         </div>
 
@@ -706,6 +752,39 @@ export default function Conteudos() {
 
       </div>
 
+      {filtrosAtivos && (
+        <div className="content-filter-summary" aria-live="polite">
+          <div className="content-filter-result-count">
+            <strong>{totalResultados}</strong>
+            {totalResultados === 1
+              ? ' conteúdo encontrado'
+              : ' conteúdos encontrados'}
+          </div>
+
+          <div className="content-filter-chips">
+            {busca.trim() && (
+              <span className="content-filter-chip">
+                Busca: <strong>"{busca.trim()}"</strong>
+              </span>
+            )}
+
+            {filtro !== 'Todas' && (
+              <span className="content-filter-chip">
+                Matéria: <strong>{filtro}</strong>
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="content-clear-filters"
+            onClick={limparFiltros}
+          >
+            Limpar filtros
+          </button>
+        </div>
+      )}
+
       {erro && (
 
         <div className="content-empty">
@@ -740,6 +819,23 @@ export default function Conteudos() {
 
       {!erro &&
         !carregando && (
+          Object.keys(conteudosFiltrados).length === 0 ? (
+            <div className="content-search-empty">
+              <div className="content-search-empty-icon" aria-hidden="true">⌕</div>
+              <strong>Nenhum conteúdo encontrado</strong>
+              <span>
+                Não encontramos nenhum tópico para <b>"{busca || filtro}"</b>.
+              </span>
+              {(busca || filtro !== 'Todas') && (
+                <button
+                  type="button"
+                  onClick={limparFiltros}
+                >
+                  Limpar filtros
+                </button>
+              )}
+            </div>
+          ) : (
           <div className="content-subject-list">
 
             {Object.entries(
@@ -786,12 +882,15 @@ export default function Conteudos() {
                   >
 
                     <button
+                      type="button"
                       className="content-subject-header"
                       onClick={() =>
                         toggleMateria(
                           materia
                         )
                       }
+                      aria-expanded={aberto}
+                      aria-controls={`conteudos-${String(materia).replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}`}
                     >
 
                       <div className="content-subject-title">
@@ -870,7 +969,10 @@ export default function Conteudos() {
 
                     {aberto && (
 
-                      <div className="content-topic-list">
+                      <div
+                        id={`conteudos-${String(materia).replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}`}
+                        className="content-topic-list"
+                      >
 
                         {topics.map(
                           (topic, index) => {
@@ -1008,26 +1110,8 @@ export default function Conteudos() {
               }
             )}
 
-            {Object.keys(
-              conteudosFiltrados
-            ).length === 0 && (
-
-              <div className="content-empty">
-
-                <strong>
-                  Nenhum conteúdo encontrado.
-                </strong>
-
-                <span>
-                  Tente outra palavra ou selecione outra matéria.
-                </span>
-
-              </div>
-
-            )}
-
           </div>
-        )}
+          ))}
 
     </div>
   );

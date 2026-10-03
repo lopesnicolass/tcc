@@ -943,3 +943,358 @@
     font-size:13px;
   }
 }
+
+/* =====================================================
+   ETAPA 3 — EXPERIÊNCIA DE ESTUDO
+   ===================================================== */
+
+.flashcards-game-page .flashcards-progress{
+  height: 9px;
+  margin-bottom: 28px;
+  background: #e3eaf2;
+}
+
+.flashcards-game-page .flashcards-progress-bar{
+  background: linear-gradient(90deg, var(--accent), var(--ink));
+}
+
+.flashcards-game-subtitle{
+  max-width: 680px;
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 600;
+}
+
+.flashcard-game-card{
+  width: min(100%, 620px);
+  height: 370px;
+  outline: none;
+}
+
+.flashcard-game-card:focus-visible{
+  border-radius: 30px;
+  box-shadow: 0 0 0 4px rgba(33,150,243,.18), 0 18px 46px rgba(13,71,161,.12);
+}
+
+.flashcard-game-face{
+  padding: 46px;
+  border-radius: 30px;
+}
+
+.flashcard-game-label{
+  margin-bottom: 24px;
+  padding: 8px 13px;
+  font-size: 11px;
+}
+
+.flashcard-game-face p{
+  max-width: 500px;
+  font-size: 24px;
+  line-height: 1.5;
+}
+
+.flashcard-game-face small{
+  margin-top: 30px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.flashcards-swipe-hint{
+  width: min(100%, 620px);
+  margin-top: 17px;
+  font-size: 13px;
+}
+
+.flashcards-game-actions{
+  width: min(100%, 620px);
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.flashcards-answer-button{
+  min-height: 52px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  box-shadow: 0 5px 14px rgba(13,71,161,.05);
+}
+
+.flashcards-answer-button.correct{
+  border-color: rgba(57,115,79,.16);
+}
+
+.flashcards-answer-button.wrong{
+  border-color: rgba(167,80,80,.16);
+}
+
+.flashcards-answer-button:hover:not(:disabled){
+  transform: translateY(-2px);
+  box-shadow: 0 9px 18px rgba(13,71,161,.09);
+}
+
+.flashcards-answer-button:focus-visible,
+.flashcards-back-button:focus-visible{
+  outline: 3px solid rgba(33,150,243,.22);
+  outline-offset: 3px;
+}
+
+.flashcards-game-error{
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px){
+  .flashcard-game-card{
+    height: 335px;
+  }
+
+  .flashcard-game-face{
+    padding: 32px;
+    border-radius: 26px;
+  }
+
+  .flashcard-game-face p{
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 560px){
+  .flashcard-game-card{
+    height: 310px;
+  }
+
+  .flashcard-game-face{
+    padding: 24px;
+    border-radius: 22px;
+  }
+
+  .flashcard-game-face p{
+    font-size: 19px;
+  }
+
+  .flashcards-answer-button{
+    min-height: 50px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .flashcard-game-inner,
+  .flashcards-answer-button,
+  .flashcards-progress-bar{
+    transition: none;
+  }
+}
+
+/* =====================================================
+   ETAPA 4 — POLIMENTO DA TELA PRINCIPAL
+   ===================================================== */
+
+.flashcards-hero{
+  min-height: 172px;
+  padding: 34px 36px;
+  margin-bottom: 26px;
+  box-shadow: 0 16px 34px -20px rgba(13,71,161,.55);
+}
+
+.flashcards-hero h1{
+  font-size: clamp(30px, 3.2vw, 40px);
+}
+
+.flashcards-hero p{
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.flashcards-hero-badge{
+  flex-basis: 124px;
+  min-height: 100px;
+  border-radius: 20px;
+}
+
+.flashcards-game-banner{
+  padding: 26px 30px;
+  margin-bottom: 24px;
+  border-radius: 24px;
+}
+
+.flashcards-game-banner-content{
+  gap: 28px;
+}
+
+.flashcards-game-banner h2{
+  font-size: 24px;
+}
+
+.flashcards-game-banner p{
+  font-size: 14px;
+}
+
+.flashcards-search{
+  max-width: 720px;
+  min-height: 50px;
+  margin-bottom: 12px;
+  border-radius: 15px;
+}
+
+.flashcards-search input{
+  font-size: 15px;
+}
+
+.flashcards-search:focus-within{
+  box-shadow: 0 0 0 3px rgba(33,150,243,.10), 0 10px 24px rgba(13,71,161,.08);
+}
+
+.materia-tabs{
+  gap: 9px;
+  margin-bottom: 30px;
+  padding-bottom: 2px;
+}
+
+.materia-tab{
+  min-height: 42px;
+  padding: 9px 16px;
+  font-size: 14px;
+  border-width: 1.5px;
+}
+
+.materia-tab:focus-visible{
+  outline: 3px solid rgba(33,150,243,.20);
+  outline-offset: 3px;
+}
+
+.materia-section{
+  margin-bottom: 38px;
+}
+
+.materia-section-title{
+  margin-bottom: 15px;
+  font-size: 20px;
+  letter-spacing: -.01em;
+}
+
+.flashcards-content-section{
+  margin-bottom: 28px;
+}
+
+.flashcards-content-title{
+  margin-bottom: 14px;
+  padding: 9px 13px;
+  border-left-width: 4px;
+  border-radius: 0 12px 12px 0;
+  background: rgba(33,150,243,.045);
+  color: var(--ink-soft, var(--ink));
+  font-size: 15px;
+}
+
+.flashcard-grid{
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.flashcard{
+  height: 166px;
+}
+
+.flashcard-face{
+  padding: 18px;
+  border-radius: 18px;
+  font-size: 15.5px;
+  line-height: 1.45;
+}
+
+.flashcard:focus-within .flashcard-face.front{
+  border-color: rgba(33,150,243,.36);
+}
+
+.flashcards-vazio{
+  padding: 34px 24px;
+  border: 1px dashed var(--line);
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.flashcards-erro{
+  max-width: 760px;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 760px){
+  .flashcards-hero{
+    padding: 28px 24px;
+  }
+
+  .flashcards-game-banner{
+    padding: 22px;
+  }
+
+  .materia-tabs{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding: 2px 2px 9px;
+    margin-right: -4px;
+    overscroll-behavior-x: contain;
+  }
+
+  .materia-tab{
+    flex: 0 0 auto;
+  }
+
+  .flashcard-grid{
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 560px){
+  .flashcards-hero{
+    min-height: 0;
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .flashcards-hero h1{
+    font-size: 30px;
+  }
+
+  .flashcards-hero p{
+    font-size: 14px;
+  }
+
+  .flashcards-game-banner{
+    border-radius: 20px;
+  }
+
+  .flashcards-search{
+    min-height: 48px;
+  }
+
+  .flashcard-grid{
+    grid-template-columns: 1fr;
+  }
+
+  .flashcard{
+    height: 154px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .flashcards-hero,
+  .flashcards-search,
+  .materia-tab,
+  .flashcard-face,
+  .flashcards-game-start{
+    transition: none;
+  }
+}
+
+html[data-theme='dark'] .flashcards-content-title{
+  background: rgba(66,165,245,.08);
+}
+
+html[data-theme='dark'] .flashcards-search:focus-within{
+  box-shadow: 0 0 0 3px rgba(66,165,245,.14), 0 10px 24px rgba(0,0,0,.20);
+}
+
+html[data-theme='dark'] .flashcards-vazio{
+  background: #0f1928;
+}

@@ -122,3 +122,304 @@
     max-width:none;
   }
 }
+
+/* =====================================================
+   ORGANIZAÇÃO POR MATÉRIA E CONTEÚDO
+   ===================================================== */
+
+.admin-flashcard-list{
+  display:flex;
+  flex-direction:column;
+  gap:34px;
+  padding-bottom:70px;
+}
+
+.admin-flashcard-materia-section{
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--surface, #f9fbfd);
+}
+
+.admin-flashcard-materia-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:22px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--line);
+}
+
+.admin-flashcard-section-eyebrow{
+  display:block;
+  margin-bottom:4px;
+  color:var(--accent-dark);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+
+.admin-flashcard-materia-header h2{
+  margin:0;
+  color:var(--ink);
+  font-family:"Space Grotesk",sans-serif;
+  font-size:22px;
+  line-height:1.2;
+}
+
+.admin-flashcard-section-count,
+.admin-flashcard-content-header span{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(13,71,161,.07);
+  color:var(--accent-dark);
+  font-size:11px;
+  font-weight:800;
+}
+
+.admin-flashcard-content-section{
+  margin-bottom:22px;
+}
+
+.admin-flashcard-content-section:last-child{
+  margin-bottom:0;
+}
+
+.admin-flashcard-content-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:12px;
+}
+
+.admin-flashcard-content-header h3{
+  margin:0;
+  padding-left:11px;
+  border-left:3px solid var(--accent);
+  color:var(--ink);
+  font-size:14px;
+  line-height:1.45;
+}
+
+.admin-flashcard-content-header span{
+  background:var(--surface-muted, #eef3f8);
+  color:var(--muted);
+}
+
+.admin-flashcard-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:180px;
+  padding:28px;
+  border:1px dashed var(--line);
+  border-radius:18px;
+  background:var(--surface, #fff);
+  text-align:center;
+}
+
+.admin-flashcard-empty strong{
+  color:var(--ink);
+  font-size:16px;
+}
+
+.admin-flashcard-empty span{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.admin-flashcard-item:focus-visible{
+  outline:3px solid rgba(56,184,94,.22);
+  outline-offset:3px;
+}
+
+@media (max-width:700px){
+  .admin-flashcard-materia-section{
+    padding:17px;
+  }
+
+  .admin-flashcard-materia-header,
+  .admin-flashcard-content-header{
+    align-items:flex-start;
+  }
+
+  .admin-flashcard-materia-header h2{
+    font-size:19px;
+  }
+
+  .admin-flashcard-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+/* =====================================================
+   BUSCA E FILTROS
+   ===================================================== */
+
+.admin-flashcard-filters{
+  display:grid;
+  grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(180px,1fr) auto;
+  align-items:end;
+  gap:12px;
+  margin-bottom:12px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--surface, #fff);
+  box-shadow:0 1px 2px rgba(13,71,161,.04);
+}
+
+.admin-flashcard-search,
+.admin-flashcard-filter-field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:0;
+}
+
+.admin-flashcard-search label,
+.admin-flashcard-filter-field > span{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.admin-flashcard-search-box{
+  position:relative;
+}
+
+.admin-flashcard-search-box input,
+.admin-flashcard-filter-field select{
+  width:100%;
+  min-height:42px;
+  box-sizing:border-box;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--surface, #fff);
+  color:var(--ink);
+  font:inherit;
+  font-size:13px;
+  outline:none;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+
+.admin-flashcard-search-box input{
+  padding:10px 40px 10px 12px;
+}
+
+.admin-flashcard-search-box input:focus,
+.admin-flashcard-filter-field select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(56,184,94,.11);
+}
+
+.admin-flashcard-clear-search{
+  position:absolute;
+  top:50%;
+  right:8px;
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  transform:translateY(-50%);
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:21px;
+  line-height:1;
+}
+
+.admin-flashcard-clear-search:hover{
+  background:var(--surface-muted, #eef3f8);
+  color:var(--ink);
+}
+
+.admin-flashcard-filter-field select{
+  padding:10px 12px;
+}
+
+.admin-flashcard-filter-field select:disabled{
+  background:var(--surface-muted, #f5f7fa);
+  color:#9aa5b1;
+  cursor:not-allowed;
+}
+
+.admin-flashcard-clear-filters,
+.admin-flashcard-empty-action{
+  min-height:42px;
+  padding:10px 13px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:transparent;
+  color:var(--accent-dark);
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.admin-flashcard-clear-filters:hover,
+.admin-flashcard-empty-action:hover{
+  background:rgba(13,71,161,.06);
+  border-color:rgba(13,71,161,.14);
+  transform:translateY(-1px);
+}
+
+.admin-flashcard-results{
+  margin:0 2px 16px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.admin-flashcard-results strong{
+  color:var(--ink);
+}
+
+.admin-flashcard-empty-action{
+  margin-top:8px;
+}
+
+@media (max-width:900px){
+  .admin-flashcard-filters{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .admin-flashcard-search{
+    grid-column:1 / -1;
+  }
+}
+
+@media (max-width:700px){
+  .admin-flashcard-filters{
+    grid-template-columns:1fr;
+    padding:14px;
+  }
+
+  .admin-flashcard-search{
+    grid-column:auto;
+  }
+
+  .admin-flashcard-clear-filters{
+    width:100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .admin-flashcard-search-box input,
+  .admin-flashcard-filter-field select,
+  .admin-flashcard-clear-filters,
+  .admin-flashcard-empty-action{
+    transition:none;
+  }
+}

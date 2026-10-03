@@ -24,6 +24,10 @@ export default function AdminFlashCards() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
+  const [busca, setBusca] = useState('');
+  const [filtroMateria, setFiltroMateria] = useState('');
+  const [filtroTopico, setFiltroTopico] = useState('');
+
   useEffect(() => {
     carregarDados();
   }, []);
@@ -366,6 +370,78 @@ export default function AdminFlashCards() {
     }
   }
 
+  const filtroConteudos = useMemo(
+    () => obterConteudosDaMateria(filtroMateria),
+    [filtroMateria, materias]
+  );
+
+  const cardsFiltrados = useMemo(() => {
+    const termo = busca.trim().toLocaleLowerCase();
+
+    return cards.filter((card) => {
+      const correspondeMateria =
+        !filtroMateria ||
+        String(card.materia_id) === String(filtroMateria);
+
+      const correspondeTopico =
+        !filtroTopico ||
+        String(card.topico_id) === String(filtroTopico);
+
+      const textoPesquisa = [
+        card.primario,
+        card.secundario,
+        card.materia,
+        card.conteudo,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLocaleLowerCase();
+
+      const correspondeBusca =
+        !termo || textoPesquisa.includes(termo);
+
+      return (
+        correspondeMateria &&
+        correspondeTopico &&
+        correspondeBusca
+      );
+    });
+  }, [cards, busca, filtroMateria, filtroTopico]);
+
+  const cardsOrganizados = useMemo(() => {
+    const grupos = new Map();
+
+    cardsFiltrados.forEach((card) => {
+      const materia = card.materia || 'Sem matéria';
+      const conteudo = card.conteudo || 'Conteúdo não definido';
+
+      if (!grupos.has(materia)) {
+        grupos.set(materia, new Map());
+      }
+
+      const conteudos = grupos.get(materia);
+
+      if (!conteudos.has(conteudo)) {
+        conteudos.set(conteudo, []);
+      }
+
+      conteudos.get(conteudo).push(card);
+    });
+
+    return Array.from(grupos.entries());
+  }, [cardsFiltrados]);
+
+  const filtrosAtivos =
+    Boolean(busca.trim()) ||
+    Boolean(filtroMateria) ||
+    Boolean(filtroTopico);
+
+  function limparFiltros() {
+    setBusca('');
+    setFiltroMateria('');
+    setFiltroTopico('');
+  }
+
   function renderMateriaOptions() {
     return (
       <>
@@ -400,32 +476,184 @@ export default function AdminFlashCards() {
       {carregando ? (
         <p>Carregando flashcards...</p>
       ) : (
-        <div className="admin-flashcard-grid">
-          {cards.map((card) => (
-            <div
-              className="admin-flashcard-item"
-              key={card.id}
-              onClick={() => openEdit(card)}
-            >
-              <strong>{card.primario}</strong>
-
-              <span className="admin-flashcard-materia">
-                {card.materia}
-              </span>
-
-              <span
-                className={
-                  card.conteudo
-                    ? 'admin-flashcard-conteudo'
-                    : 'admin-flashcard-conteudo pendente'
-                }
-              >
-                {card.conteudo ||
-                  'Conteúdo não definido'}
-              </span>
+        <>
+          <div className="admin-flashcard-filters" aria-label="Filtros de flashcards">
+            <div className="admin-flashcard-search">
+              <label htmlFor="admin-flashcard-busca">Buscar</label>
+              <div className="admin-flashcard-search-box">
+                <input
+                  id="admin-flashcard-busca"
+                  type="search"
+                  value={busca}
+                  onChange={(event) => setBusca(event.target.value)}
+                  placeholder="Buscar pergunta, resposta, matéria ou conteúdo..."
+                />
+                {busca && (
+                  <button
+                    type="button"
+                    className="admin-flashcard-clear-search"
+                    onClick={() => setBusca('')}
+                    aria-label="Limpar busca"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
+
+            <label className="admin-flashcard-filter-field">
+              <span>Matéria</span>
+              <select
+                value={filtroMateria}
+                onChange={(event) => {
+                  setFiltroMateria(event.target.value);
+                  setFiltroTopico('');
+                }}
+              >
+                <option value="">Todas as matérias</option>
+                {materiasAtivas.map((materia) => (
+                  <option key={materia.id} value={materia.id}>
+                    {materia.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="admin-flashcard-filter-field">
+              <span>Conteúdo</span>
+              <select
+                value={filtroTopico}
+                onChange={(event) => setFiltroTopico(event.target.value)}
+                disabled={!filtroMateria}
+              >
+                <option value="">
+                  {!filtroMateria
+                    ? 'Selecione uma matéria'
+                    : filtroConteudos.length
+                      ? 'Todos os conteúdos'
+                      : 'Nenhum conteúdo cadastrado'}
+                </option>
+                {filtroConteudos.map((topico) => (
+                  <option key={topico.id} value={topico.id}>
+                    {topico.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {filtrosAtivos && (
+              <button
+                type="button"
+                className="admin-flashcard-clear-filters"
+                onClick={limparFiltros}
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+
+          {filtrosAtivos && (
+            <div className="admin-flashcard-results" role="status">
+              <strong>{cardsFiltrados.length}</strong>{' '}
+              {cardsFiltrados.length === 1 ? 'flashcard encontrado' : 'flashcards encontrados'}
+            </div>
+          )}
+
+          <div className="admin-flashcard-list">
+            {!cards.length ? (
+              <div className="admin-flashcard-empty">
+                <strong>Nenhum flashcard cadastrado</strong>
+                <span>Use o botão + para criar o primeiro flashcard.</span>
+              </div>
+            ) : !cardsFiltrados.length ? (
+              <div className="admin-flashcard-empty">
+                <strong>Nenhum flashcard encontrado</strong>
+                <span>Tente mudar os filtros ou o termo da busca.</span>
+                <button
+                  type="button"
+                  className="admin-flashcard-empty-action"
+                  onClick={limparFiltros}
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            ) : (
+            cardsOrganizados.map(([materia, conteudos]) => {
+              const totalMateria = Array.from(conteudos.values()).reduce(
+                (total, lista) => total + lista.length,
+                0
+              );
+
+              return (
+                <section
+                  className="admin-flashcard-materia-section"
+                  key={materia}
+                >
+                  <div className="admin-flashcard-materia-header">
+                    <div>
+                      <span className="admin-flashcard-section-eyebrow">
+                        MATÉRIA
+                      </span>
+                      <h2>{materia}</h2>
+                    </div>
+                    <span className="admin-flashcard-section-count">
+                      {totalMateria} {totalMateria === 1 ? 'card' : 'cards'}
+                    </span>
+                  </div>
+
+                  {Array.from(conteudos.entries()).map(
+                    ([conteudo, cardsDoConteudo]) => (
+                      <div
+                        className="admin-flashcard-content-section"
+                        key={`${materia}-${conteudo}`}
+                      >
+                        <div className="admin-flashcard-content-header">
+                          <h3>{conteudo}</h3>
+                          <span>
+                            {cardsDoConteudo.length}{' '}
+                            {cardsDoConteudo.length === 1 ? 'card' : 'cards'}
+                          </span>
+                        </div>
+
+                        <div className="admin-flashcard-grid">
+                          {cardsDoConteudo.map((card) => (
+                            <div
+                              className="admin-flashcard-item"
+                              key={card.id}
+                              onClick={() => openEdit(card)}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  openEdit(card);
+                                }
+                              }}
+                              aria-label={`Editar flashcard: ${card.primario}`}
+                            >
+                              <strong>{card.primario}</strong>
+
+                              <span
+                                className={
+                                  card.conteudo
+                                    ? 'admin-flashcard-conteudo'
+                                    : 'admin-flashcard-conteudo pendente'
+                                }
+                              >
+                                {card.conteudo || 'Conteúdo não definido'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </section>
+              );
+            })
+            )}
+          </div>
+        </>
       )}
 
       <button
