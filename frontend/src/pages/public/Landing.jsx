@@ -242,6 +242,11 @@ export default function Landing() {
           />
         </div>
 
+        <nav className="landing-nav-links" aria-label="Navegação principal">
+          <a href="#recursos">Recursos</a>
+          <a href="#como-funciona">Como funciona</a>
+        </nav>
+
         <button
           className="landing-nav-btn"
           onClick={goToLogin}
@@ -425,7 +430,10 @@ export default function Landing() {
           FUNCIONALIDADES
       ===================================================== */}
 
-      <section className="landing-features">
+      <section
+        id="recursos"
+        className="landing-features"
+      >
 
         <div className="landing-section-heading">
 
@@ -479,7 +487,10 @@ export default function Landing() {
           COMO FUNCIONA
       ===================================================== */}
 
-      <section className="landing-steps">
+      <section
+        id="como-funciona"
+        className="landing-steps"
+      >
 
         <div className="landing-section-heading">
 

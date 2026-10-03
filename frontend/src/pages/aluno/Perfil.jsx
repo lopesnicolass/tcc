@@ -722,7 +722,7 @@ export default function Perfil() {
       <div className="perfil-grid">
 
         <form
-          className="panel-card"
+          className="panel-card perfil-form-card"
           onSubmit={handleSave}
         >
 
@@ -891,6 +891,7 @@ export default function Perfil() {
 
         </form>
 
+        <div className="perfil-side-column">
           <div className="perfil-avatar-card perfil-profile-card">
 
             <div className="perfil-side-heading">
@@ -926,9 +927,12 @@ export default function Perfil() {
 
             </div>
 
-            <strong>
-              {values.nome}
-            </strong>
+            <div className="perfil-avatar-meta">
+              <strong>{values.nome || 'Seu perfil'}</strong>
+              <span>{values.email || 'E-mail da conta'}</span>
+            </div>
+
+            <span className="perfil-profile-badge">Perfil pessoal</span>
 
             <input
               ref={fileInputRef}
@@ -1019,11 +1023,14 @@ export default function Perfil() {
 
           </div>
 
-          <div className="panel-card">
-
-            <h3>
-              Conquistas
-            </h3>
+          <div className="panel-card perfil-achievements-card">
+            <div className="perfil-card-heading">
+              <div>
+                <span className="perfil-section-kicker">SEU PROGRESSO</span>
+                <h3>Conquistas</h3>
+              </div>
+              <span className="perfil-card-dot" aria-hidden="true"></span>
+            </div>
 
             <div className="achievement-list">
 
@@ -1069,12 +1076,15 @@ export default function Perfil() {
 
             </div>
 
+            <div className="perfil-achievement-footer">
+              <span>Continue estudando para desbloquear novas conquistas.</span>
+            </div>
           </div>
-
         </div>
 
       </div>
 
+    </div>
 
   );
 }
