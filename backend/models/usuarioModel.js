@@ -7,10 +7,13 @@ const db = require("../config/db");
 
 function buscarUsuarioPorEmail(email, callback) {
 
+    // Comparação tolerante a maiúsculas/minúsculas e espaços,
+    // já que nem toda tela (ex: login, cadastro) normaliza o
+    // e-mail antes de chamar essa função.
     const sql = `
         SELECT *
         FROM usuarios
-        WHERE email = ?
+        WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))
     `;
 
     db.get(sql, [email], callback);

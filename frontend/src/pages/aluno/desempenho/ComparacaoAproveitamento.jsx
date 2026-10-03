@@ -16,13 +16,7 @@ export function ComparacaoAproveitamento({
 }) {
   return (
     <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns:
-          '1.15fr 0.85fr',
-        gap: '22px',
-        marginBottom: '22px'
-      }}
+      className="desempenho-split-comparacao"
     >
       <div
         style={{

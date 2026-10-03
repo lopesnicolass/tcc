@@ -15,13 +15,7 @@ export function MetaConsistencia({
 }) {
   return (
     <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns:
-          '1fr 1fr',
-        gap: '22px',
-        marginBottom: '22px'
-      }}
+      className="desempenho-split-meta"
     >
       <div
         style={{

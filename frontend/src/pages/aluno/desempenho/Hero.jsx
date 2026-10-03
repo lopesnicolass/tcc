@@ -11,13 +11,7 @@ export function Hero({
 }) {
   return (
     <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns:
-          '1.45fr 0.55fr',
-        gap: '22px',
-        marginBottom: '22px'
-      }}
+      className="desempenho-split-hero"
     >
       <div
         style={{
@@ -65,6 +59,7 @@ export function Hero({
         </div>
 
         <div
+          className="desempenho-hero-circle"
           style={{
             position: 'absolute',
             width: '230px',
@@ -78,6 +73,7 @@ export function Hero({
         />
 
         <div
+          className="desempenho-hero-circle"
           style={{
             position: 'absolute',
             width: '160px',
@@ -125,7 +121,7 @@ export function Hero({
             >
               <strong
                 style={{
-                  fontSize: '64px',
+                  fontSize: 'clamp(40px, 9vw, 64px)',
                   lineHeight: 1
                 }}
               >
@@ -247,7 +243,7 @@ export function Hero({
 
           <div
             style={{
-              fontSize: '50px',
+              fontSize: 'clamp(32px, 7vw, 50px)',
               fontWeight: '800',
               color: '#0d52b8',
               marginTop: '8px'

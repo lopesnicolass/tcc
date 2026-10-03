@@ -93,14 +93,8 @@ export function Historico({
                     resultado.id ||
                     index
                   }
+                  className="desempenho-historico-row"
                   style={{
-                    display:
-                      'grid',
-                    gridTemplateColumns:
-                      '180px 1fr 70px',
-                    gap: '18px',
-                    alignItems:
-                      'center',
                     padding:
                       '15px 0',
                     borderBottom:

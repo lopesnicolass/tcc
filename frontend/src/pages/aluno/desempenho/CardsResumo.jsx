@@ -13,13 +13,7 @@ export function CardsResumo({
 }) {
   return (
     <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns:
-          'repeat(4, minmax(0, 1fr))',
-        gap: '16px',
-        marginBottom: '22px'
-      }}
+      className="desempenho-cards-grid"
     >
       <div style={cardStyle}>
         <CardLabel>

@@ -1,3 +1,89 @@
 /* Estilos da página Desempenho */
 
+/* Os grids abaixo ficavam só inline nos componentes (sem CSS
+   nenhum), então não tinham como colapsar em telas pequenas.
+   As classes aqui substituem só a parte de layout (display,
+   grid-template-columns, gap, margin-bottom); o resto de cada
+   componente continua com estilo inline normalmente. */
 
+.desempenho-split-hero {
+  display: grid;
+  grid-template-columns: 1.45fr 0.55fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.desempenho-split-comparacao {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.desempenho-split-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.desempenho-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.desempenho-historico-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 70px;
+  gap: 18px;
+  align-items: center;
+}
+
+/* Círculos decorativos do card azul do Hero — só enfeite,
+   em telas estreitas atrapalham mais do que ajudam. */
+.desempenho-hero-circle {
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .desempenho-split-hero,
+  .desempenho-split-comparacao {
+    grid-template-columns: 1fr;
+  }
+
+  .desempenho-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .desempenho-split-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .desempenho-historico-row {
+    grid-template-columns: 96px 1fr 44px;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .desempenho-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .desempenho-hero-circle {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .desempenho-historico-row {
+    grid-template-columns: 76px 1fr 38px;
+    gap: 8px;
+  }
+}
