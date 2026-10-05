@@ -1,3 +1,4 @@
+
 import '../../styles/adm/AdminSimulados.css';
 import { useEffect, useState } from 'react';
 
@@ -51,6 +52,7 @@ export default function AdminSimulados() {
   const [form, setForm] = useState(emptySimulado);
 
   const [questoes, setQuestoes] = useState([]);
+  const [questoesOriginais, setQuestoesOriginais] = useState([]);
 
   const [showQuestaoModal, setShowQuestaoModal] = useState(false);
   const [questaoForm, setQuestaoForm] = useState(emptyQuestao);
@@ -149,6 +151,7 @@ export default function AdminSimulados() {
     });
 
     setQuestoes([]);
+    setQuestoesOriginais([]);
 
     setQuestaoForm({
       ...emptyQuestao
@@ -225,7 +228,7 @@ export default function AdminSimulados() {
             : ''
       });
 
-      setQuestoes(
+      const questoesFormatadas =
         listaQuestoes.map((questao) => ({
           id: questao.id,
           enunciado:
@@ -242,8 +245,10 @@ export default function AdminSimulados() {
             questao.alternativa_e || '',
           correta:
             questao.correta || 'A'
-        }))
-      );
+        }));
+
+      setQuestoes(questoesFormatadas);
+      setQuestoesOriginais(questoesFormatadas);
 
       setQuestaoForm({
         ...emptyQuestao
@@ -444,6 +449,7 @@ export default function AdminSimulados() {
       });
 
       setQuestoes([]);
+      setQuestoesOriginais([]);
 
       setQuestaoForm({
         ...emptyQuestao
@@ -692,6 +698,42 @@ export default function AdminSimulados() {
       );
     }
 
+    // Remover do banco as questões que existiam quando o
+    // simulado foi aberto, mas não fazem mais parte da lista atual.
+    const idsAtuais = new Set(
+      questoes
+        .filter((questao) => questao.id)
+        .map((questao) => Number(questao.id))
+    );
+
+    const idsRemovidos = questoesOriginais
+      .filter((questao) => {
+        const id = Number(questao.id);
+        return id && !idsAtuais.has(id);
+      })
+      .map((questao) => Number(questao.id));
+
+    for (const questaoId of idsRemovidos) {
+      const respostaRemocao = await fetch(
+        `${API_URL}/simulados/${simuladoId}/questoes/${questaoId}`,
+        {
+          method: 'DELETE',
+          headers: headerAuth()
+        }
+      );
+
+      const dadosRemocao =
+        await respostaRemocao.json();
+
+      if (!respostaRemocao.ok) {
+        throw new Error(
+          dadosRemocao.mensagem ||
+          dadosRemocao.erro ||
+          'Erro ao remover uma questão do simulado.'
+        );
+      }
+    }
+
     // Atualizar informações do simulado
     const materiaSelecionada =
       materiasConteudos.find(
@@ -896,7 +938,7 @@ export default function AdminSimulados() {
 
   // =====================================================
   // POSTAR / SALVAR
-  // ==========================================
+  // =====================================================
 
   async function handlePostar(e) {
     e.preventDefault();
@@ -932,6 +974,7 @@ export default function AdminSimulados() {
       });
 
       setQuestoes([]);
+      setQuestoesOriginais([]);
 
       await carregarSimulados();
 

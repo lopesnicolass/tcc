@@ -31,7 +31,10 @@ function criarFlashcard(
               AND t.ativo = 1
               AND m.ativa = 1
         `,
-        [topicoId, materiaId],
+        [
+            topicoId,
+            materiaId
+        ],
         (erro, vinculo) => {
 
             if (erro) {
@@ -39,6 +42,7 @@ function criarFlashcard(
             }
 
             if (!vinculo) {
+
                 const erroVinculo =
                     new Error(
                         "O conteúdo selecionado não pertence à matéria informada ou não está disponível."
@@ -52,19 +56,18 @@ function criarFlashcard(
                 );
             }
 
-            const sql = `
-                INSERT INTO flashcards
-                (
-                    primario,
-                    secundario,
-                    materia,
-                    topico_id
-                )
-                VALUES (?, ?, ?, ?)
-            `;
 
             db.run(
-                sql,
+                `
+                    INSERT INTO flashcards
+                    (
+                        primario,
+                        secundario,
+                        materia,
+                        topico_id
+                    )
+                    VALUES (?, ?, ?, ?)
+                `,
                 [
                     primario,
                     secundario,
@@ -91,7 +94,7 @@ function criarFlashcard(
 
 
 // =====================================================
-// LISTAR FLASHCARDS
+// LISTAR FLASHCARDS ATIVOS
 // =====================================================
 
 function listarFlashcards(callback) {
@@ -101,12 +104,22 @@ function listarFlashcards(callback) {
             f.id,
             f.primario,
             f.secundario,
-            COALESCE(m.nome, f.materia) AS materia,
+
+            COALESCE(
+                m.nome,
+                f.materia
+            ) AS materia,
+
             m.id AS materia_id,
+
             f.topico_id,
+
             t.nome AS conteudo,
+
             f.ativo,
+
             f.created_at,
+
             f.updated_at
 
         FROM flashcards f
@@ -120,10 +133,26 @@ function listarFlashcards(callback) {
         WHERE f.ativo = 1
 
         ORDER BY
-            COALESCE(m.ordem, 9999) ASC,
-            COALESCE(m.nome, f.materia) ASC,
-            COALESCE(t.ordem, 9999) ASC,
-            COALESCE(t.nome, '') ASC,
+            COALESCE(
+                m.ordem,
+                9999
+            ) ASC,
+
+            COALESCE(
+                m.nome,
+                f.materia
+            ) ASC,
+
+            COALESCE(
+                t.ordem,
+                9999
+            ) ASC,
+
+            COALESCE(
+                t.nome,
+                ''
+            ) ASC,
+
             f.id ASC
     `;
 
@@ -146,7 +175,7 @@ function listarFlashcards(callback) {
 
 
 // =====================================================
-// BUSCAR FLASHCARD
+// BUSCAR FLASHCARD POR ID
 // =====================================================
 
 function buscarFlashcardPorId(
@@ -160,12 +189,22 @@ function buscarFlashcardPorId(
                 f.id,
                 f.primario,
                 f.secundario,
-                COALESCE(m.nome, f.materia) AS materia,
+
+                COALESCE(
+                    m.nome,
+                    f.materia
+                ) AS materia,
+
                 m.id AS materia_id,
+
                 f.topico_id,
+
                 t.nome AS conteudo,
+
                 f.ativo,
+
                 f.created_at,
+
                 f.updated_at
 
             FROM flashcards f
@@ -178,7 +217,9 @@ function buscarFlashcardPorId(
 
             WHERE f.id = ?
         `,
-        [id],
+        [
+            id
+        ],
         callback
     );
 }
@@ -212,7 +253,10 @@ function buscarVinculoConteudo(
               AND t.ativo = 1
               AND m.ativa = 1
         `,
-        [topicoId, materiaId],
+        [
+            topicoId,
+            materiaId
+        ],
         callback
     );
 }
@@ -234,7 +278,9 @@ function atualizarFlashcard(
             FROM flashcards
             WHERE id = ?
         `,
-        [id],
+        [
+            id
+        ],
         (erro, atual) => {
 
             if (erro) {
@@ -242,43 +288,63 @@ function atualizarFlashcard(
             }
 
             if (!atual) {
+
                 return callback(
                     null,
                     null
                 );
             }
 
+
             const primario =
                 dados.primario !== undefined
                     ? dados.primario
                     : atual.primario;
+
 
             const secundario =
                 dados.secundario !== undefined
                     ? dados.secundario
                     : atual.secundario;
 
+
             const ativo =
                 dados.ativo !== undefined
-                    ? (dados.ativo ? 1 : 0)
+                    ? (
+                        dados.ativo
+                            ? 1
+                            : 0
+                    )
                     : atual.ativo;
+
 
             const materiaId =
                 dados.materiaId !== undefined
-                    ? Number(dados.materiaId)
+                    ? Number(
+                        dados.materiaId
+                    )
                     : null;
+
 
             const topicoId =
                 dados.topicoId !== undefined
-                    ? Number(dados.topicoId)
+                    ? Number(
+                        dados.topicoId
+                    )
                     : null;
 
+
             if (
-                !Number.isInteger(materiaId) ||
+                !Number.isInteger(
+                    materiaId
+                ) ||
                 materiaId <= 0 ||
-                !Number.isInteger(topicoId) ||
+                !Number.isInteger(
+                    topicoId
+                ) ||
                 topicoId <= 0
             ) {
+
                 const erroVinculo =
                     new Error(
                         "Matéria e conteúdo são obrigatórios."
@@ -292,10 +358,14 @@ function atualizarFlashcard(
                 );
             }
 
+
             buscarVinculoConteudo(
                 materiaId,
                 topicoId,
-                (erroVinculo, vinculo) => {
+                (
+                    erroVinculo,
+                    vinculo
+                ) => {
 
                     if (erroVinculo) {
                         return callback(
@@ -304,6 +374,7 @@ function atualizarFlashcard(
                     }
 
                     if (!vinculo) {
+
                         const erroConteudo =
                             new Error(
                                 "O conteúdo selecionado não pertence à matéria informada ou não está disponível."
@@ -316,6 +387,7 @@ function atualizarFlashcard(
                             erroConteudo
                         );
                     }
+
 
                     db.run(
                         `
@@ -340,7 +412,9 @@ function atualizarFlashcard(
                             ativo,
                             id
                         ],
-                        (erroUpdate) => {
+                        function (
+                            erroUpdate
+                        ) {
 
                             if (erroUpdate) {
                                 return callback(
@@ -364,6 +438,20 @@ function atualizarFlashcard(
 // =====================================================
 // EXCLUIR FLASHCARD
 // =====================================================
+//
+// Não apagamos fisicamente o registro.
+//
+// As respostas_flashcards possuem FK para flashcards
+// com ON DELETE CASCADE. Um DELETE real apagaria também
+// o histórico de respostas desse card.
+//
+// Por isso a exclusão é um "soft delete":
+// ativo = 0.
+//
+// O flashcard deixa de aparecer para o aluno e na
+// listagem normal do admin, mas seu histórico permanece
+// no banco.
+//
 
 function excluirFlashcard(
     id,
@@ -372,14 +460,25 @@ function excluirFlashcard(
 
     db.run(
         `
-            DELETE FROM flashcards
+            UPDATE flashcards
+
+            SET
+                ativo = 0,
+                updated_at =
+                    CURRENT_TIMESTAMP
+
             WHERE id = ?
+              AND ativo = 1
         `,
-        [id],
+        [
+            id
+        ],
         function (erro) {
 
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(
@@ -390,6 +489,10 @@ function excluirFlashcard(
     );
 }
 
+
+// =====================================================
+// EXPORTAR
+// =====================================================
 
 module.exports = {
 

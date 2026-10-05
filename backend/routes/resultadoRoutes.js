@@ -11,22 +11,40 @@ const {
 const autenticarToken =
     require("../middleware/authMiddleware");
 
-const router = express.Router();
+const verificarAdmin =
+    require("../middleware/adminMiddleware");
+
+const router =
+    express.Router();
+
 
 // =====================================================
-// SALVAR RESULTADO
+// SALVAR RESULTADO MANUALMENTE
 // =====================================================
+//
+// Esta rota não é usada pelo frontend do aluno.
+// Ela fica restrita ao administrador para impedir que
+// um usuário envie acertos/erros inventados diretamente
+// para a API.
+//
+// O aluno usa /simulados/:id/corrigir.
+//
 
 router.post(
     "/",
     autenticarToken,
+    verificarAdmin,
     cadastrarResultado
 );
 
+
 // =====================================================
 // RESULTADOS DO USUÁRIO LOGADO
-// Essas rotas vêm antes de /:usuarioId para evitar conflito.
 // =====================================================
+//
+// Estas rotas vêm antes de /:usuarioId para evitar
+// conflito de roteamento.
+//
 
 router.get(
     "/me/desempenho",
@@ -34,11 +52,13 @@ router.get(
     buscarMeuDesempenho
 );
 
+
 router.get(
     "/me",
     autenticarToken,
     listarMeusResultados
 );
+
 
 // =====================================================
 // RESULTADOS POR USUÁRIO
@@ -50,10 +70,12 @@ router.get(
     buscarDesempenho
 );
 
+
 router.get(
     "/:usuarioId",
     autenticarToken,
     listarResultados
 );
+
 
 module.exports = router;

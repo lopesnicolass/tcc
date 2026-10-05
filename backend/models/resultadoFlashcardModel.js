@@ -2,7 +2,28 @@ const db = require("../config/db");
 
 
 // =====================================================
-// CRIAR SESSÃO DE FLASHCARDS
+// AUXILIAR DE ERRO
+// =====================================================
+
+function criarErro(
+    mensagem,
+    code
+) {
+
+    const erro =
+        new Error(
+            mensagem
+        );
+
+    erro.code =
+        code;
+
+    return erro;
+}
+
+
+// =====================================================
+// CRIAR SESSÃO
 // =====================================================
 
 function criarSessao(
@@ -29,17 +50,28 @@ function criarSessao(
         function (erro) {
 
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(
                 null,
                 {
-                    id: this.lastID,
-                    usuario_id: usuarioId,
-                    total_cards: totalCards,
-                    acertos: 0,
-                    erros: 0
+                    id:
+                        this.lastID,
+
+                    usuario_id:
+                        usuarioId,
+
+                    total_cards:
+                        totalCards,
+
+                    acertos:
+                        0,
+
+                    erros:
+                        0
                 }
             );
         }
@@ -71,7 +103,108 @@ function buscarSessaoPorId(
 
             WHERE id = ?
         `,
-        [sessaoId],
+        [
+            sessaoId
+        ],
+        callback
+    );
+}
+
+
+// =====================================================
+// CONTAR RESPOSTAS
+// =====================================================
+
+function contarRespostasDaSessao(
+    sessaoId,
+    callback
+) {
+
+    db.get(
+        `
+            SELECT
+                COUNT(*) AS total
+
+            FROM respostas_flashcards
+
+            WHERE sessao_id = ?
+        `,
+        [
+            sessaoId
+        ],
+        (erro, resultado) => {
+
+            if (erro) {
+                return callback(
+                    erro
+                );
+            }
+
+            callback(
+                null,
+                Number(
+                    resultado?.total || 0
+                )
+            );
+        }
+    );
+}
+
+
+// =====================================================
+// BUSCAR FLASHCARD
+// =====================================================
+
+function buscarFlashcardPorId(
+    flashcardId,
+    callback
+) {
+
+    db.get(
+        `
+            SELECT
+                id,
+                materia,
+                ativo
+
+            FROM flashcards
+
+            WHERE id = ?
+        `,
+        [
+            flashcardId
+        ],
+        callback
+    );
+}
+
+
+// =====================================================
+// VERIFICAR CARD REPETIDO NA SESSÃO
+// =====================================================
+
+function verificarRespostaDuplicada(
+    sessaoId,
+    flashcardId,
+    callback
+) {
+
+    db.get(
+        `
+            SELECT
+                id
+
+            FROM respostas_flashcards
+
+            WHERE sessao_id = ?
+              AND flashcard_id = ?
+
+            LIMIT 1
+        `,
+        [
+            sessaoId,
+            flashcardId
+        ],
         callback
     );
 }
@@ -85,71 +218,351 @@ function registrarResposta(
     sessaoId,
     usuarioId,
     flashcardId,
-    materia,
     acertou,
     callback
 ) {
 
-    db.run(
-        `
-            INSERT INTO respostas_flashcards
-            (
-                sessao_id,
-                usuario_id,
-                flashcard_id,
-                materia,
-                acertou
-            )
-            VALUES (?, ?, ?, ?, ?)
-        `,
-        [
-            sessaoId,
-            usuarioId,
-            flashcardId,
-            materia,
-            acertou ? 1 : 0
-        ],
-        function (erro) {
+    buscarSessaoPorId(
+        sessaoId,
+        (
+            erroSessao,
+            sessao
+        ) => {
 
-            if (erro) {
-                return callback(erro);
+            if (erroSessao) {
+                return callback(
+                    erroSessao
+                );
             }
 
-            const campo =
-                acertou
-                    ? "acertos"
-                    : "erros";
+            if (!sessao) {
 
-            db.run(
-                `
-                    UPDATE sessoes_flashcards
+                return callback(
+                    criarErro(
+                        "Sessão de flashcards não encontrada.",
+                        "SESSION_NOT_FOUND"
+                    )
+                );
+            }
 
-                    SET ${campo} =
-                        ${campo} + 1
 
-                    WHERE id = ?
-                    AND usuario_id = ?
-                `,
-                [
-                    sessaoId,
+            if (
+                Number(
+                    sessao.usuario_id
+                ) !==
+                Number(
                     usuarioId
-                ],
-                function (erroUpdate) {
+                )
+            ) {
 
-                    if (erroUpdate) {
+                return callback(
+                    criarErro(
+                        "Você não pode alterar esta sessão.",
+                        "SESSION_ACCESS_DENIED"
+                    )
+                );
+            }
+
+
+            if (
+                sessao.data_fim
+            ) {
+
+                return callback(
+                    criarErro(
+                        "Esta sessão já foi finalizada.",
+                        "SESSION_FINISHED"
+                    )
+                );
+            }
+
+
+            buscarFlashcardPorId(
+                flashcardId,
+                (
+                    erroFlashcard,
+                    flashcard
+                ) => {
+
+                    if (erroFlashcard) {
                         return callback(
-                            erroUpdate
+                            erroFlashcard
                         );
                     }
 
-                    callback(
-                        null,
-                        {
-                            id: this.lastID
+                    if (!flashcard) {
+
+                        return callback(
+                            criarErro(
+                                "Flashcard não encontrado.",
+                                "FLASHCARD_NOT_FOUND"
+                            )
+                        );
+                    }
+
+
+                    if (
+                        Number(
+                            flashcard.ativo
+                        ) !== 1
+                    ) {
+
+                        return callback(
+                            criarErro(
+                                "Este flashcard não está disponível.",
+                                "FLASHCARD_INACTIVE"
+                            )
+                        );
+                    }
+
+
+                    contarRespostasDaSessao(
+                        sessaoId,
+                        (
+                            erroContagem,
+                            totalRespondido
+                        ) => {
+
+                            if (erroContagem) {
+                                return callback(
+                                    erroContagem
+                                );
+                            }
+
+
+                            if (
+                                totalRespondido >=
+                                Number(
+                                    sessao.total_cards
+                                )
+                            ) {
+
+                                return callback(
+                                    criarErro(
+                                        "A quantidade máxima de respostas desta sessão já foi atingida.",
+                                        "SESSION_FULL"
+                                    )
+                                );
+                            }
+
+
+                            verificarRespostaDuplicada(
+                                sessaoId,
+                                flashcardId,
+                                (
+                                    erroDuplicada,
+                                    respostaExistente
+                                ) => {
+
+                                    if (erroDuplicada) {
+                                        return callback(
+                                            erroDuplicada
+                                        );
+                                    }
+
+
+                                    if (
+                                        respostaExistente
+                                    ) {
+
+                                        return callback(
+                                            criarErro(
+                                                "Este flashcard já foi respondido nesta sessão.",
+                                                "FLASHCARD_ALREADY_ANSWERED"
+                                            )
+                                        );
+                                    }
+
+
+                                    const materia =
+                                        String(
+                                            flashcard.materia ||
+                                            ""
+                                        ).trim();
+
+
+                                    if (!materia) {
+
+                                        return callback(
+                                            criarErro(
+                                                "O flashcard não possui matéria cadastrada.",
+                                                "FLASHCARD_MATERIA_INVALIDA"
+                                            )
+                                        );
+                                    }
+
+
+                                    // --------------------------------
+                                    // TRANSAÇÃO
+                                    // --------------------------------
+
+                                    db.run(
+                                        "BEGIN IMMEDIATE TRANSACTION",
+                                        (erroBegin) => {
+
+                                            if (erroBegin) {
+                                                return callback(
+                                                    erroBegin
+                                                );
+                                            }
+
+
+                                            db.run(
+                                                `
+                                                    INSERT INTO respostas_flashcards
+                                                    (
+                                                        sessao_id,
+                                                        usuario_id,
+                                                        flashcard_id,
+                                                        materia,
+                                                        acertou
+                                                    )
+                                                    VALUES (?, ?, ?, ?, ?)
+                                                `,
+                                                [
+                                                    sessaoId,
+                                                    usuarioId,
+                                                    flashcardId,
+                                                    materia,
+                                                    acertou
+                                                        ? 1
+                                                        : 0
+                                                ],
+                                                function (
+                                                    erroInsert
+                                                ) {
+
+                                                    if (
+                                                        erroInsert
+                                                    ) {
+
+                                                        return db.run(
+                                                            "ROLLBACK",
+                                                            () =>
+                                                                callback(
+                                                                    erroInsert
+                                                                )
+                                                        );
+                                                    }
+
+
+                                                    const campo =
+                                                        acertou
+                                                            ? "acertos"
+                                                            : "erros";
+
+
+                                                    db.run(
+                                                        `
+                                                            UPDATE sessoes_flashcards
+
+                                                            SET ${campo} =
+                                                                ${campo} + 1
+
+                                                            WHERE id = ?
+                                                              AND usuario_id = ?
+                                                        `,
+                                                        [
+                                                            sessaoId,
+                                                            usuarioId
+                                                        ],
+                                                        function (
+                                                            erroUpdate
+                                                        ) {
+
+                                                            if (
+                                                                erroUpdate
+                                                            ) {
+
+                                                                return db.run(
+                                                                    "ROLLBACK",
+                                                                    () =>
+                                                                        callback(
+                                                                            erroUpdate
+                                                                        )
+                                                                );
+                                                            }
+
+
+                                                            db.run(
+                                                                "COMMIT",
+                                                                (
+                                                                    erroCommit
+                                                                ) => {
+
+                                                                    if (
+                                                                        erroCommit
+                                                                    ) {
+
+                                                                        return db.run(
+                                                                            "ROLLBACK",
+                                                                            () =>
+                                                                                callback(
+                                                                                    erroCommit
+                                                                                )
+                                                                        );
+                                                                    }
+
+
+                                                                    buscarSessaoPorId(
+                                                                        sessaoId,
+                                                                        (
+                                                                            erroFinal,
+                                                                            sessaoAtualizada
+                                                                        ) => {
+
+                                                                            if (
+                                                                                erroFinal
+                                                                            ) {
+
+                                                                                return callback(
+                                                                                    erroFinal
+                                                                                );
+                                                                            }
+
+
+                                                                            callback(
+                                                                                null,
+                                                                                {
+                                                                                    id:
+                                                                                        this.lastID,
+
+                                                                                    flashcard_id:
+                                                                                        flashcardId,
+
+                                                                                    materia,
+
+                                                                                    acertou,
+
+                                                                                    sessao:
+                                                                                        sessaoAtualizada
+                                                                                }
+                                                                            );
+
+                                                                        }
+                                                                    );
+
+                                                                }
+                                                            );
+
+                                                        }
+                                                    );
+
+                                                }
+                                            );
+
+                                        }
+                                    );
+
+                                }
+                            );
+
                         }
                     );
+
                 }
             );
+
         }
     );
 }
@@ -165,45 +578,132 @@ function finalizarSessao(
     callback
 ) {
 
-    db.run(
-        `
-            UPDATE sessoes_flashcards
+    buscarSessaoPorId(
+        sessaoId,
+        (
+            erroSessao,
+            sessao
+        ) => {
 
-            SET
-                data_fim =
-                    CURRENT_TIMESTAMP
-
-            WHERE id = ?
-            AND usuario_id = ?
-        `,
-        [
-            sessaoId,
-            usuarioId
-        ],
-        function (erro) {
-
-            if (erro) {
-                return callback(erro);
+            if (erroSessao) {
+                return callback(
+                    erroSessao
+                );
             }
 
-            if (this.changes === 0) {
+            if (!sessao) {
                 return callback(
                     null,
                     null
                 );
             }
 
-            buscarSessaoPorId(
+
+            if (
+                Number(
+                    sessao.usuario_id
+                ) !==
+                Number(
+                    usuarioId
+                )
+            ) {
+
+                const erro =
+                    criarErro(
+                        "Você não pode finalizar esta sessão.",
+                        "SESSION_ACCESS_DENIED"
+                    );
+
+                return callback(
+                    erro
+                );
+            }
+
+
+            if (
+                sessao.data_fim
+            ) {
+
+                return callback(
+                    null,
+                    sessao
+                );
+            }
+
+
+            contarRespostasDaSessao(
                 sessaoId,
-                callback
+                (
+                    erroContagem,
+                    totalRespondido
+                ) => {
+
+                    if (erroContagem) {
+                        return callback(
+                            erroContagem
+                        );
+                    }
+
+
+                    if (
+                        totalRespondido <
+                        Number(
+                            sessao.total_cards
+                        )
+                    ) {
+
+                        return callback(
+                            criarErro(
+                                "A sessão ainda não possui todas as respostas.",
+                                "SESSION_INCOMPLETE"
+                            )
+                        );
+                    }
+
+
+                    db.run(
+                        `
+                            UPDATE sessoes_flashcards
+
+                            SET
+                                data_fim =
+                                    CURRENT_TIMESTAMP
+
+                            WHERE id = ?
+                              AND usuario_id = ?
+                              AND data_fim IS NULL
+                        `,
+                        [
+                            sessaoId,
+                            usuarioId
+                        ],
+                        function (erroUpdate) {
+
+                            if (erroUpdate) {
+                                return callback(
+                                    erroUpdate
+                                );
+                            }
+
+
+                            buscarSessaoPorId(
+                                sessaoId,
+                                callback
+                            );
+
+                        }
+                    );
+
+                }
             );
+
         }
     );
 }
 
 
 // =====================================================
-// LISTAR SESSÕES DO USUÁRIO
+// LISTAR SESSÕES
 // =====================================================
 
 function listarSessoesDoUsuario(
@@ -226,13 +726,21 @@ function listarSessoesDoUsuario(
             WHERE usuario_id = ?
 
             ORDER BY
-                data_inicio DESC
+                data_inicio DESC,
+                id DESC
         `,
-        [usuarioId],
-        (erro, sessoes) => {
+        [
+            usuarioId
+        ],
+        (
+            erro,
+            sessoes
+        ) => {
 
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(
@@ -285,7 +793,8 @@ function buscarDesempenhoPorMateria(
                                 ELSE 0
                             END
                         ) * 100.0
-                    ) / COUNT(*),
+                    ) /
+                    COUNT(*),
                     2
                 ) AS porcentagem_acertos
 
@@ -293,16 +802,25 @@ function buscarDesempenhoPorMateria(
 
             WHERE usuario_id = ?
 
-            GROUP BY materia
+            GROUP BY
+                materia
 
             ORDER BY
-                porcentagem_acertos ASC
+                porcentagem_acertos ASC,
+                materia ASC
         `,
-        [usuarioId],
-        (erro, desempenho) => {
+        [
+            usuarioId
+        ],
+        (
+            erro,
+            desempenho
+        ) => {
 
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(
@@ -315,7 +833,7 @@ function buscarDesempenhoPorMateria(
 
 
 // =====================================================
-// LISTAR RESPOSTAS DO USUÁRIO
+// LISTAR RESPOSTAS
 // =====================================================
 
 function listarRespostasDoUsuario(
@@ -338,13 +856,21 @@ function listarRespostasDoUsuario(
             WHERE usuario_id = ?
 
             ORDER BY
-                data_resposta DESC
+                data_resposta DESC,
+                id DESC
         `,
-        [usuarioId],
-        (erro, respostas) => {
+        [
+            usuarioId
+        ],
+        (
+            erro,
+            respostas
+        ) => {
 
             if (erro) {
-                return callback(erro);
+                return callback(
+                    erro
+                );
             }
 
             callback(
@@ -356,12 +882,24 @@ function listarRespostasDoUsuario(
 }
 
 
+// =====================================================
+// EXPORTAÇÕES
+// =====================================================
+
 module.exports = {
+
     criarSessao,
+
     buscarSessaoPorId,
+
     registrarResposta,
+
     finalizarSessao,
+
     listarSessoesDoUsuario,
+
     buscarDesempenhoPorMateria,
+
     listarRespostasDoUsuario
+
 };

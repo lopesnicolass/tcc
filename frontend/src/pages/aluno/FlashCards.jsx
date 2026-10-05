@@ -7,6 +7,15 @@ const API_URL =
 
 const TOTAL_CARDS_SESSAO = 10;
 
+const MATERIA_ALIASES = {
+  'Língua Portuguesa': 'Português',
+  'Ciências da Natureza': 'Ciências',
+};
+
+function normalizarMateria(materia) {
+  return MATERIA_ALIASES[materia] || materia;
+}
+
 function obterToken() {
   return (
     localStorage.getItem('etecamp_token') ||
@@ -20,9 +29,11 @@ function embaralharCards(lista) {
   const copia = [...lista];
 
   for (let i = copia.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(
-      Math.random() * (i + 1)
-    );
+
+    const j =
+      Math.floor(
+        Math.random() * (i + 1)
+      );
 
     [copia[i], copia[j]] = [
       copia[j],
@@ -34,15 +45,20 @@ function embaralharCards(lista) {
 }
 
 async function lerJsonSeguro(resposta) {
-  const texto = await resposta.text();
+
+  const texto =
+    await resposta.text();
 
   if (!texto) {
     return {};
   }
 
   try {
+
     return JSON.parse(texto);
+
   } catch {
+
     throw new Error(
       `O servidor não retornou JSON. Status: ${resposta.status}.`
     );
@@ -55,7 +71,8 @@ export default function FlashCards() {
   // FLASHCARDS NORMAIS
   // =====================================================
 
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] =
+    useState([]);
 
   const [flipped, setFlipped] =
     useState(new Set());
@@ -124,7 +141,9 @@ export default function FlashCards() {
   // =====================================================
 
   useEffect(() => {
+
     carregarFlashcards();
+
   }, []);
 
 
@@ -133,6 +152,7 @@ export default function FlashCards() {
     try {
 
       setCarregando(true);
+
       setErro('');
 
       const token =
@@ -181,12 +201,15 @@ export default function FlashCards() {
           )
           .map(
             (card) => ({
+
               id:
                 Number(card.id),
 
               subject:
-                card.materia ||
-                'Sem matéria',
+                normalizarMateria(
+                  card.materia ||
+                  'Sem matéria'
+                ),
 
               subjectId:
                 card.materia_id ||
@@ -293,6 +316,7 @@ export default function FlashCards() {
     try {
 
       setIniciandoSessao(true);
+
       setErro('');
 
       const token =
@@ -314,6 +338,7 @@ export default function FlashCards() {
               'POST',
 
             headers: {
+
               'Content-Type':
                 'application/json',
 
@@ -370,16 +395,37 @@ export default function FlashCards() {
         selecionados
       );
 
-      setIndiceAtual(0);
-      setCardVirado(false);
-      setRespostasSessao([]);
-      setFinalizado(false);
+      setIndiceAtual(
+        0
+      );
 
-      setDeslocamento(0);
-      setInicioArrasto(null);
-      setArrastando(false);
+      setCardVirado(
+        false
+      );
 
-      setModoJogo(true);
+      setRespostasSessao(
+        []
+      );
+
+      setFinalizado(
+        false
+      );
+
+      setDeslocamento(
+        0
+      );
+
+      setInicioArrasto(
+        null
+      );
+
+      setArrastando(
+        false
+      );
+
+      setModoJogo(
+        true
+      );
 
     } catch (error) {
 
@@ -395,7 +441,9 @@ export default function FlashCards() {
 
     } finally {
 
-      setIniciandoSessao(false);
+      setIniciandoSessao(
+        false
+      );
 
     }
 
@@ -502,7 +550,10 @@ export default function FlashCards() {
 
     try {
 
-      setRegistrandoResposta(true);
+      setRegistrandoResposta(
+        true
+      );
+
       setErro('');
 
       const token =
@@ -516,6 +567,7 @@ export default function FlashCards() {
               'POST',
 
             headers: {
+
               'Content-Type':
                 'application/json',
 
@@ -577,9 +629,17 @@ export default function FlashCards() {
         novasRespostas
       );
 
-      setDeslocamento(0);
-      setInicioArrasto(null);
-      setArrastando(false);
+      setDeslocamento(
+        0
+      );
+
+      setInicioArrasto(
+        null
+      );
+
+      setArrastando(
+        false
+      );
 
       const proximoIndice =
         indiceAtual + 1;
@@ -591,7 +651,9 @@ export default function FlashCards() {
 
         await finalizarSessao();
 
-        setFinalizado(true);
+        setFinalizado(
+          true
+        );
 
       } else {
 
@@ -599,7 +661,9 @@ export default function FlashCards() {
           proximoIndice
         );
 
-        setCardVirado(false);
+        setCardVirado(
+          false
+        );
 
       }
 
@@ -617,7 +681,9 @@ export default function FlashCards() {
 
     } finally {
 
-      setRegistrandoResposta(false);
+      setRegistrandoResposta(
+        false
+      );
 
     }
 
@@ -630,25 +696,45 @@ export default function FlashCards() {
 
   function sairDoJogo() {
 
-    setModoJogo(false);
+    setModoJogo(
+      false
+    );
 
-    setSessaoId(null);
+    setSessaoId(
+      null
+    );
 
-    setCardsDaSessao([]);
+    setCardsDaSessao(
+      []
+    );
 
-    setIndiceAtual(0);
+    setIndiceAtual(
+      0
+    );
 
-    setCardVirado(false);
+    setCardVirado(
+      false
+    );
 
-    setRespostasSessao([]);
+    setRespostasSessao(
+      []
+    );
 
-    setFinalizado(false);
+    setFinalizado(
+      false
+    );
 
-    setInicioArrasto(null);
+    setInicioArrasto(
+      null
+    );
 
-    setDeslocamento(0);
+    setDeslocamento(
+      0
+    );
 
-    setArrastando(false);
+    setArrastando(
+      false
+    );
 
     setErro('');
 
@@ -661,19 +747,33 @@ export default function FlashCards() {
 
   async function jogarNovamente() {
 
-    setModoJogo(false);
+    setModoJogo(
+      false
+    );
 
-    setSessaoId(null);
+    setSessaoId(
+      null
+    );
 
-    setCardsDaSessao([]);
+    setCardsDaSessao(
+      []
+    );
 
-    setIndiceAtual(0);
+    setIndiceAtual(
+      0
+    );
 
-    setCardVirado(false);
+    setCardVirado(
+      false
+    );
 
-    setRespostasSessao([]);
+    setRespostasSessao(
+      []
+    );
 
-    setFinalizado(false);
+    setFinalizado(
+      false
+    );
 
     setErro('');
 
@@ -698,11 +798,16 @@ export default function FlashCards() {
 
     }
 
-    setArrastando(true);
+    setArrastando(
+      true
+    );
 
     setInicioArrasto({
-      x: event.clientX,
-      y: event.clientY,
+      x:
+        event.clientX,
+
+      y:
+        event.clientY,
     });
 
     event.currentTarget.setPointerCapture?.(
@@ -754,11 +859,16 @@ export default function FlashCards() {
       event.clientX -
       inicioArrasto.x;
 
-    setArrastando(false);
+    setArrastando(
+      false
+    );
 
-    setInicioArrasto(null);
+    setInicioArrasto(
+      null
+    );
 
-    const limite = 120;
+    const limite =
+      120;
 
     if (
       Math.abs(
@@ -766,23 +876,31 @@ export default function FlashCards() {
       ) < limite
     ) {
 
-      setDeslocamento(0);
+      setDeslocamento(
+        0
+      );
 
       return;
 
     }
 
-    setDeslocamento(0);
+    setDeslocamento(
+      0
+    );
 
     if (
       distancia < 0
     ) {
 
-      responderCard(true);
+      responderCard(
+        true
+      );
 
     } else {
 
-      responderCard(false);
+      responderCard(
+        false
+      );
 
     }
 
@@ -795,11 +913,17 @@ export default function FlashCards() {
 
   function cancelarArrasto() {
 
-    setArrastando(false);
+    setArrastando(
+      false
+    );
 
-    setInicioArrasto(null);
+    setInicioArrasto(
+      null
+    );
 
-    setDeslocamento(0);
+    setDeslocamento(
+      0
+    );
 
   }
 
@@ -812,7 +936,8 @@ export default function FlashCards() {
     useMemo(
       () => {
 
-        const nomes = [];
+        const nomes =
+          [];
 
         const vistos =
           new Set();
@@ -1008,11 +1133,15 @@ export default function FlashCards() {
               <div className="flashcard-inner">
 
                 <div className="flashcard-face front">
+
                   {card.front}
+
                 </div>
 
                 <div className="flashcard-face back">
+
                   {card.back}
+
                 </div>
 
               </div>
@@ -1092,8 +1221,12 @@ export default function FlashCards() {
         }
 
         porConteudo
-          .get(conteudo)
-          .push(card);
+          .get(
+            conteudo
+          )
+          .push(
+            card
+          );
 
       }
     );
@@ -1114,7 +1247,9 @@ export default function FlashCards() {
         >
 
           <h2 className="materia-section-title">
+
             {materia}
+
           </h2>
 
           {Array.from(
@@ -1133,7 +1268,9 @@ export default function FlashCards() {
               >
 
                 <h3 className="flashcards-content-title">
+
                   {conteudo}
+
                 </h3>
 
                 {renderGrid(
@@ -1173,7 +1310,7 @@ export default function FlashCards() {
 
 
   // =====================================================
-  // TELA DE RESULTADO
+  // RESULTADO DA SESSÃO
   // =====================================================
 
   if (
@@ -1182,6 +1319,7 @@ export default function FlashCards() {
   ) {
 
     return (
+
       <div className="flashcards-game-page">
 
         <div className="flashcards-game-header">
@@ -1230,17 +1368,14 @@ export default function FlashCards() {
             ✓
           </div>
 
-
           <h1>
             Sessão finalizada!
           </h1>
-
 
           <p>
             Você respondeu aos 10
             flashcards da sessão.
           </p>
-
 
           <div className="flashcards-result-score">
 
@@ -1298,41 +1433,26 @@ export default function FlashCards() {
           </div>
 
 
-          {erro && (
-
-            <p className="flashcards-game-error">
-              {erro}
-            </p>
-
-          )}
-
-
           <div className="flashcards-result-actions">
 
             <button
               type="button"
-              className="flashcards-btn-secondary"
+              className="flashcards-answer-button correct"
+              onClick={
+                jogarNovamente
+              }
+            >
+              Jogar novamente
+            </button>
+
+            <button
+              type="button"
+              className="flashcards-answer-button wrong"
               onClick={
                 sairDoJogo
               }
             >
-              Ver flashcards
-            </button>
-
-
-            <button
-              type="button"
-              className="flashcards-btn-primary"
-              onClick={
-                jogarNovamente
-              }
-              disabled={
-                iniciandoSessao
-              }
-            >
-              {iniciandoSessao
-                ? 'Iniciando...'
-                : 'Jogar novamente'}
+              Voltar
             </button>
 
           </div>
@@ -1340,57 +1460,34 @@ export default function FlashCards() {
         </section>
 
       </div>
+
     );
 
   }
 
 
   // =====================================================
-  // TELA DO JOGO
+  // TELA DA HORA DOS FLASHCARDS
   // =====================================================
 
-  if (modoJogo) {
+  if (
+    modoJogo
+  ) {
 
     const cardAtual =
       cardsDaSessao[
         indiceAtual
       ];
 
-
-    if (!cardAtual) {
-
-      return (
-        <div className="flashcards-erro">
-
-          <p>
-            Não foi possível carregar
-            o flashcard atual.
-          </p>
-
-          <button
-            type="button"
-            className="flashcards-btn-primary"
-            onClick={
-              sairDoJogo
-            }
-          >
-            Voltar
-          </button>
-
-        </div>
-      );
-
-    }
-
-
     const progresso =
-      Math.round(
-        (
-          indiceAtual /
-          cardsDaSessao.length
-        ) * 100
-      );
-
+      cardsDaSessao.length > 0
+        ? Math.round(
+            (
+              indiceAtual /
+              cardsDaSessao.length
+            ) * 100
+          )
+        : 0;
 
     return (
 
@@ -1410,7 +1507,6 @@ export default function FlashCards() {
           >
             ← Sair
           </button>
-
 
           <div className="flashcards-game-title">
 
@@ -1520,11 +1616,9 @@ export default function FlashCards() {
                   PERGUNTA
                 </span>
 
-
                 <p>
                   {cardAtual.front}
                 </p>
-
 
                 <small>
                   {cardAtual.subject}
@@ -1539,11 +1633,9 @@ export default function FlashCards() {
                   RESPOSTA
                 </span>
 
-
                 <p>
                   {cardAtual.back}
                 </p>
-
 
                 <small>
                   {
@@ -1632,6 +1724,7 @@ export default function FlashCards() {
         </div>
 
       </div>
+
     );
 
   }
@@ -1644,7 +1737,6 @@ export default function FlashCards() {
   return (
 
     <div>
-
 
       <section className="flashcards-hero">
 
@@ -1767,7 +1859,9 @@ export default function FlashCards() {
 
         <input
           type="search"
-          value={busca}
+          value={
+            busca
+          }
           onChange={
             (event) =>
               setBusca(
@@ -1819,6 +1913,7 @@ export default function FlashCards() {
             )
           }
         >
+
           Todas{' '}
 
           <span className="materia-tab-count">
@@ -1833,7 +1928,9 @@ export default function FlashCards() {
 
             <button
               type="button"
-              key={materia}
+              key={
+                materia
+              }
               className={
                 `materia-tab ${
                   filtro ===
@@ -1852,11 +1949,13 @@ export default function FlashCards() {
               {materia}{' '}
 
               <span className="materia-tab-count">
+
                 {
                   contarPorMateria(
                     materia
                   )
                 }
+
               </span>
 
             </button>

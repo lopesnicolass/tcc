@@ -5,6 +5,12 @@ const {
     excluirPostit
 } = require("../models/muralModel");
 
+const {
+    MATERIAS_MURAL,
+    normalizarMateriaMural,
+    materiaMuralValida
+} = require("../utils/materiaUtils");
+
 
 // ==========================================
 // VERIFICAR SE O USUÁRIO PODE MEXER
@@ -26,22 +32,53 @@ function usuarioPodeAcessar(req, usuarioId) {
 
 
 // ==========================================
+// VALIDAR MATÉRIA DO MURAL
+// ==========================================
+
+function validarMateria(materia) {
+
+    if (!materia) {
+        return null;
+    }
+
+    const materiaNormalizada =
+        normalizarMateriaMural(
+            materia
+        );
+
+    if (
+        !materiaMuralValida(
+            materiaNormalizada
+        )
+    ) {
+        return null;
+    }
+
+    return materiaNormalizada;
+}
+
+
+// ==========================================
 // LISTAR POST-ITS
 // ==========================================
 
 function listar(req, res) {
 
-    const usuarioId = Number(req.params.usuarioId);
+    const usuarioId =
+        Number(req.params.usuarioId);
 
     if (!usuarioId) {
+
         return res.status(400).json({
             mensagem: "Usuário inválido."
         });
     }
 
     if (!usuarioPodeAcessar(req, usuarioId)) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para ver este mural."
+            mensagem:
+                "Você não tem permissão para ver este mural."
         });
     }
 
@@ -50,13 +87,15 @@ function listar(req, res) {
         (erro, postits) => {
 
             if (erro) {
+
                 console.error(
                     "❌ Erro ao listar post-its:",
                     erro
                 );
 
                 return res.status(500).json({
-                    mensagem: "Erro ao buscar post-its."
+                    mensagem:
+                        "Erro ao buscar post-its."
                 });
             }
 
@@ -80,48 +119,65 @@ function criar(req, res) {
     const {
         materia,
         texto
-    } = req.body;
-
+    } = req.body || {};
 
     if (!usuarioId) {
+
         return res.status(400).json({
             mensagem: "Usuário inválido."
         });
     }
 
     if (!usuarioPodeAcessar(req, usuarioId)) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para criar post-its neste mural."
+            mensagem:
+                "Você não tem permissão para criar post-its neste mural."
         });
     }
 
+    const materiaNormalizada =
+        validarMateria(materia);
 
-    if (
-        !materia ||
-        !texto ||
-        !texto.trim()
-    ) {
+    if (!materiaNormalizada) {
+
         return res.status(400).json({
             mensagem:
-                "Matéria e texto são obrigatórios."
+                "Selecione uma matéria válida para o post-it.",
+
+            materiasPermitidas:
+                MATERIAS_MURAL
         });
     }
 
+    if (
+        !texto ||
+        !String(texto).trim()
+    ) {
+
+        return res.status(400).json({
+            mensagem:
+                "O texto do post-it é obrigatório."
+        });
+    }
+
+    const textoNormalizado =
+        String(texto).trim();
 
     if (
-        texto.trim().length > 200
+        textoNormalizado.length > 200
     ) {
+
         return res.status(400).json({
             mensagem:
                 "O post-it pode ter no máximo 200 caracteres."
         });
     }
 
-
     criarPostit(
         usuarioId,
-        materia,
-        texto.trim(),
+        materiaNormalizada,
+        textoNormalizado,
         (erro, postit) => {
 
             if (erro) {
@@ -136,7 +192,6 @@ function criar(req, res) {
                         "Erro ao criar post-it."
                 });
             }
-
 
             return res.status(201).json({
                 mensagem:
@@ -164,10 +219,14 @@ function atualizar(req, res) {
     const {
         materia,
         texto
-    } = req.body;
+    } = req.body || {};
 
-
-    if (!id || !usuarioId) {
+    if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !Number.isInteger(usuarioId) ||
+        usuarioId <= 0
+    ) {
 
         return res.status(400).json({
             mensagem:
@@ -176,27 +235,43 @@ function atualizar(req, res) {
     }
 
     if (!usuarioPodeAcessar(req, usuarioId)) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para editar este post-it."
+            mensagem:
+                "Você não tem permissão para editar este post-it."
         });
     }
 
+    const materiaNormalizada =
+        validarMateria(materia);
+
+    if (!materiaNormalizada) {
+
+        return res.status(400).json({
+            mensagem:
+                "Selecione uma matéria válida para o post-it.",
+
+            materiasPermitidas:
+                MATERIAS_MURAL
+        });
+    }
 
     if (
-        !materia ||
         !texto ||
-        !texto.trim()
+        !String(texto).trim()
     ) {
 
         return res.status(400).json({
             mensagem:
-                "Matéria e texto são obrigatórios."
+                "O texto do post-it é obrigatório."
         });
     }
 
+    const textoNormalizado =
+        String(texto).trim();
 
     if (
-        texto.trim().length > 200
+        textoNormalizado.length > 200
     ) {
 
         return res.status(400).json({
@@ -205,12 +280,11 @@ function atualizar(req, res) {
         });
     }
 
-
     atualizarPostit(
         id,
         usuarioId,
-        materia,
-        texto.trim(),
+        materiaNormalizada,
+        textoNormalizado,
         (erro, resultado) => {
 
             if (erro) {
@@ -226,12 +300,12 @@ function atualizar(req, res) {
                 });
             }
 
-
             return res.json({
                 mensagem:
                     "Post-it atualizado com sucesso!",
 
-                postit: resultado
+                postit:
+                    resultado
             });
         }
     );
@@ -250,8 +324,12 @@ function excluir(req, res) {
     const usuarioId =
         Number(req.params.usuarioId);
 
-
-    if (!id || !usuarioId) {
+    if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !Number.isInteger(usuarioId) ||
+        usuarioId <= 0
+    ) {
 
         return res.status(400).json({
             mensagem:
@@ -260,11 +338,12 @@ function excluir(req, res) {
     }
 
     if (!usuarioPodeAcessar(req, usuarioId)) {
+
         return res.status(403).json({
-            mensagem: "Você não tem permissão para excluir este post-it."
+            mensagem:
+                "Você não tem permissão para excluir este post-it."
         });
     }
-
 
     excluirPostit(
         id,
@@ -284,11 +363,9 @@ function excluir(req, res) {
                 });
             }
 
-
-            return res.json({
-                mensagem:
-                    "Post-it excluído com sucesso."
-            });
+            return res.json(
+                resultado
+            );
         }
     );
 }

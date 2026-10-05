@@ -1,220 +1,60 @@
 const {
+    MIN_QUESTOES_SIMULADO,
+    DIFICULDADES_VALIDAS,
+
     criarSimulado,
     listarSimulados,
     buscarSimuladoPorId,
     atualizarSimulado,
     excluirSimulado,
+
     adicionarQuestao,
+
     listarQuestoesDoSimulado,
     listarQuestoesDoSimuladoParaResponder,
+
     buscarGabaritoDoSimulado,
+
     removerQuestao,
-    atualizarOrdemQuestao,
-    removerTodasQuestoesDoSimulado
+    atualizarOrdemQuestao
 } = require("../models/simuladoModel");
+
 
 const {
     criarResultado
 } = require("../models/resultadoModel");
 
+
+// =====================================================
+// AUXILIAR
+// =====================================================
+
+function numeroInteiroPositivo(
+    valor
+) {
+
+    const numero =
+        Number(valor);
+
+    return (
+        Number.isInteger(
+            numero
+        ) &&
+        numero > 0
+    )
+        ? numero
+        : null;
+}
+
+
 // =====================================================
 // CADASTRAR SIMULADO
 // =====================================================
 
-function cadastrarSimulado(req, res) {
-    const {
-        titulo,
-        descricao,
-        materia,
-        dificuldade,
-
-        tempoLimite,
-        tempo_limite,
-
-        quantidadeQuestoes,
-        quantidade_questoes,
-
-        topicoId,
-        topico_id,
-
-        ativo
-    } = req.body;
-
-    const tempo =
-        tempoLimite ?? tempo_limite;
-
-    const quantidade =
-        quantidadeQuestoes ?? quantidade_questoes;
-
-    const idTopico =
-        topicoId ?? topico_id;
-
-    if (
-        !titulo ||
-        !materia ||
-        !dificuldade ||
-        tempo === undefined ||
-        quantidade === undefined ||
-        idTopico === undefined ||
-        idTopico === null ||
-        Number(idTopico) <= 0
-    ) {
-        return res.status(400).json({
-            mensagem:
-                "Preencha todos os campos obrigatórios."
-        });
-    }
-
-    if (Number(tempo) <= 0) {
-        return res.status(400).json({
-            mensagem:
-                "O tempo limite deve ser maior que zero."
-        });
-    }
-
-    if (Number(quantidade) <= 0) {
-        return res.status(400).json({
-            mensagem:
-                "A quantidade de questões deve ser maior que zero."
-        });
-    }
-
-    criarSimulado(
-        titulo.trim(),
-        descricao || "",
-        materia,
-        dificuldade,
-        Number(tempo),
-        Number(quantidade),
-        Number(idTopico),
-        (erro, resultado) => {
-            if (erro) {
-                console.error(
-                    "❌ Erro ao cadastrar simulado:",
-                    erro
-                );
-
-                if (erro.code === "TOPICO_NOT_FOUND") {
-                    return res.status(400).json({
-                        mensagem:
-                            "O conteúdo selecionado não existe para a matéria escolhida."
-                    });
-                }
-
-                return res.status(500).json({
-                    mensagem:
-                        "Erro ao cadastrar simulado."
-                });
-            }
-
-            return res.status(201).json({
-                mensagem:
-                    "Simulado criado com sucesso!",
-
-                simulado: {
-                    id: resultado.lastID,
-                    titulo: titulo.trim(),
-                    descricao: descricao || "",
-                    materia,
-                    dificuldade,
-                    tempo_limite: Number(tempo),
-                    quantidade_questoes:
-                        Number(quantidade),
-                    topico_id:
-                        Number(idTopico),
-                    ativo: ativo ?? 1
-                }
-            });
-        }
-    );
-}
-
-// =====================================================
-// LISTAR SIMULADOS
-// =====================================================
-
-function listarTodosSimulados(req, res) {
-    listarSimulados((erro, simulados) => {
-        if (erro) {
-            console.error(
-                "❌ Erro ao buscar simulados:",
-                erro
-            );
-
-            return res.status(500).json({
-                mensagem:
-                    "Erro ao buscar simulados."
-            });
-        }
-
-        return res.status(200).json({
-            simulados
-        });
-    });
-}
-
-// =====================================================
-// BUSCAR SIMULADO + QUESTÕES
-// =====================================================
-
-function buscarSimulado(req, res) {
-    const { id } = req.params;
-
-    buscarSimuladoPorId(
-        id,
-        (erro, simulado) => {
-            if (erro) {
-                console.error(
-                    "❌ Erro ao buscar simulado:",
-                    erro
-                );
-
-                return res.status(500).json({
-                    mensagem:
-                        "Erro ao buscar simulado."
-                });
-            }
-
-            if (!simulado) {
-                return res.status(404).json({
-                    mensagem:
-                        "Simulado não encontrado."
-                });
-            }
-
-            // Aqui é a rota que o aluno usa para ABRIR o simulado
-            // e responder — por isso NUNCA inclui o gabarito.
-            listarQuestoesDoSimuladoParaResponder(
-                id,
-                (erro, questoes) => {
-                    if (erro) {
-                        console.error(
-                            "❌ Erro ao buscar questões:",
-                            erro
-                        );
-
-                        return res.status(500).json({
-                            mensagem:
-                                "Erro ao buscar questões do simulado."
-                        });
-                    }
-
-                    return res.status(200).json({
-                        simulado,
-                        questoes
-                    });
-                }
-            );
-        }
-    );
-}
-
-// =====================================================
-// EDITAR SIMULADO
-// =====================================================
-
-function editarSimulado(req, res) {
-    const { id } = req.params;
+function cadastrarSimulado(
+    req,
+    res
+) {
 
     const {
         titulo,
@@ -230,70 +70,487 @@ function editarSimulado(req, res) {
 
         topicoId,
         topico_id
-    } = req.body;
+    } = req.body || {};
+
 
     const tempo =
-        tempoLimite ?? tempo_limite;
+        tempoLimite ??
+        tempo_limite;
+
 
     const quantidade =
         quantidadeQuestoes ??
         quantidade_questoes;
 
+
     const idTopico =
-        topicoId ?? topico_id;
+        topicoId ??
+        topico_id;
+
+
+    const tempoNumero =
+        numeroInteiroPositivo(
+            tempo
+        );
+
+
+    const quantidadeNumero =
+        numeroInteiroPositivo(
+            quantidade
+        );
+
+
+    const topicoNumero =
+        numeroInteiroPositivo(
+            idTopico
+        );
+
 
     if (
-        !titulo ||
-        !materia ||
-        !dificuldade ||
-        tempo === undefined ||
-        quantidade === undefined ||
-        idTopico === undefined ||
-        idTopico === null ||
-        Number(idTopico) <= 0
+        !String(
+            titulo || ""
+        ).trim() ||
+
+        !String(
+            materia || ""
+        ).trim() ||
+
+        !DIFICULDADES_VALIDAS.includes(
+            String(
+                dificuldade || ""
+            )
+        ) ||
+
+        !tempoNumero ||
+
+        !quantidadeNumero ||
+
+        !topicoNumero
     ) {
+
         return res.status(400).json({
             mensagem:
-                "Preencha todos os campos obrigatórios, incluindo o conteúdo."
+                "Preencha todos os campos obrigatórios corretamente."
         });
     }
 
-    if (Number(tempo) <= 0) {
+
+    if (
+        quantidadeNumero <
+        MIN_QUESTOES_SIMULADO
+    ) {
+
         return res.status(400).json({
             mensagem:
-                "O tempo limite deve ser maior que zero."
+                `Um simulado precisa ter no mínimo ${MIN_QUESTOES_SIMULADO} questões.`
         });
     }
 
-    if (Number(quantidade) <= 0) {
-        return res.status(400).json({
-            mensagem:
-                "A quantidade de questões deve ser maior que zero."
-        });
-    }
 
-    atualizarSimulado(
-        id,
-        titulo.trim(),
-        descricao || "",
-        materia,
-        dificuldade,
-        Number(tempo),
-        Number(quantidade),
-        Number(idTopico),
-        (erro, resultado) => {
+    criarSimulado(
+        String(
+            titulo
+        ).trim(),
+
+        String(
+            descricao || ""
+        ).trim(),
+
+        String(
+            materia
+        ).trim(),
+
+        String(
+            dificuldade
+        ),
+
+        tempoNumero,
+
+        quantidadeNumero,
+
+        topicoNumero,
+
+        (
+            erro,
+            resultado
+        ) => {
+
             if (erro) {
+
                 console.error(
-                    "❌ Erro ao atualizar simulado:",
+                    "❌ Erro ao cadastrar simulado:",
                     erro
                 );
 
-                if (erro.code === "TOPICO_NOT_FOUND") {
+
+                if (
+                    erro.code ===
+                    "TOPICO_NOT_FOUND"
+                ) {
+
                     return res.status(400).json({
                         mensagem:
                             "O conteúdo selecionado não existe para a matéria escolhida."
                     });
                 }
+
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao cadastrar simulado."
+                });
+            }
+
+
+            return res.status(201).json({
+
+                mensagem:
+                    "Simulado criado com sucesso!",
+
+                simulado: {
+
+                    id:
+                        resultado.lastID,
+
+                    titulo:
+                        String(
+                            titulo
+                        ).trim(),
+
+                    descricao:
+                        String(
+                            descricao || ""
+                        ).trim(),
+
+                    materia:
+                        String(
+                            materia
+                        ).trim(),
+
+                    dificuldade:
+                        String(
+                            dificuldade
+                        ),
+
+                    tempo_limite:
+                        tempoNumero,
+
+                    quantidade_questoes:
+                        quantidadeNumero,
+
+                    topico_id:
+                        topicoNumero,
+
+                    ativo:
+                        1
+                }
+
+            });
+
+        }
+    );
+}
+
+
+// =====================================================
+// LISTAR SIMULADOS
+// =====================================================
+
+function listarTodosSimulados(
+    req,
+    res
+) {
+
+    listarSimulados(
+        (
+            erro,
+            simulados
+        ) => {
+
+            if (erro) {
+
+                console.error(
+                    "❌ Erro ao buscar simulados:",
+                    erro
+                );
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao buscar simulados."
+                });
+            }
+
+
+            return res.status(200).json({
+                simulados:
+                    simulados || []
+            });
+
+        }
+    );
+}
+
+
+// =====================================================
+// BUSCAR SIMULADO PARA O ALUNO
+// =====================================================
+
+function buscarSimulado(
+    req,
+    res
+) {
+
+    const id =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    if (!id) {
+
+        return res.status(400).json({
+            mensagem:
+                "ID do simulado inválido."
+        });
+    }
+
+
+    buscarSimuladoPorId(
+        id,
+        (
+            erro,
+            simulado
+        ) => {
+
+            if (erro) {
+
+                console.error(
+                    "❌ Erro ao buscar simulado:",
+                    erro
+                );
+
+                return res.status(500).json({
+                    mensagem:
+                        "Erro ao buscar simulado."
+                });
+            }
+
+
+            if (!simulado) {
+
+                return res.status(404).json({
+                    mensagem:
+                        "Simulado não encontrado."
+                });
+            }
+
+
+            listarQuestoesDoSimuladoParaResponder(
+                id,
+                (
+                    erroQuestoes,
+                    questoes
+                ) => {
+
+                    if (
+                        erroQuestoes
+                    ) {
+
+                        console.error(
+                            "❌ Erro ao buscar questões:",
+                            erroQuestoes
+                        );
+
+                        return res.status(500).json({
+                            mensagem:
+                                "Erro ao buscar questões do simulado."
+                        });
+                    }
+
+
+                    if (
+                        !questoes ||
+                        questoes.length === 0
+                    ) {
+
+                        return res.status(409).json({
+                            mensagem:
+                                "Este simulado ainda não possui questões disponíveis."
+                        });
+                    }
+
+
+                    return res.status(200).json({
+                        simulado,
+                        questoes
+                    });
+
+                }
+            );
+
+        }
+    );
+}
+
+
+// =====================================================
+// EDITAR SIMULADO
+// =====================================================
+
+function editarSimulado(
+    req,
+    res
+) {
+
+    const id =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    const {
+        titulo,
+        descricao,
+        materia,
+        dificuldade,
+
+        tempoLimite,
+        tempo_limite,
+
+        quantidadeQuestoes,
+        quantidade_questoes,
+
+        topicoId,
+        topico_id
+    } = req.body || {};
+
+
+    const tempo =
+        tempoLimite ??
+        tempo_limite;
+
+
+    const quantidade =
+        quantidadeQuestoes ??
+        quantidade_questoes;
+
+
+    const idTopico =
+        topicoId ??
+        topico_id;
+
+
+    const tempoNumero =
+        numeroInteiroPositivo(
+            tempo
+        );
+
+
+    const quantidadeNumero =
+        numeroInteiroPositivo(
+            quantidade
+        );
+
+
+    const topicoNumero =
+        numeroInteiroPositivo(
+            idTopico
+        );
+
+
+    if (
+        !id ||
+
+        !String(
+            titulo || ""
+        ).trim() ||
+
+        !String(
+            materia || ""
+        ).trim() ||
+
+        !DIFICULDADES_VALIDAS.includes(
+            String(
+                dificuldade || ""
+            )
+        ) ||
+
+        !tempoNumero ||
+
+        !quantidadeNumero ||
+
+        !topicoNumero
+    ) {
+
+        return res.status(400).json({
+            mensagem:
+                "Preencha todos os campos obrigatórios corretamente."
+        });
+    }
+
+
+    if (
+        quantidadeNumero <
+        MIN_QUESTOES_SIMULADO
+    ) {
+
+        return res.status(400).json({
+            mensagem:
+                `Um simulado precisa ter no mínimo ${MIN_QUESTOES_SIMULADO} questões.`
+        });
+    }
+
+
+    atualizarSimulado(
+        id,
+
+        String(
+            titulo
+        ).trim(),
+
+        String(
+            descricao || ""
+        ).trim(),
+
+        String(
+            materia
+        ).trim(),
+
+        String(
+            dificuldade
+        ),
+
+        tempoNumero,
+
+        quantidadeNumero,
+
+        topicoNumero,
+
+        (
+            erro,
+            resultado,
+            status
+        ) => {
+
+            if (erro) {
+
+                console.error(
+                    "❌ Erro ao atualizar simulado:",
+                    erro
+                );
+
+
+                if (
+                    erro.code ===
+                    "TOPICO_NOT_FOUND"
+                ) {
+
+                    return res.status(400).json({
+                        mensagem:
+                            "O conteúdo selecionado não existe para a matéria escolhida."
+                    });
+                }
+
 
                 return res.status(500).json({
                     mensagem:
@@ -301,77 +558,103 @@ function editarSimulado(req, res) {
                 });
             }
 
-            if (resultado.changes === 0) {
+
+            if (
+                status ===
+                    "NOT_FOUND" ||
+
+                !resultado ||
+
+                resultado.changes ===
+                    0
+            ) {
+
                 return res.status(404).json({
                     mensagem:
                         "Simulado não encontrado."
                 });
             }
 
+
             return res.status(200).json({
                 mensagem:
                     "Simulado atualizado com sucesso!"
             });
+
         }
     );
 }
 
+
 // =====================================================
 // EXCLUIR SIMULADO
 // =====================================================
+//
+// Exclusão lógica: ativo = 0.
+//
 
-function deletarSimulado(req, res) {
-    const { id } = req.params;
+function deletarSimulado(
+    req,
+    res
+) {
 
-    // Primeiro remove os vínculos.
-    // As questões continuam no banco,
-    // pois podem pertencer ao banco de questões.
-    removerTodasQuestoesDoSimulado(
+    const id =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    if (!id) {
+
+        return res.status(400).json({
+            mensagem:
+                "ID do simulado inválido."
+        });
+    }
+
+
+    excluirSimulado(
         id,
-        (erro) => {
+        (
+            erro,
+            resultado
+        ) => {
+
             if (erro) {
+
                 console.error(
-                    "❌ Erro ao remover questões do simulado:",
+                    "❌ Erro ao desativar simulado:",
                     erro
                 );
 
                 return res.status(500).json({
                     mensagem:
-                        "Erro ao excluir o simulado."
+                        "Erro ao excluir simulado."
                 });
             }
 
-            excluirSimulado(
-                id,
-                (erro, resultado) => {
-                    if (erro) {
-                        console.error(
-                            "❌ Erro ao excluir simulado:",
-                            erro
-                        );
 
-                        return res.status(500).json({
-                            mensagem:
-                                "Erro ao excluir simulado."
-                        });
-                    }
+            if (
+                resultado.changes ===
+                0
+            ) {
 
-                    if (resultado.changes === 0) {
-                        return res.status(404).json({
-                            mensagem:
-                                "Simulado não encontrado."
-                        });
-                    }
+                return res.status(404).json({
+                    mensagem:
+                        "Simulado não encontrado."
+                });
+            }
 
-                    return res.status(200).json({
-                        mensagem:
-                            "Simulado excluído com sucesso!"
-                    });
-                }
-            );
+
+            return res.status(200).json({
+                mensagem:
+                    "Simulado excluído com sucesso!"
+            });
+
         }
     );
 }
+
 
 // =====================================================
 // ADICIONAR QUESTÃO
@@ -381,64 +664,149 @@ function adicionarQuestaoAoSimulado(
     req,
     res
 ) {
-    const { id } = req.params;
+
+    const simuladoId =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
 
     const {
         questaoId,
         questao_id,
         ordem
-    } = req.body;
+    } = req.body || {};
+
 
     const idQuestao =
-        questaoId ?? questao_id;
+        numeroInteiroPositivo(
+            questaoId ??
+            questao_id
+        );
+
+
+    const ordemNumero =
+        numeroInteiroPositivo(
+            ordem
+        );
+
 
     if (
-        idQuestao === undefined ||
-        ordem === undefined
+        !simuladoId ||
+        !idQuestao ||
+        !ordemNumero
     ) {
+
         return res.status(400).json({
             mensagem:
-                "Informe a questão e a ordem."
+                "Informe uma questão e uma ordem válidas."
         });
     }
 
+
     adicionarQuestao(
-        id,
+        simuladoId,
         idQuestao,
-        Number(ordem),
-        (erro, resultado) => {
+        ordemNumero,
+        (
+            erro,
+            resultado
+        ) => {
+
             if (erro) {
+
                 console.error(
                     "❌ Erro ao adicionar questão:",
                     erro
                 );
 
-                return res.status(500).json({
-                    mensagem:
-                        "Erro ao adicionar questão ao simulado."
-                });
+
+                switch (
+                    erro.code
+                ) {
+
+                    case "SIMULADO_NOT_FOUND":
+
+                    case "QUESTAO_NOT_FOUND":
+
+                        return res.status(404).json({
+                            mensagem:
+                                erro.message
+                        });
+
+
+                    case "QUESTAO_MATERIA_INVALIDA":
+
+                    case "QUESTAO_DUPLICADA":
+
+                    case "QUESTOES_LIMITE_ATINGIDO":
+
+                    case "ORDEM_INVALIDA":
+
+                        return res.status(400).json({
+                            mensagem:
+                                erro.message
+                        });
+
+
+                    default:
+
+                        return res.status(500).json({
+                            mensagem:
+                                "Erro ao adicionar questão ao simulado."
+                        });
+                }
             }
 
+
             return res.status(201).json({
+
                 mensagem:
                     "Questão adicionada ao simulado!",
-                id: resultado.lastID
+
+                id:
+                    resultado.lastID
+
             });
+
         }
     );
 }
 
+
 // =====================================================
-// LISTAR QUESTÕES
+// LISTAR QUESTÕES — ADMIN
 // =====================================================
 
-function listarQuestoes(req, res) {
-    const { id } = req.params;
+function listarQuestoes(
+    req,
+    res
+) {
+
+    const id =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    if (!id) {
+
+        return res.status(400).json({
+            mensagem:
+                "ID do simulado inválido."
+        });
+    }
+
 
     listarQuestoesDoSimulado(
         id,
-        (erro, questoes) => {
+        (
+            erro,
+            questoes
+        ) => {
+
             if (erro) {
+
                 console.error(
                     "❌ Erro ao buscar questões:",
                     erro
@@ -450,12 +818,16 @@ function listarQuestoes(req, res) {
                 });
             }
 
+
             return res.status(200).json({
-                questoes
+                questoes:
+                    questoes || []
             });
+
         }
     );
 }
+
 
 // =====================================================
 // REMOVER QUESTÃO
@@ -465,16 +837,41 @@ function removerQuestaoDoSimulado(
     req,
     res
 ) {
-    const {
-        id,
-        questaoId
-    } = req.params;
+
+    const simuladoId =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    const questaoId =
+        numeroInteiroPositivo(
+            req.params.questaoId
+        );
+
+
+    if (
+        !simuladoId ||
+        !questaoId
+    ) {
+
+        return res.status(400).json({
+            mensagem:
+                "IDs inválidos."
+        });
+    }
+
 
     removerQuestao(
-        id,
+        simuladoId,
         questaoId,
-        (erro, resultado) => {
+        (
+            erro,
+            resultado
+        ) => {
+
             if (erro) {
+
                 console.error(
                     "❌ Erro ao remover questão:",
                     erro
@@ -486,20 +883,28 @@ function removerQuestaoDoSimulado(
                 });
             }
 
-            if (resultado.changes === 0) {
+
+            if (
+                resultado.changes ===
+                0
+            ) {
+
                 return res.status(404).json({
                     mensagem:
                         "Questão não encontrada neste simulado."
                 });
             }
 
+
             return res.status(200).json({
                 mensagem:
                     "Questão removida do simulado!"
             });
+
         }
     );
 }
+
 
 // =====================================================
 // ATUALIZAR ORDEM
@@ -509,78 +914,178 @@ function editarOrdemQuestao(
     req,
     res
 ) {
-    const {
-        id,
-        questaoId
-    } = req.params;
 
-    const { ordem } = req.body;
+    const simuladoId =
+        numeroInteiroPositivo(
+            req.params.id
+        );
 
-    if (ordem === undefined) {
+
+    const questaoId =
+        numeroInteiroPositivo(
+            req.params.questaoId
+        );
+
+
+    const ordem =
+        numeroInteiroPositivo(
+            req.body?.ordem
+        );
+
+
+    if (
+        !simuladoId ||
+        !questaoId ||
+        !ordem
+    ) {
+
         return res.status(400).json({
             mensagem:
-                "Informe a ordem da questão."
+                "Informe uma ordem válida."
         });
     }
 
+
     atualizarOrdemQuestao(
-        id,
+        simuladoId,
         questaoId,
-        Number(ordem),
-        (erro, resultado) => {
+        ordem,
+        (
+            erro,
+            resultado
+        ) => {
+
             if (erro) {
+
                 console.error(
                     "❌ Erro ao atualizar ordem:",
                     erro
                 );
 
+
+                if (
+                    erro.code ===
+                    "ORDEM_INVALIDA"
+                ) {
+
+                    return res.status(400).json({
+                        mensagem:
+                            erro.message
+                    });
+                }
+
+
+                if (
+                    erro.code ===
+                    "QUESTAO_SIMULADO_NOT_FOUND"
+                ) {
+
+                    return res.status(404).json({
+                        mensagem:
+                            erro.message
+                    });
+                }
+
+
                 return res.status(500).json({
                     mensagem:
-                        "Erro ao atualizar ordem da questão."
+                        "Erro ao atualizar a ordem da questão."
                 });
             }
 
-            if (resultado.changes === 0) {
+
+            if (
+                resultado.changes ===
+                0
+            ) {
+
                 return res.status(404).json({
                     mensagem:
                         "Questão não encontrada neste simulado."
                 });
             }
 
+
             return res.status(200).json({
                 mensagem:
                     "Ordem atualizada com sucesso!"
             });
+
         }
     );
 }
 
+
 // =====================================================
 // CORRIGIR SIMULADO
-// (recebe as respostas do aluno e devolve o resultado
-// já corrigido no servidor — o gabarito nunca é enviado
-// antes desse momento)
 // =====================================================
 
-function corrigirSimulado(req, res) {
-    const { id } = req.params;
-    const { respostas } = req.body || {};
+function corrigirSimulado(
+    req,
+    res
+) {
+
+    const simuladoId =
+        numeroInteiroPositivo(
+            req.params.id
+        );
+
+
+    const {
+        respostas
+    } = req.body || {};
+
+
+    const usuarioId =
+        numeroInteiroPositivo(
+            req.usuario?.id ||
+            req.usuario?.usuarioId
+        );
+
+
+    if (!usuarioId) {
+
+        return res.status(401).json({
+            mensagem:
+                "Usuário não autenticado."
+        });
+    }
+
+
+    if (!simuladoId) {
+
+        return res.status(400).json({
+            mensagem:
+                "ID do simulado inválido."
+        });
+    }
+
 
     if (
         !respostas ||
-        typeof respostas !== "object" ||
-        Array.isArray(respostas)
+        typeof respostas !==
+            "object" ||
+        Array.isArray(
+            respostas
+        )
     ) {
+
         return res.status(400).json({
             mensagem:
                 "Informe as respostas no formato { questaoId: alternativa }."
         });
     }
 
+
     buscarGabaritoDoSimulado(
-        id,
-        (erro, gabarito) => {
+        simuladoId,
+        (
+            erro,
+            gabarito
+        ) => {
+
             if (erro) {
+
                 console.error(
                     "❌ Erro ao corrigir simulado:",
                     erro
@@ -592,83 +1097,131 @@ function corrigirSimulado(req, res) {
                 });
             }
 
-            if (!gabarito || gabarito.length === 0) {
+
+            if (
+                !gabarito ||
+                gabarito.length ===
+                    0
+            ) {
+
                 return res.status(404).json({
                     mensagem:
                         "Simulado não encontrado ou sem questões."
                 });
             }
 
-            let acertos = 0;
-            let erros = 0;
 
-            const detalhes = gabarito.map((questao) => {
-                const respostaUsuario =
-                    respostas[questao.id] != null
-                        ? String(respostas[questao.id]).toUpperCase()
-                        : null;
+            let acertos =
+                0;
 
-                const respostaCorreta =
-                    String(questao.correta).toUpperCase();
 
-                const acertou =
-                    respostaUsuario === respostaCorreta;
+            const detalhes =
+                gabarito.map(
+                    (
+                        questao
+                    ) => {
 
-                if (acertou) {
-                    acertos++;
-                } else {
-                    erros++;
-                }
+                        const respostaUsuario =
+                            respostas[
+                                questao.id
+                            ] != null
+                                ? String(
+                                    respostas[
+                                        questao.id
+                                    ]
+                                )
+                                    .trim()
+                                    .toUpperCase()
+                                : null;
 
-                return {
-                    questaoId: questao.id,
-                    respostaUsuario,
-                    respostaCorreta,
-                    acertou
-                };
-            });
 
-            const totalQuestoes = gabarito.length;
+                        const respostaCorreta =
+                            String(
+                                questao.correta ||
+                                ""
+                            )
+                                .trim()
+                                .toUpperCase();
+
+
+                        const acertou =
+                            Boolean(
+                                respostaUsuario &&
+                                respostaUsuario ===
+                                    respostaCorreta
+                            );
+
+
+                        if (
+                            acertou
+                        ) {
+                            acertos +=
+                                1;
+                        }
+
+
+                        return {
+
+                            questaoId:
+                                Number(
+                                    questao.id
+                                ),
+
+                            respostaUsuario,
+
+                            respostaCorreta,
+
+                            acertou
+
+                        };
+
+                    }
+                );
+
+
+            const totalQuestoes =
+                gabarito.length;
+
+
+            const erros =
+                totalQuestoes -
+                acertos;
+
 
             const porcentagem =
                 totalQuestoes > 0
+
                     ? Number(
-                        ((acertos / totalQuestoes) * 100).toFixed(2)
+                        (
+                            (
+                                acertos /
+                                totalQuestoes
+                            ) * 100
+                        ).toFixed(
+                            2
+                        )
                     )
+
                     : 0;
 
-            // =============================================
-            // SALVAR O RESULTADO NO SERVIDOR
-            //
-            // O resultado é salvo aqui, a partir dos números
-            // que o PRÓPRIO SERVIDOR acabou de calcular contra
-            // o gabarito real — nunca a partir de números que
-            // o cliente possa enviar. Isso evita que alguém
-            // forje um resultado chamando POST /resultados
-            // diretamente, sem ter respondido ao simulado.
-            // =============================================
-
-            const usuarioId = Number(
-                req.usuario?.id ||
-                req.usuario?.usuarioId
-            );
-
-            if (!usuarioId) {
-                return res.status(401).json({
-                    mensagem:
-                        "Usuário não autenticado."
-                });
-            }
 
             criarResultado(
                 usuarioId,
-                Number(id),
+                simuladoId,
                 acertos,
                 erros,
                 totalQuestoes,
                 porcentagem,
-                (erroResultado, resultadoSalvo) => {
-                    if (erroResultado) {
+
+                (
+                    erroResultado,
+                    resultadoSalvo
+                ) => {
+
+                    if (
+                        erroResultado
+                    ) {
+
                         console.error(
                             "❌ Erro ao salvar resultado do simulado:",
                             erroResultado
@@ -680,31 +1233,50 @@ function corrigirSimulado(req, res) {
                         });
                     }
 
+
                     return res.status(200).json({
+
                         resultado: {
-                            id: resultadoSalvo.lastID,
+
+                            id:
+                                resultadoSalvo.lastID,
+
                             acertos,
+
                             erros,
+
                             totalQuestoes,
+
                             porcentagem
+
                         },
+
                         detalhes
+
                     });
+
                 }
             );
+
         }
     );
 }
+
 
 // =====================================================
 // EXPORTAÇÕES
 // =====================================================
 
 module.exports = {
+
     cadastrarSimulado,
+
     listarTodosSimulados,
+
     buscarSimulado,
+
     editarSimulado,
+
     deletarSimulado,
 
     adicionarQuestao:
@@ -718,4 +1290,5 @@ module.exports = {
     editarOrdemQuestao,
 
     corrigirSimulado
+
 };

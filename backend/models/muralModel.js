@@ -1,11 +1,18 @@
 const db = require("../config/db");
 
+const {
+    normalizarMateriaMural
+} = require("../utils/materiaUtils");
+
 
 // =====================================================
 // LISTAR POST-ITS DO USUÁRIO
 // =====================================================
 
-function listarPostits(usuarioId, callback) {
+function listarPostits(
+    usuarioId,
+    callback
+) {
 
     const sql = `
         SELECT
@@ -16,7 +23,7 @@ function listarPostits(usuarioId, callback) {
             data_criacao
         FROM mural_postits
         WHERE usuario_id = ?
-        ORDER BY data_criacao DESC
+        ORDER BY data_criacao DESC, id DESC
     `;
 
     db.all(
@@ -25,6 +32,7 @@ function listarPostits(usuarioId, callback) {
         (erro, postits) => {
 
             if (erro) {
+
                 console.error(
                     "❌ Erro ao listar post-its:",
                     erro.message
@@ -36,9 +44,21 @@ function listarPostits(usuarioId, callback) {
                 );
             }
 
+            const postitsNormalizados =
+                (postits || []).map(
+                    (postit) => ({
+                        ...postit,
+
+                        materia:
+                            normalizarMateriaMural(
+                                postit.materia
+                            )
+                    })
+                );
+
             callback(
                 null,
-                postits
+                postitsNormalizados
             );
         }
     );
@@ -56,6 +76,11 @@ function criarPostit(
     callback
 ) {
 
+    const materiaNormalizada =
+        normalizarMateriaMural(
+            materia
+        );
+
     const sql = `
         INSERT INTO mural_postits
         (
@@ -70,7 +95,7 @@ function criarPostit(
         sql,
         [
             usuarioId,
-            materia,
+            materiaNormalizada,
             texto
         ],
         function (erro) {
@@ -93,7 +118,7 @@ function criarPostit(
                 {
                     id: this.lastID,
                     usuario_id: usuarioId,
-                    materia,
+                    materia: materiaNormalizada,
                     texto
                 }
             );
@@ -114,6 +139,11 @@ function atualizarPostit(
     callback
 ) {
 
+    const materiaNormalizada =
+        normalizarMateriaMural(
+            materia
+        );
+
     const sql = `
         UPDATE mural_postits
         SET
@@ -127,7 +157,7 @@ function atualizarPostit(
     db.run(
         sql,
         [
-            materia,
+            materiaNormalizada,
             texto,
             id,
             usuarioId
@@ -162,7 +192,7 @@ function atualizarPostit(
                 {
                     id,
                     usuario_id: usuarioId,
-                    materia,
+                    materia: materiaNormalizada,
                     texto
                 }
             );

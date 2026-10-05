@@ -1,19 +1,35 @@
-
 const resultadoFlashcardModel =
     require("../models/resultadoFlashcardModel");
 
 
 // =====================================================
-// OBTER USUÁRIO LOGADO
+// USUÁRIO LOGADO
 // =====================================================
 
 function obterUsuarioId(req) {
 
-    if (!req.usuario || !req.usuario.id) {
+    if (
+        !req.usuario ||
+        !req.usuario.id
+    ) {
         return null;
     }
 
-    return Number(req.usuario.id);
+    const usuarioId =
+        Number(
+            req.usuario.id
+        );
+
+    if (
+        !Number.isInteger(
+            usuarioId
+        ) ||
+        usuarioId <= 0
+    ) {
+        return null;
+    }
+
+    return usuarioId;
 }
 
 
@@ -21,7 +37,10 @@ function obterUsuarioId(req) {
 // CRIAR SESSÃO
 // =====================================================
 
-function criarSessao(req, res) {
+function criarSessao(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -29,32 +48,45 @@ function criarSessao(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
+
     const totalCards =
-        Number(req.body?.totalCards);
+        Number(
+            req.body?.totalCards
+        );
+
 
     if (
-        !Number.isInteger(totalCards) ||
-        totalCards <= 0
+        !Number.isInteger(
+            totalCards
+        ) ||
+        totalCards <= 0 ||
+        totalCards > 100
     ) {
 
         return res.status(400).json({
-            erro: "Quantidade de cards inválida."
+            erro:
+                "Quantidade de cards inválida."
         });
     }
+
 
     resultadoFlashcardModel.criarSessao(
         usuarioId,
         totalCards,
-        (erro, sessao) => {
+        (
+            erro,
+            sessao
+        ) => {
 
             if (erro) {
 
                 console.error(
-                    "Erro ao criar sessão de flashcards:",
+                    "❌ Erro ao criar sessão de flashcards:",
                     erro
                 );
 
@@ -64,11 +96,16 @@ function criarSessao(req, res) {
                 });
             }
 
+
             return res.status(201).json({
+
                 mensagem:
                     "Sessão iniciada com sucesso.",
+
                 sessao
+
             });
+
         }
     );
 }
@@ -78,7 +115,10 @@ function criarSessao(req, res) {
 // REGISTRAR RESPOSTA
 // =====================================================
 
-function registrarResposta(req, res) {
+function registrarResposta(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -86,57 +126,58 @@ function registrarResposta(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
+
     const sessaoId =
-        Number(req.params.sessaoId);
+        Number(
+            req.params.sessaoId
+        );
 
     const flashcardId =
-        Number(req.body?.flashcardId);
-
-    const materia =
-        req.body?.materia;
+        Number(
+            req.body?.flashcardId
+        );
 
     const acertou =
         req.body?.acertou;
 
 
     if (
-        !Number.isInteger(sessaoId) ||
+        !Number.isInteger(
+            sessaoId
+        ) ||
         sessaoId <= 0
     ) {
 
         return res.status(400).json({
-            erro: "ID da sessão inválido."
+            erro:
+                "ID da sessão inválido."
         });
     }
 
 
     if (
-        !Number.isInteger(flashcardId) ||
+        !Number.isInteger(
+            flashcardId
+        ) ||
         flashcardId <= 0
     ) {
 
         return res.status(400).json({
-            erro: "ID do flashcard inválido."
+            erro:
+                "ID do flashcard inválido."
         });
     }
 
 
     if (
-        !materia ||
-        !String(materia).trim()
+        typeof acertou !==
+        "boolean"
     ) {
-
-        return res.status(400).json({
-            erro: "A matéria é obrigatória."
-        });
-    }
-
-
-    if (typeof acertou !== "boolean") {
 
         return res.status(400).json({
             erro:
@@ -145,82 +186,81 @@ function registrarResposta(req, res) {
     }
 
 
-    resultadoFlashcardModel.buscarSessaoPorId(
+    resultadoFlashcardModel.registrarResposta(
         sessaoId,
-        (erroBusca, sessao) => {
+        usuarioId,
+        flashcardId,
+        acertou,
+        (
+            erro,
+            resposta
+        ) => {
 
-            if (erroBusca) {
+            if (erro) {
 
                 console.error(
-                    "Erro ao verificar sessão:",
-                    erroBusca
+                    "❌ Erro ao registrar resposta:",
+                    erro
                 );
 
-                return res.status(500).json({
-                    erro:
-                        "Erro ao verificar sessão."
-                });
-            }
+
+                switch (
+                    erro.code
+                ) {
+
+                    case "SESSION_NOT_FOUND":
+
+                    case "FLASHCARD_NOT_FOUND":
+
+                        return res.status(404).json({
+                            erro:
+                                erro.message
+                        });
 
 
-            if (!sessao) {
+                    case "SESSION_ACCESS_DENIED":
 
-                return res.status(404).json({
-                    erro:
-                        "Sessão de flashcards não encontrada."
-                });
-            }
-
-
-            if (
-                Number(sessao.usuario_id) !==
-                usuarioId
-            ) {
-
-                return res.status(403).json({
-                    erro:
-                        "Você não pode alterar esta sessão."
-                });
-            }
+                        return res.status(403).json({
+                            erro:
+                                erro.message
+                        });
 
 
-            if (sessao.data_fim) {
+                    case "SESSION_FINISHED":
 
-                return res.status(400).json({
-                    erro:
-                        "Esta sessão já foi finalizada."
-                });
-            }
+                    case "SESSION_FULL":
+
+                    case "FLASHCARD_ALREADY_ANSWERED":
+
+                    case "FLASHCARD_INACTIVE":
+
+                    case "FLASHCARD_MATERIA_INVALIDA":
+
+                        return res.status(400).json({
+                            erro:
+                                erro.message
+                        });
 
 
-            resultadoFlashcardModel.registrarResposta(
-                sessaoId,
-                usuarioId,
-                flashcardId,
-                String(materia).trim(),
-                acertou,
-                (erro, resposta) => {
-
-                    if (erro) {
-
-                        console.error(
-                            "Erro ao registrar resposta:",
-                            erro
-                        );
+                    default:
 
                         return res.status(500).json({
                             erro:
                                 "Erro ao registrar resposta."
                         });
-                    }
-
-                    return res.status(201).json({
-                        mensagem:
-                            "Resposta registrada com sucesso.",
-                        resposta
-                    });
                 }
-            );
+            }
+
+
+            return res.status(201).json({
+
+                mensagem:
+                    "Resposta registrada com sucesso.",
+
+                resposta
+
+            });
+
         }
     );
 }
@@ -230,7 +270,10 @@ function registrarResposta(req, res) {
 // FINALIZAR SESSÃO
 // =====================================================
 
-function finalizarSessao(req, res) {
+function finalizarSessao(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -238,20 +281,28 @@ function finalizarSessao(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
+
     const sessaoId =
-        Number(req.params.sessaoId);
+        Number(
+            req.params.sessaoId
+        );
+
 
     if (
-        !Number.isInteger(sessaoId) ||
+        !Number.isInteger(
+            sessaoId
+        ) ||
         sessaoId <= 0
     ) {
 
         return res.status(400).json({
-            erro: "ID da sessão inválido."
+            erro:
+                "ID da sessão inválido."
         });
     }
 
@@ -259,12 +310,39 @@ function finalizarSessao(req, res) {
     resultadoFlashcardModel.finalizarSessao(
         sessaoId,
         usuarioId,
-        (erro, sessao) => {
+        (
+            erro,
+            sessao
+        ) => {
 
             if (erro) {
 
+                if (
+                    erro.code ===
+                    "SESSION_ACCESS_DENIED"
+                ) {
+
+                    return res.status(403).json({
+                        erro:
+                            erro.message
+                    });
+                }
+
+
+                if (
+                    erro.code ===
+                    "SESSION_INCOMPLETE"
+                ) {
+
+                    return res.status(400).json({
+                        erro:
+                            erro.message
+                    });
+                }
+
+
                 console.error(
-                    "Erro ao finalizar sessão:",
+                    "❌ Erro ao finalizar sessão:",
                     erro
                 );
 
@@ -285,10 +363,14 @@ function finalizarSessao(req, res) {
 
 
             return res.json({
+
                 mensagem:
                     "Sessão finalizada com sucesso.",
+
                 sessao
+
             });
+
         }
     );
 }
@@ -298,7 +380,10 @@ function finalizarSessao(req, res) {
 // LISTAR SESSÕES
 // =====================================================
 
-function listarSessoes(req, res) {
+function listarSessoes(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -306,19 +391,23 @@ function listarSessoes(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
 
     resultadoFlashcardModel.listarSessoesDoUsuario(
         usuarioId,
-        (erro, sessoes) => {
+        (
+            erro,
+            sessoes
+        ) => {
 
             if (erro) {
 
                 console.error(
-                    "Erro ao listar sessões:",
+                    "❌ Erro ao listar sessões:",
                     erro
                 );
 
@@ -328,9 +417,11 @@ function listarSessoes(req, res) {
                 });
             }
 
+
             return res.json({
                 sessoes
             });
+
         }
     );
 }
@@ -340,7 +431,10 @@ function listarSessoes(req, res) {
 // DESEMPENHO POR MATÉRIA
 // =====================================================
 
-function desempenhoPorMateria(req, res) {
+function desempenhoPorMateria(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -348,19 +442,23 @@ function desempenhoPorMateria(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
 
     resultadoFlashcardModel.buscarDesempenhoPorMateria(
         usuarioId,
-        (erro, desempenho) => {
+        (
+            erro,
+            desempenho
+        ) => {
 
             if (erro) {
 
                 console.error(
-                    "Erro ao buscar desempenho dos flashcards:",
+                    "❌ Erro ao buscar desempenho:",
                     erro
                 );
 
@@ -370,9 +468,11 @@ function desempenhoPorMateria(req, res) {
                 });
             }
 
+
             return res.json({
                 desempenho
             });
+
         }
     );
 }
@@ -382,7 +482,10 @@ function desempenhoPorMateria(req, res) {
 // LISTAR RESPOSTAS
 // =====================================================
 
-function listarRespostas(req, res) {
+function listarRespostas(
+    req,
+    res
+) {
 
     const usuarioId =
         obterUsuarioId(req);
@@ -390,19 +493,23 @@ function listarRespostas(req, res) {
     if (!usuarioId) {
 
         return res.status(401).json({
-            erro: "Usuário não autenticado."
+            erro:
+                "Usuário não autenticado."
         });
     }
 
 
     resultadoFlashcardModel.listarRespostasDoUsuario(
         usuarioId,
-        (erro, respostas) => {
+        (
+            erro,
+            respostas
+        ) => {
 
             if (erro) {
 
                 console.error(
-                    "Erro ao listar respostas:",
+                    "❌ Erro ao listar respostas:",
                     erro
                 );
 
@@ -412,19 +519,32 @@ function listarRespostas(req, res) {
                 });
             }
 
+
             return res.json({
                 respostas
             });
+
         }
     );
 }
 
 
+// =====================================================
+// EXPORTAÇÕES
+// =====================================================
+
 module.exports = {
+
     criarSessao,
+
     registrarResposta,
+
     finalizarSessao,
+
     listarSessoes,
+
     desempenhoPorMateria,
+
     listarRespostas
+
 };

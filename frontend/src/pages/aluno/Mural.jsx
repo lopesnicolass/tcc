@@ -17,13 +17,22 @@ const MAX_CHARS = 200;
 
 const COLOR_CLASS = {
   Português: 'postit-portugues',
+  'Língua Portuguesa': 'postit-portugues',
   Matemática: 'postit-matematica',
   História: 'postit-historia',
   Geografia: 'postit-geografia',
   Ciências: 'postit-ciencias',
+  'Ciências da Natureza': 'postit-ciencias',
 };
 
+const MATERIA_ALIASES = {
+  'Língua Portuguesa': 'Português',
+  'Ciências da Natureza': 'Ciências',
+};
 
+function normalizarMateria(materia) {
+  return MATERIA_ALIASES[materia] || materia;
+}
 
 const TILTS = [-3, 2, -1.5, 3, -2, 1.5];
 
@@ -49,11 +58,6 @@ function obterUsuarioId() {
 
     const usuario =
       JSON.parse(usuarioSalvo);
-
-    console.log(
-      'Usuário logado no Mural:',
-      usuario
-    );
 
     if (usuario.id) {
       return Number(usuario.id);
@@ -187,7 +191,8 @@ export default function Mural() {
           `${API_URL}/mural/${usuarioId}`,
           {
             headers: {
-              Authorization: `Bearer ${obterToken()}`
+              Authorization:
+                `Bearer ${obterToken()}`
             }
           }
         );
@@ -204,7 +209,15 @@ export default function Mural() {
       }
 
       setPostits(
-        dados.postits || []
+        (dados.postits || []).map(
+          (postit) => ({
+            ...postit,
+            materia:
+              normalizarMateria(
+                postit.materia
+              ),
+          })
+        )
       );
 
     } catch (error) {
@@ -275,7 +288,9 @@ export default function Mural() {
             headers: {
               'Content-Type':
                 'application/json',
-              Authorization: `Bearer ${obterToken()}`
+
+              Authorization:
+                `Bearer ${obterToken()}`
             },
 
             body: JSON.stringify({
@@ -299,21 +314,24 @@ export default function Mural() {
         );
       }
 
-      // Adiciona na tela
       setPostits(
         (prev) => [
-          dados.postit,
+          {
+            ...dados.postit,
+            materia:
+              normalizarMateria(
+                dados.postit?.materia
+              ),
+          },
           ...prev
         ]
       );
 
-      // XP
       addXP(
         10,
         'novo post-it'
       );
 
-      // Fecha modal
       setShowAddModal(false);
 
       setNewText('');
@@ -345,7 +363,9 @@ export default function Mural() {
     );
 
     setEditMateria(
-      postit.materia
+      normalizarMateria(
+        postit.materia
+      )
     );
   }
 
@@ -385,7 +405,9 @@ export default function Mural() {
             headers: {
               'Content-Type':
                 'application/json',
-              Authorization: `Bearer ${obterToken()}`
+
+              Authorization:
+                `Bearer ${obterToken()}`
             },
 
             body: JSON.stringify({
@@ -409,7 +431,6 @@ export default function Mural() {
         );
       }
 
-      // Atualiza na tela
       setPostits(
         (prev) =>
           prev.map(
@@ -420,7 +441,9 @@ export default function Mural() {
                     ...postit,
 
                     materia:
-                      editMateria,
+                      normalizarMateria(
+                        editMateria
+                      ),
 
                     texto:
                       editText.trim()
@@ -481,7 +504,8 @@ export default function Mural() {
             method: 'DELETE',
 
             headers: {
-              Authorization: `Bearer ${obterToken()}`
+              Authorization:
+                `Bearer ${obterToken()}`
             }
           }
         );
@@ -531,8 +555,9 @@ export default function Mural() {
       ? postits
       : postits.filter(
           (postit) =>
-            postit.materia ===
-            filtro
+            normalizarMateria(
+              postit.materia
+            ) === filtro
         );
 
 
@@ -579,44 +604,104 @@ export default function Mural() {
       <div className="mural-hero">
 
         <div className="mural-hero-content">
-          <span className="mural-hero-eyebrow">SEU ESPAÇO DE ANOTAÇÕES</span>
-          <h1>Mural de Post-its</h1>
-          <p>Organize suas anotações por matéria e deixe seus principais lembretes sempre à vista.</p>
+
+          <span className="mural-hero-eyebrow">
+            SEU ESPAÇO DE ANOTAÇÕES
+          </span>
+
+          <h1>
+            Mural de Post-its
+          </h1>
+
+          <p>
+            Organize suas anotações por matéria
+            e deixe seus principais lembretes
+            sempre à vista.
+          </p>
+
         </div>
 
         <div className="mural-actions">
+
           <button
+            type="button"
             className="mural-btn primary"
             onClick={openAddModal}
           >
             + Adicionar post-it
           </button>
+
         </div>
 
       </div>
 
+
+      {/* ============================================= */}
+      {/* ABAS */}
+      {/* ============================================= */}
+
       <div className="materia-tabs">
 
         <button
-          className={`materia-tab ${filtro === 'Todas' ? 'active' : ''}`}
-          onClick={() => setFiltro('Todas')}
+          type="button"
+          className={
+            `materia-tab ${
+              filtro === 'Todas'
+                ? 'active'
+                : ''
+            }`
+          }
+          onClick={() =>
+            setFiltro('Todas')
+          }
         >
+
           Todas
-          <span className="materia-tab-count">{postits.length}</span>
+
+          <span className="materia-tab-count">
+            {postits.length}
+          </span>
+
         </button>
 
-        {MATERIAS.map((materia) => (
-          <button
-            key={materia}
-            className={`materia-tab ${filtro === materia ? 'active' : ''}`}
-            onClick={() => setFiltro(materia)}
-          >
-            {materia}
-            <span className="materia-tab-count">
-              {postits.filter((p) => p.materia === materia).length}
-            </span>
-          </button>
-        ))}
+
+        {MATERIAS.map(
+          (materia) => (
+
+            <button
+              type="button"
+              key={materia}
+              className={
+                `materia-tab ${
+                  filtro === materia
+                    ? 'active'
+                    : ''
+                }`
+              }
+              onClick={() =>
+                setFiltro(materia)
+              }
+            >
+
+              {materia}
+
+              <span className="materia-tab-count">
+
+                {
+                  postits.filter(
+                    (postit) =>
+                      normalizarMateria(
+                        postit.materia
+                      ) === materia
+                  ).length
+                }
+
+              </span>
+
+            </button>
+
+          )
+        )}
 
       </div>
 
@@ -657,47 +742,59 @@ export default function Mural() {
         <div className="mural-grid">
 
           {visiveis.map(
-            (postit, index) => (
+            (postit, index) => {
 
-              <div
-                key={postit.id}
+              const materiaNormalizada =
+                normalizarMateria(
+                  postit.materia
+                );
 
-                className={`postit ${
-                  COLOR_CLASS[
-                    postit.materia
-                  ] || ''
-                }`}
+              return (
+                <div
+                  key={postit.id}
 
-                style={{
-                  '--tilt':
-                    `${TILTS[
-                      index %
-                      TILTS.length
-                    ]}deg`
-                }}
+                  className={
+                    `postit ${
+                      COLOR_CLASS[
+                        materiaNormalizada
+                      ] ||
+                      COLOR_CLASS[
+                        postit.materia
+                      ] ||
+                      ''
+                    }`
+                  }
 
-                onClick={() =>
-                  openEditModal(
-                    postit
-                  )
-                }
-              >
+                  style={{
+                    '--tilt':
+                      `${TILTS[
+                        index %
+                        TILTS.length
+                      ]}deg`
+                  }}
 
-                <span className="postit-tag">
+                  onClick={() =>
+                    openEditModal(
+                      postit
+                    )
+                  }
+                >
 
-                  {postit.materia}
+                  <span className="postit-tag">
 
-                </span>
+                    {materiaNormalizada}
 
-                <p className="postit-text">
+                  </span>
 
-                  {postit.texto}
+                  <p className="postit-text">
 
-                </p>
+                    {postit.texto}
 
-              </div>
+                  </p>
 
-            )
+                </div>
+              );
+            }
           )}
 
         </div>
@@ -790,12 +887,14 @@ export default function Mural() {
                       <button
                         type="button"
                         key={materia}
-                        className={`materia-pill ${
-                          newMateria ===
-                          materia
-                            ? 'selected'
-                            : ''
-                        }`}
+                        className={
+                          `materia-pill ${
+                            newMateria ===
+                            materia
+                              ? 'selected'
+                              : ''
+                          }`
+                        }
                         onClick={() =>
                           setNewMateria(
                             materia
@@ -926,12 +1025,14 @@ export default function Mural() {
                       <button
                         type="button"
                         key={materia}
-                        className={`materia-pill ${
-                          editMateria ===
-                          materia
-                            ? 'selected'
-                            : ''
-                        }`}
+                        className={
+                          `materia-pill ${
+                            editMateria ===
+                            materia
+                              ? 'selected'
+                              : ''
+                          }`
+                        }
                         onClick={() =>
                           setEditMateria(
                             materia
@@ -976,6 +1077,7 @@ export default function Mural() {
 
 
             <button
+              type="button"
               className="modal-delete"
               onClick={
                 handleDelete
