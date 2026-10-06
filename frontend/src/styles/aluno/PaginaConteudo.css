@@ -51,7 +51,7 @@
   margin-bottom: 22px;
   padding: 24px 26px;
 
-  border-radius: 23px;
+  border-radius: var(--radius-xl);
 
   background:
     linear-gradient(
@@ -147,7 +147,7 @@
     1px solid
     rgba(255, 255, 255, 0.18);
 
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 
   background:
     rgba(255, 255, 255, 0.1);
@@ -179,7 +179,7 @@
     1px solid
     rgba(255, 255, 255, 0.14);
 
-  border-radius: 17px;
+  border-radius: var(--radius-lg);
 
   background:
     rgba(255, 255, 255, 0.12);
@@ -277,7 +277,7 @@
 
 .pagina-content-block {
   padding: 22px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-content-block h2 {
@@ -370,7 +370,7 @@
 
   flex: 0 0 42px;
 
-  border-radius: 13px;
+  border-radius: var(--radius-md);
 
   background:
     rgba(255, 255, 255, 0.82);
@@ -414,7 +414,7 @@
 
   overflow: hidden;
 
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 
   background: #0b1721;
 }
@@ -442,7 +442,7 @@
 
   object-fit: contain;
 
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 
   background: var(--paper);
 }
@@ -473,7 +473,7 @@
     1px solid
     rgba(33, 150, 243, 0.13);
 
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 
   background:
     rgba(33, 150, 243, 0.045);
@@ -507,7 +507,7 @@
 
   flex: 0 0 auto;
 
-  border-radius: 13px;
+  border-radius: var(--radius-md);
 
   background: var(--paper);
 
@@ -587,7 +587,7 @@
 
   border: 0;
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   padding: 10px 13px;
 
@@ -637,7 +637,7 @@
 .pagina-id-list span {
   padding: 4px 7px;
 
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
 
   background: var(--paper);
 
@@ -690,7 +690,7 @@
 
   flex: 0 0 27px;
 
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 
   background: var(--paper);
 
@@ -718,7 +718,7 @@
 .pagina-flashcards-loading {
   padding: 16px;
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 
   background: #f6fafe;
 
@@ -738,7 +738,7 @@
 
   padding: 5px 8px;
 
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 
   background: var(--paper);
 
@@ -765,7 +765,7 @@
     1px solid
     rgba(33, 150, 243, 0.14);
 
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 
   background:
     linear-gradient(
@@ -888,7 +888,7 @@
 .pagina-aside-card {
   padding: 19px;
 
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-aside-label {
@@ -941,7 +941,7 @@
 
   border: 0;
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   background: var(--ink);
 
@@ -1034,7 +1034,7 @@
     1px dashed
     rgba(13, 71, 161, 0.16);
 
-  border-radius: 19px;
+  border-radius: var(--radius-lg);
 
   background:
     rgba(255, 255, 255, 0.75);
@@ -1053,7 +1053,7 @@
 
   margin-bottom: 4px;
 
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 
   background: var(--paper);
 
@@ -1084,7 +1084,7 @@
 .pagina-block-placeholder {
   padding: 20px;
 
-  border-radius: 13px;
+  border-radius: var(--radius-md);
 
   background: #f6fafe;
 
@@ -1102,7 +1102,7 @@
 
   overflow-x: auto;
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 
   background: #f5f8fb;
 
@@ -1123,7 +1123,7 @@
 .pagina-questions-loading {
   padding: 16px;
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 
   background: #f6fafe;
 
@@ -1143,7 +1143,7 @@
     1px solid
     rgba(193, 70, 47, 0.18);
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   background: #fff5f3;
 
@@ -1166,7 +1166,7 @@
 
   padding: 9px 11px;
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   background: #f6fafe;
 
@@ -1196,7 +1196,7 @@
     1px solid
     rgba(13, 71, 161, 0.09);
 
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 
   background: var(--card);
 
@@ -1299,7 +1299,7 @@
     1px solid
     rgba(13, 71, 161, 0.09);
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   background: var(--card);
 
@@ -1364,7 +1364,7 @@
 
   flex: 0 0 28px;
 
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 
   background: #edf5fb;
 
@@ -1437,7 +1437,7 @@
 
   border: 0;
 
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 
   background: var(--ink);
 
@@ -1482,7 +1482,7 @@
 
   padding: 15px;
 
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 
   background:
     linear-gradient(
@@ -1590,7 +1590,7 @@
 
   margin: 14px 0 15px;
 
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
 
   background: #edf5fa;
 
@@ -1636,7 +1636,7 @@
     1px solid
     rgba(13, 71, 161, 0.07);
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 
   background: #f6fafe;
 
@@ -1697,7 +1697,7 @@
     1px solid
     rgba(13, 71, 161, 0.12);
 
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 
   background: var(--card);
 
@@ -1814,7 +1814,7 @@
   .pagina-hero {
     padding: 20px;
 
-    border-radius: 20px;
+    border-radius: var(--radius-lg);
   }
 
   .pagina-hero-top {
@@ -1847,7 +1847,7 @@
   .pagina-content-block {
     padding: 18px;
 
-    border-radius: 16px;
+    border-radius: var(--radius-md);
   }
 
   .pagina-flashcard {
@@ -2037,7 +2037,7 @@
 .dashboard-sem-sidebar .pagina-hero {
   margin-bottom: 28px;
   padding: 32px 36px;
-  border-radius: 26px;
+  border-radius: var(--radius-2xl);
   box-shadow: 0 20px 42px -28px rgba(13, 71, 161, 0.55);
 }
 
@@ -2063,7 +2063,7 @@
   width: 68px;
   height: 68px;
   flex-basis: 68px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .dashboard-sem-sidebar .pagina-kicker {
@@ -2094,7 +2094,7 @@
 .dashboard-sem-sidebar .pagina-content-block,
 .dashboard-sem-sidebar .pagina-progress-card,
 .dashboard-sem-sidebar .pagina-aside-card {
-  border-radius: 21px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 12px 30px -24px rgba(13, 71, 161, 0.5);
 }
 
@@ -2118,18 +2118,18 @@
 }
 
 .dashboard-sem-sidebar .pagina-video {
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .dashboard-sem-sidebar .pagina-image img {
   max-height: 680px;
-  border-radius: 17px;
+  border-radius: var(--radius-lg);
 }
 
 .dashboard-sem-sidebar .pagina-flashcard {
   min-height: 285px;
   padding: 42px;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
 }
 
 .dashboard-sem-sidebar .pagina-flashcard-content strong {
@@ -2196,7 +2196,7 @@
 
   .dashboard-sem-sidebar .pagina-hero {
     padding: 24px 22px;
-    border-radius: 22px;
+    border-radius: var(--radius-xl);
   }
 
   .dashboard-sem-sidebar .pagina-hero-icon {
@@ -2237,7 +2237,7 @@
 .pagina-hero {
   margin-bottom: 28px;
   padding: 32px 36px;
-  border-radius: 26px;
+  border-radius: var(--radius-2xl);
 }
 
 .pagina-hero-top {
@@ -2264,7 +2264,7 @@
   width: 66px;
   height: 66px;
   flex-basis: 66px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-kicker {
@@ -2302,7 +2302,7 @@
 
 .pagina-content-block {
   padding: 28px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-content-block h2 {
@@ -2342,12 +2342,12 @@
 }
 
 .pagina-video {
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-image img {
   max-height: 680px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-image figcaption {
@@ -2358,7 +2358,7 @@
 .pagina-resource {
   gap: 14px;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
 }
 
 .pagina-resource-copy strong {
@@ -2390,7 +2390,7 @@
 
 .pagina-secondary-button {
   padding: 11px 15px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
 }
 
@@ -2408,7 +2408,7 @@
   width: 30px;
   height: 30px;
   flex-basis: 30px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
 }
 
@@ -2425,7 +2425,7 @@
 .pagina-flashcard {
   min-height: 300px;
   padding: 42px;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
 }
 
 .pagina-flashcard-label {
@@ -2451,7 +2451,7 @@
 .pagina-progress-card,
 .pagina-aside-card {
   padding: 22px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-aside-label {
@@ -2471,7 +2471,7 @@
 
 .pagina-study-button {
   padding: 12px 13px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
 }
 
@@ -2492,13 +2492,13 @@
 .pagina-state-card {
   min-height: 300px;
   padding: 42px;
-  border-radius: 21px;
+  border-radius: var(--radius-xl);
 }
 
 .pagina-state-icon {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
 }
 
 .pagina-state-card strong {
@@ -2530,7 +2530,7 @@
 
   .pagina-hero {
     padding: 26px 22px;
-    border-radius: 22px;
+    border-radius: var(--radius-xl);
   }
 
   .pagina-hero-top {
@@ -2602,7 +2602,7 @@
 
 .pagina-content-block {
   padding: 28px 30px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-content-block h2 {
@@ -2712,7 +2712,7 @@
 .pagina-progress-card,
 .pagina-aside-card {
   padding: 23px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .pagina-progress-card strong {
@@ -2761,7 +2761,7 @@
 
   .pagina-content-block {
     padding: 22px 20px;
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
   }
 
   .pagina-content-block h2 {

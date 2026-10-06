@@ -46,7 +46,7 @@
 }
 
 .cronograma-alerta {
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: 14px 18px;
   margin-bottom: 20px;
   font-size: 0.94rem;
@@ -73,7 +73,7 @@
 .cronograma-admin-card {
   background: var(--card);
   border: 1px solid #e7eaf0;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 12px 30px rgba(25, 34, 52, 0.055);
 }
 
@@ -113,7 +113,7 @@
 .cronograma-status-chip {
   flex: 0 0 auto;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #edf8f1;
   color: #25613c;
   font-size: 0.78rem;
@@ -145,7 +145,7 @@
   box-sizing: border-box;
   border: 1px solid #dfe3e9;
   background: #fbfcfd;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 13px 14px;
   color: #242a32;
   font: inherit;
@@ -176,7 +176,7 @@
 
 .cronograma-estatisticas > div {
   padding: 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: #f6f8fa;
   border: 1px solid #edf0f3;
 }
@@ -207,7 +207,7 @@
   justify-content: center;
   gap: 5px;
   padding: 12px;
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   border: 1px solid #e2e6eb;
   background: #fbfcfd;
   text-align: left;
@@ -242,7 +242,7 @@
 
 .cronograma-semana-block {
   border: 1px solid #e5e8ed;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -280,7 +280,7 @@
   align-items: center;
   padding: 12px;
   border: 1px solid #eceff3;
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   background: var(--card);
 }
 
@@ -289,7 +289,7 @@
   height: 32px;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #f0f3f7;
   color: #565e69;
   font-weight: 800;
@@ -306,7 +306,7 @@
   box-sizing: border-box;
   border: 1px solid #dfe3e9;
   background: #fbfcfd;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 12px 10px;
   color: #242a32;
   font: inherit;
@@ -328,7 +328,7 @@
   width: 38px;
   height: 38px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #fff1f1;
   color: #9b3f3f;
   font-size: 1.35rem;
@@ -356,7 +356,7 @@
 .cronograma-item-count {
   flex: 0 0 auto;
   padding: 7px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #f4f6f8;
   color: #5b6470;
   font-size: 0.78rem;
@@ -384,7 +384,7 @@
 
 .cronograma-btn {
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 11px 15px;
   font: inherit;
   font-size: 0.86rem;
@@ -446,7 +446,7 @@
 .cronograma-modal {
   width: min(520px, 100%);
   padding: 28px;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow: 0 24px 70px rgba(14, 20, 30, 0.2);
 }
@@ -540,7 +540,7 @@
   bottom: -1px;
   width: 86px;
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent);
 }
 
@@ -572,7 +572,7 @@
 .cronograma-alerta {
   margin: 0 0 18px;
   padding: 13px 16px;
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 700;
 }
@@ -595,7 +595,7 @@
 
 .cronograma-admin-card {
   border: 1px solid rgba(13, 71, 161, .11);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--card);
   box-shadow: 0 10px 28px -24px rgba(13, 71, 161, .62);
 }
@@ -663,7 +663,7 @@
 .cronograma-item-select-wrap select {
   min-height: 44px;
   border: 1px solid rgba(13, 71, 161, .14);
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   background: #fbfdff;
   color: var(--ink);
   font-size: 13px;
@@ -698,7 +698,7 @@
   overflow: hidden;
   padding: 15px 16px;
   border: 1px solid rgba(13,71,161,.10);
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   background: #f7fbff;
 }
 
@@ -739,7 +739,7 @@
   min-height: 82px;
   padding: 12px 13px;
   border: 1px solid rgba(13,71,161,.11);
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   background: #fbfdff;
   box-shadow: 0 5px 14px -14px rgba(13,71,161,.7);
 }
@@ -774,7 +774,7 @@
 
 .cronograma-semana-block {
   border: 1px solid rgba(13,71,161,.12);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background: var(--card);
   box-shadow: 0 7px 20px -20px rgba(13,71,161,.7);
 }
@@ -807,7 +807,7 @@
   gap: 10px;
   padding: 10px;
   border: 1px solid rgba(13,71,161,.10);
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   background: var(--card);
 }
 
@@ -819,7 +819,7 @@
 .cronograma-item-numero {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #e9f3ff;
   color: var(--accent-dark);
   font-family: "Space Grotesk", sans-serif;
@@ -848,7 +848,7 @@
   width: 36px;
   height: 36px;
   border: 1px solid #f0d7d4;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #fff7f5;
   color: var(--error);
   font-size: 19px;
@@ -883,7 +883,7 @@
 }
 
 .cronograma-btn {
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
 }
 
@@ -936,7 +936,7 @@
   width: min(520px, 100%);
   padding: 26px;
   border: 1px solid rgba(13,71,161,.12);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 28px 75px -34px rgba(13,71,161,.6);
 }
 

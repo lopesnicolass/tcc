@@ -86,7 +86,7 @@ html[data-theme='dark'] .dashboard-content {
   min-height: 42px;
   padding: 0 13px 0 10px;
   border: 1px solid rgba(13, 71, 161, 0.12);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.96);
   color: var(--ink);
   box-shadow: 0 12px 30px rgba(13, 71, 161, 0.18);

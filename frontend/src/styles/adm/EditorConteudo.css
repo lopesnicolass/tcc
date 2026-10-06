@@ -33,7 +33,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 12px;
   font-weight: 800;
@@ -81,7 +81,7 @@
   gap: 7px;
   margin-bottom: 15px;
   padding: 11px 13px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 11px;
   font-weight: 700;
 }
@@ -181,7 +181,7 @@
   box-sizing: border-box;
   width: 100%;
   border: 1px solid var(--line, #e1e6e3);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   outline: none;
   background: var(--card);
   color: var(--ink, #173A5E);
@@ -227,7 +227,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
   color: var(--muted, #6B849A);
   font-size: 10px;
@@ -243,7 +243,7 @@
 .editor-block {
   overflow: hidden;
   border: 1px solid var(--line, #e1e6e3);
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   background: var(--card);
 }
 
@@ -269,7 +269,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
   color: var(--editor-muted);
   font-size: 9px;
@@ -282,7 +282,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: rgba(49, 131, 94, 0.1);
   color: var(--accent-dark, var(--ink));
 }
@@ -314,7 +314,7 @@
   justify-content: center;
   padding: 0;
   border: 1px solid var(--line, #e1e6e3);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--editor-text);
   cursor: pointer;
@@ -350,7 +350,7 @@
 .editor-block-placeholder {
   padding: 18px;
   border: 1px dashed var(--editor-border);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
   color: var(--editor-muted);
   font-size: 10px;
@@ -363,7 +363,7 @@
   gap: 4px;
   padding: 12px 13px;
   border-left: 3px solid var(--editor-success-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--editor-success-bg);
 }
 
@@ -390,7 +390,7 @@
 .editor-block-video {
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
 }
 
@@ -405,7 +405,7 @@
   width: 100%;
   max-height: 320px;
   object-fit: contain;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
 }
 
@@ -428,7 +428,7 @@
   display: inline-flex;
   margin-top: 9px;
   padding: 6px 8px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
   color: var(--editor-text);
   font-size: 9px;
@@ -442,7 +442,7 @@
   margin-top: 8px;
   padding: 9px 11px;
   border: 1px solid var(--editor-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--editor-surface);
   color: var(--accent-dark, var(--ink));
   font-size: 10px;
@@ -472,7 +472,7 @@
   gap: 8px !important;
   padding: 8px !important;
   border: 1px solid transparent !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-sm) !important;
   background: var(--card) !important;
   color: inherit !important;
   text-align: left !important;
@@ -496,7 +496,7 @@
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0;
-  border-radius: 7px !important;
+  border-radius: var(--radius-sm) !important;
   background: var(--editor-surface) !important;
   color: var(--editor-text) !important;
 }
@@ -555,7 +555,7 @@
   width: 50px;
   height: 50px;
   margin-bottom: 10px;
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   background: var(--editor-surface);
   color: var(--accent-dark, var(--ink));
 }
@@ -636,7 +636,7 @@
   box-sizing: border-box;
   padding: 0 9px;
   border: 1px solid var(--line, #e1e6e3);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   outline: none;
   font-family: inherit;
   font-size: 11px;
@@ -647,7 +647,7 @@
 .editor-preview {
   overflow: hidden;
   border: 1px solid var(--line, #e1e6e3);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-preview > span {
@@ -691,7 +691,7 @@
   max-height: calc(100vh - 44px);
   overflow: hidden;
   border: 1px solid var(--editor-border);
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   background: var(--card);
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.16);
 }
@@ -805,7 +805,7 @@
   margin: 0 !important;
 
   border: 1px solid transparent !important;
-  border-radius: 10px !important;
+  border-radius: var(--radius-sm) !important;
 
   background: var(--card) !important;
   color: var(--editor-info) !important;
@@ -838,7 +838,7 @@
   align-items: center !important;
   justify-content: center !important;
 
-  border-radius: 8px !important;
+  border-radius: var(--radius-sm) !important;
 
   background: var(--editor-surface) !important;
   color: var(--editor-text) !important;
@@ -933,7 +933,7 @@
   padding: 0 10px;
 
   border: 1px solid var(--editor-border);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 
   background: var(--card);
   color: var(--editor-muted);
@@ -977,7 +977,7 @@
   padding: 9px !important;
 
   border: 1px solid var(--editor-border) !important;
-  border-radius: 9px !important;
+  border-radius: var(--radius-sm) !important;
 
   background: var(--card) !important;
   color: var(--editor-ink) !important;
@@ -1008,7 +1008,7 @@
   justify-content: center;
 
   border: 1px solid var(--editor-border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 
   background: var(--card);
   color: #fff;
@@ -1045,7 +1045,7 @@
   padding: 18px 10px;
 
   border: 1px dashed var(--editor-border);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 
   background: var(--editor-surface);
 
@@ -1054,7 +1054,7 @@
   text-align: center;
 }
 /* Refinamento visual TENNA — construtor de aula */
-.editor-page-header{padding-bottom:2px}.editor-page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.editor-layout{grid-template-columns:minmax(0,1fr) 300px!important;gap:18px!important}.editor-panel{border-radius:18px!important;border-color:rgba(13,71,161,.10)!important;box-shadow:0 9px 28px -26px rgba(13,71,161,.55)!important}.editor-type.selected{border-color:var(--accent)!important;background:var(--paper)!important;box-shadow:0 6px 18px -14px rgba(13,71,161,.45)}.editor-block{border-radius:15px!important;border-color:rgba(13,71,161,.10)!important}.editor-block-icon{background:var(--paper)!important;color:var(--accent-dark)!important}.editor-add-button{border-color:rgba(33,150,243,.22)!important;color:var(--accent-dark)!important;background:var(--editor-info-bg)!important}.editor-modal-overlay{background:rgba(9,40,72,.35)!important;backdrop-filter:blur(3px)}.editor-modal{border-radius:20px!important;border-color:rgba(13,71,161,.12)!important;box-shadow:0 25px 70px -30px rgba(13,71,161,.55)!important}@media(max-width:850px){.editor-layout{grid-template-columns:1fr!important}.editor-sidebar{position:static}}
+.editor-page-header{padding-bottom:2px}.editor-page-header h1{font-family:"Space Grotesk",sans-serif;letter-spacing:-.04em}.editor-layout{grid-template-columns:minmax(0,1fr) 300px!important;gap:18px!important}.editor-panel{border-radius:var(--radius-lg)!important;border-color:rgba(13,71,161,.10)!important;box-shadow:0 9px 28px -26px rgba(13,71,161,.55)!important}.editor-type.selected{border-color:var(--accent)!important;background:var(--paper)!important;box-shadow:0 6px 18px -14px rgba(13,71,161,.45)}.editor-block{border-radius:var(--radius-md)!important;border-color:rgba(13,71,161,.10)!important}.editor-block-icon{background:var(--paper)!important;color:var(--accent-dark)!important}.editor-add-button{border-color:rgba(33,150,243,.22)!important;color:var(--accent-dark)!important;background:var(--editor-info-bg)!important}.editor-modal-overlay{background:rgba(9,40,72,.35)!important;backdrop-filter:blur(3px)}.editor-modal{border-radius:var(--radius-lg)!important;border-color:rgba(13,71,161,.12)!important;box-shadow:0 25px 70px -30px rgba(13,71,161,.55)!important}@media(max-width:850px){.editor-layout{grid-template-columns:1fr!important}.editor-sidebar{position:static}}
 
 /* =========================================================
    PUBLICAÇÃO DA AULA
@@ -1074,7 +1074,7 @@
   min-height: 36px;
   padding: 0 11px;
   border: 1px solid var(--line, #dce5df);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--muted, #6B849A);
   font-size: 10px;
@@ -1156,7 +1156,7 @@
 
 .editor-panel {
   padding: 24px !important;
-  border-radius: 20px !important;
+  border-radius: var(--radius-lg) !important;
 }
 
 .editor-panel-title {
@@ -1191,7 +1191,7 @@
   height: 46px;
   padding: 0 14px;
   font-size: 15px !important;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-field textarea {
@@ -1199,7 +1199,7 @@
   padding: 13px 14px;
   font-size: 15px !important;
   line-height: 1.55;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-field-help {
@@ -1219,13 +1219,13 @@
 .editor-secondary-button {
   min-height: 44px;
   padding: 0 16px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-danger-button {
   min-height: 44px;
   padding: 0 14px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-header-actions {
@@ -1235,7 +1235,7 @@
 .editor-publication-status {
   min-height: 44px;
   padding: 0 14px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font-size: 13px !important;
 }
 
@@ -1243,7 +1243,7 @@
 .editor-error {
   margin-bottom: 18px;
   padding: 13px 15px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: 14px !important;
   line-height: 1.5;
 }
@@ -1253,7 +1253,7 @@
 }
 
 .editor-block {
-  border-radius: 15px !important;
+  border-radius: var(--radius-md) !important;
 }
 
 .editor-block-header {
@@ -1268,14 +1268,14 @@
 .editor-block-number {
   width: 31px;
   height: 31px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font-size: 11px;
 }
 
 .editor-block-icon {
   width: 35px;
   height: 35px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-block-name strong {
@@ -1294,7 +1294,7 @@
 .editor-icon-button {
   width: 36px;
   height: 36px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-block-body {
@@ -1313,7 +1313,7 @@
 
 .editor-block-placeholder {
   padding: 22px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   font-size: 13px !important;
   line-height: 1.5;
 }
@@ -1321,7 +1321,7 @@
 .editor-block-highlight {
   gap: 6px;
   padding: 14px 15px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-block-highlight strong {
@@ -1340,14 +1340,14 @@
 
 .editor-preview-tag {
   padding: 7px 9px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 11px !important;
 }
 
 .editor-resource {
   padding: 10px 12px;
   font-size: 13px !important;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-sidebar-description {
@@ -1365,14 +1365,14 @@
   min-height: 60px;
   gap: 11px !important;
   padding: 11px 12px !important;
-  border-radius: 11px !important;
+  border-radius: var(--radius-sm) !important;
 }
 
 .editor-type > span {
   width: 36px !important;
   min-width: 36px !important;
   height: 36px !important;
-  border-radius: 9px !important;
+  border-radius: var(--radius-sm) !important;
 }
 
 .editor-type strong {
@@ -1404,7 +1404,7 @@
 .editor-empty-icon {
   width: 58px;
   height: 58px;
-  border-radius: 15px;
+  border-radius: var(--radius-md);
 }
 
 .editor-empty strong,
@@ -1423,7 +1423,7 @@
 .editor-add-button {
   min-height: 46px;
   margin-top: 14px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-items {
@@ -1452,12 +1452,12 @@
 .editor-item-row input {
   height: 43px;
   padding: 0 11px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
 }
 
 .editor-preview {
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-preview > span {
@@ -1475,7 +1475,7 @@
 
 .editor-modal {
   width: min(780px, 100%);
-  border-radius: 20px !important;
+  border-radius: var(--radius-lg) !important;
 }
 
 .editor-modal-header {
@@ -1511,7 +1511,7 @@
 .editor-search {
   height: 44px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .editor-search input {
@@ -1526,7 +1526,7 @@
 .editor-related-item {
   gap: 10px !important;
   padding: 11px !important;
-  border-radius: 10px !important;
+  border-radius: var(--radius-sm) !important;
 }
 
 .editor-related-check {
@@ -1546,7 +1546,7 @@
 
 .editor-related-empty {
   padding: 22px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
 }
 

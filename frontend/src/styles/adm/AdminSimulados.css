@@ -5,7 +5,7 @@
 .admin-list{ display:flex; flex-direction:column; gap:12px; }
 
 .admin-list-item{
-  background:var(--card); border-radius:16px; padding:16px 22px;
+  background:var(--card); border-radius:var(--radius-md); padding:16px 22px;
   display:flex; align-items:center; justify-content:space-between;
   box-shadow:0 1px 2px rgba(13,71,161,0.05);
   font-weight:600; color:var(--ink); font-size:16px;
@@ -16,7 +16,7 @@
 
 .admin-edit-btn{
   background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);
-  border-radius:12px; padding:8px 16px; font-size:13.5px; font-weight:600; cursor:pointer;
+  border-radius:var(--radius-sm); padding:8px 16px; font-size:13.5px; font-weight:600; cursor:pointer;
   transition:border-color .15s ease, color .15s ease, transform .18s var(--bouncy);
 }
 
@@ -44,7 +44,7 @@
 .simulado-questoes-header{ margin-top:20px; }
 .simulado-question-count{ margin-top:15px; }
 .simulado-question-list{ max-height:220px; overflow-y:auto; }
-.simulado-question-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:8px; }
+.simulado-question-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:var(--radius-sm); }
 .simulado-question-actions{ display:flex; gap:8px; }
 .simulado-edit-question,.simulado-remove-question{ border:none; background:transparent; cursor:pointer; }
 .simulado-edit-question{ color:#2563eb; }

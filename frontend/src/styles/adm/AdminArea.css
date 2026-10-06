@@ -242,7 +242,7 @@
 
 .admin-area .stat-card {
   padding: 22px 22px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .admin-area .stat-value {
@@ -379,7 +379,7 @@
 
 .admin-area .admin-provas-card {
   padding: 30px 32px;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
 }
 
 .admin-area .admin-provas-card-header h2 {
@@ -432,7 +432,7 @@
 
 .admin-area .cronograma-admin-card {
   padding: 26px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
 }
 
 .admin-area .cronograma-card-header h2,

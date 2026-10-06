@@ -39,7 +39,7 @@ form{display:flex; flex-direction:column; gap:18px;}
 .btn-primary{
   margin-top:4px;
   background:var(--ink); color:#fff; border:none;
-  border-radius:14px; padding:15px;
+  border-radius:var(--radius-md); padding:15px;
   font-family:"IBM Plex Sans"; font-size:16px; font-weight:600;
   cursor:pointer; position:relative; overflow:hidden;
   transition:background .18s ease, transform .18s var(--bouncy), box-shadow .18s ease;
