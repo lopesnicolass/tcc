@@ -16,6 +16,37 @@
 
 html[data-theme='dark'] {
   color-scheme: dark;
+
+  /* Tokens semânticos do sistema visual */
+  --color-primary-900: #071f47;
+  --color-primary-800: #8fc4ff;
+  --color-primary-600: #5db0ff;
+  --color-primary-500: #42a5f5;
+  --color-primary-300: #2d5f94;
+  --color-primary-100: #102640;
+
+  --color-background: #0b1220;
+  --color-surface: #121c2b;
+  --color-surface-soft: #172538;
+  --color-surface-muted: #1c2b40;
+
+  --color-text: #e7eef7;
+  --color-text-soft: rgba(201, 222, 246, 0.76);
+  --color-text-muted: rgba(200, 216, 234, 0.64);
+  --color-text-on-primary: #061425;
+
+  --color-border: rgba(157, 190, 224, 0.16);
+  --color-border-strong: rgba(157, 190, 224, 0.25);
+
+  --color-success: #7bd7a7;
+  --color-success-soft: rgba(123, 215, 167, 0.12);
+  --color-warning: #ffd66e;
+  --color-warning-soft: rgba(255, 214, 110, 0.12);
+  --color-danger: #ff927f;
+  --color-danger-soft: rgba(255, 146, 127, 0.12);
+  --color-info: #8fc4ff;
+  --color-info-soft: rgba(143, 196, 255, 0.12);
+
   --ink: #8fc4ff;
   --ink-soft: rgba(201, 222, 246, 0.76);
   --paper: #0b1220;
@@ -104,6 +135,7 @@ html[data-theme='dark'] .theme-toggle-icon {
 html[data-theme='dark'] .sidebar {
   background: #09284f;
   color: #fff;
+  border-right-color: rgba(143,196,255,.10);
 }
 
 html[data-theme='dark'] .sidebar-link {
@@ -116,8 +148,10 @@ html[data-theme='dark'] .sidebar-link:hover {
 }
 
 html[data-theme='dark'] .sidebar-link.active {
-  background: #2389df;
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.12);
   color: #fff;
+  box-shadow: inset 3px 0 0 #ffd66e, 0 8px 18px -14px rgba(0,0,0,.5);
 }
 
 html[data-theme='dark'] .admin-preview-banner {
@@ -369,7 +403,7 @@ html[data-theme='dark'] .landing-features {
 
 html[data-theme='dark'] .landing-subject-card,
 html[data-theme='dark'] .landing-feature-card,
-html[data-theme='dark'] .landing-step,
+html[data-theme='dark'] .landing-step {
   background: #121c2b;
   border-color: var(--dark-border);
   color: var(--dark-text);
@@ -557,4 +591,29 @@ html[data-theme='dark'] .terrario-page .terrario-game-top {
     min-height: 42px;
     width: 100%;
   }
+}
+
+/* ---------------------------------------------------------
+   TOKENS DO EDITOR DE CONTEÚDO (admin) — modo escuro
+   --------------------------------------------------------- */
+html[data-theme='dark'] {
+  --editor-ink: #c9dcef;
+  --editor-text: #a9b8b0;
+  --editor-muted: #7c8a83;
+  --editor-surface: #16211c;
+  --editor-border: rgba(140, 170, 155, 0.22);
+
+  --editor-success: #6fcf9a;
+  --editor-success-bg: #112a1d;
+  --editor-success-border: #2f6b4a;
+
+  --editor-info: #7eb6ff;
+  --editor-info-bg: #0f2033;
+  --editor-info-border: #27486b;
+
+  --editor-danger-bg: #2c1513;
+  --editor-danger-border: #6b2f28;
+
+  --editor-warning-bg: #2b2213;
+  --editor-warning-border: #6b5228;
 }

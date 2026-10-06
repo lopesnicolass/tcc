@@ -1236,3 +1236,208 @@ html[data-theme="dark"] .conteudos-page .content-search-empty button:hover {
     transition-duration: .001ms !important;
   }
 }
+
+
+/* =========================================================
+   ETAPA 4 — CONTEÚDOS COMO TELA-MODELO
+   Refinamento alinhado ao Design System global.
+   ========================================================= */
+
+.conteudos-page {
+  box-sizing: border-box;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.conteudos-page .tenna-auto-intro {
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-900) 0%,
+    var(--color-primary-800) 62%,
+    var(--color-primary-500) 100%
+  );
+  box-shadow: var(--shadow-md);
+}
+
+.conteudos-page .tenna-auto-kicker {
+  color: var(--color-primary-300);
+}
+
+.conteudos-page .tenna-auto-intro h2 span {
+  color: var(--color-sunshine);
+}
+
+.conteudos-page .content-progress-card {
+  border-color: var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.conteudos-page .content-progress-icon {
+  background: var(--color-surface-muted);
+}
+
+.conteudos-page .content-progress-track,
+.conteudos-page .content-subject-track {
+  background: var(--color-surface-muted);
+}
+
+.conteudos-page .content-toolbar {
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.conteudos-page .content-search-wrap,
+.conteudos-page .content-toolbar select,
+.conteudos-page .content-reset-btn {
+  min-height: 46px;
+  height: 46px;
+  border-color: var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.conteudos-page .content-search-wrap {
+  padding-inline: var(--space-4);
+}
+
+.conteudos-page .content-search-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.conteudos-page .content-search-wrap input {
+  font-size: var(--font-size-sm);
+}
+
+.conteudos-page .content-reset-btn {
+  padding-inline: var(--space-4);
+  color: var(--color-text-soft);
+}
+
+.conteudos-page .content-reset-btn:hover {
+  background: var(--color-surface-soft);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary-800);
+}
+
+.conteudos-page .content-filter-summary {
+  margin-top: calc(var(--space-3) * -1);
+  padding: var(--space-3) var(--space-4);
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.conteudos-page .content-subject-list {
+  gap: var(--space-4);
+}
+
+.conteudos-page .content-subject-card {
+  border-color: var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.conteudos-page .content-subject-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.conteudos-page .content-subject-header {
+  min-height: 92px;
+  padding: var(--space-5) var(--space-6);
+}
+
+.conteudos-page .content-subject-icon {
+  border-radius: var(--radius-md);
+}
+
+.conteudos-page .content-topic-list {
+  border-top-color: var(--color-border);
+  background: var(--color-surface-soft);
+}
+
+.conteudos-page .content-topic {
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.conteudos-page .content-topic:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.conteudos-page .content-topic-check {
+  border-color: var(--color-border-strong);
+}
+
+.conteudos-page .content-topic-number {
+  background: var(--color-surface-muted);
+}
+
+.conteudos-page .content-topic-search,
+.conteudos-page .content-search-empty-icon {
+  background: var(--color-surface-muted);
+}
+
+.conteudos-page .content-search-empty {
+  border-color: var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.conteudos-page .content-search-empty button {
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 820px) {
+  .conteudos-page .tenna-auto-intro,
+  .conteudos-page .content-progress-card {
+    border-radius: var(--radius-xl);
+  }
+}
+
+@media (max-width: 560px) {
+  .conteudos-page .tenna-auto-intro {
+    border-radius: var(--radius-lg);
+  }
+
+  .conteudos-page .content-subject-card,
+  .conteudos-page .content-search-empty {
+    border-radius: var(--radius-lg);
+  }
+}
+
+html[data-theme="dark"] .conteudos-page .content-search-empty,
+html[data-theme="dark"] .conteudos-page .content-subject-card,
+html[data-theme="dark"] .conteudos-page .content-topic,
+html[data-theme="dark"] .conteudos-page .content-progress-card,
+html[data-theme="dark"] .conteudos-page .content-search-wrap,
+html[data-theme="dark"] .conteudos-page .content-toolbar select,
+html[data-theme="dark"] .conteudos-page .content-reset-btn {
+  border-color: var(--dark-border);
+  background: var(--dark-surface);
+}
+
+html[data-theme="dark"] .conteudos-page .content-topic-list,
+html[data-theme="dark"] .conteudos-page .content-filter-summary,
+html[data-theme="dark"] .conteudos-page .content-progress-icon,
+html[data-theme="dark"] .conteudos-page .content-topic-number,
+html[data-theme="dark"] .conteudos-page .content-search-empty-icon {
+  background: var(--dark-surface-2);
+}
+
+html[data-theme="dark"] .conteudos-page .content-reset-btn {
+  color: var(--dark-text-soft);
+}
+
+html[data-theme="dark"] .conteudos-page .content-reset-btn:hover {
+  background: var(--dark-surface-2);
+  color: var(--dark-text);
+}

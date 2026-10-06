@@ -1,0 +1,331 @@
+/* =========================================================
+   TENNA — SISTEMA VISUAL GLOBAL
+   Camada base para manter o frontend consistente.
+   As variáveis legadas (--ink, --card, --paper...) continuam
+   sendo suportadas para não exigir refatoração das páginas de uma só vez.
+   ========================================================= */
+
+:root {
+  /* ---------- Tipografia ---------- */
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+  --font-hand: "Kalam", cursive;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+
+  --line-height-tight: 1.15;
+  --line-height-snug: 1.35;
+  --line-height-body: 1.55;
+
+  /* ---------- Paleta ---------- */
+  --color-primary-900: #092f70;
+  --color-primary-800: #0d47a1;
+  --color-primary-600: #176dcc;
+  --color-primary-500: #2196f3;
+  --color-primary-300: #90caf9;
+  --color-primary-100: #e3f2fd;
+
+  --color-coral: #ff8a65;
+  --color-sunshine: #ffc93c;
+
+  --color-background: #e3f2fd;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f6faff;
+  --color-surface-muted: #edf5fc;
+
+  --color-text: #183a5d;
+  --color-text-soft: rgba(13, 71, 161, 0.72);
+  --color-text-muted: rgba(13, 71, 161, 0.55);
+  --color-text-on-primary: #ffffff;
+
+  --color-border: rgba(13, 71, 161, 0.16);
+  --color-border-strong: rgba(13, 71, 161, 0.24);
+
+  --color-success: #26734d;
+  --color-success-soft: #eaf6ef;
+  --color-warning: #b7791f;
+  --color-warning-soft: #fcf7ee;
+  --color-danger: #c1462f;
+  --color-danger-soft: #fff1f0;
+  --color-info: #174f9c;
+  --color-info-soft: #f1f8ff;
+
+  /* ---------- Espaçamento ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* ---------- Raios ---------- */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+
+  /* ---------- Sombras ---------- */
+  --shadow-xs: 0 1px 2px rgba(13, 71, 161, 0.05);
+  --shadow-sm: 0 5px 16px -12px rgba(13, 71, 161, 0.28);
+  --shadow-md: 0 14px 30px -18px rgba(13, 71, 161, 0.28);
+  --shadow-lg: 0 24px 50px -28px rgba(13, 71, 161, 0.34);
+
+  /* ---------- Movimento ---------- */
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 140ms;
+  --duration-normal: 180ms;
+  --duration-slow: 260ms;
+
+  /* ---------- Compatibilidade com o CSS atual ---------- */
+  --ink: var(--color-primary-800);
+  --ink-soft: var(--color-text-soft);
+  --paper: var(--color-background);
+  --card: var(--color-surface);
+  --accent: var(--color-primary-500);
+  --accent-dark: var(--color-primary-800);
+  --accent-light: var(--color-primary-300);
+  --coral: var(--color-coral);
+  --sunshine: var(--color-sunshine);
+  --sky: var(--color-primary-300);
+  --line: var(--color-border);
+  --muted: var(--color-text-muted);
+  --error: var(--color-danger);
+  --bouncy: var(--ease-bouncy);
+
+  /* Aliases já utilizados em algumas telas */
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-soft);
+  --surface-3: var(--color-surface-muted);
+  --surface-muted: var(--color-surface-muted);
+  --text: var(--color-text);
+
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------
+   BASE GLOBAL
+   --------------------------------------------------------- */
+
+html {
+  min-width: 320px;
+  background: var(--color-background);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(33, 150, 243, 0.28);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--color-primary-800);
+}
+
+::selection {
+  background: rgba(33, 150, 243, 0.18);
+  color: var(--color-primary-900);
+}
+
+/* ---------------------------------------------------------
+   PRIMITIVAS REUTILIZÁVEIS
+   Usadas gradualmente nas próximas etapas sem quebrar as telas atuais.
+   --------------------------------------------------------- */
+
+.ui-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.ui-card--interactive {
+  transition:
+    transform var(--duration-normal) var(--ease-bouncy),
+    box-shadow var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard);
+}
+
+.ui-card--interactive:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.ui-btn {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform var(--duration-normal) var(--ease-bouncy),
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.ui-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ui-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.ui-btn--primary {
+  background: var(--color-primary-800);
+  color: var(--color-text-on-primary);
+  box-shadow: 0 8px 18px -10px rgba(13, 71, 161, 0.55);
+}
+
+.ui-btn--primary:hover {
+  background: var(--color-primary-900);
+}
+
+.ui-btn--secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-primary-800);
+}
+
+.ui-btn--secondary:hover {
+  background: var(--color-surface-soft);
+}
+
+.ui-btn--ghost {
+  background: transparent;
+  color: var(--color-primary-800);
+}
+
+.ui-btn--ghost:hover {
+  background: var(--color-surface-muted);
+}
+
+.ui-btn--danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.ui-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.ui-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ui-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.12);
+  outline: none;
+}
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ui-badge--info {
+  background: var(--color-info-soft);
+  color: var(--color-info);
+}
+
+.ui-badge--success {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+}
+
+.ui-badge--warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.ui-badge--danger {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* ---------------------------------------------------------
+   REDUÇÃO DE MOVIMENTO
+   --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

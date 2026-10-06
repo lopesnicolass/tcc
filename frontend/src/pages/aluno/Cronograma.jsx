@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../../styles/aluno/Cronograma.css';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
@@ -808,7 +809,11 @@ export default function Cronograma() {
 
         </div>
 
-        <div className="tenna-auto-intro-badge">
+        <Link
+          className="tenna-auto-intro-badge calendar-hero-link"
+          to="/plano-automatico"
+          title="Abrir plano automático"
+        >
 
           <Icon
             name="calendar"
@@ -816,20 +821,24 @@ export default function Cronograma() {
             color="#fff"
           />
 
-          <small>
-            Sua rotina
-          </small>
+          <span>
+            <small>
+              Sua rotina
+            </small>
+            <strong>
+              Ajustar plano
+            </strong>
+          </span>
 
-        </div>
+        </Link>
 
       </section>
 
       <div className="calendar-actions-row">
 
         <p>
-          Toque em um dia do calendário
-          para ver suas atividades e as datas importantes
-          do Vestibulinho.
+          Selecione um dia para acompanhar suas atividades,
+          datas importantes e o ritmo do seu mês.
         </p>
 
         <div className="calendar-actions-buttons">

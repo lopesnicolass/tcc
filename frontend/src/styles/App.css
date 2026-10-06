@@ -1,31 +1,12 @@
-:root{
-  --ink:#0D47A1;
-  --ink-soft:rgba(13,71,161,0.72);
-  --paper:#E3F2FD;
-  --card:#FFFFFF;
-  --accent:#2196F3;
-  --accent-dark:#0D47A1;
-  --accent-light:#90CAF9;
- --coral:#FF8A65;
---sunshine:#FFC93C;
---sky:#90CAF9;
-  --line:rgba(13,71,161,0.16);
-  --muted:rgba(13,71,161,0.55);
-  --error:#C1462F;
-  --bouncy:cubic-bezier(.34,1.56,.64,1);
-}
-
-*{box-sizing:border-box;}
-
-html,body,#root{margin:0;padding:0;min-height:100%;}
+html,body,#root{min-height:100%;}
 
 body{
-  font-family:"IBM Plex Sans", sans-serif;
+  font-family:var(--font-body);
   background:var(--paper);
   color:var(--ink);
 }
 
-h1,h2,h3,.brand{ font-family:"Space Grotesk", sans-serif; }
+h1,h2,h3,h4,h5,h6,.brand{ font-family:var(--font-display); }
 
 @keyframes spin{ to{ transform:rotate(360deg); } }
 
@@ -199,3 +180,34 @@ form{display:flex; flex-direction:column; gap:18px;}
 /* =========================================================
    REDUÇÃO DE MOVIMENTO
    ========================================================= */
+
+/* ---------------------------------------------------------
+   TOKENS DO EDITOR DE CONTEÚDO (admin)
+   Antes dessas variáveis, AdminConstrutorConteudos.css e
+   EditorConteudo.css tinham ~136 cores hex soltas, a maioria
+   usada uma única vez e quase idênticas entre si (deriva
+   acidental, não um sistema de cores intencional). Esses
+   tokens consolidam essas cores por função, preservando a
+   aparência atual (paleta verde-acinzentada neutra do editor).
+   --------------------------------------------------------- */
+:root {
+  --editor-ink: #173A5E;
+  --editor-text: #5E6B64;
+  --editor-muted: #8B978F;
+  --editor-surface: #F4F7F6;
+  --editor-border: #DCE5DF;
+
+  --editor-success: #26734D;
+  --editor-success-bg: #EAF6EF;
+  --editor-success-border: #8AC4A3;
+
+  --editor-info: #174F9C;
+  --editor-info-bg: #F1F8FF;
+  --editor-info-border: #CFE5F7;
+
+  --editor-danger-bg: #FFF1F0;
+  --editor-danger-border: #FFC9C5;
+
+  --editor-warning-bg: #FCF7EE;
+  --editor-warning-border: #C89545;
+}

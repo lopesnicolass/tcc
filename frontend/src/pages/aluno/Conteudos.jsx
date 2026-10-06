@@ -593,7 +593,7 @@ export default function Conteudos() {
   }
 
   return (
-    <div className="conteudos-page">
+    <div className="conteudos-page page-shell">
 
       <section className="tenna-auto-intro">
 
@@ -689,7 +689,7 @@ export default function Conteudos() {
 
         <div className="content-search-wrap">
 
-          <span aria-hidden="true">⌕</span>
+          <span className="content-search-icon" aria-hidden="true"><Icon name="search" size={18} /></span>
 
           <input
             value={busca}
@@ -742,7 +742,7 @@ export default function Conteudos() {
         </select>
 
         <button
-          className="content-reset-btn"
+          className="content-reset-btn ui-btn ui-btn--ghost"
           onClick={
             marcarTodosComoNaoEstudados
           }
@@ -821,7 +821,7 @@ export default function Conteudos() {
         !carregando && (
           Object.keys(conteudosFiltrados).length === 0 ? (
             <div className="content-search-empty">
-              <div className="content-search-empty-icon" aria-hidden="true">⌕</div>
+              <div className="content-search-empty-icon" aria-hidden="true"><Icon name="search" size={26} /></div>
               <strong>Nenhum conteúdo encontrado</strong>
               <span>
                 Não encontramos nenhum tópico para <b>"{busca || filtro}"</b>.
@@ -830,6 +830,7 @@ export default function Conteudos() {
                 <button
                   type="button"
                   onClick={limparFiltros}
+                  className="ui-btn ui-btn--secondary"
                 >
                   Limpar filtros
                 </button>

@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { GamificationProvider } from './context/GamificationContext.jsx';
 import './styles/global.css';
+import './styles/design-system.css';
+import './styles/layout-system.css';
 import './styles/App.css';
 import App from './App.jsx';
 import './styles/dark-mode.css';

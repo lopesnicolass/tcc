@@ -2803,3 +2803,451 @@
     align-items: flex-start;
   }
 }
+
+
+/* =========================================================
+   ETAPA 5 — PÁGINA INTERNA / VISUAL FINAL
+   Usa o Design System sem alterar a lógica da página.
+   ========================================================= */
+
+.pagina-conteudo-page.page-shell {
+  max-width: 1360px;
+  padding-inline: 0;
+}
+
+.pagina-back-button {
+  color: var(--color-text-muted);
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  min-height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.pagina-back-button:hover {
+  color: var(--color-primary-800);
+  background: var(--color-surface-muted);
+  transform: translateX(-2px);
+}
+
+.pagina-hero {
+  margin-bottom: var(--space-7);
+  padding: clamp(24px, 4vw, 34px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-2xl);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(144, 202, 249, 0.26), transparent 22%),
+    radial-gradient(circle at 8% 92%, rgba(255, 255, 255, 0.09), transparent 28%),
+    linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-800) 58%, var(--color-primary-600) 100%);
+  box-shadow: var(--shadow-lg);
+}
+
+.pagina-hero-top {
+  margin-bottom: var(--space-7);
+}
+
+.pagina-breadcrumb {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: var(--font-size-xs);
+}
+
+.pagina-materia-badge {
+  min-height: 34px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.pagina-hero-content {
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.pagina-hero-icon {
+  width: 68px;
+  height: 68px;
+  flex-basis: 68px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.pagina-kicker {
+  margin-bottom: var(--space-2);
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.pagina-hero h1 {
+  max-width: 1040px;
+  font-size: clamp(30px, 4vw, 46px);
+  letter-spacing: -0.03em;
+}
+
+.pagina-hero p {
+  max-width: 900px;
+  margin-top: var(--space-3);
+  color: rgba(255, 255, 255, 0.79);
+  font-size: var(--font-size-md);
+}
+
+.pagina-layout {
+  grid-template-columns: minmax(0, 1fr) 312px;
+  gap: var(--space-7);
+}
+
+.pagina-main {
+  gap: var(--space-5);
+}
+
+.pagina-content-block,
+.pagina-progress-card,
+.pagina-aside-card {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagina-content-block {
+  padding: clamp(22px, 3vw, 30px);
+  border-radius: var(--radius-lg);
+}
+
+.pagina-content-block h2 {
+  color: var(--color-primary-800);
+  font-size: clamp(19px, 2vw, 22px);
+}
+
+.pagina-rich-text {
+  max-width: 78ch;
+  color: var(--color-text);
+  font-size: clamp(16px, 1.25vw, 17px);
+  line-height: 1.95;
+  letter-spacing: 0.002em;
+}
+
+.pagina-muted {
+  max-width: 78ch;
+  color: var(--color-text-muted);
+}
+
+.pagina-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: 22px 24px;
+  border-color: rgba(33, 150, 243, 0.16);
+  background: linear-gradient(135deg, var(--color-info-soft), var(--color-surface));
+}
+
+.pagina-highlight-icon {
+  width: 46px;
+  height: 46px;
+  flex-basis: 46px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-primary-800);
+  box-shadow: var(--shadow-xs);
+}
+
+.pagina-highlight-content strong,
+.pagina-resource-copy strong,
+.pagina-topic-info strong,
+.pagina-progress-card strong {
+  color: var(--color-primary-800);
+}
+
+.pagina-highlight-content span,
+.pagina-resource-copy small,
+.pagina-topic-info span,
+.pagina-progress-card p {
+  color: var(--color-text-muted);
+}
+
+.pagina-video,
+.pagina-image img {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.pagina-resource {
+  min-height: 68px;
+  border-color: rgba(33, 150, 243, 0.14);
+  border-radius: var(--radius-md);
+  background: var(--color-info-soft);
+}
+
+.pagina-resource:hover {
+  border-color: rgba(33, 150, 243, 0.28);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagina-resource-icon,
+.pagina-resource-block-icon,
+.pagina-list-marker,
+.pagina-question-letter {
+  background: var(--color-surface-muted);
+  color: var(--color-primary-800);
+}
+
+.pagina-secondary-button,
+.pagina-primary-action,
+.pagina-study-button {
+  min-height: 42px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-800);
+  box-shadow: 0 8px 18px -10px rgba(13, 71, 161, 0.55);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  transition:
+    transform var(--duration-normal) var(--ease-bouncy),
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+.pagina-secondary-button:hover:not(:disabled),
+.pagina-primary-action:hover:not(:disabled),
+.pagina-study-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--color-primary-900);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagina-secondary-button:focus-visible,
+.pagina-primary-action:focus-visible,
+.pagina-study-button:focus-visible,
+.pagina-question-option:focus-visible {
+  outline: 3px solid rgba(33, 150, 243, 0.22);
+  outline-offset: 2px;
+}
+
+.pagina-study-button.completed {
+  background: var(--color-success);
+}
+
+.pagina-study-button.completed:hover:not(:disabled) {
+  background: #1f6543;
+}
+
+.pagina-id-list span,
+.pagina-flashcards-counter {
+  background: var(--color-surface-muted);
+  color: var(--color-primary-800);
+}
+
+.pagina-flashcard {
+  min-height: 310px;
+  padding: clamp(28px, 5vw, 46px);
+  border: 1px solid rgba(33, 150, 243, 0.13);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, var(--color-surface), var(--color-surface-soft));
+  box-shadow: var(--shadow-md);
+}
+
+.pagina-flashcard:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.pagina-flashcard.show-answer {
+  background: linear-gradient(145deg, var(--color-info-soft), var(--color-surface));
+}
+
+.pagina-flashcard-content strong {
+  color: var(--color-primary-800);
+}
+
+.pagina-aside {
+  top: var(--space-5);
+  gap: var(--space-4);
+}
+
+.pagina-progress-card,
+.pagina-aside-card {
+  padding: 22px;
+  border-radius: var(--radius-lg);
+}
+
+.pagina-progress-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.pagina-progress-card::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--color-primary-800), var(--color-primary-500));
+}
+
+.pagina-aside-label {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+}
+
+.pagina-progress-card strong {
+  font-size: 18px;
+}
+
+.pagina-progress-card p {
+  line-height: 1.7;
+}
+
+.pagina-topic-info {
+  border-bottom-color: var(--color-border);
+}
+
+.pagina-state-card {
+  min-height: 300px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), var(--color-surface-soft));
+}
+
+.pagina-state-icon {
+  background: var(--color-surface-muted);
+  color: var(--color-primary-800);
+  box-shadow: var(--shadow-xs);
+}
+
+.pagina-question-card {
+  border-color: var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.pagina-question-option {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.pagina-question-option:hover:not(:disabled) {
+  border-color: rgba(33, 150, 243, 0.28);
+  background: var(--color-surface-soft);
+}
+
+.pagina-question-option.selected {
+  border-color: rgba(33, 150, 243, 0.34);
+  background: var(--color-info-soft);
+}
+
+.pagina-question-option.correct {
+  border-color: rgba(38, 115, 77, 0.3);
+  background: var(--color-success-soft);
+}
+
+.pagina-question-option.incorrect {
+  border-color: rgba(193, 70, 47, 0.28);
+  background: var(--color-danger-soft);
+}
+
+@media (max-width: 980px) {
+  .pagina-conteudo-page.page-shell {
+    max-width: none;
+  }
+
+  .pagina-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-aside {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .pagina-conteudo-page.page-shell {
+    padding-inline: 0;
+  }
+
+  .pagina-hero {
+    padding: 24px 20px;
+    border-radius: var(--radius-xl);
+  }
+
+  .pagina-hero-top {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: var(--space-6);
+  }
+
+  .pagina-hero-content {
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .pagina-hero-icon {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+  }
+
+  .pagina-hero h1 {
+    font-size: 29px;
+  }
+
+  .pagina-content-block {
+    padding: 22px 20px;
+  }
+
+  .pagina-rich-text {
+    font-size: 15.5px;
+    line-height: 1.88;
+  }
+
+  .pagina-aside {
+    grid-template-columns: 1fr;
+  }
+
+  .pagina-flashcard {
+    min-height: 250px;
+    padding: 28px 20px;
+  }
+
+  .pagina-flashcard-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagina-flashcard-navigation {
+    width: 100%;
+  }
+
+  .pagina-flashcard-navigation .pagina-secondary-button {
+    flex: 1;
+  }
+
+  .pagina-resource-block {
+    flex-wrap: wrap;
+  }
+
+  .pagina-resource-block-copy {
+    flex-basis: calc(100% - 68px);
+  }
+
+  .pagina-resource-block > .pagina-secondary-button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pagina-back-button,
+  .pagina-secondary-button,
+  .pagina-primary-action,
+  .pagina-study-button,
+  .pagina-resource,
+  .pagina-flashcard,
+  .pagina-question-option {
+    transition: none;
+  }
+}

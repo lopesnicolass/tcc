@@ -1138,7 +1138,7 @@ export default function PaginaConteudo() {
 
   if (carregando) {
     return (
-      <div className="pagina-conteudo-page">
+      <div className="pagina-conteudo-page page-shell">
         <div className="pagina-state-card">
           <div className="pagina-state-icon">
             <Icon
@@ -1165,7 +1165,7 @@ export default function PaginaConteudo() {
 
   if (erro) {
     return (
-      <div className="pagina-conteudo-page">
+      <div className="pagina-conteudo-page page-shell">
         <button
           type="button"
           className="pagina-back-button"
@@ -1209,7 +1209,7 @@ export default function PaginaConteudo() {
 
   if (!pagina) {
     return (
-      <div className="pagina-conteudo-page">
+      <div className="pagina-conteudo-page page-shell">
         <button
           type="button"
           className="pagina-back-button"
@@ -1253,7 +1253,7 @@ export default function PaginaConteudo() {
     '';
 
   return (
-    <div className="pagina-conteudo-page">
+    <div className="pagina-conteudo-page page-shell">
       <button
         type="button"
         className="pagina-back-button"

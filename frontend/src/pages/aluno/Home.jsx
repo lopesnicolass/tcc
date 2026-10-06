@@ -445,7 +445,7 @@ export default function Home() {
   }
 
   return (
-    <div className="home-page">
+    <div className="home-page page-shell">
       {/* HERO */}
       <div className="home-hero">
         <div className="home-hero-text">
@@ -680,7 +680,7 @@ export default function Home() {
               className="home-panel-link"
               onClick={() => navigate('/cronograma')}
             >
-              Abrir cronograma →
+              Abrir plano de estudos →
             </button>
           </div>
 
