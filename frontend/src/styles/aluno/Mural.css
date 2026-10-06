@@ -15,11 +15,11 @@
 
 .mural-btn.primary:hover{ background:var(--accent-dark); box-shadow:0 10px 18px -8px rgba(13,71,161,0.45); }
 
-.mural-btn.secondary{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
+.mural-btn.secondary{ background:var(--card); color:var(--ink-soft); border:1.5px solid var(--line); }
 
 .mural-btn.secondary:hover{ border-color:var(--accent); color:var(--ink); }
 
-.mural-btn.ghost{ background:#fff; color:var(--ink-soft); border:1.5px solid var(--line); }
+.mural-btn.ghost{ background:var(--card); color:var(--ink-soft); border:1.5px solid var(--line); }
 
 .mural-btn.ghost:hover{ border-color:var(--accent); color:var(--ink); }
 
@@ -30,7 +30,7 @@
   font-family:"IBM Plex Sans";
   font-size:15px;
   color:var(--ink);
-  background:#fff;
+  background:var(--card);
   cursor:pointer;
   transition:border-color .15s ease;
 }
@@ -179,7 +179,7 @@
 }
 
 .mural-hero .mural-btn.primary{
-  background:#fff;
+  background:var(--card);
   color:var(--ink);
   box-shadow:0 10px 20px -12px rgba(0,0,0,.35);
 }

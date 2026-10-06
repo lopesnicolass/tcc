@@ -268,7 +268,7 @@
     1px solid
     rgba(13, 71, 161, 0.09);
 
-  background: #fff;
+  background: var(--card);
 
   box-shadow:
     0 8px 26px -20px
@@ -770,7 +770,7 @@
   background:
     linear-gradient(
       145deg,
-      #fff,
+      var(--card),
       #f8fbfe
     );
 
@@ -799,7 +799,7 @@
     linear-gradient(
       145deg,
       #f1f8ff,
-      #fff
+      var(--card)
     );
 }
 
@@ -1198,7 +1198,7 @@
 
   border-radius: 15px;
 
-  background: #fff;
+  background: var(--card);
 
   transition:
     border-color 0.16s ease,
@@ -1301,7 +1301,7 @@
 
   border-radius: 11px;
 
-  background: #fff;
+  background: var(--card);
 
   color: var(--ink);
 
@@ -1666,7 +1666,7 @@
   border-color:
     rgba(33, 150, 243, 0.2);
 
-  background: #fff;
+  background: var(--card);
 }
 
 .pagina-check-item.interactive.completed {
@@ -1699,7 +1699,7 @@
 
   border-radius: 8px;
 
-  background: #fff;
+  background: var(--card);
 
   color: #fff;
 }

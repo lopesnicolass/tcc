@@ -42,8 +42,8 @@
 
 .editor-primary-button {
   padding: 10px 14px;
-  border: 1px solid var(--accent, #2196F3);
-  background: var(--accent, #2196F3);
+  border: 1px solid var(--accent, var(--accent));
+  background: var(--accent, var(--accent));
   color: #fff;
 }
 
@@ -54,7 +54,7 @@
 .editor-secondary-button {
   padding: 10px 14px;
   border: 1px solid var(--line, #e2e7e4);
-  background: #fff;
+  background: var(--card);
   color: var(--ink, #173A5E);
 }
 
@@ -89,7 +89,7 @@
 .editor-success {
   border: 1px solid #CFE5F7;
   background: #F1F8FF;
-  color: #0D47A1;
+  color: var(--ink);
 }
 
 .editor-error {
@@ -183,7 +183,7 @@
   border: 1px solid var(--line, #e1e6e3);
   border-radius: 9px;
   outline: none;
-  background: #fff;
+  background: var(--card);
   color: var(--ink, #173A5E);
   font-family: inherit;
   font-size: 12px;
@@ -244,7 +244,7 @@
   overflow: hidden;
   border: 1px solid var(--line, #e1e6e3);
   border-radius: 11px;
-  background: #fff;
+  background: var(--card);
 }
 
 .editor-block-header {
@@ -284,7 +284,7 @@
   justify-content: center;
   border-radius: 8px;
   background: rgba(49, 131, 94, 0.1);
-  color: var(--accent-dark, #0D47A1);
+  color: var(--accent-dark, var(--ink));
 }
 
 .editor-block-name strong {
@@ -315,7 +315,7 @@
   padding: 0;
   border: 1px solid var(--line, #e1e6e3);
   border-radius: 7px;
-  background: #fff;
+  background: var(--card);
   color: #69746e;
   cursor: pointer;
 }
@@ -444,7 +444,7 @@
   border: 1px solid #dce5df;
   border-radius: 8px;
   background: #f8fbf9;
-  color: var(--accent-dark, #0D47A1);
+  color: var(--accent-dark, var(--ink));
   font-size: 10px;
   font-weight: 800;
   text-decoration: none;
@@ -473,7 +473,7 @@
   padding: 8px !important;
   border: 1px solid transparent !important;
   border-radius: 8px !important;
-  background: #fff !important;
+  background: var(--card) !important;
   color: inherit !important;
   text-align: left !important;
   font-family: inherit !important;
@@ -503,7 +503,7 @@
 
 .editor-type.selected > span {
   background: rgba(49, 131, 94, 0.11) !important;
-  color: var(--accent-dark, #0D47A1) !important;
+  color: var(--accent-dark, var(--ink)) !important;
 }
 
 .editor-type > div {
@@ -557,7 +557,7 @@
   margin-bottom: 10px;
   border-radius: 13px;
   background: #f0f4f2;
-  color: var(--accent-dark, #0D47A1);
+  color: var(--accent-dark, var(--ink));
 }
 
 .editor-empty strong,
@@ -581,7 +581,7 @@
   padding: 10px;
   border: 1px dashed #ccd7d1;
   background: #fbfcfb;
-  color: var(--accent-dark, #0D47A1);
+  color: var(--accent-dark, var(--ink));
 }
 
 .editor-add-button:hover {
@@ -611,8 +611,8 @@
 .editor-small-button {
   padding: 6px 8px;
   border: 1px solid var(--line, #e1e6e3);
-  background: #fff;
-  color: var(--accent-dark, #0D47A1);
+  background: var(--card);
+  color: var(--accent-dark, var(--ink));
   font-size: 9px;
 }
 
@@ -692,7 +692,7 @@
   overflow: hidden;
   border: 1px solid #e0e5e2;
   border-radius: 15px;
-  background: #fff;
+  background: var(--card);
   box-shadow: 0 25px 65px rgba(0, 0, 0, 0.16);
 }
 
@@ -807,7 +807,7 @@
   border: 1px solid transparent !important;
   border-radius: 10px !important;
 
-  background: #ffffff !important;
+  background: var(--card) !important;
   color: #174f9c !important;
 
   font-family: inherit !important;
@@ -935,7 +935,7 @@
   border: 1px solid #dfe6e2;
   border-radius: 9px;
 
-  background: #fff;
+  background: var(--card);
   color: #83908a;
 }
 
@@ -979,7 +979,7 @@
   border: 1px solid #e0e6e3 !important;
   border-radius: 9px !important;
 
-  background: #fff !important;
+  background: var(--card) !important;
   color: #173A5E !important;
 
   font-family: inherit !important;
@@ -1010,14 +1010,14 @@
   border: 1px solid #d4ddd8;
   border-radius: 6px;
 
-  background: #fff;
+  background: var(--card);
   color: #fff;
 }
 
 .editor-related-item.selected
 .editor-related-check {
-  border-color: #2196F3;
-  background: #2196F3;
+  border-color: var(--accent);
+  background: var(--accent);
 }
 
 .editor-related-item > span:last-child {
@@ -1075,7 +1075,7 @@
   padding: 0 11px;
   border: 1px solid var(--line, #dce5df);
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
   color: var(--muted, #6B849A);
   font-size: 10px;
   font-weight: 800;
@@ -1084,7 +1084,7 @@
 .editor-publication-status.published {
   border-color: rgba(33, 150, 243, .22);
   background: #f1f8ff;
-  color: #0D47A1;
+  color: var(--ink);
 }
 
 .editor-publication-status.draft {
@@ -1099,7 +1099,7 @@
 }
 
 .editor-publication-status.published .editor-publication-dot {
-  background: #2196F3;
+  background: var(--accent);
 }
 
 @media (max-width: 760px) {

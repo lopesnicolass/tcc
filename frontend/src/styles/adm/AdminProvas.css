@@ -48,7 +48,7 @@
 }
 
 .admin-provas-card{
-  background:#fff;
+  background:var(--card);
 
   border:1px solid rgba(13,71,161,0.06);
   border-radius:22px;
@@ -93,7 +93,7 @@
 
   border-radius:14px;
 
-  background:#E3F2FD;
+  background:var(--paper);
 
   font-size:21px;
 }
@@ -149,7 +149,7 @@
   border:1.5px solid var(--line);
   border-radius:13px;
 
-  background:#fff;
+  background:var(--card);
   color:var(--ink);
 
   font-family:"IBM Plex Sans", sans-serif;
@@ -174,7 +174,7 @@
 .admin-provas-field input:focus{
   border-color:var(--accent);
 
-  background:#fff;
+  background:var(--card);
 
   box-shadow:
     0 0 0 4px rgba(33,150,243,0.12);
@@ -234,7 +234,7 @@
 
   border-radius:12px;
 
-  background:#E3F2FD;
+  background:var(--paper);
 
   font-size:18px;
 }
@@ -264,7 +264,7 @@
 
   border-radius:11px;
 
-  background:#fff;
+  background:var(--card);
   border:1.5px solid var(--line);
 
   color:var(--ink);
@@ -402,7 +402,7 @@
   border:1.5px solid rgba(193,70,47,0.25);
   border-radius:10px;
 
-  background:#fff;
+  background:var(--card);
   color:var(--error);
 
   font-family:"IBM Plex Sans", sans-serif;

@@ -8,7 +8,7 @@
 }
 
 .tenna-auto-config {
-  background: #fff;
+  background: var(--card);
   border: 1px solid rgba(13, 71, 161, .12);
   border-radius: 26px;
   padding: 32px 34px 28px;
@@ -41,7 +41,7 @@
   width: 40px;
   height: 40px;
   border-radius: 13px;
-  background: #E3F2FD;
+  background: var(--paper);
   color: var(--accent-dark);
   display: flex;
   align-items: center;
@@ -144,7 +144,7 @@
   margin-top: 10px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #E3F2FD;
+  background: var(--paper);
   color: var(--accent-dark);
   font-size: 11px;
   font-weight: 800;
@@ -181,7 +181,7 @@
   min-width: 82px;
   border: 1.5px solid #D7E4F2;
   border-radius: 15px;
-  background: #fff;
+  background: var(--card);
   color: var(--ink-soft);
   padding: 12px 12px;
   cursor: pointer;
@@ -296,7 +296,7 @@
   grid-template-columns: 48px 1fr auto;
   align-items: center;
   gap: 15px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid #CFE0F2;
   border-radius: 18px;
   padding: 17px 19px;
@@ -309,7 +309,7 @@
   width: 48px;
   height: 48px;
   border-radius: 15px;
-  background: #E3F2FD;
+  background: var(--paper);
   color: var(--ink);
   display: flex;
   align-items: center;
@@ -362,7 +362,7 @@
 }
 
 .tenna-auto-journey {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 24px 26px;
@@ -436,7 +436,7 @@
     linear-gradient(
       90deg,
       rgba(255, 255, 255, 0),
-      #fff
+      var(--card)
     );
   pointer-events: none;
 }
@@ -492,12 +492,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: var(--card);
   border: 2px solid #D5E3F0;
   color: var(--muted);
   font-size: 10px;
   font-weight: 800;
-  box-shadow: 0 0 0 5px #fff;
+  box-shadow: 0 0 0 5px var(--card);
   transition: all .18s ease;
 }
 
@@ -524,7 +524,7 @@
 }
 
 .tenna-auto-month {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 22px;
   overflow: hidden;
@@ -542,7 +542,7 @@
   background:
     linear-gradient(
       180deg,
-      #fff 0%,
+      var(--card) 0%,
       #F7FBFF 100%
     );
   border-bottom: 1px solid var(--line);
@@ -615,7 +615,7 @@
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 10px;
-  background: #fff;
+  background: var(--card);
   transition:
     border-color .18s ease,
     box-shadow .18s ease;
@@ -635,7 +635,7 @@
 .tenna-auto-week-head {
   width: 100%;
   border: 0;
-  background: #fff;
+  background: var(--card);
   cursor: pointer;
   display: grid;
   grid-template-columns: 42px 1fr auto;
@@ -741,7 +741,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -992,7 +992,7 @@
   height: 42px;
   border-width: 2px;
   font-size: 12px;
-  box-shadow: 0 0 0 6px #fff;
+  box-shadow: 0 0 0 6px var(--card);
 }
 
 .tenna-auto-timeline-item strong {

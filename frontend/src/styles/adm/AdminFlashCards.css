@@ -10,7 +10,7 @@
 }
 
 .admin-flashcard-item{
-  background:#fff;
+  background:var(--card);
   border-radius:18px;
   padding:20px;
   min-height:118px;
@@ -91,7 +91,7 @@
   padding:10px 12px;
   border:1px solid var(--line);
   border-radius:11px;
-  background:#fff;
+  background:var(--card);
   color:var(--ink);
   font:inherit;
   font-size:13px;
@@ -219,7 +219,7 @@
   padding:28px;
   border:1px dashed var(--line);
   border-radius:18px;
-  background:var(--surface, #fff);
+  background:var(--surface, var(--card));
   text-align:center;
 }
 
@@ -270,7 +270,7 @@
   padding:16px;
   border:1px solid var(--line);
   border-radius:18px;
-  background:var(--surface, #fff);
+  background:var(--surface, var(--card));
   box-shadow:0 1px 2px rgba(13,71,161,.04);
 }
 
@@ -302,7 +302,7 @@
   box-sizing:border-box;
   border:1px solid var(--line);
   border-radius:11px;
-  background:var(--surface, #fff);
+  background:var(--surface, var(--card));
   color:var(--ink);
   font:inherit;
   font-size:13px;

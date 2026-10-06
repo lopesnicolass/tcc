@@ -28,7 +28,7 @@
   padding: 30px 34px;
   overflow: hidden;
   border-radius: 24px;
-  background: linear-gradient(135deg, #0D47A1 0%, #1565C0 60%, #2196F3 100%);
+  background: linear-gradient(135deg, var(--ink) 0%, #1565C0 60%, var(--accent) 100%);
   color: #fff;
   box-shadow: 0 16px 30px -20px rgba(13, 71, 161, 0.55);
 }
@@ -71,7 +71,7 @@
 }
 
 .conteudos-page .tenna-auto-intro h2 span {
-  color: #90CAF9;
+  color: var(--accent-light);
 }
 
 .conteudos-page .tenna-auto-intro p {
@@ -100,7 +100,7 @@
 }
 
 .conteudos-page .tenna-auto-intro-badge small {
-  color: #E3F2FD;
+  color: var(--paper);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -764,7 +764,7 @@
 
 .conteudos-page .content-topic.studied .content-topic-status {
   border-color: rgba(33, 150, 243, .14);
-  background: #E3F2FD;
+  background: var(--paper);
   color: var(--accent-dark);
 }
 
@@ -1090,7 +1090,7 @@ html[data-theme="dark"] .conteudos-page .content-filter-chip {
 }
 
 html[data-theme="dark"] .conteudos-page .content-clear-filters {
-  color: #90CAF9;
+  color: var(--accent-light);
 }
 
 html[data-theme="dark"] .conteudos-page .content-clear-filters:hover {
@@ -1203,13 +1203,13 @@ html[data-theme="dark"] .conteudos-page .content-search-empty span b {
 
 html[data-theme="dark"] .conteudos-page .content-search-empty-icon {
   background: var(--dark-surface-3);
-  color: #90CAF9;
+  color: var(--accent-light);
 }
 
 html[data-theme="dark"] .conteudos-page .content-search-empty button {
   border-color: var(--dark-border);
   background: var(--dark-surface-3);
-  color: #90CAF9;
+  color: var(--accent-light);
 }
 
 html[data-theme="dark"] .conteudos-page .content-search-empty button:hover {

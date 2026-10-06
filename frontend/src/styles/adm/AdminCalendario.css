@@ -43,7 +43,7 @@
 }
 
 .admin-calendar-stats article {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line, #dfe7ef);
   border-radius: 18px;
   padding: 18px 20px;
@@ -94,7 +94,7 @@
 
 .admin-calendar-month-card,
 .admin-calendar-form-card {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line, #dfe7ef);
   border-radius: 22px;
   box-shadow: 0 8px 28px rgba(13,71,161,.06);
@@ -127,7 +127,7 @@
   height: 38px;
   border: 1px solid var(--line, #dfe7ef);
   border-radius: 10px;
-  background: #fff;
+  background: var(--card);
   color: var(--ink, #1b2b3a);
   font-size: 22px;
   cursor: pointer;
@@ -162,7 +162,7 @@
 .admin-calendar-day {
   min-height: 126px;
   padding: 8px;
-  background: #fff;
+  background: var(--card);
   border: 0;
   border-right: 1px solid var(--line, #dfe7ef);
   border-bottom: 1px solid var(--line, #dfe7ef);
@@ -285,7 +285,7 @@
   width: 100%;
   border: 1px solid var(--line, #dfe7ef);
   border-radius: 11px;
-  background: #fff;
+  background: var(--card);
   color: var(--ink, #1b2b3a);
   padding: 11px 12px;
   font: inherit;
@@ -335,7 +335,7 @@
 
 .admin-calendar-secondary {
   border: 1px solid var(--line, #dfe7ef);
-  background: #fff;
+  background: var(--card);
   color: var(--ink, #1b2b3a);
 }
 

@@ -598,7 +598,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(33,150,243,0.18);
-  color: #90CAF9;
+  color: var(--accent-light);
   flex-shrink: 0;
 }
 

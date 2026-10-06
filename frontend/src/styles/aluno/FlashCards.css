@@ -80,7 +80,7 @@
   margin: 0 0 14px;
   border: 1px solid var(--line);
   border-radius: 13px;
-  background: #fff;
+  background: var(--card);
   box-shadow: 0 5px 16px rgba(13, 71, 161, .045);
   transition: border-color .18s ease, box-shadow .18s ease;
 }
@@ -188,7 +188,7 @@
 
 
 .flashcard-face.front {
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
 }
 
@@ -218,7 +218,7 @@
   margin: 0;
   padding: 24px;
   border-radius: 16px;
-  background: #fff;
+  background: var(--card);
   color: var(--muted);
   text-align: center;
 }
@@ -232,7 +232,7 @@
   max-width: 620px;
   padding: 24px;
   border-radius: 18px;
-  background: #fff;
+  background: var(--card);
   box-shadow:
     0 4px 20px
     rgba(13, 71, 161, 0.06);
@@ -285,7 +285,7 @@
    HORA DOS FLASHCARDS
    ===================================================== */
 
-.flashcards-game-banner{margin-bottom:22px; padding:24px 28px; border:1px solid var(--line); border-radius:22px; background:#fff; box-shadow:0 8px 28px rgba(13,71,161,.06);}
+.flashcards-game-banner{margin-bottom:22px; padding:24px 28px; border:1px solid var(--line); border-radius:22px; background:var(--card); box-shadow:0 8px 28px rgba(13,71,161,.06);}
 .flashcards-game-banner-content{display:flex; align-items:center; justify-content:space-between; gap:24px;}
 .flashcards-game-eyebrow{display:inline-block; margin-bottom:7px; color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.12em;}
 .flashcards-game-banner h2{margin:0 0 6px; color:var(--ink); font:800 22px "Space Grotesk",sans-serif;}
@@ -485,7 +485,7 @@
 
 
 .flashcard-game-front {
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
 
   border:
@@ -684,7 +684,7 @@
 
   border-radius: 24px;
 
-  background: #fff;
+  background: var(--card);
 
   border:
     1px solid #e4ebf3;

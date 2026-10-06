@@ -3,7 +3,7 @@
 .week-nav{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
 
 .week-nav button{
-  background:#fff; border:1.5px solid var(--line); border-radius:12px;
+  background:var(--card); border:1.5px solid var(--line); border-radius:12px;
   width:38px; height:38px; display:flex; align-items:center; justify-content:center;
   cursor:pointer; color:var(--ink-soft); font-size:16px;
   transition:transform .18s var(--bouncy), border-color .15s ease;
@@ -41,7 +41,7 @@
 }
 
 .day-column{
-  background:#fff; border-radius:18px; padding:14px;
+  background:var(--card); border-radius:18px; padding:14px;
   box-shadow:0 1px 2px rgba(13,71,161,0.05);
   min-height:180px; display:flex; flex-direction:column; gap:10px;
   transition:transform .2s var(--bouncy), box-shadow .2s ease;
@@ -72,7 +72,7 @@
 
 .calendar-overview{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:14px;margin:0 0 24px}
 
-.calendar-overview>div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 5px 18px rgba(13,71,161,.05);display:flex;align-items:center;gap:13px}
+.calendar-overview>div{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:0 5px 18px rgba(13,71,161,.05);display:flex;align-items:center;gap:13px}
 
 .calendar-overview span{display:block;color:var(--muted);font-size:12px;font-weight:700}
 
@@ -88,7 +88,7 @@
 
 .calendar-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
 
-.calendar-card,.calendar-sidebar-card{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(13,71,161,.06);overflow:hidden}
+.calendar-card,.calendar-sidebar-card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(13,71,161,.06);overflow:hidden}
 
 .calendar-toolbar{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line)}
 
@@ -96,7 +96,7 @@
 
 .calendar-month-nav h2{font:700 22px "Space Grotesk";color:var(--ink);min-width:210px;text-align:center;margin:0}
 
-.calendar-month-nav button,.calendar-today{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:22px}
+.calendar-month-nav button,.calendar-today{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:22px}
 
 .calendar-month-nav button:hover,.calendar-today:hover{border-color:var(--accent);color:var(--accent)}
 
@@ -108,7 +108,7 @@
 
 .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line)}
 
-.calendar-day{min-height:118px;text-align:left;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#fff;padding:9px;cursor:pointer;position:relative;transition:.16s ease}
+.calendar-day{min-height:118px;text-align:left;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--card);padding:9px;cursor:pointer;position:relative;transition:.16s ease}
 
 .calendar-day:nth-child(7n){border-right:0}
 
@@ -150,7 +150,7 @@
 
 .calendar-task.done .calendar-task-info strong{text-decoration:line-through}
 
-.calendar-check{flex:0 0 25px;width:25px;height:25px;border-radius:8px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);font-weight:900;cursor:pointer}
+.calendar-check{flex:0 0 25px;width:25px;height:25px;border-radius:8px;border:1.5px solid var(--accent);background:var(--card);color:var(--accent);font-weight:900;cursor:pointer}
 
 .calendar-task-info{min-width:0;flex:1}
 
@@ -208,7 +208,7 @@
 
 .calendar-delete-plan {
   border: 1px solid #c9d7ea;
-  background: #ffffff;
+  background: var(--card);
   color: #315b9d;
   border-radius: 12px;
   padding: 11px 18px;
@@ -266,7 +266,7 @@
 
 .calendar-delete-plan {
   border: 1px solid #c9d7ea;
-  background: #ffffff;
+  background: var(--card);
   color: #315b9d;
   border-radius: 12px;
   padding: 11px 18px;
