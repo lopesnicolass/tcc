@@ -31,6 +31,36 @@ const MATERIAS = [
   'Outro'
 ];
 
+const POSTIT_MATERIA_STYLES = {
+  'Português': { bg: '#BFE3FA', color: '#25658A' },
+  'Língua Portuguesa': { bg: '#BFE3FA', color: '#25658A' },
+  'Matemática': { bg: '#F7B8B4', color: '#9C3D39' },
+  'História': { bg: '#D8B98A', color: '#704E2B' },
+  'Geografia': { bg: '#BEE3B4', color: '#3F6F3A' },
+  'Ciências': { bg: '#D6BEF0', color: '#644493' },
+  'Ciências da Natureza': { bg: '#D6BEF0', color: '#644493' },
+};
+
+function getPostItMateriaStyle(materia = '') {
+  const direct = POSTIT_MATERIA_STYLES[materia];
+  if (direct) return direct;
+
+  const normalized = String(materia).trim().toLowerCase();
+  const found = Object.keys(POSTIT_MATERIA_STYLES).find(
+    (key) => {
+      const keyNormalized = key.toLowerCase();
+      return (
+        normalized.includes(keyNormalized) ||
+        keyNormalized.includes(normalized)
+      );
+    }
+  );
+
+  return found
+    ? POSTIT_MATERIA_STYLES[found]
+    : { bg: '#EAF0F6', color: '#52616B' };
+}
+
 const pad = (n) =>
   String(n).padStart(2, '0');
 
@@ -765,7 +795,7 @@ export default function Cronograma() {
             </span>
 
             <h2>
-              Organize seu{' '}
+              Seu{' '}
               <span>
                 calendário de estudos
               </span>
@@ -802,185 +832,39 @@ export default function Cronograma() {
           </h2>
 
           <p>
-            Veja o que estudar em cada dia,
-            acompanhe sua constância e não
-            deixe o conteúdo acumular.
+            Organize suas atividades, acompanhe seu ritmo e mantenha seus estudos em dia.
           </p>
 
         </div>
 
-        <Link
-          className="tenna-auto-intro-badge calendar-hero-link"
-          to="/plano-automatico"
-          title="Abrir plano automático"
-        >
+        <div className="calendar-hero-actions">
 
-          <Icon
-            name="calendar"
-            size={26}
-            color="#fff"
-          />
-
-          <span>
-            <small>
-              Sua rotina
-            </small>
-            <strong>
-              Ajustar plano
-            </strong>
-          </span>
-
-        </Link>
-
-      </section>
-
-      <div className="calendar-actions-row">
-
-        <p>
-          Selecione um dia para acompanhar suas atividades,
-          datas importantes e o ritmo do seu mês.
-        </p>
-
-        <div className="calendar-actions-buttons">
-
-          <button
-            className="calendar-delete-plan"
-            onClick={
-              requestDeleteAutomaticPlan
-            }
-            disabled={
-              saving ||
-              !activities.some(
-                (activity) =>
-                  activity.origem ===
-                  'plano-automatico'
-              )
-            }
+          <Link
+            className="calendar-hero-link"
+            to="/plano-automatico"
+            title="Abrir plano automático"
           >
-            Apagar plano automático
-          </button>
+            <Icon
+              name="calendar"
+              size={21}
+              color="#fff"
+            />
+            <span>
+              <small>
+                Sua rotina
+              </small>
+              <strong>
+                Ajustar plano
+              </strong>
+            </span>
+          </Link>
 
           <button
-            className="mural-btn primary"
-            onClick={() =>
-              openCreate()
-            }
+            className="calendar-hero-new"
+            onClick={() => openCreate()}
           >
             + Nova atividade
           </button>
-
-        </div>
-
-      </div>
-
-      <section className="calendar-overview">
-
-        <div>
-
-          <span
-            className="calendar-stat-icon"
-            style={{
-              color:
-                'var(--accent-dark)'
-            }}
-          >
-            <Icon
-              name="pin"
-              size={18}
-            />
-          </span>
-
-          <div>
-
-            <span>
-              Atividades no mês
-            </span>
-
-            <strong>
-              {monthActivities.length}
-            </strong>
-
-          </div>
-
-        </div>
-
-        <div>
-
-          <span
-            className="calendar-stat-icon"
-            style={{
-              color:
-                'var(--accent-dark)'
-            }}
-          >
-            <Icon
-              name="check"
-              size={18}
-            />
-          </span>
-
-          <div>
-
-            <span>
-              Concluídas
-            </span>
-
-            <strong>
-              {doneCount}
-            </strong>
-
-          </div>
-
-        </div>
-
-        <div>
-
-          <span
-            className="calendar-stat-icon"
-            style={{
-              color:
-                'var(--accent-dark)'
-            }}
-          >
-            <Icon
-              name="clock"
-              size={18}
-            />
-          </span>
-
-          <div>
-
-            <span>
-              Horas planejadas
-            </span>
-
-            <strong>
-              {totalHours.toFixed(1)}h
-            </strong>
-
-          </div>
-
-        </div>
-
-        <div className="calendar-overview-tip">
-
-          <span className="calendar-important-summary-icon">
-            <Icon
-              name="calendar"
-              size={22}
-            />
-          </span>
-
-          <p>
-            Este mês tem{' '}
-            <strong>
-              {monthImportantDates.length}{' '}
-              {monthImportantDates.length === 1
-                ? 'data importante'
-                : 'datas importantes'}
-            </strong>{' '}
-            definidas pela administração.
-          </p>
 
         </div>
 
@@ -992,38 +876,69 @@ export default function Cronograma() {
 
           <div className="calendar-toolbar">
 
-            <div className="calendar-month-nav">
+            <div className="calendar-toolbar-left">
+              <div className="calendar-month-nav">
 
-              <button
-                onClick={() =>
-                  changeMonth(-1)
-                }
-                aria-label="Mês anterior"
-              >
-                ‹
-              </button>
+                <button
+                  onClick={() =>
+                    changeMonth(-1)
+                  }
+                  aria-label="Mês anterior"
+                >
+                  ‹
+                </button>
 
-              <h2>
-                {monthLabel}
-              </h2>
+                <h2>
+                  {monthLabel}
+                </h2>
 
-              <button
-                onClick={() =>
-                  changeMonth(1)
-                }
-                aria-label="Próximo mês"
-              >
-                ›
-              </button>
+                <button
+                  onClick={() =>
+                    changeMonth(1)
+                  }
+                  aria-label="Próximo mês"
+                >
+                  ›
+                </button>
 
+              </div>
+
+              <div className="calendar-toolbar-stats">
+                <span>
+                  <strong>{monthActivities.length}</strong> atividades
+                </span>
+                <span>
+                  <strong>{doneCount}</strong> concluídas
+                </span>
+                <span>
+                  <strong>{totalHours.toFixed(1)}h</strong> planejadas
+                </span>
+              </div>
             </div>
 
-            <button
-              className="calendar-today"
-              onClick={goToday}
-            >
-              Hoje
-            </button>
+            <div className="calendar-toolbar-actions">
+              <button
+                className="calendar-today"
+                onClick={goToday}
+              >
+                Hoje
+              </button>
+
+              <button
+                className="calendar-delete-plan calendar-delete-compact"
+                onClick={requestDeleteAutomaticPlan}
+                disabled={
+                  saving ||
+                  !activities.some(
+                    (activity) =>
+                      activity.origem ===
+                      'plano-automatico'
+                  )
+                }
+              >
+                Apagar plano
+              </button>
+            </div>
 
           </div>
 
@@ -1122,7 +1037,7 @@ export default function Cronograma() {
                       ))}
 
                     {dayActivities
-                      .slice(0, Math.max(0, 3 - dayImportantDates.length))
+                      .slice(0, 2)
                       .map((a) => {
 
                         const style =
@@ -1143,11 +1058,11 @@ export default function Cronograma() {
                             }
                             style={{
                               background:
-                                style.bg,
+                                getPostItMateriaStyle(a.materia).bg,
                               borderLeftColor:
-                                style.color,
+                                getPostItMateriaStyle(a.materia).color,
                               color:
-                                style.color
+                                getPostItMateriaStyle(a.materia).color
                             }}
                           >
 
@@ -1167,12 +1082,10 @@ export default function Cronograma() {
                         );
                       })}
 
-                    {totalDayEvents > 3 && (
+                    {dayActivities.length > 2 && (
 
                       <span className="calendar-more">
-                        +
-                        {totalDayEvents - 3}{' '}
-                        mais
+                        +{dayActivities.length - 2} mais
                       </span>
 
                     )}
@@ -1316,6 +1229,10 @@ export default function Cronograma() {
                           activity
                         )
                       }
+                      style={{
+                        background: getPostItMateriaStyle(activity.materia).bg,
+                        borderColor: getPostItMateriaStyle(activity.materia).color
+                      }}
                     >
 
                       <button
@@ -1337,9 +1254,9 @@ export default function Cronograma() {
                         className="calendar-task-subject-icon"
                         style={{
                           background:
-                            style.bg,
+                            getPostItMateriaStyle(activity.materia).bg,
                           color:
-                            style.color
+                            getPostItMateriaStyle(activity.materia).color
                         }}
                       >
                         <SubjectIcon

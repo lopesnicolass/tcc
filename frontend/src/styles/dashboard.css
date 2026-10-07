@@ -129,7 +129,7 @@
   border-color:rgba(255,255,255,.12);
   color:#fff;
   font-weight:700;
-  box-shadow:inset 3px 0 0 var(--color-sunshine), 0 8px 18px -14px rgba(0,0,0,.4);
+  box-shadow:0 8px 18px -14px rgba(0,0,0,.4);
 }
 
 .sidebar-link svg{

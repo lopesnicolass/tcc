@@ -2,7 +2,7 @@ import '../../styles/aluno/ConteudoEstudo.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
-import SubjectIcon from '../../components/SubjectIcon.jsx';
+import SubjectIcon from '../../components/cu.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
 
 const API_URL =
@@ -82,6 +82,7 @@ function BlocoConteudo({ bloco }) {
     case 'texto':
       return (
         <article className="study-block study-text-block">
+          <span className="study-block-kicker">EXPLICAÇÃO</span>
           {titulo && <h2>{titulo}</h2>}
           <TextoComQuebras texto={dados.texto} />
         </article>
@@ -346,8 +347,14 @@ export default function ConteudoEstudo() {
   if (erro && !pagina) {
     return (
       <div className="conteudo-estudo-page">
-        <button className="study-back-button" onClick={() => navigate('/conteudos')}>
-          ← Voltar para conteúdos
+        <button
+          type="button"
+          className="study-back-button"
+          onClick={() => navigate('/conteudos')}
+          aria-label="Voltar para conteúdos"
+          title="Voltar para conteúdos"
+        >
+          &lt;
         </button>
         <div className="study-state study-state-error">
           <strong>Não foi possível abrir esta aula.</strong>
@@ -360,13 +367,19 @@ export default function ConteudoEstudo() {
   if (!pagina) {
     return (
       <div className="conteudo-estudo-page">
-        <button className="study-back-button" onClick={() => navigate('/conteudos')}>
-          ← Voltar para conteúdos
+        <button
+          type="button"
+          className="study-back-button"
+          onClick={() => navigate('/conteudos')}
+          aria-label="Voltar para conteúdos"
+          title="Voltar para conteúdos"
+        >
+          &lt;
         </button>
         <div className="study-empty-content">
           <div className="study-empty-icon"><Icon name="book" size={30} /></div>
-          <h1>Conteúdo em preparação</h1>
-          <p>Este tópico já está disponível na lista de estudos, mas a aula ainda não foi publicada.</p>
+          <h1>Aula ainda não publicada</h1>
+          <p>Este tópico existe no catálogo, mas o administrador ainda não publicou a aula. Quando estiver pronta, ela poderá trazer explicações, exemplos, vídeos e materiais de apoio.</p>
           <button className="study-primary-button" onClick={() => navigate('/conteudos')}>
             Voltar para conteúdos
           </button>
@@ -375,93 +388,63 @@ export default function ConteudoEstudo() {
     );
   }
 
-  const nomesBlocos = {
-    texto: 'Explicação',
-    destaque: 'Ponto importante',
-    video: 'Videoaula',
-    imagem: 'Imagem',
-    pdf: 'Material complementar',
-    lista: 'Lista',
-    checklist: 'Checklist',
-    flashcards: 'Flashcards',
-    questoes: 'Questões',
-    simulado: 'Simulado',
-  };
-
   return (
     <div className="conteudo-estudo-page">
-      <button className="study-back-button" onClick={() => navigate('/conteudos')}>
-        ← Voltar para conteúdos
-      </button>
-
-      <div className="study-breadcrumb">
-        <span>Conteúdos</span><b>›</b><span>{pagina.materia || 'Matéria'}</span><b>›</b><strong>{pagina.topico || pagina.titulo}</strong>
-      </div>
+      <button
+          type="button"
+          className="study-back-button"
+          onClick={() => navigate('/conteudos')}
+          aria-label="Voltar para conteúdos"
+          title="Voltar para conteúdos"
+        >
+          &lt;
+        </button>
 
       <header className="study-hero" style={{ borderLeftColor: materiaStyle.color }}>
         <div className="study-hero-icon" style={{ background: materiaStyle.bg, color: materiaStyle.color }}>
           <SubjectIcon materia={pagina.materia} size={25} />
         </div>
         <div className="study-hero-copy">
-          <div className="study-title-line">
-            <span className="study-eyebrow">{pagina.materia || 'CONTEÚDO'} · AULA</span>
-            <span className={`study-status-pill ${estudado ? 'done' : ''}`}>{estudado ? '✓ Estudado' : 'Não estudado'}</span>
-          </div>
+          <span className="study-eyebrow">{pagina.materia || 'CONTEÚDO'} · AULA</span>
           <h1>{pagina.titulo || pagina.topico}</h1>
-          <p>{pagina.descricao || `Aprenda ${pagina.topico || 'este conteúdo'} com explicações e materiais de apoio.`}</p>
+          <p>{pagina.descricao || `Estude este conteúdo com explicações, exemplos e materiais de apoio selecionados pelo administrador.`}</p>
         </div>
       </header>
 
       {erro && <div className="study-inline-error">{erro}</div>}
 
-      <div className="study-layout">
-        <main className="study-content-column">
-          {blocos.length ? (
-            blocos.map((bloco, index) => (
-              <div className="study-numbered-block" id={`bloco-${bloco.id}`} key={bloco.id}>
-                <span className="study-block-number">{String(index + 1).padStart(2, '0')}</span>
-                <BlocoConteudo bloco={bloco} />
-              </div>
-            ))
-          ) : (
-            <div className="study-empty-content study-empty-small">
-              <h2>Aula ainda sem conteúdo</h2>
-              <p>O administrador pode adicionar texto, vídeo, imagens e materiais pelo construtor de conteúdos.</p>
-            </div>
-          )}
+      <main className="study-content-column">
+        {blocos.length ? (
+          blocos.map((bloco) => (
+            <BlocoConteudo key={bloco.id} bloco={bloco} />
+          ))
+        ) : (
+          <div className="study-empty-content study-empty-small">
+            <h2>Aula sem conteúdo publicado</h2>
+            <p>O administrador pode montar esta aula pelo construtor de conteúdos, adicionando explicações, destaques, videoaulas e materiais.</p>
+          </div>
+        )}
 
-          <section className={`study-completion-card ${estudado ? 'completed' : ''}`}>
-            <div>
-              <span className="study-block-kicker">SEU PROGRESSO</span>
-              <h2>{estudado ? 'Conteúdo concluído!' : 'Terminou de estudar?'}</h2>
-              <p>{estudado ? 'Esta aula já está marcada como estudada no seu progresso.' : 'Marque esta aula como estudada para acompanhar sua evolução.'}</p>
-            </div>
-            <button className="study-complete-button" onClick={alternarEstudado} disabled={salvando}>
-              {salvando ? 'Salvando...' : estudado ? '✓ Estudado' : 'Concluir aula'}
-            </button>
-          </section>
-        </main>
+        <section className={`study-completion-card ${estudado ? 'completed' : ''}`}>
+          <div>
+            <span className="study-block-kicker">SEU PROGRESSO</span>
+            <h2>{estudado ? 'Conteúdo concluído!' : 'Terminou de estudar?'}</h2>
+            <p>
+              {estudado
+                ? 'Este conteúdo já está marcado como estudado no seu progresso.'
+                : 'Marque esta aula como estudada para acompanhar sua evolução.'}
+            </p>
+          </div>
 
-        <aside className="study-sidebar">
-          <section className="study-side-card">
-            <span className="study-side-kicker">NESTA AULA</span>
-            <h2>Conteúdos</h2>
-            <div className="study-side-list">
-              {blocos.map((bloco, index) => (
-                <a key={bloco.id} href={`#bloco-${bloco.id}`}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  {normalizarDados(bloco).titulo || nomesBlocos[bloco.tipo] || 'Conteúdo'}
-                </a>
-              ))}
-            </div>
-          </section>
-          <section className="study-side-card study-side-progress">
-            <span className="study-side-kicker">PROGRESSO</span>
-            <div className="study-side-progress-row"><strong>{estudado ? '100%' : '0%'}</strong><span>{estudado ? 'Concluída' : 'Em andamento'}</span></div>
-            <div className="study-side-track"><span style={{ width: estudado ? '100%' : '0%' }} /></div>
-          </section>
-        </aside>
-      </div>
+          <button
+            className="study-complete-button"
+            onClick={alternarEstudado}
+            disabled={salvando}
+          >
+            {salvando ? 'Salvando...' : estudado ? '✓ Estudado' : 'Marcar como estudado'}
+          </button>
+        </section>
+      </main>
     </div>
   );
 }

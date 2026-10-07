@@ -1,10 +1,71 @@
 import '../../styles/aluno/Conteudos.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 
+const imagensMaterias = import.meta.glob(
+  '../../assets/conteudos/*.{png,jpg,jpeg,webp,avif}',
+  { eager: true, query: '?url', import: 'default' }
+);
+
+const ALIAS_IMAGEM_MATERIA = {
+  portugues: 'iconeportugues',
+  'lingua-portuguesa': 'iconeportugues',
+  matematica: 'iconematematica',
+  historia: 'iconehistoria',
+  geografia: 'iconegeografia',
+  ciencias: 'iconeciencias',
+  'ciencias-da-natureza': 'iconeciencias',
+  biologia: 'biologia',
+  quimica: 'quimica',
+  fisica: 'fisica',
+  'raciocinio-e-interpretacao': 'raciocinio-e-interpretacao',
+};
+
+function slugMateria(nome = '') {
+  return String(nome)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function getMateriaCor(materia = '') {
+  const slug = slugMateria(materia);
+
+  const cores = {
+    portugues: { color: '#5DADE2', bg: '#EAF5FF' },
+    'lingua-portuguesa': { color: '#5DADE2', bg: '#EAF5FF' },
+    matematica: { color: '#D95C5C', bg: '#FFF0EF' },
+    historia: { color: '#A97745', bg: '#F7F0E8' },
+    geografia: { color: '#62A85E', bg: '#EFF8EE' },
+    ciencias: { color: '#8D68C9', bg: '#F3EEFB' },
+    'ciencias-da-natureza': { color: '#8D68C9', bg: '#F3EEFB' },
+    biologia: { color: '#62A85E', bg: '#EFF8EE' },
+    quimica: { color: '#8D68C9', bg: '#F3EEFB' },
+    fisica: { color: '#8D68C9', bg: '#F3EEFB' },
+  };
+
+  return cores[slug] || { color: '#5DADE2', bg: '#EAF5FF' };
+}
+
+function getMateriaImagem(materia) {
+  const slug = slugMateria(materia);
+  const nomeArquivo = ALIAS_IMAGEM_MATERIA[slug] || slug;
+
+  const encontrada = Object.entries(imagensMaterias).find(([caminho]) => {
+    const nome = caminho
+      .split('/')
+      .pop()
+      ?.replace(/\.(png|jpe?g|webp|avif)$/i, '')
+      .toLowerCase();
+
+    return nome === nomeArquivo;
+  });
+
+  return encontrada?.[1] || null;
+}
 
 function obterToken() {
   return (
@@ -857,10 +918,7 @@ export default function Conteudos() {
                 const aberto =
                   abertos.has(materia);
 
-                const style =
-                  getSubjectStyle(
-                    materia
-                  );
+                const style = getMateriaCor(materia);
 
                 const materiaProgresso =
                   topics.length
@@ -878,7 +936,11 @@ export default function Conteudos() {
                     key={materia}
                     style={{
                       borderLeftColor:
-                        style.color
+                        style.color,
+                      '--subject-color':
+                        style.color,
+                      '--subject-bg':
+                        style.bg
                     }}
                   >
 
@@ -906,12 +968,21 @@ export default function Conteudos() {
                           }}
                         >
 
-                          <SubjectIcon
-                            materia={
-                              materia
-                            }
-                            size={20}
-                          />
+                          {getMateriaImagem(materia) ? (
+                            <img
+                              src={getMateriaImagem(materia)}
+                              alt=""
+                              className="content-subject-image"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span
+                              className="content-subject-image-fallback"
+                              aria-hidden="true"
+                            >
+                              {String(materia).charAt(0).toUpperCase()}
+                            </span>
+                          )}
 
                         </span>
 
@@ -1005,16 +1076,13 @@ export default function Conteudos() {
                                 key={
                                   topic.id
                                 }
-                                style={
-                                  done
-                                    ? {
-                                        borderColor:
-                                          style.color,
-                                        background:
-                                          style.bg
-                                      }
+                                style={{
+                                  '--topic-color': style.color,
+                                  '--topic-bg': style.bg,
+                                  borderColor: done
+                                    ? style.color
                                     : undefined
-                                }
+                                }}
                               >
 
                                 <button
@@ -1034,16 +1102,17 @@ export default function Conteudos() {
                                       ? 'Marcar tópico como não estudado'
                                       : 'Marcar tópico como estudado'
                                   }
-                                  style={
-                                    done
-                                      ? {
-                                          background:
-                                            style.color,
-                                          borderColor:
-                                            style.color
-                                        }
-                                      : undefined
-                                  }
+                                  style={{
+                                    background: done
+                                      ? style.color
+                                      : style.bg,
+                                    borderColor: done
+                                      ? style.color
+                                      : style.color,
+                                    color: done
+                                      ? '#fff'
+                                      : style.color
+                                  }}
                                 >
                                   {done
                                     ? '✓'
@@ -1059,42 +1128,67 @@ export default function Conteudos() {
                                     )
                                   }
                                 >
+                                  <span className="content-topic-meta">
+                                    <span
+                                      className="content-topic-number"
+                                      style={{
+                                        background: style.bg,
+                                        color: style.color
+                                      }}
+                                    >
+                                      {String(
+                                        index + 1
+                                      ).padStart(
+                                        2,
+                                        '0'
+                                      )}
+                                    </span>
 
-                                  <span className="content-topic-number">
-                                    {String(
-                                      index + 1
-                                    ).padStart(
-                                      2,
-                                      '0'
-                                    )}
+                                    <span
+                                      className="content-topic-materia"
+                                      style={{
+                                        color: style.color,
+                                        background: style.bg
+                                      }}
+                                    >
+                                      {materia}
+                                    </span>
                                   </span>
 
                                   <span className="content-topic-name">
                                     {topic.nome}
                                   </span>
 
-                                  <span
-                                    className="content-topic-status"
-                                    style={
-                                      done
-                                        ? {
-                                            color:
-                                              style.color
-                                          }
-                                        : undefined
-                                    }
-                                  >
-                                    {salvando
-                                      ? 'Salvando...'
-                                      : done
-                                        ? 'Estudado'
-                                        : 'Ver conteúdo'}
-                                  </span>
+                                  <span className="content-topic-footer">
+                                    <span
+                                      className="content-topic-status"
+                                      style={{
+                                        color: style.color,
+                                        borderColor: `${style.color}2E`,
+                                        background: done
+                                          ? style.bg
+                                          : '#F7FBFF'
+                                      }}
+                                    >
+                                      {salvando
+                                        ? 'Salvando...'
+                                        : done
+                                          ? 'Estudado'
+                                          : 'Não iniciado'}
+                                    </span>
 
-                                  <span className="content-topic-arrow">
-                                    ›
+                                    <span
+                                      className="content-topic-action"
+                                      style={{
+                                        color: style.color
+                                      }}
+                                    >
+                                      Ver conteúdo
+                                      <span className="content-topic-arrow">
+                                        ›
+                                      </span>
+                                    </span>
                                   </span>
-
                                 </button>
 
                               </div>
