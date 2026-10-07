@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&display=swap");
+
 /* Estilos da página Mural */
 
 .mural-btn{
@@ -55,7 +57,7 @@
 
 .postit-tag{
   display:block;
-  font-family:"Kalam", cursive;
+  font-family:"Caveat", cursive;
   font-size:12px;
   font-weight:700;
   text-transform:uppercase;
@@ -65,7 +67,7 @@
 }
 
 .postit-text{
-  font-family:"Kalam", cursive;
+  font-family:"Caveat", cursive;
   font-size:18px;
   line-height:1.45;
   color:rgba(0,0,0,0.78);
@@ -200,4 +202,564 @@
   .mural-hero .mural-btn{
     width:100%;
   }
+}
+
+/* =========================================================
+   MURAL — REFINO VISUAL
+   ========================================================= */
+
+.mural-page {
+  --mural-blue: var(--color-primary-800);
+  --mural-blue-dark: var(--color-primary-900);
+  --mural-line: rgba(13, 71, 161, 0.13);
+}
+
+.mural-page .mural-hero {
+  min-height: 152px;
+  padding: 30px 34px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow-md);
+}
+
+.mural-page .mural-hero h1 {
+  letter-spacing: -0.025em;
+}
+
+.mural-page .mural-hero p {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.mural-page .mural-hero .mural-btn.primary {
+  min-height: 46px;
+  padding: 0 18px;
+  background: #ffffff !important;
+  color: var(--color-primary-800) !important;
+  border: 1px solid rgba(255,255,255,.5);
+  box-shadow: 0 10px 24px -12px rgba(0,0,0,.35);
+}
+
+.mural-page .mural-hero .mural-btn.primary:hover {
+  background: #f5f9ff !important;
+  color: var(--color-primary-900) !important;
+}
+
+.mural-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 700;
+  background: rgba(13,71,161,.10);
+}
+
+.mural-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.mural-toolbar-top {
+  order: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 1 460px;
+  min-width: 320px;
+  gap: 18px;
+  margin-bottom: 0;
+}
+
+.mural-search {
+  width: 100%;
+  max-width: 520px;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px 0 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-600);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);
+}
+
+.mural-search:focus-within {
+  background: var(--color-surface);
+  border-color: rgba(33,150,243,.45);
+  box-shadow: 0 0 0 4px rgba(33,150,243,.08);
+}
+
+.mural-search-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.mural-search-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mural-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.mural-search input::placeholder {
+  color: rgba(13,71,161,.46);
+}
+
+.mural-search-clear {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-surface-muted);
+  color: var(--color-primary-800);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.mural-search-clear:hover {
+  background: var(--color-primary-100);
+}
+
+.mural-page .materia-tabs {
+  order: 1;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mural-page .materia-tab {
+  min-height: 38px;
+  padding: 8px 13px;
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.mural-page .materia-tab:not(.active):hover {
+  background: var(--color-surface-soft);
+  transform: translateY(-1px);
+}
+
+.mural-tab-dot,
+.materia-tab-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: var(--color-primary-300);
+}
+
+.materia-tab-dot-portugues { background: #72bde9; }
+.materia-tab-dot-matematica { background: #ef8f87; }
+.materia-tab-dot-historia { background: #b98f55; }
+.materia-tab-dot-geografia { background: #6cb36c; }
+.materia-tab-dot-ciencias { background: #a176c9; }
+
+.mural-board-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 2px 14px;
+}
+
+.mural-board-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--color-primary-800);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.mural-board-header p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.mural-board-count {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mural-page .mural-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 30px 22px;
+  padding: 4px 0 18px;
+}
+
+.mural-page .postit {
+  min-height: 218px;
+  padding: 29px 24px 20px;
+  border-radius: 2px 2px 3px 3px;
+  border: 1px solid rgba(0,0,0,.045);
+  background-image:
+    linear-gradient(135deg, rgba(255,255,255,.34), transparent 40%),
+    linear-gradient(to bottom right, transparent 87%, rgba(0,0,0,.12) 100%);
+  box-shadow:
+    0 2px 3px rgba(0,0,0,.06),
+    5px 14px 20px -11px rgba(30,20,10,.36),
+    14px 30px 40px -24px rgba(30,20,10,.25);
+  transform: rotate(var(--tilt));
+  animation: muralPostitIn .38s var(--ease-bouncy) both;
+  animation-delay: var(--postit-delay);
+  outline: none;
+}
+
+.mural-page .postit:hover {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow:
+    0 3px 5px rgba(0,0,0,.07),
+    6px 20px 28px -10px rgba(30,20,10,.42),
+    18px 34px 44px -24px rgba(30,20,10,.27);
+}
+
+.mural-page .postit:focus-visible {
+  box-shadow: 0 0 0 4px rgba(33,150,243,.18), 0 18px 32px -14px rgba(30,20,10,.42);
+}
+
+.mural-page .postit::before {
+  width: 70px;
+  height: 20px;
+  top: -10px;
+  background: linear-gradient(rgba(255,255,255,.88), rgba(255,255,255,.56));
+}
+
+.postit-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mural-page .postit-tag {
+  margin: 0;
+  color: rgba(0,0,0,.48);
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+.postit-edit {
+  opacity: 0;
+  padding: 4px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.42);
+  color: rgba(0,0,0,.48);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.mural-page .postit:hover .postit-edit,
+.mural-page .postit:focus-visible .postit-edit {
+  opacity: 1;
+}
+
+.mural-page .postit-text {
+  margin: 18px 0 0;
+  font-family: "Caveat", cursive;
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 500;
+  text-wrap: pretty;
+}
+
+.postit-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 16px;
+  color: rgba(0,0,0,.38);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  opacity: .78;
+}
+
+.postit-footer-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.mural-empty-card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 310px;
+  padding: 34px 24px;
+  background: var(--color-surface);
+  border: 1px dashed rgba(13,71,161,.20);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.mural-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 15px;
+  border-radius: 18px;
+  background: var(--color-primary-100);
+  font-size: 25px;
+}
+
+.mural-empty-card h3 {
+  margin: 0;
+  color: var(--color-primary-800);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.mural-empty-card p {
+  max-width: 490px;
+  margin: 7px 0 18px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.mural-page .modal-overlay {
+  background: rgba(7, 42, 91, .52);
+  backdrop-filter: blur(5px);
+  padding: 22px;
+}
+
+.mural-page .modal-card {
+  max-width: 660px;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.mural-page .modal-header h2 {
+  font-size: 23px;
+  letter-spacing: -.02em;
+}
+
+@keyframes muralPostitIn {
+  from {
+    opacity: 0;
+    transform: rotate(var(--tilt)) translateY(16px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--tilt));
+  }
+}
+
+@media (max-width: 1050px) {
+  .mural-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mural-toolbar-top {
+    order: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mural-page .materia-tabs {
+    order: 2;
+    width: 100%;
+  }
+
+  .mural-search {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .mural-page .mural-hero {
+    min-height: 0;
+    padding: 24px 22px;
+  }
+
+  .mural-toolbar {
+    padding: 18px;
+  }
+
+  .mural-board-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mural-page .mural-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  .mural-page .postit {
+    min-height: 200px;
+  }
+}
+
+/* =========================================================
+   POST-ITS — CORES MAIS VIVAS E APENAS A ANOTAÇÃO DO USUÁRIO
+   ========================================================= */
+
+.mural-page .postit-portugues {
+  background: linear-gradient(135deg, #70cdf7 0%, #57b9ef 100%);
+}
+
+.mural-page .postit-matematica {
+  background: linear-gradient(135deg, #ff9e98 0%, #f5837e 100%);
+}
+
+.mural-page .postit-historia {
+  background: linear-gradient(135deg, #e8bf73 0%, #d8a954 100%);
+}
+
+.mural-page .postit-geografia {
+  background: linear-gradient(135deg, #8cda88 0%, #69c96d 100%);
+}
+
+.mural-page .postit-ciencias {
+  background: linear-gradient(135deg, #c39aed 0%, #aa7bd8 100%);
+}
+
+/* A matéria já aparece nos filtros; dentro do post-it fica somente a anotação. */
+.mural-page .postit-tag,
+.mural-page .postit-edit,
+.mural-page .postit-footer {
+  display: none !important;
+}
+
+.mural-page .postit-text {
+  margin-top: 0;
+  color: rgba(22, 32, 45, .92);
+  font-weight: 500;
+}
+
+/* A matéria selecionada usa a mesma cor do post-it correspondente. */
+.mural-page .materia-pill.selected.materia-pill-portugues {
+  background: #57b9ef;
+  border-color: #57b9ef;
+  color: #173449;
+  box-shadow: 0 8px 18px -12px rgba(52, 143, 194, .75);
+}
+
+.mural-page .materia-pill.selected.materia-pill-matematica {
+  background: #f5837e;
+  border-color: #f5837e;
+  color: #4a2422;
+  box-shadow: 0 8px 18px -12px rgba(207, 91, 85, .75);
+}
+
+.mural-page .materia-pill.selected.materia-pill-historia {
+  background: #d8a954;
+  border-color: #d8a954;
+  color: #4b3518;
+  box-shadow: 0 8px 18px -12px rgba(167, 120, 48, .75);
+}
+
+.mural-page .materia-pill.selected.materia-pill-geografia {
+  background: #69c96d;
+  border-color: #69c96d;
+  color: #193e1e;
+  box-shadow: 0 8px 18px -12px rgba(75, 165, 80, .75);
+}
+
+.mural-page .materia-pill.selected.materia-pill-ciencias {
+  background: #aa7bd8;
+  border-color: #aa7bd8;
+  color: #2f1d40;
+  box-shadow: 0 8px 18px -12px rgba(126, 83, 169, .75);
+}
+
+/* Contador dos filtros na cor de cada post-it */
+.mural-page .materia-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border-radius: 50%;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+}
+
+.mural-page .materia-tab-count-todas {
+  background: #dbeeff;
+  border-color: #b7dcfb;
+  color: #1458b8;
+}
+
+.mural-page .materia-tab-count-portugues {
+  background: #57b9ef;
+  border-color: #57b9ef;
+  color: #173449;
+}
+
+.mural-page .materia-tab-count-matematica {
+  background: #f5837e;
+  border-color: #f5837e;
+  color: #4a2422;
+}
+
+.mural-page .materia-tab-count-historia {
+  background: #d8a954;
+  border-color: #d8a954;
+  color: #4b3518;
+}
+
+.mural-page .materia-tab-count-geografia {
+  background: #69c96d;
+  border-color: #69c96d;
+  color: #193e1e;
+}
+
+.mural-page .materia-tab-count-ciencias {
+  background: #aa7bd8;
+  border-color: #aa7bd8;
+  color: #2f1d40;
 }

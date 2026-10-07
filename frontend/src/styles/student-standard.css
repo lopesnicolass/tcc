@@ -1,0 +1,316 @@
+/* =========================================================
+   TENNA — PADRÃO VISUAL DA ÁREA DO ESTUDANTE
+   Camada de consistência: mantém a identidade atual e faz
+   as telas principais compartilharem a mesma estrutura.
+   ========================================================= */
+
+.student-area .dashboard-content {
+  padding: 30px clamp(22px, 3vw, 48px) 54px;
+}
+
+.student-area .page-shell,
+.student-area > .dashboard-content > #root {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ---------------------------------------------------------
+   HERO / CABEÇALHO PRINCIPAL
+   --------------------------------------------------------- */
+
+.student-area .home-hero,
+.student-area .mural-hero,
+.student-area .conteudos-page .tenna-auto-intro,
+.student-area .calendar-page .tenna-auto-intro,
+.student-area .tenna-auto-plan .tenna-auto-intro,
+.student-area .simulados-hero,
+.student-area .provas-page .provas-header,
+.student-area .flashcards-hero,
+.student-area .perfil-page-header {
+  min-height: 150px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 16px 34px -24px rgba(13, 71, 161, .60);
+}
+
+.student-area .home-hero-text h1,
+.student-area .mural-hero h1,
+.student-area .conteudos-page .tenna-auto-intro h2,
+.student-area .calendar-page .tenna-auto-intro h2,
+.student-area .tenna-auto-page .tenna-auto-intro h2,
+.student-area .simulados-hero h1,
+.student-area .provas-page .provas-header h1,
+.student-area .flashcards-hero h1,
+.student-area .perfil-page-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3vw, 38px);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.025em;
+}
+
+.student-area .home-hero-text p,
+.student-area .mural-hero p,
+.student-area .conteudos-page .tenna-auto-intro p,
+.student-area .calendar-page .tenna-auto-intro p,
+.student-area .tenna-auto-page .tenna-auto-intro p,
+.student-area .simulados-hero p,
+.student-area .provas-page .provas-header p,
+.student-area .flashcards-hero p,
+.student-area .perfil-page-header p {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-body);
+}
+
+/* Cabeçalho do Perfil passa a seguir o mesmo padrão das demais telas. */
+.student-area .perfil-page-header {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(120deg, var(--color-primary-800), var(--color-primary-500));
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.student-area .perfil-page-header::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  top: -120px;
+  border-radius: 50%;
+  border: 34px solid rgba(255, 255, 255, .08);
+  pointer-events: none;
+}
+
+.student-area .perfil-page-header > div {
+  position: relative;
+  z-index: 1;
+}
+
+.student-area .perfil-page-header h1 {
+  margin: 0 0 6px;
+  color: #fff;
+}
+
+.student-area .perfil-page-header p {
+  margin: 0;
+  color: rgba(255,255,255,.82);
+}
+
+/* ---------------------------------------------------------
+   ESPAÇAMENTO ENTRE SEÇÕES
+   --------------------------------------------------------- */
+
+.student-area .home-stats-row,
+.student-area .home-grid,
+.student-area .home-extra-grid,
+.student-area .content-toolbar,
+.student-area .flashcards-search,
+.student-area .materia-tabs,
+.student-area .stats-row,
+.student-area .simulado-grid,
+.student-area .provas-list,
+.student-area .perfil-grid {
+  margin-bottom: 24px;
+}
+
+.student-area .home-grid,
+.student-area .home-extra-grid,
+.student-area .perfil-grid,
+.student-area .desempenho-split-hero,
+.student-area .desempenho-split-comparacao,
+.student-area .desempenho-split-meta {
+  gap: 20px;
+}
+
+/* ---------------------------------------------------------
+   CARDS — UMA MESMA LINGUAGEM EM TODAS AS TELAS
+   --------------------------------------------------------- */
+
+.student-area .stat-card,
+.student-area .panel-card,
+.student-area .content-progress-card,
+.student-area .content-subject-card,
+.student-area .flashcards-game-banner,
+.student-area .perfil-form-card,
+.student-area .perfil-avatar-card,
+.student-area .perfil-achievements-card,
+.student-area .prova-row,
+.student-area .provas-empty,
+.student-area .tenna-auto-journey,
+.student-area .tenna-auto-month,
+.student-area .calendar-overview,
+.student-area .calendar-main,
+.student-area .calendar-day-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.student-area .stat-card:hover,
+.student-area .panel-card:hover,
+.student-area .content-subject-card:hover,
+.student-area .prova-row:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* ---------------------------------------------------------
+   BOTÕES
+   --------------------------------------------------------- */
+
+.student-area .mural-btn,
+.student-area .flashcards-btn-primary,
+.student-area .flashcards-btn-secondary,
+.student-area .flashcards-game-start,
+.student-area .home-extra-button,
+.student-area .perfil-form-footer .mural-btn,
+.student-area .perfil-avatar-card > .mural-btn,
+.student-area .prova-links a {
+  min-height: 42px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.student-area .mural-btn.primary,
+.student-area .flashcards-btn-primary,
+.student-area .flashcards-game-start {
+  background: var(--color-primary-800);
+}
+
+.student-area .mural-btn.primary:hover,
+.student-area .flashcards-btn-primary:hover,
+.student-area .flashcards-game-start:hover:not(:disabled) {
+  background: var(--color-primary-900);
+}
+
+/* ---------------------------------------------------------
+   ABAS / FILTROS
+   --------------------------------------------------------- */
+
+.student-area .materia-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-area .materia-tab,
+.student-area .content-filter-chip {
+  min-height: 38px;
+  border-radius: var(--radius-pill);
+}
+
+.student-area .flashcards-search,
+.student-area .content-search-wrap,
+.student-area .content-toolbar select,
+.student-area .mural-filter-select {
+  min-height: 46px;
+  border-radius: var(--radius-md);
+}
+
+/* ---------------------------------------------------------
+   TIPOGRAFIA DOS TÍTULOS DE SEÇÃO
+   --------------------------------------------------------- */
+
+.student-area .page-section-title,
+.student-area .home-panel-heading h3,
+.student-area .perfil-form-heading h2,
+.student-area .perfil-card-heading h3,
+.student-area .materia-section-title {
+  font-family: var(--font-display);
+  color: var(--color-primary-800);
+}
+
+/* ---------------------------------------------------------
+   DESEMPENHO — alinhamento com as demais telas
+   --------------------------------------------------------- */
+
+.student-area .desempenho-split-hero {
+  margin-bottom: 24px;
+}
+
+.student-area .desempenho-cards-grid {
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+/* ---------------------------------------------------------
+   RESPONSIVIDADE
+   --------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .student-area .dashboard-content {
+    padding: 24px 20px 44px;
+  }
+
+  .student-area .home-hero,
+  .student-area .mural-hero,
+  .student-area .conteudos-page .tenna-auto-intro,
+  .student-area .calendar-page .tenna-auto-intro,
+  .student-area .tenna-auto-plan .tenna-auto-intro,
+  .student-area .simulados-hero,
+  .student-area .provas-page .provas-header,
+  .student-area .flashcards-hero,
+  .student-area .perfil-page-header {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .student-area .dashboard-content {
+    padding: 20px 16px 36px;
+  }
+
+  .student-area .home-hero,
+  .student-area .mural-hero,
+  .student-area .conteudos-page .tenna-auto-intro,
+  .student-area .calendar-page .tenna-auto-intro,
+  .student-area .tenna-auto-plan .tenna-auto-intro,
+  .student-area .simulados-hero,
+  .student-area .provas-page .provas-header,
+  .student-area .flashcards-hero,
+  .student-area .perfil-page-header {
+    min-height: 0;
+    padding: 22px 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .student-area .home-grid,
+  .student-area .home-extra-grid,
+  .student-area .perfil-grid,
+  .student-area .desempenho-split-hero,
+  .student-area .desempenho-split-comparacao,
+  .student-area .desempenho-split-meta {
+    gap: 16px;
+  }
+
+  .student-area .materia-tabs {
+    gap: 8px;
+  }
+}
+
+/* ---------------------------------------------------------
+   ALINHAMENTO EXTERNO — todas as páginas começam e terminam
+   na mesma largura útil.
+   --------------------------------------------------------- */
+
+.student-area .mural-page,
+.student-area .simulados-page,
+.student-area .provas-page,
+.student-area .desempenho-page,
+.student-area .flashcards-page,
+.student-area .perfil-page,
+.student-area .tenna-auto-plan,
+.student-area .calendar-page {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.student-area .calendar-page {
+  padding-bottom: 48px;
+}

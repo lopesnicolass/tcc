@@ -8,6 +8,7 @@ import './styles/layout-system.css';
 import './styles/App.css';
 import App from './App.jsx';
 import './styles/dark-mode.css';
+import './styles/student-standard.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

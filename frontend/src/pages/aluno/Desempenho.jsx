@@ -676,7 +676,7 @@ export default function Desempenho() {
 
 
     return (
-        <div
+        <div className="desempenho-page page-shell"
             style={{
                 width: '100%',
                 maxWidth: 'none',

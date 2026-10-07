@@ -1736,7 +1736,7 @@ export default function FlashCards() {
 
   return (
 
-    <div>
+    <div className="flashcards-page page-shell">
 
       <section className="flashcards-hero">
 

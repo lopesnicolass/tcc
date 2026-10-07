@@ -687,9 +687,9 @@ export default function Perfil() {
 
   return (
 
-    <div>
+    <div className="perfil-page page-shell">
 
-      <div className="page-header">
+      <div className="page-header perfil-page-header">
 
         <div>
 

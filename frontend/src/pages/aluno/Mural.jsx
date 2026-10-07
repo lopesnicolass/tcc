@@ -34,6 +34,16 @@ function normalizarMateria(materia) {
   return MATERIA_ALIASES[materia] || materia;
 }
 
+function materiaPillClass(materia) {
+  const slug = normalizarMateria(materia)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-');
+
+  return `materia-pill-${slug}`;
+}
+
 const TILTS = [-3, 2, -1.5, 3, -2, 1.5];
 
 
@@ -117,6 +127,9 @@ export default function Mural() {
 
   const [filtro, setFiltro] =
     useState('Todas');
+
+  const [busca, setBusca] =
+    useState('');
 
   const [carregando, setCarregando] =
     useState(true);
@@ -550,15 +563,21 @@ export default function Mural() {
   // FILTRO
   // ===================================================
 
-  const visiveis =
-    filtro === 'Todas'
-      ? postits
-      : postits.filter(
-          (postit) =>
-            normalizarMateria(
-              postit.materia
-            ) === filtro
-        );
+  const textoBusca = busca.trim().toLowerCase();
+
+  const visiveis = postits.filter((postit) => {
+    const passaMateria =
+      filtro === 'Todas' ||
+      normalizarMateria(postit.materia) === filtro;
+
+    const passaBusca =
+      !textoBusca ||
+      String(postit.texto || '')
+        .toLowerCase()
+        .includes(textoBusca);
+
+    return passaMateria && passaBusca;
+  });
 
 
   // ===================================================
@@ -595,7 +614,7 @@ export default function Mural() {
 
   return (
 
-    <div>
+    <div className="mural-page page-shell">
 
       {/* ============================================= */}
       {/* CABEÇALHO */}
@@ -637,10 +656,12 @@ export default function Mural() {
 
 
       {/* ============================================= */}
-      {/* ABAS */}
+      {/* FILTROS + PESQUISA */}
       {/* ============================================= */}
 
-      <div className="materia-tabs">
+      <div className="mural-toolbar">
+
+        <div className="materia-tabs">
 
         <button
           type="button"
@@ -658,7 +679,7 @@ export default function Mural() {
 
           Todas
 
-          <span className="materia-tab-count">
+          <span className="materia-tab-count materia-tab-count-todas">
             {postits.length}
           </span>
 
@@ -685,7 +706,7 @@ export default function Mural() {
 
               {materia}
 
-              <span className="materia-tab-count">
+              <span className={`materia-tab-count ${materiaPillClass(materia).replace('materia-pill-', 'materia-tab-count-')}`}>
 
                 {
                   postits.filter(
@@ -702,6 +723,41 @@ export default function Mural() {
 
           )
         )}
+
+        </div>
+
+        <div className="mural-toolbar-top">
+
+          <label className="mural-search" aria-label="Pesquisar post-it">
+
+            <span className="mural-search-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-4-4" />
+              </svg>
+            </span>
+
+            <input
+              type="search"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Pesquisar post-it..."
+            />
+
+            {busca && (
+              <button
+                type="button"
+                className="mural-search-clear"
+                onClick={() => setBusca('')}
+                aria-label="Limpar pesquisa"
+              >
+                ×
+              </button>
+            )}
+
+          </label>
+
+        </div>
 
       </div>
 
@@ -893,7 +949,7 @@ export default function Mural() {
                             materia
                               ? 'selected'
                               : ''
-                          }`
+                          } ${materiaPillClass(materia)}`
                         }
                         onClick={() =>
                           setNewMateria(
@@ -1031,7 +1087,7 @@ export default function Mural() {
                             materia
                               ? 'selected'
                               : ''
-                          }`
+                          } ${materiaPillClass(materia)}`
                         }
                         onClick={() =>
                           setEditMateria(

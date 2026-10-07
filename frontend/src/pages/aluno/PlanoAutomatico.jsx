@@ -1445,7 +1445,7 @@ export default function PlanoAutomatico() {
 
   return (
 
-    <div className="tenna-auto-plan">
+    <div className="tenna-auto-plan page-shell">
 
       <section className="tenna-auto-intro">
 

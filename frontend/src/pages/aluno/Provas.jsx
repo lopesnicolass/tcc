@@ -27,7 +27,7 @@ export default function Provas() {
     }, []);
 
     return (
-        <div className="provas-page">
+        <div className="provas-page page-shell">
 
             <div className="provas-header">
                 <div className="provas-header-content">

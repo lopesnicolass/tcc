@@ -35,7 +35,7 @@ export function ListaSimulados({
   );
 
   return (
-    <div>
+    <div className="simulados-page page-shell">
 
       <div className="simulados-hero">
         <h1>Simulados</h1>
