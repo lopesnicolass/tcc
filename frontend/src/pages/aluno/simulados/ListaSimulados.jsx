@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { STATUS_LABEL, BTN_LABEL } from './constants.js';
 
 const MATERIAS_SIMULADOS = [
@@ -120,8 +121,14 @@ export function ListaSimulados({
   abrirSimulado,
   carregandoQuestoes
 }) {
+  const [conteudoAberto, setConteudoAberto] = useState(null);
+
   const materiaSelecionada =
     filtro !== 'Todas' ? normalizarMateria(filtro) : null;
+
+  const estiloMateriaSelecionada = materiaSelecionada
+    ? estiloMateria(materiaSelecionada)
+    : null;
 
   const gruposPorMateria = Array.from(
     simuladosVisiveis.reduce(
@@ -180,71 +187,113 @@ export function ListaSimulados({
                 key={materia}
                 className="simulados-materia-section"
               >
-                {gruposPorConteudo.map(([chave, grupo]) => (
-                  <div
-                    key={chave}
-                    className="simulados-conteudo-group"
-                  >
-                    <h3>{grupo.nome}</h3>
+                {gruposPorConteudo.map(([chave, grupo]) => {
+                  const aberto = conteudoAberto === `${materia}-${chave}`;
+                  const painelId = `simulados-${materia}-${chave}`
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-');
 
-                    <div className="simulado-grid">
-                      {grupo.simulados.map((simulado) => (
-                        <article
-                          className={`simulado-card simulado-card-${simulado.status}`}
-                          key={simulado.id}
+                  return (
+                    <section
+                      key={chave}
+                      className={`simulados-conteudo-group ${aberto ? 'aberto' : ''}`}
+                    >
+                      <button
+                        type="button"
+                        className="simulados-conteudo-heading"
+                        aria-expanded={aberto}
+                        aria-controls={painelId}
+                        onClick={() =>
+                          setConteudoAberto(aberto ? null : `${materia}-${chave}`)
+                        }
+                      >
+                        <span className="simulados-conteudo-heading-main">
+                          <span className="simulados-conteudo-icon" aria-hidden="true">
+                            ✓
+                          </span>
+                          <span className="simulados-conteudo-heading-copy">
+                            <span className="simulados-conteudo-label">Conteúdo</span>
+                            <span className="simulados-conteudo-title">{grupo.nome}</span>
+                          </span>
+                        </span>
+
+                        <span className="simulados-conteudo-heading-side">
+                          <span className="simulados-conteudo-count">
+                            {grupo.simulados.length}{' '}
+                            {grupo.simulados.length === 1 ? 'simulado' : 'simulados'}
+                          </span>
+                          <span className="simulados-conteudo-chevron" aria-hidden="true">
+                            {aberto ? '⌃' : '⌄'}
+                          </span>
+                        </span>
+                      </button>
+
+                      {aberto && (
+                        <div
+                          id={painelId}
+                          className="simulados-conteudo-panel"
                         >
-                          <div className="simulado-card-header">
-                            <span className="simulado-subject">
-                              {simulado.materia || 'Simulado'}
-                            </span>
+                          <div className="simulado-grid">
+                            {grupo.simulados.map((simulado) => (
+                              <article
+                                className={`simulado-card simulado-card-${simulado.status}`}
+                                key={simulado.id}
+                              >
+                                <div className="simulado-card-header">
+                                  <span className="simulado-subject">
+                                    {simulado.materia || 'Simulado'}
+                                  </span>
 
-                            <span
-                              className={`status-badge ${simulado.status}`}
-                            >
-                              {STATUS_LABEL[simulado.status]}
-                            </span>
+                                  <span
+                                    className={`status-badge ${simulado.status}`}
+                                  >
+                                    {STATUS_LABEL[simulado.status]}
+                                  </span>
+                                </div>
+
+                                <div className="simulado-card-body">
+                                  <div className="simulado-card-kicker">
+                                    Simulado
+                                  </div>
+
+                                  <h2>{simulado.titulo}</h2>
+
+                                  {simulado.descricao && (
+                                    <p className="simulado-description">
+                                      {simulado.descricao}
+                                    </p>
+                                  )}
+
+                                  <div className="simulado-meta">
+                                    <span>
+                                      <strong aria-hidden="true">📝</strong>
+                                      {simulado.quantidade_questoes} questões
+                                    </span>
+
+                                    <span>
+                                      <strong aria-hidden="true">⏱</strong>
+                                      {simulado.tempo_limite} minutos
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  className="simulado-btn"
+                                  onClick={() => abrirSimulado(simulado)}
+                                  disabled={carregandoQuestoes}
+                                >
+                                  {carregandoQuestoes
+                                    ? 'Carregando...'
+                                    : BTN_LABEL[simulado.status]}
+                                </button>
+                              </article>
+                            ))}
                           </div>
-
-                          <div className="simulado-card-body">
-                            <div className="simulado-card-kicker">
-                              Simulado
-                            </div>
-
-                            <h2>{simulado.titulo}</h2>
-
-                            {simulado.descricao && (
-                              <p className="simulado-description">
-                                {simulado.descricao}
-                              </p>
-                            )}
-
-                            <div className="simulado-meta">
-                              <span>
-                                <strong aria-hidden="true">📝</strong>
-                                {simulado.quantidade_questoes} questões
-                              </span>
-
-                              <span>
-                                <strong aria-hidden="true">⏱</strong>
-                                {simulado.tempo_limite} minutos
-                              </span>
-                            </div>
-                          </div>
-
-                          <button
-                            className="simulado-btn"
-                            onClick={() => abrirSimulado(simulado)}
-                            disabled={carregandoQuestoes}
-                          >
-                            {carregandoQuestoes
-                              ? 'Carregando...'
-                              : BTN_LABEL[simulado.status]}
-                          </button>
-                        </article>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                        </div>
+                      )}
+                    </section>
+                  );
+                })}
               </section>
             );
           }
@@ -255,9 +304,22 @@ export function ListaSimulados({
 
   return (
     <div className="simulados-page page-shell">
-      <div className="simulados-hero">
-        <h1>Simulados</h1>
-        <p>Pratique seus conhecimentos, acompanhe seus resultados e avance na sua preparação para o Vestibulinho.</p>
+      <div
+        className={`simulados-hero ${
+          materiaSelecionada
+            ? `simulados-hero-materia simulados-hero-materia-${estiloMateriaSelecionada?.classe || 'outra'}`
+            : ''
+        }`}
+      >
+        <div className="simulados-hero-copy">
+          <h1>{materiaSelecionada || 'Simulados'}</h1>
+          <p>
+            {materiaSelecionada
+              ? 'Escolha um simulado para começar seus estudos.'
+              : 'Pratique seus conhecimentos, acompanhe seus resultados e avance na sua preparação para o Vestibulinho.'}
+          </p>
+        </div>
+
       </div>
 
       {erro && (
@@ -328,37 +390,6 @@ export function ListaSimulados({
             >
               ← Voltar para matérias
             </button>
-
-            <div className="simulados-detalhe-titulo">
-              <span className="section-eyebrow">Matéria selecionada</span>
-              <h2>{materiaSelecionada}</h2>
-              <p>Escolha um simulado para começar seus estudos.</p>
-            </div>
-          </div>
-
-          <div className="stats-row">
-            <div className="stat-card">
-              <div className="stat-value">
-                {String(concluidos).padStart(2, '0')}
-              </div>
-              <div className="stat-label">Simulados concluídos</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-value">{simuladosVisiveis.length}</div>
-              <div className="stat-label">Simulados em {materiaSelecionada}</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-value">
-                {simuladosVisiveis.reduce(
-                  (total, simulado) =>
-                    total + Number(simulado.quantidade_questoes || 0),
-                  0
-                )}
-              </div>
-              <div className="stat-label">Questões disponíveis</div>
-            </div>
           </div>
 
           {simuladosVisiveis.length === 0 ? (

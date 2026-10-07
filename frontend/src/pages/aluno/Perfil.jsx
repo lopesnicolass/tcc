@@ -687,23 +687,7 @@ export default function Perfil() {
 
   return (
 
-    <div className="perfil-page page-shell">
-
-      <div className="page-header perfil-page-header">
-
-        <div>
-
-          <h1>
-            Perfil
-          </h1>
-
-          <p>
-            Organize seu perfil
-          </p>
-
-        </div>
-
-      </div>
+    <div className="perfil-page">
 
       {mensagem && (
         <div className="perfil-alert perfil-alert-success">
