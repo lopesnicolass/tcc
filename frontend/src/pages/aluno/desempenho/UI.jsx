@@ -14,6 +14,7 @@ export function CardLabel({
 }) {
   return (
     <span
+      className="desempenho-card-label"
       style={{
         display: 'block',
         color: '#8191a6',
@@ -37,6 +38,7 @@ export function CardValue({
 }) {
   return (
     <strong
+      className="desempenho-card-value"
       style={{
         display:
           'block',
@@ -58,6 +60,7 @@ export function CardDescription({
 }) {
   return (
     <span
+      className="desempenho-card-description"
       style={{
         display:
           'block',

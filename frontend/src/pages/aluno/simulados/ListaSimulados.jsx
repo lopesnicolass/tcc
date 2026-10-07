@@ -1,8 +1,113 @@
 import { STATUS_LABEL, BTN_LABEL } from './constants.js';
 
-// Tela principal: lista de simulados disponíveis, com abas de
-// matéria e estatísticas gerais.
-// Extraído de Simulados.jsx (era o bloco "LISTAGEM").
+const MATERIAS_SIMULADOS = [
+  'Português',
+  'Matemática',
+  'História',
+  'Geografia',
+  'Ciências',
+  'Simulados Gerais',
+];
+
+const MATERIA_ALIASES = {
+  'Língua Portuguesa': 'Português',
+  'Ciências da Natureza': 'Ciências',
+  'Geral': 'Simulados Gerais',
+  'Simulado Geral': 'Simulados Gerais',
+  'Simulados Gerais': 'Simulados Gerais',
+  'Geral/Misto': 'Simulados Gerais',
+  'Misto': 'Simulados Gerais',
+};
+
+function ehSimuladoGeral(simulado) {
+  if (!simulado) return false;
+
+  if (simulado.tipo === 'geral' || simulado.tipo === 'misto') {
+    return true;
+  }
+
+  if (simulado.is_geral === true || simulado.simulado_geral === true) {
+    return true;
+  }
+
+  if (Array.isArray(simulado.materias) && simulado.materias.length > 1) {
+    return true;
+  }
+
+  return MATERIA_ALIASES[simulado.materia] === 'Simulados Gerais';
+}
+
+function normalizarMateria(materia) {
+  return MATERIA_ALIASES[materia] || materia;
+}
+
+function normalizarMateriaSimulado(simulado) {
+  return ehSimuladoGeral(simulado)
+    ? 'Simulados Gerais'
+    : normalizarMateria(simulado?.materia);
+}
+
+const MATERIA_ESTILO = {
+  Matemática: { sigla: '∑', classe: 'matematica' },
+  Português: { sigla: 'A', classe: 'portugues' },
+  História: { sigla: 'H', classe: 'historia' },
+  Geografia: { sigla: 'G', classe: 'geografia' },
+  Ciências: { sigla: 'C', classe: 'ciencias' },
+  Biologia: { sigla: 'B', classe: 'biologia' },
+  Química: { sigla: 'Q', classe: 'quimica' },
+  Física: { sigla: 'F', classe: 'fisica' },
+  Inglês: { sigla: 'EN', classe: 'ingles' },
+  'Simulados Gerais': { sigla: '★', classe: 'gerais' },
+ 
+};
+
+
+const CAPAS_SIMULADOS = import.meta.glob(
+  '../../../assets/simulados/*.{png,jpg,jpeg,webp,avif}',
+  {
+    eager: true,
+    import: 'default',
+    query: '?url'
+  }
+);
+
+function slugDaMateria(materia) {
+  return materia
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function obterCapaMateria(materia) {
+  const slug = slugDaMateria(materia);
+  const entrada = Object.entries(CAPAS_SIMULADOS).find(([caminho]) => {
+    const arquivo = caminho.split('/').pop()?.replace(/\.[^.]+$/, '');
+    return arquivo === slug;
+  });
+
+  return entrada?.[1] || null;
+}
+
+function estiloMateria(materia) {
+  const configuracao = MATERIA_ESTILO[materia];
+
+  if (configuracao) {
+    return configuracao;
+  }
+
+  const slug = materia
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-');
+
+  return {
+    sigla: materia.slice(0, 1).toUpperCase(),
+    classe: slug || 'outra'
+  };
+}
 
 export function ListaSimulados({
   materias,
@@ -15,12 +120,13 @@ export function ListaSimulados({
   abrirSimulado,
   carregandoQuestoes
 }) {
+  const materiaSelecionada =
+    filtro !== 'Todas' ? normalizarMateria(filtro) : null;
+
   const gruposPorMateria = Array.from(
     simuladosVisiveis.reduce(
       (mapa, simulado) => {
-        const materia =
-          simulado.materia ||
-          'Sem matéria';
+        const materia = normalizarMateriaSimulado(simulado) || 'Sem matéria';
 
         if (!mapa.has(materia)) {
           mapa.set(materia, []);
@@ -34,299 +140,237 @@ export function ListaSimulados({
     )
   );
 
+  // As matérias ficam sempre visíveis. O administrador apenas alimenta
+  // o card correspondente ao criar um novo simulado para aquela matéria.
+  const materiasDisponiveis = MATERIAS_SIMULADOS;
+
+  function renderSimulados() {
+    return (
+      <div className="simulados-lista-detalhe">
+        {gruposPorMateria.map(
+          ([materia, listaMateria]) => {
+            const gruposPorConteudo =
+              Array.from(
+                listaMateria.reduce(
+                  (mapa, simulado) => {
+                    const chave =
+                      simulado.topico_id != null
+                        ? `topico-${simulado.topico_id}`
+                        : 'sem-conteudo';
+
+                    if (!mapa.has(chave)) {
+                      mapa.set(chave, {
+                        nome:
+                          simulado.topico ||
+                          'Conteúdo não definido',
+                        simulados: []
+                      });
+                    }
+
+                    mapa.get(chave).simulados.push(simulado);
+
+                    return mapa;
+                  },
+                  new Map()
+                )
+              );
+
+            return (
+              <section
+                key={materia}
+                className="simulados-materia-section"
+              >
+                {gruposPorConteudo.map(([chave, grupo]) => (
+                  <div
+                    key={chave}
+                    className="simulados-conteudo-group"
+                  >
+                    <h3>{grupo.nome}</h3>
+
+                    <div className="simulado-grid">
+                      {grupo.simulados.map((simulado) => (
+                        <article
+                          className={`simulado-card simulado-card-${simulado.status}`}
+                          key={simulado.id}
+                        >
+                          <div className="simulado-card-header">
+                            <span className="simulado-subject">
+                              {simulado.materia || 'Simulado'}
+                            </span>
+
+                            <span
+                              className={`status-badge ${simulado.status}`}
+                            >
+                              {STATUS_LABEL[simulado.status]}
+                            </span>
+                          </div>
+
+                          <div className="simulado-card-body">
+                            <div className="simulado-card-kicker">
+                              Simulado
+                            </div>
+
+                            <h2>{simulado.titulo}</h2>
+
+                            {simulado.descricao && (
+                              <p className="simulado-description">
+                                {simulado.descricao}
+                              </p>
+                            )}
+
+                            <div className="simulado-meta">
+                              <span>
+                                <strong aria-hidden="true">📝</strong>
+                                {simulado.quantidade_questoes} questões
+                              </span>
+
+                              <span>
+                                <strong aria-hidden="true">⏱</strong>
+                                {simulado.tempo_limite} minutos
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            className="simulado-btn"
+                            onClick={() => abrirSimulado(simulado)}
+                            disabled={carregandoQuestoes}
+                          >
+                            {carregandoQuestoes
+                              ? 'Carregando...'
+                              : BTN_LABEL[simulado.status]}
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            );
+          }
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="simulados-page page-shell">
-
       <div className="simulados-hero">
         <h1>Simulados</h1>
         <p>Pratique seus conhecimentos, acompanhe seus resultados e avance na sua preparação para o Vestibulinho.</p>
       </div>
 
-      <div className="materia-tabs">
-
-        {materias.map((materia) => (
-          <button
-            key={materia}
-            className={`materia-tab ${filtro === materia ? 'active' : ''}`}
-            onClick={() => setFiltro(materia)}
-          >
-            <span className="materia-tab-icon" aria-hidden="true" />
-            {materia}
-            <span className="materia-tab-count">
-              {materia === 'Todas'
-                ? simulados.length
-                : simulados.filter((s) => s.materia === materia).length}
-            </span>
-          </button>
-        ))}
-
-      </div>
-
       {erro && (
-        <div
-          className="stat-card"
-          style={{
-            marginBottom: '20px'
-          }}
-        >
+        <div className="stat-card simulados-error-card">
           <p>{erro}</p>
         </div>
       )}
 
-      <div className="stats-row">
-
-        <div className="stat-card">
-
-          <div className="stat-value">
-            {String(
-              concluidos
-            ).padStart(2, '0')}
-          </div>
-
-          <div className="stat-label">
-            Simulados concluídos
-          </div>
-
-        </div>
-
-        <div className="stat-card">
-
-          <div className="stat-value">
-            {simulados.length}
-          </div>
-
-          <div className="stat-label">
-            Simulados disponíveis
-          </div>
-
-        </div>
-
-        <div className="stat-card">
-
-          <div className="stat-value">
-            {simulados.reduce(
-              (
-                total,
-                simulado
-              ) =>
-                total +
-                Number(
-                  simulado.quantidade_questoes ||
-                    0
-                ),
-              0
-            )}
-          </div>
-
-          <div className="stat-label">
-            Questões disponíveis
-          </div>
-
-        </div>
-
-      </div>
-
-      {simuladosVisiveis.length === 0 ? (
-
-        <div
-          className="stat-card"
-          style={{
-            marginTop: '25px'
-          }}
-        >
-
-          <h2>
-            Nenhum simulado encontrado.
-          </h2>
-
-          <p>
-            Os simulados cadastrados
-            pelo administrador
-            aparecerão aqui.
-          </p>
-
-        </div>
-
-      ) : (
-
-        <div
-          style={{
-            marginTop: '25px'
-          }}
-        >
-          {gruposPorMateria.map(
-            ([materia, listaMateria]) => {
-              const gruposPorConteudo =
-                Array.from(
-                  listaMateria.reduce(
-                    (mapa, simulado) => {
-                      const chave =
-                        simulado.topico_id != null
-                          ? `topico-${simulado.topico_id}`
-                          : 'sem-conteudo';
-
-                      if (!mapa.has(chave)) {
-                        mapa.set(chave, {
-                          nome:
-                            simulado.topico ||
-                            'Conteúdo não definido',
-                          simulados: []
-                        });
-                      }
-
-                      mapa
-                        .get(chave)
-                        .simulados.push(
-                          simulado
-                        );
-
-                      return mapa;
-                    },
-                    new Map()
-                  )
-                );
+      {!materiaSelecionada ? (
+        <section className="materias-simulados-section">
+          <div className="materias-simulados-grid">
+            {materiasDisponiveis.map((materia) => {
+              const estilo = estiloMateria(materia);
+              const listaMateria = simulados.filter(
+                (simulado) => normalizarMateriaSimulado(simulado) === materia
+              );
+              const quantidadeQuestoes = listaMateria.reduce(
+                (total, simulado) => total + Number(simulado.quantidade_questoes || 0),
+                0
+              );
 
               return (
-                <section
+                <button
                   key={materia}
-                  style={{
-                    marginBottom: '35px'
-                  }}
+                  type="button"
+                  className="materia-simulado-card"
+                  onClick={() => setFiltro(materia)}
                 >
-                  <h2
-                    style={{
-                      marginBottom: '8px'
-                    }}
-                  >
-                    {materia}
-                  </h2>
+                  <div className={`materia-simulado-cover materia-cover-${estilo.classe}`}>
+                    {obterCapaMateria(materia) ? (
+                      <img
+                        className="materia-simulado-cover-image"
+                        src={obterCapaMateria(materia)}
+                        alt={`Capa de ${materia}`}
+                      />
+                    ) : (
+                      <>
+                        <span className="materia-simulado-cover-shape materia-simulado-cover-shape-one" />
+                        <span className="materia-simulado-cover-shape materia-simulado-cover-shape-two" />
+                        <span className="materia-simulado-cover-symbol">
+                          {estilo.sigla}
+                        </span>
+                      </>
+                    )}
+                  </div>
 
-                  {gruposPorConteudo.map(
-                    ([
-                      chave,
-                      grupo
-                    ]) => (
-                      <div
-                        key={chave}
-                        style={{
-                          marginTop: '20px'
-                        }}
-                      >
-                        <h3
-                          style={{
-                            marginBottom: '15px'
-                          }}
-                        >
-                          {grupo.nome}
-                        </h3>
+                  <div className="materia-simulado-card-content">
+                    <h3>{materia}</h3>
+                    <div className="materia-simulado-card-footer">
+                      <span>{listaMateria.length} {listaMateria.length === 1 ? 'simulado' : 'simulados'}</span>
+                      <span>{quantidadeQuestoes} questões</span>
+                    </div>
+                  </div>
 
-                        <div className="simulado-grid">
-                          {grupo.simulados.map(
-                            (simulado) => (
-                              <div
-                                className="simulado-card"
-                                key={
-                                  simulado.id
-                                }
-                              >
-                                <div className="simulado-top">
-                                  <span className="simulado-subject">
-                                    {
-                                      simulado.materia ||
-                                      'Simulado'
-                                    }
-                                  </span>
-
-                                  <span
-                                    className={`status-badge ${simulado.status}`}
-                                  >
-                                    {
-                                      STATUS_LABEL[
-                                        simulado.status
-                                      ]
-                                    }
-                                  </span>
-                                </div>
-
-                                <h2
-                                  style={{
-                                    marginTop: '15px',
-                                    marginBottom:
-                                      '10px'
-                                  }}
-                                >
-                                  {
-                                    simulado.titulo
-                                  }
-                                </h2>
-
-                                {simulado.descricao && (
-                                  <p
-                                    style={{
-                                      marginBottom:
-                                        '20px'
-                                    }}
-                                  >
-                                    {
-                                      simulado.descricao
-                                    }
-                                  </p>
-                                )}
-
-                                <div className="simulado-meta">
-                                  <span>
-                                    📝{' '}
-                                    {
-                                      simulado.quantidade_questoes
-                                    }{' '}
-                                    questões
-                                  </span>
-
-                                  <span>
-                                    ⏱{' '}
-                                    {
-                                      simulado.tempo_limite
-                                    }{' '}
-                                    minutos
-                                  </span>
-                                </div>
-
-                                <button
-                                  className="simulado-btn"
-                                  onClick={() =>
-                                    abrirSimulado(
-                                      simulado
-                                    )
-                                  }
-                                  disabled={
-                                    carregandoQuestoes
-                                  }
-                                  style={{
-                                    marginTop:
-                                      '20px'
-                                  }}
-                                >
-                                  {carregandoQuestoes
-                                    ? 'Carregando...'
-                                    : BTN_LABEL[
-                                        simulado.status
-                                      ]}
-                                </button>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </section>
+                  <span className="materia-simulado-arrow" aria-hidden="true">→</span>
+                </button>
               );
-            }
+            })}
+          </div>
+        </section>
+      ) : (
+        <>
+          <div className="simulados-detalhe-topo">
+            <button
+              type="button"
+              className="simulados-voltar-materias"
+              onClick={() => setFiltro('Todas')}
+            >
+              ← Voltar para matérias
+            </button>
+
+            <div className="simulados-detalhe-titulo">
+              <span className="section-eyebrow">Matéria selecionada</span>
+              <h2>{materiaSelecionada}</h2>
+              <p>Escolha um simulado para começar seus estudos.</p>
+            </div>
+          </div>
+
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className="stat-value">
+                {String(concluidos).padStart(2, '0')}
+              </div>
+              <div className="stat-label">Simulados concluídos</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-value">{simuladosVisiveis.length}</div>
+              <div className="stat-label">Simulados em {materiaSelecionada}</div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-value">
+                {simuladosVisiveis.reduce(
+                  (total, simulado) =>
+                    total + Number(simulado.quantidade_questoes || 0),
+                  0
+                )}
+              </div>
+              <div className="stat-label">Questões disponíveis</div>
+            </div>
+          </div>
+
+          {simuladosVisiveis.length === 0 ? (
+            <div className="stat-card simulados-empty-card">
+              <h2>Nenhum simulado encontrado.</h2>
+              <p>Os simulados cadastrados pelo administrador aparecerão aqui.</p>
+            </div>
+          ) : (
+            renderSimulados()
           )}
-        </div>
-
+        </>
       )}
-
     </div>
   );
 }

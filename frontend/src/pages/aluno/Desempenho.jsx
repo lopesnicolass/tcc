@@ -595,7 +595,7 @@ export default function Desempenho() {
     if (carregando) {
 
         return (
-            <div>
+            <div className="desempenho-page">
 
                 <div className="page-header">
 
@@ -639,7 +639,7 @@ export default function Desempenho() {
     if (erro) {
 
         return (
-            <div>
+            <div className="desempenho-page">
 
                 <div className="page-header">
 
@@ -676,14 +676,7 @@ export default function Desempenho() {
 
 
     return (
-        <div className="desempenho-page page-shell"
-            style={{
-                width: '100%',
-                maxWidth: 'none',
-                margin: '0',
-                paddingBottom: '40px'
-            }}
-        >
+        <div className="desempenho-page">
 
             <Hero
                 mediaGeral={

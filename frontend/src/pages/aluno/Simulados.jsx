@@ -10,6 +10,53 @@ import { ListaSimulados } from './simulados/ListaSimulados.jsx';
 const API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+const MATERIAS_SIMULADOS = [
+  'Português',
+  'Matemática',
+  'História',
+  'Geografia',
+  'Ciências',
+  'Simulados Gerais',
+];
+
+const MATERIA_ALIASES = {
+  'Língua Portuguesa': 'Português',
+  'Ciências da Natureza': 'Ciências',
+  'Geral': 'Simulados Gerais',
+  'Simulado Geral': 'Simulados Gerais',
+  'Simulados Gerais': 'Simulados Gerais',
+  'Geral/Misto': 'Simulados Gerais',
+  'Misto': 'Simulados Gerais',
+};
+
+function ehSimuladoGeral(simulado) {
+  if (!simulado) return false;
+
+  if (simulado.tipo === 'geral' || simulado.tipo === 'misto') {
+    return true;
+  }
+
+  if (simulado.is_geral === true || simulado.simulado_geral === true) {
+    return true;
+  }
+
+  if (Array.isArray(simulado.materias) && simulado.materias.length > 1) {
+    return true;
+  }
+
+  return MATERIA_ALIASES[simulado.materia] === 'Simulados Gerais';
+}
+
+function normalizarMateria(materia) {
+  return MATERIA_ALIASES[materia] || materia;
+}
+
+function normalizarMateriaSimulado(simulado) {
+  return ehSimuladoGeral(simulado)
+    ? 'Simulados Gerais'
+    : normalizarMateria(simulado?.materia);
+}
+
 function obterToken() {
   return (
     localStorage.getItem('etecamp_token') ||
@@ -1511,19 +1558,12 @@ export default function Simulados() {
   // FILTROS
   // ==========================================
 
+  // Os cards de matéria são fixos e ficam sempre disponíveis.
+  // Os simulados cadastrados pelo administrador são agrupados
+  // automaticamente de acordo com a matéria informada no cadastro.
   const materias = [
     'Todas',
-
-    ...Array.from(
-      new Set(
-        simulados
-          .map(
-            (simulado) =>
-              simulado.materia
-          )
-          .filter(Boolean)
-      )
-    )
+    ...MATERIAS_SIMULADOS
   ];
 
   const simuladosVisiveis =
@@ -1531,7 +1571,7 @@ export default function Simulados() {
       ? simulados
       : simulados.filter(
           (simulado) =>
-            simulado.materia ===
+            normalizarMateriaSimulado(simulado) ===
             filtro
         );
 
