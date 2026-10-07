@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { to: '/mural', label: 'Mural', icon: 'mural' },
   { to: '/conteudos', label: 'Conteúdos', icon: 'book' },
   { to: '/cronograma', label: 'Calendário', icon: 'calendar' },
-  { to: '/plano-automatico', label: 'Plano de estudos', icon: 'target' },
+  { to: '/plano-automatico', label: 'Cronograma', icon: 'target' },
   { to: '/simulados', label: 'Simulados', icon: 'check' },
   { to: '/provas', label: 'Provas', icon: 'file' },
   { to: '/desempenho', label: 'Desempenho', icon: 'chart' },

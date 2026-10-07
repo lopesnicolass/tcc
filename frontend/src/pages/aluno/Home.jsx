@@ -103,6 +103,33 @@ function formatarData(data) {
   return texto;
 }
 
+const CORES_PROGRESSO_MATERIA = {
+  'Português': '#2196F3',
+  'Língua Portuguesa': '#2196F3',
+  'Matemática': '#E53935',
+  'História': '#8D6E63',
+  'Geografia': '#43A047',
+  'Ciências': '#8E44AD',
+  'Biologia': '#8E44AD',
+};
+
+function obterCorProgressoMateria(materia = '') {
+  if (CORES_PROGRESSO_MATERIA[materia]) {
+    return CORES_PROGRESSO_MATERIA[materia];
+  }
+
+  const entrada = String(materia).toLowerCase();
+  const encontrada = Object.keys(CORES_PROGRESSO_MATERIA).find(
+    (nome) =>
+      entrada.includes(nome.toLowerCase()) ||
+      nome.toLowerCase().includes(entrada)
+  );
+
+  return encontrada
+    ? CORES_PROGRESSO_MATERIA[encontrada]
+    : '#2196F3';
+}
+
 function obterStatusData(atividade) {
   const data = criarDataAtividade(atividade);
 
@@ -159,6 +186,7 @@ export default function Home() {
   const [desempenho, setDesempenho] = useState(null);
   const [resultados, setResultados] = useState([]);
   const [proximasAtividades, setProximasAtividades] = useState([]);
+  const [dataVestibulinho, setDataVestibulinho] = useState(null);
 
   const usuario = obterUsuario();
   const primeiroNome =
@@ -191,7 +219,8 @@ export default function Home() {
           fetch(`${API_URL}/conteudos/publico`),
           fetch(`${API_URL}/conteudos/progresso`, { headers }),
           fetch(`${API_URL}/resultados/me/desempenho`, { headers }),
-          fetch(`${API_URL}/resultados/me`, { headers })
+          fetch(`${API_URL}/resultados/me`, { headers }),
+          fetch(`${API_URL}/calendario/datas-importantes`, { headers })
         ];
 
         if (usuarioId > 0) {
@@ -208,6 +237,7 @@ export default function Home() {
           respostaProgresso,
           respostaDesempenho,
           respostaResultados,
+          respostaCalendario,
           respostaCronograma
         ] = respostas;
 
@@ -216,6 +246,7 @@ export default function Home() {
           dadosProgresso,
           dadosDesempenho,
           dadosResultados,
+          dadosCalendario,
           dadosCronograma
         ] = await Promise.all(
           respostas.map((resposta) =>
@@ -322,6 +353,38 @@ export default function Home() {
             ? dadosResultados.resultados
             : []
         );
+
+        const datasImportantes = Array.isArray(
+          dadosCalendario?.datas
+        )
+          ? dadosCalendario.datas
+          : [];
+
+        const hojeSemHorario = new Date();
+        hojeSemHorario.setHours(0, 0, 0, 0);
+
+        const vestibulinho = datasImportantes
+          .filter((item) => {
+            const titulo = String(item?.titulo || '').toLowerCase();
+            const tipo = String(item?.tipo || '').toLowerCase();
+            const data = criarDataAtividade({ data: item?.data });
+
+            return (
+              data &&
+              data >= hojeSemHorario &&
+              (titulo.includes('vestibulinho') ||
+                tipo.includes('vestibulinho'))
+            );
+          })
+          .sort(
+            (a, b) =>
+              (criarDataAtividade({ data: a.data })?.getTime() ||
+                Number.MAX_SAFE_INTEGER) -
+              (criarDataAtividade({ data: b.data })?.getTime() ||
+                Number.MAX_SAFE_INTEGER)
+          )[0] || null;
+
+        setDataVestibulinho(vestibulinho);
         setProximasAtividades(futuras);
       } catch (error) {
         console.error(
@@ -444,15 +507,35 @@ export default function Home() {
     );
   }
 
+  const diasParaVestibulinho = useMemo(() => {
+    if (!dataVestibulinho?.data) {
+      return null;
+    }
+
+    const alvo = criarDataAtividade({
+      data: dataVestibulinho.data
+    });
+
+    if (!alvo) {
+      return null;
+    }
+
+    alvo.setHours(0, 0, 0, 0);
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    return Math.max(0, Math.ceil(
+      (alvo.getTime() - hoje.getTime()) /
+        (1000 * 60 * 60 * 24)
+    ));
+  }, [dataVestibulinho]);
+
   return (
     <div className="home-page page-shell">
       {/* HERO */}
       <div className="home-hero">
         <div className="home-hero-text">
-          <span className="home-hero-kicker">
-            PREPARA ETECAMP
-          </span>
-
           <h1>
             Olá, {primeiroNome}!
           </h1>
@@ -510,6 +593,7 @@ export default function Home() {
               />
             </div>
           </div>
+
         </div>
       </div>
 
@@ -523,17 +607,17 @@ export default function Home() {
       <div className="home-stats-row">
         <div className="stat-card">
           <div className="stat-icon">
-            <Icon name="book" size={20} />
+            <Icon name="calendar" size={20} />
           </div>
 
           <div className="stat-value">
-            {carregandoResumo
+            {diasParaVestibulinho === null
               ? '—'
-              : `${totalEstudados}/${totalConteudos}`}
+              : diasParaVestibulinho}
           </div>
 
           <div className="stat-label">
-            Conteúdos estudados
+            Dias para o Vestibulinho
           </div>
         </div>
 
@@ -620,6 +704,8 @@ export default function Home() {
                 (item) => {
                   const style =
                     getSubjectStyle(item.nome);
+                  const corProgresso =
+                    obterCorProgressoMateria(item.nome);
 
                   return (
                     <div
@@ -631,7 +717,7 @@ export default function Home() {
                           <span
                             className="home-subject-dot"
                             style={{
-                              background: style.color
+                              background: corProgresso
                             }}
                           />
 
@@ -650,7 +736,7 @@ export default function Home() {
                           className="performance-fill"
                           style={{
                             width: `${item.percentual}%`,
-                            background: style.color
+                            background: corProgresso
                           }}
                         />
                       </div>

@@ -42,6 +42,14 @@ export const ICON_PATHS = {
     'm21 21-4.3-4.3M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z',
   shield:
     'M12 3 20 6v5c0 5-3.2 8.4-8 10-4.8-1.6-8-5-8-10V6l8-3Z',
+  question:
+    'M9.6 9a2.7 2.7 0 1 1 4.7 1.8c-.9.9-2.3 1.4-2.3 3.2M12 18h.01',
+  highlight:
+    'M9 3h6l1 5-4 4-4-4 1-5ZM12 12v6M8 21h8',
+  layers:
+    'm12 3 8 4-8 4-8-4 8-4Zm-8 8 8 4 8-4M4 15l8 4 8-4',
+  external:
+    'M14 4h6v6M20 4l-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4',
 };
 
 export default function Icon({

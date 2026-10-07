@@ -31,7 +31,7 @@ function slugMateria(nome = '') {
     .replace(/^-+|-+$/g, '');
 }
 
-function getMateriaCor(materia = '') {
+export function getMateriaCor(materia = '') {
   const slug = slugMateria(materia);
 
   const cores = {

@@ -569,7 +569,7 @@
 .materia-simulado-cover{
   position:relative;
   display:grid;
-  min-height:158px;
+  min-height:126px;
   place-items:center;
   overflow:hidden;
 }
@@ -644,7 +644,7 @@
 .materia-simulado-card-content{
   position:relative;
   flex:1;
-  padding:18px 18px 20px;
+  padding:16px 18px 16px;
 }
 
 .materia-simulado-card-kicker{
@@ -1065,4 +1065,13 @@
   .simulados-conteudo-group .simulado-grid{
     padding:14px 0 0;
   }
+}
+
+.simulados-stat-detail{
+  position:relative;
+  z-index:1;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:600;
 }

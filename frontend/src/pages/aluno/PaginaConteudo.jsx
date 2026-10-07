@@ -1383,21 +1383,43 @@ export default function PaginaConteudo() {
 
         <aside className="pagina-aside">
           <div className="pagina-progress-card">
-            <span className="pagina-aside-label">
-              SEU PROGRESSO
-            </span>
+            <div className="pagina-progress-heading">
+              <span className="pagina-aside-label">
+                SEU PROGRESSO
+              </span>
+
+              <span
+                className={`pagina-progress-status ${
+                  estudado ? 'completed' : ''
+                }`}
+              >
+                <span className="pagina-progress-status-dot" />
+                {estudado ? 'Concluído' : 'Em andamento'}
+              </span>
+            </div>
 
             <strong>
               {estudado
-                ? 'Conteúdo estudado'
-                : 'Ainda não estudado'}
+                ? 'Tópico concluído'
+                : 'Continue seu estudo'}
             </strong>
 
             <p>
               {estudado
                 ? 'Você já marcou este tópico como estudado.'
-                : 'Depois de revisar o material, marque este tópico como estudado.'}
+                : 'Quando terminar de revisar, marque este tópico como estudado.'}
             </p>
+
+            <div
+              className="pagina-progress-track"
+              aria-hidden="true"
+            >
+              <span
+                style={{
+                  width: estudado ? '100%' : '0%',
+                }}
+              />
+            </div>
 
             <button
               type="button"

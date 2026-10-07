@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { STATUS_LABEL, BTN_LABEL } from './constants.js';
 
 const MATERIAS_SIMULADOS = [
@@ -110,6 +109,20 @@ function estiloMateria(materia) {
   };
 }
 
+function obterCorMateria(materia) {
+  const mapa = {
+    Português: '#5DADE2',
+    'Língua Portuguesa': '#5DADE2',
+    Matemática: '#D95C5C',
+    História: '#A97745',
+    Geografia: '#62A85E',
+    Ciências: '#8D68C9',
+    'Simulados Gerais': '#4D78A8'
+  };
+
+  return mapa[materia] || '#5DADE2';
+}
+
 export function ListaSimulados({
   materias,
   filtro,
@@ -117,12 +130,11 @@ export function ListaSimulados({
   simulados,
   erro,
   concluidos,
+  historicoResultados,
   simuladosVisiveis,
   abrirSimulado,
   carregandoQuestoes
 }) {
-  const [conteudoAberto, setConteudoAberto] = useState(null);
-
   const materiaSelecionada =
     filtro !== 'Todas' ? normalizarMateria(filtro) : null;
 
@@ -146,6 +158,50 @@ export function ListaSimulados({
       new Map()
     )
   );
+
+  const realizados = Math.max(
+    concluidos,
+    historicoResultados.length
+  );
+
+  const desempenhoPorMateria = Object.entries(
+    historicoResultados.reduce((acc, item) => {
+      const materia = normalizarMateriaSimulado({ materia: item.materia }) || 'Geral';
+
+      if (materia === 'Simulados Gerais' || materia === 'Geral') {
+        return acc;
+      }
+
+      if (!acc[materia]) {
+        acc[materia] = { acertos: 0, total: 0 };
+      }
+
+      acc[materia].acertos += Number(item.acertos || 0);
+      acc[materia].total += Number(item.totalQuestoes || 0);
+
+      return acc;
+    }, {})
+  )
+    .map(([materia, dados]) => ({
+      materia,
+      percentual:
+        dados.total > 0
+          ? Math.round((dados.acertos / dados.total) * 100)
+          : 0
+    }))
+    .filter((item) => item.percentual >= 0);
+
+  const materiaMelhor = desempenhoPorMateria.length
+    ? [...desempenhoPorMateria].sort(
+        (a, b) => b.percentual - a.percentual
+      )[0]
+    : null;
+
+  const materiaPior = desempenhoPorMateria.length
+    ? [...desempenhoPorMateria].sort(
+        (a, b) => a.percentual - b.percentual
+      )[0]
+    : null;
 
   // As matérias ficam sempre visíveis. O administrador apenas alimenta
   // o card correspondente ao criar um novo simulado para aquela matéria.
@@ -187,113 +243,80 @@ export function ListaSimulados({
                 key={materia}
                 className="simulados-materia-section"
               >
-                {gruposPorConteudo.map(([chave, grupo]) => {
-                  const aberto = conteudoAberto === `${materia}-${chave}`;
-                  const painelId = `simulados-${materia}-${chave}`
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-');
+                {gruposPorConteudo.map(([chave, grupo]) => (
+                  <div
+                    key={chave}
+                    className="simulados-conteudo-group"
+                  >
+                    <div className="simulados-conteudo-heading">
+                      <div className="simulados-conteudo-heading-main">
+                        <span className="simulados-conteudo-label">Conteúdo</span>
+                        <h3>{grupo.nome}</h3>
+                      </div>
+                      <span className="simulados-conteudo-count">
+                        {grupo.simulados.length}{' '}
+                        {grupo.simulados.length === 1 ? 'simulado' : 'simulados'}
+                      </span>
+                    </div>
 
-                  return (
-                    <section
-                      key={chave}
-                      className={`simulados-conteudo-group ${aberto ? 'aberto' : ''}`}
-                    >
-                      <button
-                        type="button"
-                        className="simulados-conteudo-heading"
-                        aria-expanded={aberto}
-                        aria-controls={painelId}
-                        onClick={() =>
-                          setConteudoAberto(aberto ? null : `${materia}-${chave}`)
-                        }
-                      >
-                        <span className="simulados-conteudo-heading-main">
-                          <span className="simulados-conteudo-icon" aria-hidden="true">
-                            ✓
-                          </span>
-                          <span className="simulados-conteudo-heading-copy">
-                            <span className="simulados-conteudo-label">Conteúdo</span>
-                            <span className="simulados-conteudo-title">{grupo.nome}</span>
-                          </span>
-                        </span>
-
-                        <span className="simulados-conteudo-heading-side">
-                          <span className="simulados-conteudo-count">
-                            {grupo.simulados.length}{' '}
-                            {grupo.simulados.length === 1 ? 'simulado' : 'simulados'}
-                          </span>
-                          <span className="simulados-conteudo-chevron" aria-hidden="true">
-                            {aberto ? '⌃' : '⌄'}
-                          </span>
-                        </span>
-                      </button>
-
-                      {aberto && (
-                        <div
-                          id={painelId}
-                          className="simulados-conteudo-panel"
+                    <div className="simulado-grid">
+                      {grupo.simulados.map((simulado) => (
+                        <article
+                          className={`simulado-card simulado-card-${simulado.status}`}
+                          key={simulado.id}
                         >
-                          <div className="simulado-grid">
-                            {grupo.simulados.map((simulado) => (
-                              <article
-                                className={`simulado-card simulado-card-${simulado.status}`}
-                                key={simulado.id}
-                              >
-                                <div className="simulado-card-header">
-                                  <span className="simulado-subject">
-                                    {simulado.materia || 'Simulado'}
-                                  </span>
+                          <div className="simulado-card-header">
+                            <span className="simulado-subject">
+                              {simulado.materia || 'Simulado'}
+                            </span>
 
-                                  <span
-                                    className={`status-badge ${simulado.status}`}
-                                  >
-                                    {STATUS_LABEL[simulado.status]}
-                                  </span>
-                                </div>
-
-                                <div className="simulado-card-body">
-                                  <div className="simulado-card-kicker">
-                                    Simulado
-                                  </div>
-
-                                  <h2>{simulado.titulo}</h2>
-
-                                  {simulado.descricao && (
-                                    <p className="simulado-description">
-                                      {simulado.descricao}
-                                    </p>
-                                  )}
-
-                                  <div className="simulado-meta">
-                                    <span>
-                                      <strong aria-hidden="true">📝</strong>
-                                      {simulado.quantidade_questoes} questões
-                                    </span>
-
-                                    <span>
-                                      <strong aria-hidden="true">⏱</strong>
-                                      {simulado.tempo_limite} minutos
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <button
-                                  className="simulado-btn"
-                                  onClick={() => abrirSimulado(simulado)}
-                                  disabled={carregandoQuestoes}
-                                >
-                                  {carregandoQuestoes
-                                    ? 'Carregando...'
-                                    : BTN_LABEL[simulado.status]}
-                                </button>
-                              </article>
-                            ))}
+                            <span
+                              className={`status-badge ${simulado.status}`}
+                            >
+                              {STATUS_LABEL[simulado.status]}
+                            </span>
                           </div>
-                        </div>
-                      )}
-                    </section>
-                  );
-                })}
+
+                          <div className="simulado-card-body">
+                            <div className="simulado-card-kicker">
+                              Simulado
+                            </div>
+
+                            <h2>{simulado.titulo}</h2>
+
+                            {simulado.descricao && (
+                              <p className="simulado-description">
+                                {simulado.descricao}
+                              </p>
+                            )}
+
+                            <div className="simulado-meta">
+                              <span>
+                                <strong aria-hidden="true">📝</strong>
+                                {simulado.quantidade_questoes} questões
+                              </span>
+
+                              <span>
+                                <strong aria-hidden="true">⏱</strong>
+                                {simulado.tempo_limite} minutos
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            className="simulado-btn"
+                            onClick={() => abrirSimulado(simulado)}
+                            disabled={carregandoQuestoes}
+                          >
+                            {carregandoQuestoes
+                              ? 'Carregando...'
+                              : BTN_LABEL[simulado.status]}
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </section>
             );
           }
@@ -321,6 +344,75 @@ export function ListaSimulados({
         </div>
 
       </div>
+
+      {!materiaSelecionada && (
+      <div
+        className="stats-row"
+        style={{
+          marginBottom: '22px'
+        }}
+      >
+        <div
+          className="stat-card"
+          style={{ minHeight: '108px', justifyContent: 'center' }}
+        >
+          <div className="stat-value">
+            {realizados}
+          </div>
+          <div className="stat-label">
+            Simulados realizados
+          </div>
+        </div>
+
+        <div
+          className="stat-card"
+          style={{ minHeight: '108px', justifyContent: 'center' }}
+        >
+          <div
+            className="stat-value"
+            style={{
+              color: materiaMelhor
+                ? obterCorMateria(materiaMelhor.materia)
+                : 'var(--ink)'
+            }}
+          >
+            {materiaMelhor ? materiaMelhor.materia : '—'}
+          </div>
+          <div className="stat-label">
+            Melhor taxa de acertos
+          </div>
+          {materiaMelhor && (
+            <span className="simulados-stat-detail">
+              {materiaMelhor.percentual}% de acertos
+            </span>
+          )}
+        </div>
+
+        <div
+          className="stat-card"
+          style={{ minHeight: '108px', justifyContent: 'center' }}
+        >
+          <div
+            className="stat-value"
+            style={{
+              color: materiaPior
+                ? obterCorMateria(materiaPior.materia)
+                : 'var(--ink)'
+            }}
+          >
+            {materiaPior ? materiaPior.materia : '—'}
+          </div>
+          <div className="stat-label">
+            Pior taxa de acertos
+          </div>
+          {materiaPior && (
+            <span className="simulados-stat-detail">
+              {materiaPior.percentual}% de acertos
+            </span>
+          )}
+        </div>
+      </div>
+      )}
 
       {erro && (
         <div className="stat-card simulados-error-card">
