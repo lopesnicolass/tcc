@@ -8,12 +8,7 @@ import BlocoQuestoes from './conteudos/BlocoQuestoes.jsx';
 import BlocoChecklist from './conteudos/BlocoChecklist.jsx';
 
 import '../../styles/aluno/PaginaConteudo.css';
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function obterToken() {
-  return localStorage.getItem('etecamp_token');
-}
+import { API_URL, obterToken } from '../../services/api.js';
 
 function normalizarDados(bloco) {
   let dados = bloco?.dados;

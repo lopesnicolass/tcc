@@ -5,16 +5,7 @@ import {
 } from 'react';
 
 import Icon from '../../../components/Icon.jsx';
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
-
-function obterToken() {
-  return localStorage.getItem(
-    'etecamp_token'
-  );
-}
+import { obterToken, request } from '../../../services/api.js';
 
 function normalizarDados(
   valor
@@ -118,31 +109,12 @@ export default function BlocoChecklist({
           return;
         }
 
-        const resposta =
-          await fetch(
-            `${API_URL}/checklists/${bloco.id}`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
-            }
-          );
-
         const dadosResposta =
-          await resposta
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (!resposta.ok) {
-          throw new Error(
-            dadosResposta.mensagem ||
-              dadosResposta.erro ||
-              'Não foi possível carregar o checklist.'
+          await request(
+            `/checklists/${bloco.id}`,
+            {},
+            'Não foi possível carregar o checklist.'
           );
-        }
 
         if (!ativo) {
           return;
@@ -248,44 +220,21 @@ export default function BlocoChecklist({
     setErro('');
 
     try {
-      const resposta =
-        await fetch(
-          `${API_URL}/checklists/${bloco.id}`,
-          {
-            method: 'PUT',
+      await request(
+        `/checklists/${bloco.id}`,
+        {
+          method: 'PUT',
 
-            headers: {
-              'Content-Type':
-                'application/json',
+          body: JSON.stringify({
+            itemIndice:
+              index,
 
-              Authorization:
-                `Bearer ${token}`
-            },
-
-            body: JSON.stringify({
-              itemIndice:
-                index,
-
-              concluido:
-                !estavaConcluido
-            })
-          }
-        );
-
-      const dadosResposta =
-        await resposta
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (!resposta.ok) {
-        throw new Error(
-          dadosResposta.mensagem ||
-            dadosResposta.erro ||
-            'Não foi possível salvar este item.'
-        );
-      }
+            concluido:
+              !estavaConcluido
+          })
+        },
+        'Não foi possível salvar este item.'
+      );
     } catch (error) {
       console.error(
         'Erro ao salvar item do checklist:',
@@ -330,34 +279,14 @@ export default function BlocoChecklist({
 
       setErro('');
 
-      const resposta =
-        await fetch(
-          `${API_URL}/checklists/${bloco.id}`,
-          {
-            method:
-              'DELETE',
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            }
-          }
-        );
-
-      const dadosResposta =
-        await resposta
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (!resposta.ok) {
-        throw new Error(
-          dadosResposta.mensagem ||
-            dadosResposta.erro ||
-            'Não foi possível limpar o checklist.'
-        );
-      }
+      await request(
+        `/checklists/${bloco.id}`,
+        {
+          method:
+            'DELETE'
+        },
+        'Não foi possível limpar o checklist.'
+      );
 
       setConcluidos([]);
     } catch (error) {

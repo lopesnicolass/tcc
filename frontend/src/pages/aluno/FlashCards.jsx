@@ -1,9 +1,6 @@
 import '../../styles/aluno/FlashCards.css';
 import { useEffect, useMemo, useState } from 'react';
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+import { API_URL, obterToken } from '../../services/api.js';
 
 const TOTAL_CARDS_SESSAO = 10;
 
@@ -14,15 +11,6 @@ const MATERIA_ALIASES = {
 
 function normalizarMateria(materia) {
   return MATERIA_ALIASES[materia] || materia;
-}
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('accessToken') ||
-    ''
-  );
 }
 
 function embaralharCards(lista) {

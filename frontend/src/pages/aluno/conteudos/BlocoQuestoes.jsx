@@ -5,16 +5,7 @@ import {
 } from 'react';
 
 import Icon from '../../../components/Icon.jsx';
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
-
-function obterToken() {
-  return localStorage.getItem(
-    'etecamp_token'
-  );
-}
+import { obterToken, request } from '../../../services/api.js';
 
 function normalizarDados(
   valor
@@ -188,36 +179,14 @@ export default function BlocoQuestoes({
         setCarregando(true);
         setErro('');
 
-        const token =
-          obterToken();
-
-        const resposta =
-          await fetch(
-            `${API_URL}/questoes/aluno?ids=${encodeURIComponent(
+        const dadosResposta =
+          await request(
+            `/questoes/aluno?ids=${encodeURIComponent(
               questaoIds.join(',')
             )}`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
+            {},
+            'Não foi possível carregar as questões.'
           );
-
-        const dadosResposta =
-          await resposta
-            .json()
-            .catch(
-              () => ({})
-            );
-
-        if (!resposta.ok) {
-          throw new Error(
-            dadosResposta.mensagem ||
-              dadosResposta.erro ||
-              'Não foi possível carregar as questões.'
-          );
-        }
 
         if (!ativo) {
           return;
@@ -308,19 +277,11 @@ export default function BlocoQuestoes({
         );
       }
 
-      const resposta =
-        await fetch(
-          `${API_URL}/questoes/corrigir-bloco`,
+      const dados =
+        await request(
+          '/questoes/corrigir-bloco',
           {
             method: 'POST',
-
-            headers: {
-              'Content-Type':
-                'application/json',
-
-              Authorization:
-                `Bearer ${token}`,
-            },
 
             body: JSON.stringify({
               questaoIds:
@@ -333,23 +294,9 @@ export default function BlocoQuestoes({
 
               respostas
             })
-          }
+          },
+          'Não foi possível corrigir as questões.'
         );
-
-      const dados =
-        await resposta
-          .json()
-          .catch(
-            () => ({})
-          );
-
-      if (!resposta.ok) {
-        throw new Error(
-          dados.mensagem ||
-            dados.erro ||
-            'Não foi possível corrigir as questões.'
-        );
-      }
 
       setResultado(
         dados

@@ -9,18 +9,7 @@ import {
 import Icon from '../../components/Icon.jsx';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
-
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('accessToken') ||
-    ''
-  );
-}
+import { API_URL, obterToken } from '../../services/api.js';
 
 function obterUsuario() {
   try {

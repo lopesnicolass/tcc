@@ -1,16 +1,7 @@
 
 import '../../styles/adm/AdminSimulados.css';
 import { useEffect, useState } from 'react';
-
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token')
-  );
-}
+import { API_URL, obterToken } from '../../services/api.js';
 
 function headerAuth(comJson = false) {
   const headers = {

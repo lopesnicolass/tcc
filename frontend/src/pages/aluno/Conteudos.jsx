@@ -2,6 +2,7 @@ import '../../styles/aluno/Conteudos.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon.jsx';
+import { API_URL, obterToken } from '../../services/api.js';
 
 const imagensMaterias = import.meta.glob(
   '../../assets/conteudos/*.{png,jpg,jpeg,webp,avif}',
@@ -65,15 +66,6 @@ function getMateriaImagem(materia) {
   });
 
   return encontrada?.[1] || null;
-}
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token') ||
-    localStorage.getItem('accessToken') ||
-    ''
-  );
 }
 
 export const TOPICS_BANK = {
@@ -257,10 +249,6 @@ export const TOPICS_BANK = {
 
 export default function Conteudos() {
   const navigate = useNavigate();
-
-  const API_URL =
-    import.meta.env.VITE_API_URL ||
-    'http://localhost:3000';
 
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('Todas');

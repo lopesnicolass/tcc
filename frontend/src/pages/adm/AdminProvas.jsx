@@ -1,15 +1,6 @@
 import '../../styles/adm/AdminProvas.css';
 import { useEffect, useState } from "react";
-
-const API_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:3000";
-
-function obterToken() {
-    return (
-        localStorage.getItem("etecamp_token") ||
-        localStorage.getItem("token")
-    );
-}
+import { API_URL, request } from '../../services/api.js';
 
 export default function AdminProvas() {
     const [ano, setAno] = useState("");
@@ -22,16 +13,9 @@ export default function AdminProvas() {
 
     async function carregarProvas() {
         try {
-            const resposta = await fetch(`${API_URL}/provas`, {
-                headers: {
-                    Authorization: `Bearer ${obterToken()}`
-                }
-            });
-            const dados = await resposta.json();
+            const dados = await request("/provas");
 
-            if (resposta.ok) {
-                setProvas(dados.provas || []);
-            }
+            setProvas(dados.provas || []);
         } catch (erro) {
             console.error("Erro ao carregar provas:", erro);
         }
@@ -60,26 +44,14 @@ export default function AdminProvas() {
         setCarregando(true);
 
         try {
-            const resposta = await fetch(
-                `${API_URL}/provas`,
+            await request(
+                "/provas",
                 {
                     method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${obterToken()}`
-                    },
                     body: formData
-                }
+                },
+                "Erro ao cadastrar prova."
             );
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                setMensagem(
-                    "error:" +
-                    (dados.mensagem || "Erro ao cadastrar prova.")
-                );
-                return;
-            }
 
             setMensagem("success:Prova cadastrada com sucesso!");
 
@@ -97,7 +69,9 @@ export default function AdminProvas() {
             console.error(erro);
 
             setMensagem(
-                "error:Não foi possível conectar ao servidor."
+                erro.status
+                    ? "error:" + erro.message
+                    : "error:Não foi possível conectar ao servidor."
             );
         } finally {
             setCarregando(false);
@@ -114,25 +88,13 @@ export default function AdminProvas() {
         }
 
         try {
-            const resposta = await fetch(
-                `${API_URL}/provas/${id}`,
+            await request(
+                `/provas/${id}`,
                 {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: `Bearer ${obterToken()}`
-                    }
-                }
+                    method: "DELETE"
+                },
+                "Erro ao excluir prova."
             );
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                setMensagem(
-                    "error:" +
-                    (dados.mensagem || "Erro ao excluir prova.")
-                );
-                return;
-            }
 
             setMensagem("success:Prova excluída com sucesso!");
 
@@ -142,7 +104,9 @@ export default function AdminProvas() {
             console.error(erro);
 
             setMensagem(
-                "error:Não foi possível conectar ao servidor."
+                erro.status
+                    ? "error:" + erro.message
+                    : "error:Não foi possível conectar ao servidor."
             );
         }
     }

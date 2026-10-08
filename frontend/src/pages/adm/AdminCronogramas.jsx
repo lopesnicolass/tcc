@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../../styles/adm/AdminCronogramas.css';
+import { API_URL } from '../../services/api.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 const TOTAL_MESES = 12;
 const TOTAL_SEMANAS = 4;
 const DIAS_ESTUDO = Array.from({ length: 7 }, (_, index) => index + 1);

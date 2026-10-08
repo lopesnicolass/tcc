@@ -1,10 +1,7 @@
 import '../../styles/aluno/Perfil.css';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 export default function Perfil() {
 
@@ -153,28 +150,12 @@ export default function Perfil() {
 
         }
 
-        const resposta =
-          await fetch(
-            `${API_URL}/usuarios/meu-perfil`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
-            }
-          );
-
         const dados =
-          await resposta.json();
-
-        if (!resposta.ok) {
-
-          throw new Error(
-            dados.mensagem ||
+          await request(
+            '/usuarios/meu-perfil',
+            {},
             'Erro ao carregar perfil.'
           );
-
-        }
 
         const usuario =
           dados.usuario;
@@ -293,19 +274,11 @@ export default function Perfil() {
 
       }
 
-      const resposta =
-        await fetch(
-          `${API_URL}/usuarios/meu-perfil`,
+      const dados =
+        await request(
+          '/usuarios/meu-perfil',
           {
             method: 'PUT',
-
-            headers: {
-              'Content-Type':
-                'application/json',
-
-              Authorization:
-                `Bearer ${token}`
-            },
 
             body:
               JSON.stringify({
@@ -321,20 +294,9 @@ export default function Perfil() {
                 novaSenha:
                   values.novaSenha
               })
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
+          },
           'Não foi possível atualizar o perfil.'
         );
-
-      }
 
       localStorage.setItem(
         'etecamp_usuario',
@@ -484,32 +446,15 @@ export default function Perfil() {
         previewFoto.arquivo
       );
 
-      const resposta =
-        await fetch(
-          `${API_URL}/usuarios/meu-perfil/foto`,
-          {
-            method: 'POST',
+      await request(
+        '/usuarios/meu-perfil/foto',
+        {
+          method: 'POST',
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            },
-
-            body: formData
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
-          'Erro ao salvar foto.'
-        );
-
-      }
+          body: formData
+        },
+        'Erro ao salvar foto.'
+      );
 
       // =================================================
       // MOSTRAR A FOTO IMEDIATAMENTE
@@ -626,15 +571,10 @@ export default function Perfil() {
         token
       ) {
 
-        await fetch(
-          `${API_URL}/sessoes/sair/${usuario.id}`,
+        await request(
+          `/sessoes/sair/${usuario.id}`,
           {
-            method: 'PUT',
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            }
+            method: 'PUT'
           }
         );
 

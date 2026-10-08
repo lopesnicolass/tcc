@@ -19,11 +19,7 @@ import SubjectIcon
 
 import Icon
   from '../../components/Icon.jsx';
-
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 
 const DAYS_BY_COUNT = {
@@ -116,27 +112,6 @@ function getUserKey() {
     usuario.id ||
     usuario.usuarioId ||
     'anonimo'
-  );
-
-}
-
-
-function getToken() {
-
-  return (
-    localStorage.getItem(
-      'etecamp_token'
-    ) ||
-
-    localStorage.getItem(
-      'token'
-    ) ||
-
-    localStorage.getItem(
-      'accessToken'
-    ) ||
-
-    ''
   );
 
 }
@@ -631,36 +606,12 @@ export default function PlanoAutomatico() {
 
       try {
 
-        const response =
-          await fetch(
-            `${API_URL}/cronogramas-modelos/ativo`,
-            {
-              headers: {
-                ...(getToken()
-                  ? {
-                      Authorization:
-                        `Bearer ${getToken()}`
-                    }
-                  : {})
-              }
-            }
-          );
-
-
         const data =
-          await response.json();
-
-
-        if (
-          !response.ok
-        ) {
-
-          throw new Error(
-            data.mensagem ||
+          await request(
+            '/cronogramas-modelos/ativo',
+            {},
             'O administrador ainda não configurou o cronograma de estudos.'
           );
-
-        }
 
 
         const modelo =
@@ -1042,10 +993,6 @@ export default function PlanoAutomatico() {
       );
 
 
-    const token =
-      getToken();
-
-
     if (
       !usuarioId
     ) {
@@ -1082,61 +1029,20 @@ export default function PlanoAutomatico() {
       );
 
 
-      const response =
-        await fetch(
-          `${API_URL}/cronograma/${usuarioId}/lote`,
-          {
-            method:
-              'POST',
+      await request(
+        `/cronograma/${usuarioId}/lote`,
+        {
+          method: 'POST',
 
-            headers: {
-              'Content-Type':
-                'application/json',
+          body: JSON.stringify({
+            atividades,
 
-              ...(token
-                ? {
-                    Authorization:
-                      `Bearer ${token}`
-                  }
-                : {})
-            },
-
-            body:
-              JSON.stringify({
-                atividades,
-
-                substituirOrigem:
-                  'plano-automatico'
-              })
-          }
-        );
-
-
-      let data = {};
-
-
-      try {
-
-        data =
-          await response.json();
-
-      } catch {
-
-        data = {};
-
-      }
-
-
-      if (
-        !response.ok
-      ) {
-
-        throw new Error(
-          data.mensagem ||
-          'Não foi possível salvar o plano no cronograma.'
-        );
-
-      }
+            substituirOrigem:
+              'plano-automatico'
+          })
+        },
+        'Não foi possível salvar o plano no cronograma.'
+      );
 
 
     } catch (
@@ -1177,10 +1083,6 @@ export default function PlanoAutomatico() {
         getUser().usuarioId ||
         0
       );
-
-
-    const token =
-      getToken();
 
 
     if (
@@ -1324,63 +1226,20 @@ export default function PlanoAutomatico() {
       );
 
 
-      const response =
-        await fetch(
-          `${API_URL}/cronograma/${usuarioId}/lote`,
-          {
-            method:
-              'POST',
+      await request(
+        `/cronograma/${usuarioId}/lote`,
+        {
+          method: 'POST',
 
-            headers: {
-              'Content-Type':
-                'application/json',
+          body: JSON.stringify({
+            atividades,
 
-              ...(token
-                ? {
-                    Authorization:
-                      `Bearer ${token}`
-                  }
-                : {})
-            },
-
-            body:
-              JSON.stringify({
-
-                atividades,
-
-                substituirOrigem:
-                  null
-
-              })
-          }
-        );
-
-
-      let data = {};
-
-
-      try {
-
-        data =
-          await response.json();
-
-      } catch {
-
-        data = {};
-
-      }
-
-
-      if (
-        !response.ok
-      ) {
-
-        throw new Error(
-          data.mensagem ||
-          'Não foi possível adicionar a semana ao calendário.'
-        );
-
-      }
+            substituirOrigem:
+              null
+          })
+        },
+        'Não foi possível adicionar a semana ao calendário.'
+      );
 
 
       addXP(

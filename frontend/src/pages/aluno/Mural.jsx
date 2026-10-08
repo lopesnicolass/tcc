@@ -1,9 +1,7 @@
 import '../../styles/aluno/Mural.css';
 import { useEffect, useState } from 'react';
 import { useGamification } from '../../context/GamificationContext.jsx';
-
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import { request } from '../../services/api.js';
 
 const MATERIAS = [
   'Português',
@@ -93,18 +91,6 @@ function obterUsuarioId() {
 
     return null;
   }
-}
-
-
-// =====================================================
-// PEGAR TOKEN DE AUTENTICAÇÃO
-// =====================================================
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token')
-  );
 }
 
 
@@ -199,27 +185,12 @@ export default function Mural() {
 
       setErro('');
 
-      const resposta =
-        await fetch(
-          `${API_URL}/mural/${usuarioId}`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${obterToken()}`
-            }
-          }
-        );
-
       const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
+        await request(
+          `/mural/${usuarioId}`,
+          {},
           'Erro ao carregar post-its.'
         );
-      }
 
       setPostits(
         (dados.postits || []).map(
@@ -292,19 +263,11 @@ export default function Mural() {
 
     try {
 
-      const resposta =
-        await fetch(
-          `${API_URL}/mural/${usuarioId}`,
+      const dados =
+        await request(
+          `/mural/${usuarioId}`,
           {
             method: 'POST',
-
-            headers: {
-              'Content-Type':
-                'application/json',
-
-              Authorization:
-                `Bearer ${obterToken()}`
-            },
 
             body: JSON.stringify({
               materia:
@@ -313,19 +276,9 @@ export default function Mural() {
               texto:
                 newText.trim()
             })
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
+          },
           'Erro ao criar post-it.'
         );
-      }
 
       setPostits(
         (prev) => [
@@ -409,40 +362,21 @@ export default function Mural() {
 
     try {
 
-      const resposta =
-        await fetch(
-          `${API_URL}/mural/${usuarioId}/${editingPostit.id}`,
-          {
-            method: 'PUT',
+      await request(
+        `/mural/${usuarioId}/${editingPostit.id}`,
+        {
+          method: 'PUT',
 
-            headers: {
-              'Content-Type':
-                'application/json',
+          body: JSON.stringify({
+            materia:
+              editMateria,
 
-              Authorization:
-                `Bearer ${obterToken()}`
-            },
-
-            body: JSON.stringify({
-              materia:
-                editMateria,
-
-              texto:
-                editText.trim()
-            })
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
-          'Erro ao atualizar post-it.'
-        );
-      }
+            texto:
+              editText.trim()
+          })
+        },
+        'Erro ao atualizar post-it.'
+      );
 
       setPostits(
         (prev) =>
@@ -510,29 +444,13 @@ export default function Mural() {
 
     try {
 
-      const resposta =
-        await fetch(
-          `${API_URL}/mural/${usuarioId}/${editingPostit.id}`,
-          {
-            method: 'DELETE',
-
-            headers: {
-              Authorization:
-                `Bearer ${obterToken()}`
-            }
-          }
-        );
-
-      const dados =
-        await resposta.json();
-
-      if (!resposta.ok) {
-
-        throw new Error(
-          dados.mensagem ||
-          'Erro ao excluir post-it.'
-        );
-      }
+      await request(
+        `/mural/${usuarioId}/${editingPostit.id}`,
+        {
+          method: 'DELETE'
+        },
+        'Erro ao excluir post-it.'
+      );
 
       setPostits(
         (prev) =>

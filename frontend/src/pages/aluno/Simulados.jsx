@@ -6,16 +6,7 @@ import { STATUS_LABEL, BTN_LABEL } from './simulados/constants.js';
 import { TelaResultado } from './simulados/TelaResultado.jsx';
 import { TelaSimulado } from './simulados/TelaSimulado.jsx';
 import { ListaSimulados } from './simulados/ListaSimulados.jsx';
-
-const API_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-function obterToken() {
-  return (
-    localStorage.getItem('etecamp_token') ||
-    localStorage.getItem('token')
-  );
-}
+import { request } from '../../services/api.js';
 
 export default function Simulados() {
   const { addXP } = useGamification();
@@ -742,27 +733,12 @@ export default function Simulados() {
 
       setErro('');
 
-      const resposta =
-        await fetch(
-          `${API_URL}/simulados`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${obterToken()}`
-            }
-          }
-        );
-
-      if (
-        !resposta.ok
-      ) {
-        throw new Error(
+      const dados =
+        await request(
+          '/simulados',
+          {},
           'Erro ao buscar simulados.'
         );
-      }
-
-      const dados =
-        await resposta.json();
 
       const lista =
         Array.isArray(
@@ -898,27 +874,12 @@ export default function Simulados() {
         false
       );
 
-      const resposta =
-        await fetch(
-          `${API_URL}/simulados/${simulado.id}`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${obterToken()}`
-            }
-          }
-        );
-
-      if (
-        !resposta.ok
-      ) {
-        throw new Error(
+      const dados =
+        await request(
+          `/simulados/${simulado.id}`,
+          {},
           'Erro ao buscar o simulado.'
         );
-      }
-
-      const dados =
-        await resposta.json();
 
       const listaQuestoes =
         Array.isArray(
@@ -1109,39 +1070,18 @@ export default function Simulados() {
   // ==========================================
 
   async function corrigirNoServidor() {
-    const resposta =
-      await fetch(
-        `${API_URL}/simulados/${simuladoSelecionado.id}/corrigir`,
-        {
-          method:
-            'POST',
-
-          headers: {
-            'Content-Type':
-              'application/json',
-
-            Authorization:
-              `Bearer ${obterToken()}`
-          },
-
-          body:
-            JSON.stringify({
-              respostas
-            })
-        }
-      );
-
     const dados =
-      await resposta.json();
+      await request(
+        `/simulados/${simuladoSelecionado.id}/corrigir`,
+        {
+          method: 'POST',
 
-    if (
-      !resposta.ok
-    ) {
-      throw new Error(
-        dados.mensagem ||
-          'Erro ao corrigir o simulado.'
+          body: JSON.stringify({
+            respostas
+          })
+        },
+        'Erro ao corrigir o simulado.'
       );
-    }
 
     const detalhesComQuestao =
       (
