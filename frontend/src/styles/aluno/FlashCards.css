@@ -1298,3 +1298,231 @@ html[data-theme='dark'] .flashcards-search:focus-within{
 html[data-theme='dark'] .flashcards-vazio{
   background: #0f1928;
 }
+
+/* =====================================================
+   POLIMENTO EXTRA — TELA PRINCIPAL
+   ===================================================== */
+
+.flashcards-page{
+  width:100%;
+}
+
+.flashcards-page .flashcards-hero{
+  background: linear-gradient(135deg,#1250a6 0%,#2d8fd8 100%);
+}
+
+.flashcards-study-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  margin:0 0 14px;
+  padding:18px 20px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  background:var(--card);
+  box-shadow:0 8px 20px rgba(13,71,161,.045);
+}
+
+.flashcards-toolbar-eyebrow{
+  display:block;
+  margin-bottom:4px;
+  color:var(--accent-dark);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+
+.flashcards-toolbar-title{
+  margin:0;
+  color:var(--ink);
+  font:800 20px "Space Grotesk",sans-serif;
+}
+
+.flashcards-toolbar-subtitle{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.flashcards-toolbar-total{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:2px;
+  min-width:92px;
+  padding-left:18px;
+  border-left:1px solid var(--line);
+}
+
+.flashcards-toolbar-total strong{
+  color:var(--ink);
+  font:800 24px "Space Grotesk",sans-serif;
+  line-height:1;
+}
+
+.flashcards-toolbar-total span{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.flashcards-page .flashcards-search{
+  max-width:none;
+  min-height:50px;
+  margin-bottom:12px;
+}
+
+.flashcards-page .materia-tabs{
+  gap:8px;
+  margin-bottom:22px;
+  padding:2px 2px 4px;
+}
+
+.flashcards-page .materia-tab{
+  min-height:40px;
+  padding:8px 14px;
+  border:1px solid #dfe7f0;
+  border-radius:999px;
+  background:#fff;
+  box-shadow:none;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,color .18s ease;
+}
+
+.flashcards-page .materia-tab:hover{
+  transform:translateY(-1px);
+  border-color:#b9d3ec;
+}
+
+.flashcards-page .materia-tab.active{
+  border-color:var(--accent);
+  background:#edf6ff;
+  color:var(--ink);
+}
+
+.flashcards-page .materia-tab-count{
+  min-width:22px;
+  padding:2px 7px;
+  border-radius:999px;
+  background:#edf2f7;
+  font-size:11px;
+}
+
+.flashcards-page .materia-tab.active .materia-tab-count{
+  background:#d8ecff;
+}
+
+.flashcards-page .materia-section{
+  margin-bottom:28px;
+  padding:18px 18px 20px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-xl);
+  background:rgba(255,255,255,.72);
+  box-shadow:0 8px 22px rgba(13,71,161,.035);
+}
+
+.flashcards-page .materia-section-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.flashcards-page .materia-section-title{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:0;
+  font-size:19px;
+}
+
+.flashcards-page .materia-section-dot{
+  width:10px;
+  height:10px;
+  flex:0 0 10px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 4px rgba(33,150,243,.09);
+}
+
+.flashcards-page .materia-section-count{
+  padding:5px 9px;
+  border-radius:999px;
+  background:#f3f6fa;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+
+.flashcards-page .flashcards-content-title{
+  margin-bottom:10px;
+  padding:7px 10px;
+  border-left:0;
+  border-radius:8px;
+  background:#f6f9fc;
+  color:var(--ink-soft,var(--ink));
+  font-size:13px;
+}
+
+.flashcards-page .flashcard-grid{
+  grid-template-columns:repeat(auto-fill,minmax(215px,1fr));
+  gap:14px;
+}
+
+.flashcards-page .flashcard{
+  position:relative;
+  height:158px;
+}
+
+.flashcards-page .flashcard-face{
+  border-radius:var(--radius-lg);
+  padding:18px;
+  line-height:1.45;
+}
+
+.flashcards-page .flashcard-face.front{
+  background:linear-gradient(180deg,#fff 0%,#f9fbfd 100%);
+}
+
+.flashcards-page .flashcard-face.back{
+  background:linear-gradient(135deg,var(--ink) 0%,#0b397f 100%);
+}
+
+.flashcards-page .flashcard::after{
+  content:'Clique para virar';
+  position:absolute;
+  left:12px;
+  bottom:9px;
+  z-index:2;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.86);
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  pointer-events:none;
+}
+
+.flashcards-page .flashcard.flipped::after{
+  content:'Clique para voltar';
+  color:#edf4ff;
+  background:rgba(8,48,107,.52);
+}
+
+.flashcards-page .materia-portugues .materia-section-dot{background:#4aa6e8;box-shadow:0 0 0 4px rgba(74,166,232,.12)}
+.flashcards-page .materia-matematica .materia-section-dot{background:#db6258;box-shadow:0 0 0 4px rgba(219,98,88,.12)}
+.flashcards-page .materia-historia .materia-section-dot{background:#9a6b43;box-shadow:0 0 0 4px rgba(154,107,67,.12)}
+.flashcards-page .materia-geografia .materia-section-dot{background:#5caa60;box-shadow:0 0 0 4px rgba(92,170,96,.12)}
+.flashcards-page .materia-ciencias .materia-section-dot{background:#8c69c7;box-shadow:0 0 0 4px rgba(140,105,199,.12)}
+
+@media (max-width:760px){
+  .flashcards-study-toolbar{align-items:flex-start;flex-direction:column;}
+  .flashcards-toolbar-total{align-items:flex-start;width:100%;padding:10px 0 0;border-top:1px solid var(--line);border-left:0;}
+  .flashcards-page .materia-section{padding:15px;}
+}
+
+@media (max-width:560px){
+  .flashcards-page .materia-section-heading{align-items:flex-start;flex-direction:column;}
+  .flashcards-page .materia-section-count{align-self:flex-start;}
+}

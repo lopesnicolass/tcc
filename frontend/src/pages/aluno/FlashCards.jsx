@@ -1240,17 +1240,31 @@ export default function FlashCards() {
       ]) => (
 
         <section
-          className="materia-section"
+          className={`materia-section materia-${materia
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')}`}
           key={
             materia
           }
         >
 
-          <h2 className="materia-section-title">
+          <div className="materia-section-heading">
 
-            {materia}
+            <h2 className="materia-section-title">
 
-          </h2>
+              <span className="materia-section-dot" aria-hidden="true" />
+              {materia}
+
+            </h2>
+
+            <span className="materia-section-count">
+              {Array.from(conteudos.values()).reduce((total, grupo) => total + grupo.length, 0)} cards
+            </span>
+
+          </div>
 
           {Array.from(
             conteudos.entries()
@@ -1736,7 +1750,7 @@ export default function FlashCards() {
 
   return (
 
-    <div className="flashcards-page page-shell">
+    <div className="flashcards-page">
 
       <section className="flashcards-hero">
 
@@ -1846,6 +1860,19 @@ export default function FlashCards() {
       {/* =================================================
           PESQUISA
       ================================================= */}
+
+      <div className="flashcards-study-toolbar">
+        <div>
+          <span className="flashcards-toolbar-eyebrow">REVISÃO POR CONTEÚDO</span>
+          <h2 className="flashcards-toolbar-title">Seus flashcards</h2>
+          <p className="flashcards-toolbar-subtitle">Escolha uma matéria ou pesquise um tema para revisar.</p>
+        </div>
+
+        <div className="flashcards-toolbar-total">
+          <strong>{cardsFiltrados.length}</strong>
+          <span>cards exibidos</span>
+        </div>
+      </div>
 
       <div className="flashcards-search">
 
