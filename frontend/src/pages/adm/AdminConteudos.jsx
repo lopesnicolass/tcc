@@ -182,6 +182,11 @@ export default function AdminConteudos() {
         Boolean(
           topico.ativo
         ),
+      prioridade: Number(topico.prioridade || 2),
+      frequencia_provas: Number(topico.frequencia_provas || 0),
+      tempo_estimado_minutos: Number(topico.tempo_estimado_minutos || 45),
+      justificativa_prioridade: topico.justificativa_prioridade || '',
+      fonte_frequencia: topico.fonte_frequencia || '',
     });
 
     setModalTopico({
@@ -281,6 +286,16 @@ export default function AdminConteudos() {
     ) {
       setErro(
         'Informe o nome do tópico.'
+      );
+      return;
+    }
+
+    if (
+      Number(formTopico.frequencia_provas || 0) > 0 &&
+      !String(formTopico.fonte_frequencia || '').trim()
+    ) {
+      setErro(
+        'Informe a prova ou os anos analisados para registrar a recorrência.'
       );
       return;
     }

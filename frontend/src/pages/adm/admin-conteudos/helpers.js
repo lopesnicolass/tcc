@@ -16,6 +16,11 @@ export const EMPTY_TOPICO = {
   descricao: '',
   ordem: 0,
   ativo: true,
+  prioridade: 2,
+  frequencia_provas: 0,
+  tempo_estimado_minutos: 45,
+  justificativa_prioridade: '',
+  fonte_frequencia: '',
 };
 
 export const ICONES = [
