@@ -1,40 +1,39 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 
 import Landing from './pages/public/Landing.jsx';
 import Auth from './pages/public/Auth.jsx';
-import EsqueciSenha from './pages/public/EsqueciSenha.jsx';
-import RedefinirSenha from './pages/public/RedefinirSenha.jsx';
+const EsqueciSenha = lazy(() => import('./pages/public/EsqueciSenha.jsx'));
+const RedefinirSenha = lazy(() => import('./pages/public/RedefinirSenha.jsx'));
 
 import DashboardLayout from './layouts/DashboardLayout.jsx';
 import AdminLayout from './layouts/AdminLayout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import AdminRoute from './components/AdminRoute.jsx';
-
-import Home from './pages/aluno/Home.jsx';
-import Mural from './pages/aluno/Mural.jsx';
-import Cronograma from './pages/aluno/Cronograma.jsx';
-import PlanoAutomatico from './pages/aluno/PlanoAutomatico.jsx';
-import Conteudos from './pages/aluno/Conteudos.jsx';
-import PaginaConteudo from './pages/aluno/PaginaConteudo.jsx';
-import Simulados from './pages/aluno/Simulados.jsx';
-import Provas from './pages/aluno/Provas.jsx';
-import Desempenho from './pages/aluno/Desempenho.jsx';
-import FlashCards from './pages/aluno/FlashCards.jsx';
-import Perfil from './pages/aluno/Perfil.jsx';
-
-import Terrario from './terrario/Terrario.jsx';
-
-import AdminDashboard from './pages/adm/AdminDashboard.jsx';
-import AdminUsuarios from './pages/adm/AdminUsuarios.jsx';
-import AdminSimulados from './pages/adm/AdminSimulados.jsx';
-import AdminFlashCards from './pages/adm/AdminFlashCards.jsx';
-import AdminProvas from './pages/adm/AdminProvas.jsx';
-import AdminConteudos from './pages/adm/AdminConteudos.jsx';
-import AdminCronogramas from './pages/adm/AdminCronogramas.jsx';
-import AdminCalendario from './pages/adm/AdminCalendario.jsx';
-
 import XPToast from './components/XPToast.jsx';
+
+const Home = lazy(() => import('./pages/aluno/Home.jsx'));
+const Mural = lazy(() => import('./pages/aluno/Mural.jsx'));
+const Cronograma = lazy(() => import('./pages/aluno/Cronograma.jsx'));
+const PlanoAutomatico = lazy(() => import('./pages/aluno/PlanoAutomatico.jsx'));
+const Conteudos = lazy(() => import('./pages/aluno/Conteudos.jsx'));
+const PaginaConteudo = lazy(() => import('./pages/aluno/PaginaConteudo.jsx'));
+const Simulados = lazy(() => import('./pages/aluno/Simulados.jsx'));
+const Provas = lazy(() => import('./pages/aluno/Provas.jsx'));
+const Desempenho = lazy(() => import('./pages/aluno/Desempenho.jsx'));
+const FlashCards = lazy(() => import('./pages/aluno/FlashCards.jsx'));
+const Perfil = lazy(() => import('./pages/aluno/Perfil.jsx'));
+
+const Terrario = lazy(() => import('./terrario/Terrario.jsx'));
+
+const AdminDashboard = lazy(() => import('./pages/adm/AdminDashboard.jsx'));
+const AdminUsuarios = lazy(() => import('./pages/adm/AdminUsuarios.jsx'));
+const AdminSimulados = lazy(() => import('./pages/adm/AdminSimulados.jsx'));
+const AdminFlashCards = lazy(() => import('./pages/adm/AdminFlashCards.jsx'));
+const AdminProvas = lazy(() => import('./pages/adm/AdminProvas.jsx'));
+const AdminConteudos = lazy(() => import('./pages/adm/AdminConteudos.jsx'));
+const AdminCronogramas = lazy(() => import('./pages/adm/AdminCronogramas.jsx'));
+const AdminCalendario = lazy(() => import('./pages/adm/AdminCalendario.jsx'));
 
 export default function App() {
   useEffect(() => {
@@ -53,6 +52,7 @@ export default function App() {
     <>
       <XPToast />
 
+      <Suspense fallback={<div className="rota-carregando" role="status" aria-live="polite">Carregando…</div>}>
       <Routes>
 
         {/* PÁGINAS PÚBLICAS */}
@@ -217,6 +217,7 @@ export default function App() {
         />
 
       </Routes>
+      </Suspense>
     </>
   );
 }

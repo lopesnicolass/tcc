@@ -1,7 +1,7 @@
 import '../../styles/public/Landing.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import tennaLogo from '../../assets/tenna_logo.png';
+import tennaLogo from '../../assets/tenna_logo.webp';
 
 function getDaysUntilExam() {
   const target = new Date('2026-11-08T00:00:00');

@@ -373,10 +373,57 @@ function adicionarXP(
 
 
 // =====================================================
+// REGISTRAR EVENTO DE XP COM LIMITE DIÁRIO
+// (um único INSERT: conta e grava de forma atômica)
+// changes = 1 -> XP liberado | changes = 0 -> limite atingido
+// =====================================================
+
+function registrarEventoXP(
+    usuarioId,
+    action,
+    quantidade,
+    data,
+    limiteDiario,
+    callback
+) {
+
+    const sql = `
+        INSERT INTO xp_eventos
+        (usuario_id, action, data, quantidade)
+        SELECT ?, ?, ?, ?
+        WHERE (
+            SELECT COUNT(*)
+            FROM xp_eventos
+            WHERE usuario_id = ?
+              AND action = ?
+              AND data = ?
+        ) < ?
+    `;
+
+    db.run(
+        sql,
+        [
+            usuarioId, action, data, quantidade,
+            usuarioId, action, data, limiteDiario
+        ],
+        function (erro) {
+
+            if (erro) {
+                return callback(erro);
+            }
+
+            callback(null, this.changes);
+        }
+    );
+}
+
+
+// =====================================================
 // EXPORTAR
 // =====================================================
 
 module.exports = {
+    registrarEventoXP,
     buscarUsuarioPorEmail,
     buscarUsuarioPorId,
     buscarSenhaPorId,

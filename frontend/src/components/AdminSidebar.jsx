@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import logoIcon from '../assets/tenna_logo.png';
+import logoIcon from '../assets/tenna_logo.webp';
 import ThemeToggle from './ThemeToggle.jsx';
 
 const NAV_SECTIONS = [

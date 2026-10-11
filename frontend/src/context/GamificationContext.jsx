@@ -203,11 +203,13 @@ export function GamificationProvider({ children }) {
         lastActiveDate: dados.lastActiveDate || null
       });
 
-      setToast({
-        amount: Number(dados.gainedXP) || Number(amount) || 0,
-        reason,
-        key: Date.now()
-      });
+      if (dados.gainedXP !== 0) {
+        setToast({
+          amount: Number(dados.gainedXP) || Number(amount) || 0,
+          reason,
+          key: Date.now()
+        });
+      }
     } catch (erro) {
       console.error('Erro ao enviar XP:', erro);
     } finally {

@@ -1,7 +1,8 @@
 const {
     buscarGamificacao,
     registrarAtividade,
-    adicionarXP
+    adicionarXP,
+    registrarEventoXP
 } = require("../models/usuarioModel");
 
 
@@ -12,6 +13,18 @@ const XP_POR_ACAO = {
     novo_postit: 10,
     semana_cronograma: 10,
     atividade_concluida: 15
+};
+
+
+// Quantas vezes por dia cada ação pode render XP.
+// Evita que alguém chame a API em loop para ganhar XP infinito.
+const LIMITE_DIARIO = {
+    simulado_iniciado: 10,
+    simulado_concluido: 5,
+    flashcard_revisado: 20,
+    novo_postit: 10,
+    semana_cronograma: 10,
+    atividade_concluida: 10
 };
 
 
@@ -153,12 +166,13 @@ function ganharXP(req, res) {
 
         const { hoje, streak } = calcularStreak(dados);
 
-        adicionarXP(
+        registrarEventoXP(
             usuarioId,
+            action,
             quantidade,
-            streak,
             hoje,
-            (erro) => {
+            LIMITE_DIARIO[action] || 5,
+            (erro, liberado) => {
                 if (erro) {
                     console.error(erro);
                     return res.status(500).json({
@@ -166,21 +180,46 @@ function ganharXP(req, res) {
                     });
                 }
 
-                buscarGamificacao(usuarioId, (erro, atualizado) => {
-                    if (erro) {
-                        console.error(erro);
-                        return res.status(500).json({
-                            mensagem: "Erro ao atualizar XP."
+                // Limite diário atingido: não soma XP
+                if (!liberado) {
+                    return res.json({
+                        xp: Number(dados.xp) || 0,
+                        streak: Number(dados.streak) || 0,
+                        lastActiveDate: dados.last_active_date || null,
+                        gainedXP: 0
+                    });
+                }
+
+                adicionarXP(
+                    usuarioId,
+                    quantidade,
+                    streak,
+                    hoje,
+                    (erro) => {
+                        if (erro) {
+                            console.error(erro);
+                            return res.status(500).json({
+                                mensagem: "Erro ao salvar XP."
+                            });
+                        }
+
+                        buscarGamificacao(usuarioId, (erro, atualizado) => {
+                            if (erro) {
+                                console.error(erro);
+                                return res.status(500).json({
+                                    mensagem: "Erro ao atualizar XP."
+                                });
+                            }
+
+                            res.json({
+                                xp: Number(atualizado.xp) || 0,
+                                streak: Number(atualizado.streak) || 0,
+                                lastActiveDate: atualizado.last_active_date || null,
+                                gainedXP: quantidade
+                            });
                         });
                     }
-
-                    res.json({
-                        xp: Number(atualizado.xp) || 0,
-                        streak: Number(atualizado.streak) || 0,
-                        lastActiveDate: atualizado.last_active_date || null,
-                        gainedXP: quantidade
-                    });
-                });
+                );
             }
         );
     });

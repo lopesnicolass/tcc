@@ -26,11 +26,33 @@ const {
 
 async function cadastrar(req, res) {
 
-    const { nome, email, senha } = req.body;
+    const nome =
+        String(req.body?.nome || "").trim();
+
+    const email =
+        String(req.body?.email || "")
+            .trim()
+            .toLowerCase();
+
+    const senha =
+        String(req.body?.senha || "");
 
     if (!nome || !email || !senha) {
         return res.status(400).json({
             mensagem: "Preencha todos os campos."
+        });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({
+            mensagem: "Informe um e-mail válido."
+        });
+    }
+
+    if (senha.length < 6) {
+        return res.status(400).json({
+            mensagem:
+                "A senha deve ter pelo menos 6 caracteres."
         });
     }
 

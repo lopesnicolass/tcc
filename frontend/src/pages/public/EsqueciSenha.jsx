@@ -1,7 +1,7 @@
 import '../../styles/public/Auth.css';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoWordmark from '../../assets/tenna_logo.png';
+import logoWordmark from '../../assets/tenna_logo.webp';
 import { request } from '../../services/api.js';
 
 export default function EsqueciSenha() {
