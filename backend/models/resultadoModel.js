@@ -69,12 +69,19 @@ function buscarResultadosPorUsuario(
             r.porcentagem,
             r.data_realizacao,
 
-            s.titulo AS simulado_nome
+            s.titulo AS simulado_nome,
+            COALESCE(m.nome, s.materia) AS materia
 
         FROM resultados r
 
         LEFT JOIN simulados s
             ON s.id = r.simulado_id
+
+        LEFT JOIN topicos t
+            ON t.id = s.topico_id
+
+        LEFT JOIN materias m
+            ON m.id = t.materia_id
 
         WHERE r.usuario_id = ?
 

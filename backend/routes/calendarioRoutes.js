@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     listar,
+    proximoVestibulinho,
     criar,
     atualizar,
     excluir
@@ -12,6 +13,8 @@ const verificarAdmin = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
+// A data da prova é pública; todas as outras datas continuam autenticadas.
+router.get("/vestibulinho", proximoVestibulinho);
 router.get("/datas-importantes", autenticarToken, listar);
 router.post("/datas-importantes", autenticarToken, verificarAdmin, criar);
 router.put("/datas-importantes/:id", autenticarToken, verificarAdmin, atualizar);

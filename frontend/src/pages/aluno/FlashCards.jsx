@@ -1,6 +1,14 @@
 import '../../styles/aluno/FlashCards.css';
 import { useEffect, useMemo, useState } from 'react';
 import { API_URL, obterToken } from '../../services/api.js';
+import { alternarCardsVirados, obterTemasParaRevisar } from '../../utils/flashcardsReview.js';
+import { organizarMaterias } from '../../utils/flashcardsMaterias.js';
+
+// Identidade própria para os baralhos: cartões ilustrados com CSS, sem capas dos Simulados.
+function slugMateria(nome = '') {
+  return String(nome).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 
 const TOTAL_CARDS_SESSAO = 10;
 
@@ -920,45 +928,17 @@ export default function FlashCards() {
   // MATÉRIAS
   // =====================================================
 
-  const materiasDisponiveis =
-    useMemo(
-      () => {
+  // Inclui as cinco matérias principais, inclusive quando ainda não há cartões.
+  // Também mantém matérias adicionais cadastradas pelo administrador.
+  const materiasDisponiveis = useMemo(() => organizarMaterias(cards), [cards]);
+  const materiaSelecionada = filtro === 'Todas' ? null : filtro;
 
-        const nomes =
-          [];
-
-        const vistos =
-          new Set();
-
-        cards.forEach(
-          (card) => {
-
-            if (
-              card.subject &&
-              !vistos.has(
-                card.subject
-              )
-            ) {
-
-              vistos.add(
-                card.subject
-              );
-
-              nomes.push(
-                card.subject
-              );
-
-            }
-
-          }
-        );
-
-        return nomes;
-
-      },
-      [cards]
-    );
-
+  function selecionarMateria(materia) {
+    setFiltro(materia);
+    setBusca('');
+    setFlipped(new Set());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   // =====================================================
   // CONTAGEM POR MATÉRIA
@@ -1042,6 +1022,15 @@ export default function FlashCards() {
     );
 
 
+  // Revela/oculta somente os cartões presentes no filtro atual.
+  const todosExibidosVirados =
+    cardsFiltrados.length > 0 &&
+    cardsFiltrados.every((card) => flipped.has(card.id));
+
+  function alternarRespostasExibidas() {
+    setFlipped((anterior) => alternarCardsVirados(anterior, cardsFiltrados));
+  }
+
   // =====================================================
   // RESULTADO
   // =====================================================
@@ -1076,72 +1065,43 @@ export default function FlashCards() {
   // GRID NORMAL
   // =====================================================
 
-  function renderGrid(
-    lista
-  ) {
-
+  function renderGrid(lista) {
     if (!lista.length) {
-
-      return (
-        <p className="flashcards-vazio">
-          Nenhum flashcard encontrado.
-        </p>
-      );
-
+      return null;
     }
 
     return (
       <div className="flashcard-grid">
+        {lista.map((card) => {
+          const virado = flipped.has(card.id);
 
-        {lista.map(
-          (card) => (
-
-            <div
-              className={
-                `flashcard ${
-                  flipped.has(
-                    card.id
-                  )
-                    ? 'flipped'
-                    : ''
-                }`
-              }
-
-              key={
-                card.id
-              }
-
-              onClick={() =>
-                toggle(
-                  card.id
-                )
-              }
+          return (
+            <button
+              type="button"
+              key={card.id}
+              className={`flashcard ${virado ? 'flipped' : ''}`}
+              onClick={() => toggle(card.id)}
+              aria-pressed={virado}
+              aria-label={`${virado ? 'Resposta' : 'Pergunta'}: ${virado ? card.back : card.front}. ${virado ? 'Voltar à pergunta' : 'Revelar resposta'}`}
             >
+              <span className="flashcard-inner">
+                <span className="flashcard-face front" aria-hidden={virado}>
+                  <span className="flashcard-side-label">PERGUNTA</span>
+                  <span className="flashcard-face-text">{card.front}</span>
+                  <span className="flashcard-face-hint">Toque para ver a resposta ↗</span>
+                </span>
 
-              <div className="flashcard-inner">
-
-                <div className="flashcard-face front">
-
-                  {card.front}
-
-                </div>
-
-                <div className="flashcard-face back">
-
-                  {card.back}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          )
-        )}
-
+                <span className="flashcard-face back" aria-hidden={!virado}>
+                  <span className="flashcard-side-label">RESPOSTA</span>
+                  <span className="flashcard-face-text">{card.back}</span>
+                  <span className="flashcard-face-hint">Toque para voltar ↩</span>
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
     );
-
   }
 
 
@@ -1154,13 +1114,21 @@ export default function FlashCards() {
   ) {
 
     if (!lista.length) {
-
       return (
-        <p className="flashcards-vazio">
-          Nenhum flashcard encontrado.
-        </p>
+        <div className="flashcards-vazio" role="status">
+          <strong>{busca.trim() ? 'Nenhum card encontrado' : 'Nenhum flashcard nesta matéria'}</strong>
+          <p>
+            {busca.trim()
+              ? 'Tente pesquisar outra palavra nesta matéria.'
+              : 'Quando houver flashcards cadastrados nesta matéria, eles aparecerão aqui.'}
+          </p>
+          {busca.trim() && (
+            <button type="button" className="flashcards-btn-secondary" onClick={() => setBusca('')}>
+              Limpar pesquisa
+            </button>
+          )}
+        </div>
       );
-
     }
 
     const grupos =
@@ -1299,12 +1267,9 @@ export default function FlashCards() {
   if (carregando) {
 
     return (
-      <div className="flashcards-erro">
-
-        <p>
-          Carregando flashcards...
-        </p>
-
+      <div className="flashcards-loading" role="status" aria-live="polite">
+        <span className="flashcards-loading-spinner" aria-hidden="true" />
+        Carregando flashcards...
       </div>
     );
 
@@ -1375,8 +1340,7 @@ export default function FlashCards() {
           </h1>
 
           <p>
-            Você respondeu aos 10
-            flashcards da sessão.
+            Você revisou {totalRespondido} de {cardsDaSessao.length} flashcards nesta sessão.
           </p>
 
           <div className="flashcards-result-score">
@@ -1434,6 +1398,18 @@ export default function FlashCards() {
 
           </div>
 
+
+          {erros > 0 && (
+            <div className="flashcards-review-suggestion">
+              <h2>Vale revisar</h2>
+              <p>Você pode retomar estes temas na lista de flashcards:</p>
+              <div className="flashcards-review-topics">
+                {obterTemasParaRevisar(respostasSessao, cardsDaSessao).map((tema) => (
+                  <span key={tema}>{tema}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flashcards-result-actions">
 
@@ -1526,28 +1502,33 @@ export default function FlashCards() {
         </div>
 
 
-        <div className="flashcards-progress">
-
+        <div className="flashcards-progress-caption">
+          <span>{indiceAtual} respondidos de {cardsDaSessao.length}</span>
+          <strong>{progresso}% concluído</strong>
+        </div>
+        <div
+          className="flashcards-progress"
+          role="progressbar"
+          aria-label="Progresso da sessão"
+          aria-valuemin={0}
+          aria-valuemax={cardsDaSessao.length}
+          aria-valuenow={indiceAtual}
+        >
           <div
             className="flashcards-progress-bar"
-            style={{
-              width:
-                `${Math.max(
-                  0,
-                  progresso
-                )}%`,
-            }}
+            style={{ width: `${Math.max(0, progresso)}%` }}
           />
-
         </div>
 
 
         <div className="flashcards-game-content">
 
-          <p className="flashcards-game-subtitle">
-            Toque no card para revelar
-            a resposta.
-          </p>
+          <div className="flashcards-game-context">
+            <span className="flashcards-game-subject">{cardAtual.subject}</span>
+            <p className="flashcards-game-subtitle">
+              Leia a pergunta, vire o cartão e avalie sua resposta.
+            </p>
+          </div>
 
 
           <div
@@ -1737,288 +1718,167 @@ export default function FlashCards() {
   // =====================================================
 
   return (
-
-    <div className="flashcards-page">
-
+    <div className="flashcards-page page-shell">
       <section className="flashcards-hero">
-
         <div className="flashcards-hero-content">
-
           <span className="flashcards-hero-eyebrow">
-            REVISÃO RÁPIDA
+            {materiaSelecionada ? 'REVISÃO POR MATÉRIA' : 'REVISÃO RÁPIDA'}
           </span>
-
-          <h1>
-            Flash Cards
-          </h1>
-
+          <h1>{materiaSelecionada || 'Flash Cards'}</h1>
           <p>
-            Revise os conteúdos de forma rápida
-            e teste seus conhecimentos para o
-            Vestibulinho.
+            {materiaSelecionada
+              ? `Revise ${materiaSelecionada} com os cartões disponíveis e revele as respostas no seu ritmo.`
+              : 'Escolha uma matéria para revisar ou pratique com uma rodada de perguntas para o Vestibulinho.'}
           </p>
-
         </div>
-
-
-        <div
-          className="flashcards-hero-badge"
-          aria-hidden="true"
-        >
-
-          <span>
-            ✦
-          </span>
-
-          <strong>
-            {cards.length}
-          </strong>
-
-          <small>
-            cards disponíveis
-          </small>
-
+        <div className="flashcards-hero-badge" aria-label={`${materiaSelecionada ? contarPorMateria(materiaSelecionada) : cards.length} cartões disponíveis`}>
+          <span aria-hidden="true">✦</span>
+          <strong>{materiaSelecionada ? contarPorMateria(materiaSelecionada) : cards.length}</strong>
+          <small>cards disponíveis</small>
         </div>
-
       </section>
-
-
-      {/* =================================================
-          HORA DOS FLASHCARDS
-      ================================================= */}
-
-      <section className="flashcards-game-banner">
-
-        <div className="flashcards-game-banner-content">
-
-          <div>
-
-            <span className="flashcards-game-eyebrow">
-              GAMIFICAÇÃO
-            </span>
-
-            <h2>
-              Hora dos Flashcards!
-            </h2>
-
-            <p>
-              Teste seus conhecimentos com 10
-              flashcards. Vire o card e indique
-              se você acertou ou errou.
-            </p>
-
-          </div>
-
-
-          <button
-            type="button"
-            className="flashcards-game-start"
-            onClick={
-              iniciarHoraDosFlashcards
-            }
-            disabled={
-              iniciandoSessao ||
-              cards.length <
-                TOTAL_CARDS_SESSAO
-            }
-          >
-            {
-              iniciandoSessao
-                ? 'Iniciando...'
-                : 'Começar'
-            }
-          </button>
-
-        </div>
-
-
-        {cards.length <
-          TOTAL_CARDS_SESSAO && (
-
-          <p className="flashcards-game-warning">
-            É necessário ter pelo menos 10
-            flashcards cadastrados para jogar.
-          </p>
-
-        )}
-
-      </section>
-
-
-      {/* =================================================
-          PESQUISA
-      ================================================= */}
-
-      <div className="flashcards-study-toolbar">
-        <div>
-          <span className="flashcards-toolbar-eyebrow">REVISÃO POR CONTEÚDO</span>
-          <h2 className="flashcards-toolbar-title">Seus flashcards</h2>
-          <p className="flashcards-toolbar-subtitle">Escolha uma matéria ou pesquise um tema para revisar.</p>
-        </div>
-
-        <div className="flashcards-toolbar-total">
-          <strong>{cardsFiltrados.length}</strong>
-          <span>cards exibidos</span>
-        </div>
-      </div>
-
-      <div className="flashcards-search">
-
-        <span
-          className="flashcards-search-icon"
-          aria-hidden="true"
-        >
-          ⌕
-        </span>
-
-
-        <input
-          type="search"
-          value={
-            busca
-          }
-          onChange={
-            (event) =>
-              setBusca(
-                event.target.value
-              )
-          }
-          placeholder="Pesquisar flashcards..."
-          aria-label="Pesquisar flashcards"
-        />
-
-
-        {busca && (
-
-          <button
-            type="button"
-            className="flashcards-search-clear"
-            onClick={() =>
-              setBusca('')
-            }
-            aria-label="Limpar pesquisa"
-          >
-            ×
-          </button>
-
-        )}
-
-      </div>
-
-
-      {/* =================================================
-          MATÉRIAS
-      ================================================= */}
-
-      <div className="materia-tabs">
-
-        <button
-          type="button"
-          className={
-            `materia-tab ${
-              filtro ===
-              'Todas'
-                ? 'active'
-                : ''
-            }`
-          }
-          onClick={() =>
-            setFiltro(
-              'Todas'
-            )
-          }
-        >
-
-          Todas{' '}
-
-          <span className="materia-tab-count">
-            {cards.length}
-          </span>
-
-        </button>
-
-
-        {materiasDisponiveis.map(
-          (materia) => (
-
-            <button
-              type="button"
-              key={
-                materia
-              }
-              className={
-                `materia-tab ${
-                  filtro ===
-                  materia
-                    ? 'active'
-                    : ''
-                }`
-              }
-              onClick={() =>
-                setFiltro(
-                  materia
-                )
-              }
-            >
-
-              {materia}{' '}
-
-              <span className="materia-tab-count">
-
-                {
-                  contarPorMateria(
-                    materia
-                  )
-                }
-
-              </span>
-
-            </button>
-
-          )
-        )}
-
-      </div>
-
-
-      {/* =================================================
-          ERRO
-      ================================================= */}
 
       {erro && (
-
-        <div className="flashcards-erro">
-
-          <p>
-            {erro}
-          </p>
-
-          <button
-            type="button"
-            className="flashcards-btn-primary"
-            onClick={
-              carregarFlashcards
-            }
-          >
+        <div className="flashcards-erro" role="alert">
+          <p>{erro}</p>
+          <button type="button" className="flashcards-btn-primary" onClick={carregarFlashcards}>
             Tentar novamente
           </button>
-
         </div>
-
       )}
 
+      {!materiaSelecionada ? (
+        <>
+          <section className="flashcards-game-banner">
+            <div className="flashcards-game-banner-content">
+              <div>
+                <span className="flashcards-game-eyebrow">GAMIFICAÇÃO</span>
+                <h2>Hora dos Flashcards!</h2>
+                <p>
+                  Uma rodada com 10 perguntas sorteadas de todas as matérias.
+                  Revele cada resposta e marque se acertou para acompanhar seu resultado.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="flashcards-game-start"
+                onClick={iniciarHoraDosFlashcards}
+                disabled={iniciandoSessao || cards.length < TOTAL_CARDS_SESSAO}
+              >
+                {iniciandoSessao ? 'Iniciando...' : 'Começar'}
+              </button>
+            </div>
+            {cards.length < TOTAL_CARDS_SESSAO && (
+              <p className="flashcards-game-warning">
+                São necessários {TOTAL_CARDS_SESSAO} flashcards para começar uma rodada.
+                Atualmente, há {cards.length} disponíveis.
+              </p>
+            )}
+          </section>
 
-      {/* =================================================
-          LISTAGEM
-      ================================================= */}
+          <section className="flashcards-materias flashcards-materias-direta" aria-label="Baralhos disponíveis">
+            <div className="flashcards-decks-grid">
+              {materiasDisponiveis.map((materia, indice) => {
+                const cardsDaMateria = cards.filter((card) => card.subject === materia);
+                const quantidade = cardsDaMateria.length;
+                const temas = [...new Set(cardsDaMateria.map((card) => card.content?.trim() || 'Revisão geral'))];
+                return (
+                  <button
+                    type="button"
+                    key={materia}
+                    className={`flashcards-deck flashcards-deck-${slugMateria(materia)}`}
+                    onClick={() => selecionarMateria(materia)}
+                    aria-label={`Abrir baralho de ${materia}: ${quantidade} ${quantidade === 1 ? 'flashcard' : 'flashcards'}`}
+                  >
+                    <span className="flashcards-deck-illustration" aria-hidden="true">
+                      <span className="flashcards-deck-sheet flashcards-deck-sheet-bottom" />
+                      <span className="flashcards-deck-sheet flashcards-deck-sheet-middle" />
+                      <span className="flashcards-deck-sheet flashcards-deck-sheet-front">
+                        <span className="flashcards-deck-glyph">?</span>
+                        <span className="flashcards-deck-dashes"><i /><i /></span>
+                      </span>
+                    </span>
+                    <span className="flashcards-deck-details">
+                      <span className="flashcards-deck-kicker">BARALHO {String(indice + 1).padStart(2, '0')}</span>
+                      <strong className="flashcards-deck-title">{materia}</strong>
+                      <span className="flashcards-deck-meta">
+                        {quantidade} {quantidade === 1 ? 'cartão' : 'cartões'}
+                        <span className="flashcards-deck-meta-dot" aria-hidden="true">·</span>
+                        {temas.length} {temas.length === 1 ? 'assunto' : 'assuntos'}
+                      </span>
+                      <span className="flashcards-deck-topics">
+                        {temas.length > 0
+                          ? temas.slice(0, 2).join(' · ')
+                          : 'Em breve, novos cartões de revisão'}
+                      </span>
+                      <span className="flashcards-deck-action">
+                        Abrir baralho <span aria-hidden="true">→</span>
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </>
+      ) : (
+        <>
+          <div className="flashcards-detalhe-topo">
+            <button type="button" className="flashcards-voltar-materias" onClick={() => selecionarMateria('Todas')}>
+              ← Voltar para matérias
+            </button>
+          </div>
+          <div className="flashcards-study-toolbar">
+            <div>
+              <span className="flashcards-toolbar-eyebrow">SEUS FLASHCARDS</span>
+              <h2 className="flashcards-toolbar-title">Cartões de {materiaSelecionada}</h2>
+              <p className="flashcards-toolbar-subtitle">Clique em um cartão para revelar a resposta.</p>
+            </div>
+            <div className="flashcards-toolbar-total">
+              <strong>{cardsFiltrados.length}</strong>
+              <span>de {contarPorMateria(materiaSelecionada)} cards</span>
+            </div>
+          </div>
 
-      {!erro &&
-        renderFlashcardsOrganizados(
-          cardsFiltrados
-        )}
+          <div className="flashcards-filter-panel" aria-label="Pesquisar cartões nesta matéria">
+            <div className="flashcards-search">
+              <span className="flashcards-search-icon" aria-hidden="true">⌕</span>
+              <input
+                type="search"
+                value={busca}
+                onChange={(event) => setBusca(event.target.value)}
+                placeholder={`Pesquisar em ${materiaSelecionada}...`}
+                aria-label={`Pesquisar flashcards de ${materiaSelecionada}`}
+              />
+              {busca && (
+                <button type="button" className="flashcards-search-clear" onClick={() => setBusca('')} aria-label="Limpar pesquisa">×</button>
+              )}
+            </div>
+            <div className="flashcards-filter-footer">
+              <span role="status">
+                {cardsFiltrados.length} {cardsFiltrados.length === 1 ? 'cartão encontrado' : 'cartões encontrados'}
+              </span>
+              <div className="flashcards-filter-actions">
+                {busca && (
+                  <button type="button" className="flashcards-link-button" onClick={() => setBusca('')}>
+                    Limpar pesquisa
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="flashcards-reveal-button"
+                  onClick={alternarRespostasExibidas}
+                  disabled={cardsFiltrados.length === 0}
+                >
+                  {todosExibidosVirados ? 'Mostrar perguntas' : 'Revelar respostas'}
+                </button>
+              </div>
+            </div>
+          </div>
 
+          {!erro && renderFlashcardsOrganizados(cardsFiltrados)}
+        </>
+      )}
     </div>
-
   );
-
 }

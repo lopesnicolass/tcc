@@ -1,5 +1,6 @@
 const {
     listarDatasImportantes,
+    buscarProximoVestibulinho,
     buscarDataImportantePorId,
     criarDataImportante,
     atualizarDataImportante,
@@ -139,4 +140,24 @@ function excluir(req, res) {
     });
 }
 
-module.exports = { listar, criar, atualizar, excluir };
+
+// Endpoint público usado pela landing e pela Home; não retorna as demais datas.
+function proximoVestibulinho(req, res) {
+    // Data civil de São Paulo, independente da configuração de fuso do servidor.
+    const hoje = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(new Date()).split('/').reverse().join('-');
+
+    buscarProximoVestibulinho(hoje, (erro, prova) => {
+        if (erro) {
+            console.error('Erro ao consultar a data do Vestibulinho:', erro);
+            return res.status(500).json({ mensagem: 'Não foi possível consultar a data do Vestibulinho.' });
+        }
+        return res.json({ data: prova?.data || null });
+    });
+}
+
+module.exports = { listar, criar, atualizar, excluir, proximoVestibulinho };

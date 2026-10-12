@@ -64,8 +64,8 @@ export default function Sidebar() {
   }, [streakOpen]);
 
   return (
-    <aside className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
-      <div className="sidebar-brand">
+    <aside className={`sidebar student-sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className="sidebar-brand student-sidebar-brand">
         <img src={logoIcon} alt="Tenna" className="sidebar-logo-full" />
         <button
           type="button"

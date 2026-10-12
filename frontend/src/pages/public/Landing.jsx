@@ -1,17 +1,10 @@
 import '../../styles/public/Landing.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tennaLogo from '../../assets/tenna_logo.webp';
+import { API_URL } from '../../services/api.js';
+import { diasAteVestibulinho } from '../../utils/vestibulinho.js';
 
-function getDaysUntilExam() {
-  const target = new Date('2026-11-08T00:00:00');
-  const now = new Date();
-
-  return Math.max(
-    0,
-    Math.ceil((target - now) / 86400000)
-  );
-}
 
 
 /* ============================================================
@@ -198,6 +191,25 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const [subjects, setSubjects] = useState(SUBJECTS);
+  const [dataVestibulinho, setDataVestibulinho] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`${API_URL}/calendario/vestibulinho`, { signal: controller.signal })
+      .then((resposta) => {
+        if (!resposta.ok) throw new Error('Data indisponível');
+        return resposta.json();
+      })
+      .then((dados) => setDataVestibulinho(dados?.data || null))
+      .catch((erro) => {
+        if (erro.name !== 'AbortError') setDataVestibulinho(null);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const diasParaProva = diasAteVestibulinho(dataVestibulinho);
 
 
   function toggleSubject(name) {
@@ -275,8 +287,11 @@ export default function Landing() {
               <span className="landing-badge-icon">🔥</span>
 
               <span>
-                <strong>{getDaysUntilExam()}</strong>{' '}
-                dias até o Vestibulinho
+                {diasParaProva === null ? (
+                  <>Data do Vestibulinho a confirmar</>
+                ) : (
+                  <><strong>{diasParaProva}</strong>{' '}dias até o Vestibulinho</>
+                )}
               </span>
             </div>
 

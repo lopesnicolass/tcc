@@ -2,10 +2,10 @@ import '../../styles/aluno/Simulados.css';
 import { useEffect, useState, useRef } from 'react';
 import { useGamification } from '../../context/GamificationContext.jsx';
 
-import { STATUS_LABEL, BTN_LABEL } from './simulados/constants.js';
 import { TelaResultado } from './simulados/TelaResultado.jsx';
 import { TelaSimulado } from './simulados/TelaSimulado.jsx';
 import { ListaSimulados } from './simulados/ListaSimulados.jsx';
+import { filtrarPorMateria, integrarStatusComHistorico } from './simulados/dadosSimulados.js';
 import { request } from '../../services/api.js';
 
 export default function Simulados() {
@@ -39,8 +39,18 @@ export default function Simulados() {
   const [erro, setErro] =
     useState('');
 
+  // null indica histórico ainda indisponível; [] indica usuário sem tentativas.
   const [historicoResultados, setHistoricoResultados] =
-    useState([]);
+    useState(null);
+
+  // Reflete tentativas salvas no servidor sem interromper provas em andamento.
+  useEffect(() => {
+    if (!Array.isArray(historicoResultados)) return;
+    setSimulados((atuais) => {
+      const integrados = integrarStatusComHistorico(atuais, historicoResultados);
+      return integrados.some((item, index) => item !== atuais[index]) ? integrados : atuais;
+    });
+  }, [historicoResultados, simulados]);
 
   // ==========================================
   // CRONÔMETRO
@@ -138,81 +148,29 @@ export default function Simulados() {
     return `respostasSimulado_${usuarioId}_${simuladoId}`;
   }
 
-  function obterChaveHistoricoResultados() {
-    const usuarioId = obterUsuarioId();
-
-    if (!usuarioId) {
-      return null;
-    }
-
-    return `historicoResultadosSimulados_${usuarioId}`;
-  }
-
-  function carregarHistoricoResultados() {
-    const chave = obterChaveHistoricoResultados();
-
-    if (!chave) {
-      setHistoricoResultados([]);
-      return;
-    }
-
+  // Resultados oficiais: única fonte de verdade para Home, Simulados e Desempenho.
+  async function carregarHistoricoResultados() {
     try {
-      const salvo = JSON.parse(
-        localStorage.getItem(chave) || '[]'
+      const dados = await request(
+        '/resultados/me',
+        {},
+        'Não foi possível carregar o histórico dos simulados.'
       );
-
       setHistoricoResultados(
-        Array.isArray(salvo) ? salvo : []
+        (Array.isArray(dados?.resultados) ? dados.resultados : []).map(
+          (resultado) => ({
+            ...resultado,
+            totalQuestoes: Number(
+              resultado.total_questoes ?? resultado.totalQuestoes ?? 0
+            )
+          })
+        )
       );
     } catch (error) {
-      console.error(
-        'Erro ao carregar histórico de simulados:',
-        error
-      );
-      setHistoricoResultados([]);
+      console.error('Erro ao carregar histórico de simulados:', error);
+      setHistoricoResultados(null);
+      setErro(error.message || 'Não foi possível carregar o histórico dos simulados.');
     }
-  }
-
-  function salvarResultadoNoHistorico(resultado) {
-    const chave = obterChaveHistoricoResultados();
-
-    if (!chave) {
-      return;
-    }
-
-    let historico = [];
-
-    try {
-      const salvo = JSON.parse(
-        localStorage.getItem(chave) || '[]'
-      );
-
-      historico = Array.isArray(salvo) ? salvo : [];
-    } catch (error) {
-      console.error(
-        'Erro ao ler histórico de simulados:',
-        error
-      );
-    }
-
-    const item = {
-      id: `${simuladoSelecionado?.id || 'simulado'}-${Date.now()}`,
-      simuladoId: simuladoSelecionado?.id || null,
-      materia: simuladoSelecionado?.materia || 'Geral',
-      acertos: Number(resultado.acertos || 0),
-      totalQuestoes: Number(resultado.totalQuestoes || 0),
-      porcentagem: Number(resultado.porcentagem || 0),
-      data: new Date().toISOString()
-    };
-
-    const novoHistorico = [...historico, item];
-
-    localStorage.setItem(
-      chave,
-      JSON.stringify(novoHistorico)
-    );
-
-    setHistoricoResultados(novoHistorico);
   }
 
   // ==========================================
@@ -1302,7 +1260,9 @@ export default function Simulados() {
         'simulado concluído'
       );
 
-      salvarResultadoNoHistorico(resultado);
+      // O resultado já foi persistido por /simulados/:id/corrigir.
+      // Recarrega o histórico oficial, sem duplicar tentativas no localStorage.
+      await carregarHistoricoResultados();
 
       setResultadoFinal({
         acertos:
@@ -1534,36 +1494,7 @@ export default function Simulados() {
   // FILTROS
   // ==========================================
 
-  const materias = [
-    'Todas',
-
-    ...Array.from(
-      new Set(
-        simulados
-          .map(
-            (simulado) =>
-              simulado.materia
-          )
-          .filter(Boolean)
-      )
-    )
-  ];
-
-  const simuladosVisiveis =
-    filtro === 'Todas'
-      ? simulados
-      : simulados.filter(
-          (simulado) =>
-            simulado.materia ===
-            filtro
-        );
-
-  const concluidos =
-    simulados.filter(
-      (simulado) =>
-        simulado.status ===
-        'concluido'
-    ).length;
+  const simuladosVisiveis = filtrarPorMateria(simulados, filtro);
 
   // ==========================================
   // RESULTADO / TELA DO SIMULADO
@@ -1671,9 +1602,6 @@ export default function Simulados() {
 
   return (
     <ListaSimulados
-      materias={
-        materias
-      }
       filtro={
         filtro
       }
@@ -1685,9 +1613,6 @@ export default function Simulados() {
       }
       erro={
         erro
-      }
-      concluidos={
-        concluidos
       }
       historicoResultados={
         historicoResultados

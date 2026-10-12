@@ -30,7 +30,7 @@ export function TelaResultado({
       </div>
 
       <div
-        className="stat-card"
+        className="stat-card simulado-resultado-cartao"
         style={{
           textAlign: 'center',
           marginTop: '30px',
@@ -43,7 +43,7 @@ export function TelaResultado({
             marginBottom: '10px'
           }}
         >
-          🎉 Simulado concluído!
+          Simulado finalizado!
         </h2>
 
         <p
@@ -56,7 +56,7 @@ export function TelaResultado({
         </p>
 
         <div
-          className="stats-row"
+          className="stats-row simulado-resultado-indicadores"
           style={{
             marginBottom: '30px'
           }}
@@ -139,6 +139,7 @@ export function TelaResultado({
         </p>
 
         <div
+          className="simulado-resultado-acoes"
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -148,6 +149,7 @@ export function TelaResultado({
         >
           <button
             className="simulado-btn"
+            aria-expanded={mostrarErros}
             onClick={() =>
               setMostrarErros(
                 !mostrarErros

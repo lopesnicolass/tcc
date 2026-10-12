@@ -55,6 +55,27 @@ export default function Perfil() {
   const [erro, setErro] =
     useState('');
 
+  const [conquistaNotaMaxima, setConquistaNotaMaxima] = useState(null);
+  const [carregandoConquistas, setCarregandoConquistas] = useState(true);
+
+  useEffect(() => {
+    let ativo = true;
+    request('/resultados/me', {}, 'Não foi possível consultar conquistas.')
+      .then((dados) => {
+        if (!ativo) return;
+        const resultados = Array.isArray(dados?.resultados) ? dados.resultados : [];
+        setConquistaNotaMaxima(
+          resultados.some((resultado) => Number(resultado.porcentagem) >= 100)
+        );
+      })
+      .catch((erroConquistas) => {
+        console.error('Erro ao carregar conquistas:', erroConquistas);
+        if (ativo) setConquistaNotaMaxima(null);
+      })
+      .finally(() => { if (ativo) setCarregandoConquistas(false); });
+    return () => { ativo = false; };
+  }, []);
+
   // =====================================================
   // CONVERTER BLOB DO SQLITE PARA IMAGEM
   // =====================================================
@@ -957,51 +978,30 @@ export default function Perfil() {
             </div>
 
             <div className="achievement-list">
-
-              <div className="achievement-item">
-
-                <div className="achievement-icon">
-                  🏆
+              <div className={`achievement-item ${conquistaNotaMaxima === true ? 'achievement-unlocked' : 'achievement-locked'}`}>
+                <div className="achievement-icon" aria-hidden="true">
+                  {conquistaNotaMaxima === true ? '🏆' : '🔒'}
                 </div>
-
                 <div className="achievement-text">
-
-                  <strong>
-                    Nota Máxima
-                  </strong>
-
-                  <span>
-                    Acertou 100% em um simulado
-                  </span>
-
+                  <strong>Nota Máxima {conquistaNotaMaxima === true ? '· Conquistada' : conquistaNotaMaxima === false ? '· Bloqueada' : '· Não verificada'}</strong>
+                  <span>Objetivo: acertar 100% em um simulado.</span>
                 </div>
-
               </div>
 
-              <div className="achievement-item">
-
-                <div className="achievement-icon">
-                  🎯
-                </div>
-
+              <div className="achievement-item achievement-locked">
+                <div className="achievement-icon" aria-hidden="true">🔒</div>
                 <div className="achievement-text">
-
-                  <strong>
-                    Meta Semanal
-                  </strong>
-
-                  <span>
-                    Completou 20h de estudo em uma semana
-                  </span>
-
+                  <strong>Meta Semanal · Ainda não verificada</strong>
+                  <span>Objetivo: registrar 20h de estudo em uma semana.</span>
                 </div>
-
               </div>
-
             </div>
 
             <div className="perfil-achievement-footer">
-              <span>Continue estudando para desbloquear novas conquistas.</span>
+              <span>{carregandoConquistas
+                ? 'Consultando seus resultados...'
+                : 'As conquistas dependem de dados verificados. O controle de horas semanais será implementado na próxima etapa.'}
+              </span>
             </div>
           </div>
         </div>

@@ -7,9 +7,9 @@ import {
   xpForLevel
 } from '../../context/GamificationContext.jsx';
 import Icon from '../../components/Icon.jsx';
-import SubjectIcon from '../../components/SubjectIcon.jsx';
-import { getSubjectStyle } from '../../utils/subjects.js';
 import { API_URL, obterToken } from '../../services/api.js';
+import { diasAteVestibulinho } from '../../utils/vestibulinho.js';
+import { formatarData, obterStatusData, selecionarProximasAtividades } from '../../utils/homeAtividades.js';
 
 function obterUsuario() {
   try {
@@ -33,63 +33,6 @@ function normalizarTopicos(materias) {
         materiaId: materia.id
       }))
   );
-}
-
-function criarDataAtividade(atividade) {
-  if (!atividade?.data) {
-    return null;
-  }
-
-  const texto = String(atividade.data).trim();
-
-  let ano;
-  let mes;
-  let dia;
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
-    [ano, mes, dia] = texto.split('-').map(Number);
-  } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
-    [dia, mes, ano] = texto.split('/').map(Number);
-  } else {
-    return null;
-  }
-
-  const [horaTexto, minutoTexto] = String(
-    atividade.horario || '23:59'
-  ).split(':');
-
-  const resultado = new Date(
-    ano,
-    mes - 1,
-    dia,
-    Number(horaTexto) || 0,
-    Number(minutoTexto) || 0,
-    0,
-    0
-  );
-
-  return Number.isNaN(resultado.getTime())
-    ? null
-    : resultado;
-}
-
-function formatarData(data) {
-  if (!data) {
-    return '';
-  }
-
-  const texto = String(data).trim();
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
-    const [ano, mes, dia] = texto.split('-');
-    return `${dia}/${mes}/${ano}`;
-  }
-
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
-    return texto;
-  }
-
-  return texto;
 }
 
 const CORES_PROGRESSO_MATERIA = {
@@ -119,42 +62,6 @@ function obterCorProgressoMateria(materia = '') {
     : '#2196F3';
 }
 
-function obterStatusData(atividade) {
-  const data = criarDataAtividade(atividade);
-
-  if (!data) {
-    return '';
-  }
-
-  const agora = new Date();
-  const hoje = new Date(
-    agora.getFullYear(),
-    agora.getMonth(),
-    agora.getDate()
-  );
-
-  const dataSemHorario = new Date(
-    data.getFullYear(),
-    data.getMonth(),
-    data.getDate()
-  );
-
-  const diferenca = Math.round(
-    (dataSemHorario.getTime() - hoje.getTime()) /
-      (1000 * 60 * 60 * 24)
-  );
-
-  if (diferenca === 0) {
-    return 'Hoje';
-  }
-
-  if (diferenca === 1) {
-    return 'Amanhã';
-  }
-
-  return '';
-}
-
 export default function Home() {
   const navigate = useNavigate();
 
@@ -169,6 +76,7 @@ export default function Home() {
   const [showLevels, setShowLevels] = useState(false);
   const [carregandoResumo, setCarregandoResumo] = useState(true);
   const [erroResumo, setErroResumo] = useState('');
+  const [tentativasResumo, setTentativasResumo] = useState(0);
 
   const [materiasData, setMateriasData] = useState([]);
   const [estudados, setEstudados] = useState({});
@@ -209,7 +117,7 @@ export default function Home() {
           fetch(`${API_URL}/conteudos/progresso`, { headers }),
           fetch(`${API_URL}/resultados/me/desempenho`, { headers }),
           fetch(`${API_URL}/resultados/me`, { headers }),
-          fetch(`${API_URL}/calendario/datas-importantes`, { headers })
+          fetch(`${API_URL}/calendario/vestibulinho`)
         ];
 
         if (usuarioId > 0) {
@@ -305,32 +213,7 @@ export default function Home() {
           atividades = dadosCronograma.data;
         }
 
-        const agora = new Date();
-
-        const futuras = atividades
-          .filter((atividade) => {
-            if (!atividade?.data) {
-              return false;
-            }
-
-            const concluida =
-              atividade.concluida === true ||
-              atividade.concluida === 1 ||
-              atividade.concluida === '1' ||
-              atividade.done === true;
-
-            const data = criarDataAtividade(atividade);
-
-            return !concluida && data && data >= agora;
-          })
-          .sort(
-            (a, b) =>
-              (criarDataAtividade(a)?.getTime() ||
-                Number.MAX_SAFE_INTEGER) -
-              (criarDataAtividade(b)?.getTime() ||
-                Number.MAX_SAFE_INTEGER)
-          )
-          .slice(0, 4);
+        const futuras = selecionarProximasAtividades(atividades);
 
         setMateriasData(materias);
         setEstudados(mapaProgresso);
@@ -343,37 +226,7 @@ export default function Home() {
             : []
         );
 
-        const datasImportantes = Array.isArray(
-          dadosCalendario?.datas
-        )
-          ? dadosCalendario.datas
-          : [];
-
-        const hojeSemHorario = new Date();
-        hojeSemHorario.setHours(0, 0, 0, 0);
-
-        const vestibulinho = datasImportantes
-          .filter((item) => {
-            const titulo = String(item?.titulo || '').toLowerCase();
-            const tipo = String(item?.tipo || '').toLowerCase();
-            const data = criarDataAtividade({ data: item?.data });
-
-            return (
-              data &&
-              data >= hojeSemHorario &&
-              (titulo.includes('vestibulinho') ||
-                tipo.includes('vestibulinho'))
-            );
-          })
-          .sort(
-            (a, b) =>
-              (criarDataAtividade({ data: a.data })?.getTime() ||
-                Number.MAX_SAFE_INTEGER) -
-              (criarDataAtividade({ data: b.data })?.getTime() ||
-                Number.MAX_SAFE_INTEGER)
-          )[0] || null;
-
-        setDataVestibulinho(vestibulinho);
+        setDataVestibulinho(respostaCalendario.ok ? (dadosCalendario?.data || null) : null);
         setProximasAtividades(futuras);
       } catch (error) {
         console.error(
@@ -412,7 +265,7 @@ export default function Home() {
         atualizar
       );
     };
-  }, [usuarioId]);
+  }, [usuarioId, tentativasResumo]);
 
   const topicos = useMemo(
     () => normalizarTopicos(materiasData),
@@ -479,6 +332,11 @@ export default function Home() {
   );
 
   const ultimoResultado = resultados[0] || null;
+  const resumoIndisponivel = carregandoResumo || Boolean(erroResumo);
+  const conteudosPendentes = Math.max(totalConteudos - totalEstudados, 0);
+  const descricaoProgresso = totalConteudos > 0
+    ? `${totalEstudados} de ${totalConteudos} conteúdos revisados`
+    : 'Nenhum conteúdo cadastrado';
 
   function formatarDataResultado(data) {
     if (!data) {
@@ -496,35 +354,14 @@ export default function Home() {
     );
   }
 
-  const diasParaVestibulinho = useMemo(() => {
-    if (!dataVestibulinho?.data) {
-      return null;
-    }
-
-    const alvo = criarDataAtividade({
-      data: dataVestibulinho.data
-    });
-
-    if (!alvo) {
-      return null;
-    }
-
-    alvo.setHours(0, 0, 0, 0);
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    return Math.max(0, Math.ceil(
-      (alvo.getTime() - hoje.getTime()) /
-        (1000 * 60 * 60 * 24)
-    ));
-  }, [dataVestibulinho]);
+  const diasParaVestibulinho = diasAteVestibulinho(dataVestibulinho);
 
   return (
     <div className="home-page page-shell">
       {/* HERO */}
       <div className="home-hero">
         <div className="home-hero-text">
+          <span className="home-hero-kicker">SEU PAINEL DE ESTUDOS</span>
           <h1>
             Olá, {primeiroNome}!
           </h1>
@@ -570,14 +407,18 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="home-hero-xp-track">
+            <div
+              className="home-hero-xp-track"
+              role="progressbar"
+              aria-label="Progresso de XP no nível atual"
+              aria-valuemin={0}
+              aria-valuemax={Math.max(xpForNext, 1)}
+              aria-valuenow={Math.min(Math.max(xpIntoLevel, 0), Math.max(xpForNext, 1))}
+            >
               <div
                 className="home-hero-xp-fill"
                 style={{
-                  width: `${Math.min(
-                    (xpIntoLevel / xpForNext) * 100,
-                    100
-                  )}%`
+                  width: `${xpForNext > 0 ? Math.max(0, Math.min((xpIntoLevel / xpForNext) * 100, 100)) : 0}%`
                 }}
               />
             </div>
@@ -587,8 +428,15 @@ export default function Home() {
       </div>
 
       {erroResumo && (
-        <div className="home-inline-error">
-          {erroResumo}
+        <div className="home-inline-error" role="alert">
+          <span>{erroResumo}</span>
+          <button
+            type="button"
+            className="home-retry-button"
+            onClick={() => setTentativasResumo((valor) => valor + 1)}
+          >
+            Tentar novamente
+          </button>
         </div>
       )}
 
@@ -616,9 +464,7 @@ export default function Home() {
           </div>
 
           <div className="stat-value">
-            {carregandoResumo
-              ? '—'
-              : totalSimulados}
+            {resumoIndisponivel ? '—' : totalSimulados}
           </div>
 
           <div className="stat-label">
@@ -632,9 +478,7 @@ export default function Home() {
           </div>
 
           <div className="stat-value">
-            {carregandoResumo
-              ? '—'
-              : `${mediaGeral}%`}
+            {resumoIndisponivel ? '—' : totalSimulados > 0 ? `${mediaGeral}%` : '—'}
           </div>
 
           <div className="stat-label">
@@ -648,9 +492,7 @@ export default function Home() {
           </div>
 
           <div className="stat-value">
-            {carregandoResumo
-              ? '—'
-              : `${melhorResultado}%`}
+            {resumoIndisponivel ? '—' : totalSimulados > 0 ? `${melhorResultado}%` : '—'}
           </div>
 
           <div className="stat-label">
@@ -661,92 +503,124 @@ export default function Home() {
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className="home-grid">
-        <div className="panel-card home-performance-card">
-          <div className="home-panel-heading">
-            <div>
-              <h3>Progresso por matéria</h3>
-              <p>
-                Quanto dos conteúdos disponíveis você já revisou.
-              </p>
+        <div className="home-left-stack">
+          <div className="panel-card home-performance-card">
+            <div className="home-panel-heading">
+              <div>
+                <h3>Progresso por matéria</h3>
+                <p>
+                  Acompanhe seus conteúdos revisados em cada disciplina.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="home-panel-link"
+                onClick={() => navigate('/conteudos')}
+              >
+                Ver conteúdos →
+              </button>
             </div>
 
-            <button
-              type="button"
-              className="home-panel-link"
-              onClick={() => navigate('/conteudos')}
-            >
-              Ver conteúdos →
-            </button>
-          </div>
+            {!resumoIndisponivel && totalConteudos > 0 && (
+              <div className="home-overall-progress">
+                <div className="home-overall-progress-top">
+                  <span>{descricaoProgresso}</span>
+                  <strong>{progressoGeral}%</strong>
+                </div>
+                <div
+                  className="home-overall-progress-track"
+                  role="progressbar"
+                  aria-label="Conteúdos estudados no total"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressoGeral}
+                >
+                  <div style={{ width: `${progressoGeral}%` }} />
+                </div>
+                <small>
+                  {conteudosPendentes > 0
+                    ? `${conteudosPendentes} ${conteudosPendentes === 1 ? 'conteúdo pendente' : 'conteúdos pendentes'}`
+                    : 'Todos os conteúdos foram revisados!'}
+                </small>
+              </div>
+            )}
 
-          {carregandoResumo ? (
-            <div className="activities-empty-message">
-              Carregando seu progresso...
-            </div>
-          ) : progressoPorMateria.length === 0 ? (
-            <div className="activities-empty-message">
-              Nenhum conteúdo disponível ainda.
-            </div>
-          ) : (
-            <div className="performance-chart">
-              {progressoPorMateria.map(
-                (item) => {
-                  const style =
-                    getSubjectStyle(item.nome);
-                  const corProgresso =
-                    obterCorProgressoMateria(item.nome);
+            {resumoIndisponivel ? (
+              <div className="activities-empty-message" role="status">
+                {erroResumo ? 'Não foi possível mostrar seu progresso.' : 'Carregando seu progresso...'}
+              </div>
+            ) : progressoPorMateria.length === 0 ? (
+              <div className="activities-empty-message">
+                Nenhum conteúdo disponível ainda.
+              </div>
+            ) : (
+              <div className="performance-chart">
+                {progressoPorMateria.map(
+                  (item) => {
+                    const corProgresso =
+                      obterCorProgressoMateria(item.nome);
 
-                  return (
-                    <div
-                      className="performance-row"
-                      key={item.id || item.nome}
-                    >
-                      <div className="performance-row-top">
-                        <div className="home-subject-label">
-                          <span
-                            className="home-subject-dot"
-                            style={{
-                              background: corProgresso
-                            }}
-                          />
+                    return (
+                      <div
+                        className="performance-row"
+                        key={item.id || item.nome}
+                      >
+                        <div className="performance-row-top">
+                          <div className="home-subject-label">
+                            <span
+                              className="home-subject-dot"
+                              style={{
+                                background: corProgresso
+                              }}
+                            />
 
-                          <span className="performance-subject">
-                            {item.nome}
+                            <span className="performance-subject">
+                              {item.nome}
+                            </span>
+                          </div>
+
+                          <span className="performance-value">
+                            {item.percentual}%
                           </span>
                         </div>
 
-                        <span className="performance-value">
-                          {item.percentual}%
-                        </span>
-                      </div>
-
-                      <div className="performance-track">
                         <div
-                          className="performance-fill"
-                          style={{
-                            width: `${item.percentual}%`,
-                            background: corProgresso
-                          }}
-                        />
-                      </div>
+                          className="performance-track"
+                          role="progressbar"
+                          aria-label={`Progresso de ${item.nome}`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={item.percentual}
+                        >
+                          <div
+                            className="performance-fill"
+                            style={{
+                              width: `${item.percentual}%`,
+                              background: corProgresso
+                            }}
+                          />
+                        </div>
 
-                      <small className="performance-count">
-                        {item.estudados} de {item.total} conteúdos
-                      </small>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          )}
+                        <small className="performance-count">
+                          {item.estudados} de {item.total} conteúdos
+                        </small>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
+        <div className="home-side-stack">
         <div className="panel-card home-activities-card">
           <div className="home-panel-heading">
             <div>
               <h3>Próximas atividades</h3>
               <p>
-                O que está programado para você.
+                Seus próximos compromissos de estudo.
               </p>
             </div>
 
@@ -755,20 +629,22 @@ export default function Home() {
               className="home-panel-link"
               onClick={() => navigate('/cronograma')}
             >
-              Abrir plano de estudos →
+              Ver calendário →
             </button>
           </div>
 
-          {carregandoResumo ? (
-            <div className="activities-empty-message">
-              Carregando suas atividades...
+          {resumoIndisponivel ? (
+            <div className="activities-empty-message" role="status">
+              {erroResumo ? 'Não foi possível mostrar suas atividades.' : 'Carregando suas atividades...'}
             </div>
           ) : proximasAtividades.length === 0 ? (
-            <div className="activities-empty-message">
-              <strong>Nenhuma atividade próxima.</strong>
-              <span>
-                Organize seu próximo estudo no cronograma.
-              </span>
+            <div className="activities-empty-message home-activities-empty">
+              <span className="home-empty-icon"><Icon name="calendar" size={22} /></span>
+              <strong>Nenhuma atividade próxima</strong>
+              <span>Crie sua próxima atividade para organizar os estudos.</span>
+              <button type="button" className="home-empty-action" onClick={() => navigate('/cronograma')}>
+                Abrir calendário <Icon name="arrowRight" size={16} />
+              </button>
             </div>
           ) : (
             <div className="activity-list">
@@ -778,9 +654,12 @@ export default function Home() {
                     obterStatusData(atividade);
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       className="activity-item"
-                      key={atividade.id}
+                      key={atividade.id ?? `${atividade.data}-${atividade.horario}-${atividade.nome}`}
+                      onClick={() => navigate('/cronograma')}
+                      aria-label={`Ver no calendário: ${atividade.nome}, ${formatarData(atividade.data)}`}
                     >
                       <div className="activity-item-info">
                         <span className="activity-name">
@@ -809,17 +688,14 @@ export default function Home() {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   );
                 }
               )}
             </div>
           )}
         </div>
-      </div>
 
-      {/* DETALHES EXTRAS */}
-      <div className="home-extra-grid">
         <div className="panel-card home-next-card">
           <div className="home-extra-icon">
             <Icon name="book" size={22} />
@@ -827,15 +703,18 @@ export default function Home() {
 
           <div className="home-extra-copy">
             <span className="home-extra-kicker">
-              CONTINUE ESTUDANDO
+              SEU PRÓXIMO PASSO
             </span>
 
-            {proximoTopico ? (
+            {resumoIndisponivel ? (
+              <>
+                <h3>{erroResumo ? 'Próximo estudo indisponível' : 'Preparando seu próximo estudo...'}</h3>
+                <p>{erroResumo ? 'Tente novamente quando seus dados estiverem disponíveis.' : 'Buscando seus conteúdos pendentes.'}</p>
+              </>
+            ) : proximoTopico ? (
               <>
                 <h3>{proximoTopico.nome}</h3>
-                <p>
-                  {proximoTopico.materia}
-                </p>
+                <p>{proximoTopico.materia} · Conteúdo pendente</p>
 
                 <button
                   type="button"
@@ -847,6 +726,14 @@ export default function Home() {
                   }
                 >
                   Abrir conteúdo →
+                </button>
+              </>
+            ) : totalConteudos === 0 ? (
+              <>
+                <h3>Explore os simulados</h3>
+                <p>Ainda não há conteúdos cadastrados para revisão.</p>
+                <button type="button" className="home-extra-button" onClick={() => navigate('/simulados')}>
+                  Ver simulados <Icon name="arrowRight" size={16} />
                 </button>
               </>
             ) : (
@@ -878,26 +765,28 @@ export default function Home() {
               ÚLTIMO RESULTADO
             </span>
 
-            {ultimoResultado ? (
+            {resumoIndisponivel ? (
               <>
-                <div className="home-result-score">
-                  {Number(
-                    ultimoResultado.porcentagem || 0
-                  ).toFixed(0)}%
-                </div>
-
+                <h3>{erroResumo ? 'Resultado indisponível' : 'Carregando resultados...'}</h3>
+                <p>Seu histórico será exibido quando estiver disponível.</p>
+              </>
+            ) : ultimoResultado ? (
+              <>
                 <h3>
                   {ultimoResultado.simulado_nome ||
                     'Simulado realizado'}
                 </h3>
 
                 <p>
-                  {ultimoResultado.acertos} acertos de{' '}
-                  {ultimoResultado.total_questoes} questões
+                  <strong className="home-result-percentage">
+                    {Number(ultimoResultado.porcentagem || 0).toFixed(0)}% de acertos
+                  </strong>
                   {' · '}
-                  {formatarDataResultado(
-                    ultimoResultado.data_realizacao
-                  )}
+                  {ultimoResultado.acertos} de{' '}
+                  {ultimoResultado.total_questoes} questões
+                  {formatarDataResultado(ultimoResultado.data_realizacao)
+                    ? ` · ${formatarDataResultado(ultimoResultado.data_realizacao)}`
+                    : ''}
                 </p>
               </>
             ) : (
@@ -912,11 +801,12 @@ export default function Home() {
             <button
               type="button"
               className="home-extra-button"
-              onClick={() => navigate('/desempenho')}
+              onClick={() => navigate(ultimoResultado ? '/desempenho' : '/simulados')}
             >
-              Ver desempenho →
+              {ultimoResultado ? 'Ver desempenho →' : 'Fazer um simulado →'}
             </button>
           </div>
+        </div>
         </div>
       </div>
 

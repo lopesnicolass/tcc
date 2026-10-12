@@ -365,6 +365,15 @@
   transition: border-color .16s ease, background .16s ease;
 }
 
+/* Conquistas indisponíveis não devem parecer já desbloqueadas. */
+.achievement-locked {
+  opacity: .78;
+}
+
+.achievement-unlocked {
+  border-color: var(--color-primary-500, #2196f3);
+}
+
 .achievement-item:hover {
   background: var(--card);
   border-color: var(--color-border-strong);
@@ -429,7 +438,16 @@ html[data-theme='dark'] .achievement-item {
   border-color: var(--dark-border);
 }
 
-html[data-theme='dark'] .achievement-item:hover {
+html[data-theme='dark'] /* Conquistas indisponíveis não devem parecer já desbloqueadas. */
+.achievement-locked {
+  opacity: .78;
+}
+
+.achievement-unlocked {
+  border-color: var(--color-primary-500, #2196f3);
+}
+
+.achievement-item:hover {
   background: var(--dark-surface-3);
 }
 

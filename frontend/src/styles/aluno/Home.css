@@ -343,8 +343,7 @@
   gap: var(--space-5);
 }
 
-.home-grid .panel-card,
-.home-extra-grid .panel-card {
+.home-grid .panel-card {
   min-width: 0;
   padding: var(--space-6);
   border: 1px solid var(--color-border);
@@ -357,8 +356,7 @@
     border-color var(--duration-normal) var(--ease-standard);
 }
 
-.home-grid .panel-card:hover,
-.home-extra-grid .panel-card:hover {
+.home-grid .panel-card:hover {
   transform: translateY(-2px);
   border-color: var(--color-border-strong);
   box-shadow: var(--shadow-md);
@@ -604,12 +602,6 @@
    CARDS EXTRAS
    ========================================================= */
 
-.home-extra-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-5);
-}
-
 .home-next-card,
 .home-result-card {
   display: flex;
@@ -686,14 +678,9 @@
   box-shadow: var(--shadow-sm);
 }
 
-.home-result-score {
-  margin-bottom: var(--space-1);
+.home-result-percentage {
   color: var(--color-primary-800);
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -.04em;
+  font-weight: 750;
 }
 
 /* =========================================================
@@ -804,9 +791,6 @@
     max-width: none;
   }
 
-  .home-extra-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 600px) {
@@ -857,8 +841,7 @@
     font-size: 12px;
   }
 
-  .home-grid .panel-card,
-  .home-extra-grid .panel-card {
+  .home-grid .panel-card {
     padding: var(--space-5);
   }
 
@@ -907,3 +890,279 @@
   }
 }
 
+
+/* =========================================================
+   ETAPA 2 + REORGANIZAÇÃO — HOME: HIERARQUIA E FOCO
+   Escopo exclusivo desta página para não alterar outras telas.
+   ========================================================= */
+
+/* Os componentes já possuem espaçamento próprio: evita margens
+   duplicadas adicionadas pelo student-standard.css. */
+.student-area .home-page .home-hero,
+.student-area .home-page .home-stats-row,
+.student-area .home-page .home-grid {
+  margin-bottom: 0;
+}
+
+.home-page {
+  gap: clamp(16px, 1.8vw, 24px);
+}
+
+.home-page .home-hero-kicker {
+  margin-bottom: 10px;
+}
+
+/* O painel de atividades cresce apenas com o conteúdo disponível. */
+.home-page .home-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr);
+  align-items: start;
+}
+
+.home-left-stack,
+.home-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.home-page .home-activities-card,
+.home-page .home-next-card {
+  min-height: 0;
+}
+
+/* Resumo do progresso antes da lista, sem substituir os dados por matéria. */
+.home-overall-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.home-overall-progress-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-overall-progress-top strong {
+  flex-shrink: 0;
+  color: var(--color-primary-800);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+
+.home-overall-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+}
+
+.home-overall-progress-track > div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary-500);
+  transition: width .45s var(--ease-standard);
+}
+
+.home-overall-progress small {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.home-page .performance-chart {
+  gap: 18px;
+}
+
+.home-page .performance-count,
+.home-page .activity-subject,
+.home-page .activity-item .time {
+  font-size: 12px;
+}
+
+.home-page .home-stats-row .stat-label {
+  font-size: 13px;
+}
+
+/* Cada atividade é um atalho para o calendário; título longo quebra
+   naturalmente e não desaparece ao ultrapassar a largura da coluna. */
+.home-page .activity-list {
+  gap: 10px;
+}
+
+.home-page .activity-item {
+  width: 100%;
+  min-height: 64px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.home-page .activity-item:focus-visible,
+.home-page .home-empty-action:focus-visible,
+.home-page .home-extra-button:focus-visible {
+  outline: 3px solid var(--color-primary-500);
+  outline-offset: 3px;
+}
+
+.home-page .activity-name {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.home-page .activity-item-date {
+  text-align: right;
+}
+
+.home-page .activities-empty-message {
+  min-height: 115px;
+  padding: 20px 12px;
+}
+
+.home-page .home-activities-empty {
+  min-height: 188px;
+}
+
+.home-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--color-primary-100);
+  color: var(--color-primary-800);
+}
+
+.home-empty-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-primary-800);
+  font: 700 12px/1.3 var(--font-body);
+  cursor: pointer;
+}
+
+.home-empty-action:hover {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-100);
+}
+
+/* Cards compactos de próximo passo e último resultado. */
+.home-page .home-next-card,
+.home-page .home-result-card {
+  background: linear-gradient(140deg, var(--color-surface), var(--color-surface-soft));
+}
+
+.home-page .home-extra-button {
+  gap: 8px;
+}
+
+.home-page .home-extra-button svg {
+  flex: none;
+}
+
+/* Resultado segue o card Seu próximo passo na coluna direita, sem altura forçada. */
+.home-page .home-result-card {
+  align-self: stretch;
+  min-height: 0;
+}
+
+/* Na versão escura preserva o contraste do hero e dos botões. */
+html[data-theme='dark'] .home-page .home-hero {
+  background:
+    radial-gradient(circle at 92% 10%, rgba(255,255,255,.10), transparent 30%),
+    linear-gradient(135deg, #0c2b57, #15538f 55%, #1b6ba7);
+}
+
+html[data-theme='dark'] .home-page .home-extra-button {
+  background: #1d63b6;
+  color: #fff;
+}
+
+html[data-theme='dark'] .home-page .home-extra-button:hover {
+  background: #2479d5;
+}
+
+html[data-theme='dark'] .home-page .home-empty-action {
+  color: #c3e1ff;
+}
+
+@media (max-width: 1120px) {
+  .home-page .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Mantém os três cards da coluna direita empilhados também nos tablets. */
+}
+
+@media (max-width: 600px) {
+  .home-page .home-grid .panel-card {
+    padding: 20px;
+  }
+
+  .home-overall-progress {
+    padding: 14px;
+    margin-bottom: 20px;
+  }
+
+  .home-page .home-panel-heading {
+    margin-bottom: 16px;
+  }
+
+  .home-page .activity-item {
+    gap: 10px;
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page .home-overall-progress-track > div,
+  .home-page .activity-item {
+    transition: none;
+  }
+}
+
+.home-page .home-inline-error {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.home-retry-button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  font: 700 12px/1.25 var(--font-body);
+  cursor: pointer;
+}
+
+.home-retry-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+html[data-theme='dark'] .home-page .home-overall-progress small,
+html[data-theme='dark'] .home-page .performance-count {
+  color: var(--dark-text-soft);
+}

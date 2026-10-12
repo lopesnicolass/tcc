@@ -1883,3 +1883,91 @@ body.streak-modal-open{
   .streak-modal-flame{width:58px;height:58px;flex-basis:58px;border-radius:var(--radius-lg);font-size:32px;}
   .streak-modal h2{font-size:28px;}
 }
+
+/* =========================================================
+   SIDEBAR DO ALUNO — TOPO DESTACADO PARA A LOGO
+   O azul #09284f reaproveita a cor da sidebar no tema escuro.
+   Estas regras não afetam a sidebar do administrador.
+   ========================================================= */
+.student-area .student-sidebar .student-sidebar-brand {
+  box-sizing: border-box;
+  width: calc(100% + 2 * var(--space-4));
+  min-height: 112px;
+  flex: 0 0 auto;
+  margin: calc(-1 * var(--space-7)) calc(-1 * var(--space-4)) 0;
+  padding: 22px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #09284f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+/* Logo original, sem filtros de cor e sem fundo branco. */
+.student-area .student-sidebar .sidebar-logo-full {
+  box-sizing: border-box;
+  display: block;
+  width: min(182px, calc(100% - 42px));
+  max-width: 100%;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
+}
+
+.student-area .student-sidebar .sidebar-collapse-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.student-area .student-sidebar .sidebar-collapse-btn:focus-visible {
+  outline: 2px solid #a5dcff;
+  outline-offset: 3px;
+}
+
+/* O topo também ocupa toda a largura quando o menu é recolhido. */
+.student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+  width: calc(100% + 2 * var(--space-3));
+  min-height: 84px;
+  margin: calc(-1 * var(--space-7)) calc(-1 * var(--space-3)) 0;
+  padding: 18px 12px;
+  justify-content: center;
+}
+
+.student-area .student-sidebar.sidebar-collapsed .sidebar-logo-full {
+  display: none;
+}
+
+/* Na versão escura, a faixa fica um tom abaixo do restante da sidebar. */
+html[data-theme='dark'] .student-area .student-sidebar .student-sidebar-brand {
+  background: #061b36;
+  border-bottom-color: rgba(143, 196, 255, 0.16);
+}
+
+@media (max-width: 760px) {
+  /* No celular a sidebar passa a ser uma barra horizontal. */
+  .student-area .student-sidebar .student-sidebar-brand,
+  .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+    width: auto;
+    min-height: 0;
+    margin: calc(-1 * var(--space-3)) 0 calc(-1 * var(--space-3)) calc(-1 * var(--space-4));
+    padding: 14px 16px;
+    border-right: 1px solid rgba(255, 255, 255, 0.13);
+    border-bottom: 0;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  .student-area .student-sidebar .sidebar-logo-full,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-logo-full {
+    display: block;
+    width: 112px;
+    max-width: none;
+    height: auto;
+  }
+}

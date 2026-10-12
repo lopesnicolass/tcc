@@ -1,51 +1,11 @@
+import { useState } from 'react';
 import { STATUS_LABEL, BTN_LABEL } from './constants.js';
-
-const MATERIAS_SIMULADOS = [
-  'Português',
-  'Matemática',
-  'História',
-  'Geografia',
-  'Ciências',
-  'Simulados Gerais',
-];
-
-const MATERIA_ALIASES = {
-  'Língua Portuguesa': 'Português',
-  'Ciências da Natureza': 'Ciências',
-  'Geral': 'Simulados Gerais',
-  'Simulado Geral': 'Simulados Gerais',
-  'Simulados Gerais': 'Simulados Gerais',
-  'Geral/Misto': 'Simulados Gerais',
-  'Misto': 'Simulados Gerais',
-};
-
-function ehSimuladoGeral(simulado) {
-  if (!simulado) return false;
-
-  if (simulado.tipo === 'geral' || simulado.tipo === 'misto') {
-    return true;
-  }
-
-  if (simulado.is_geral === true || simulado.simulado_geral === true) {
-    return true;
-  }
-
-  if (Array.isArray(simulado.materias) && simulado.materias.length > 1) {
-    return true;
-  }
-
-  return MATERIA_ALIASES[simulado.materia] === 'Simulados Gerais';
-}
-
-function normalizarMateria(materia) {
-  return MATERIA_ALIASES[materia] || materia;
-}
-
-function normalizarMateriaSimulado(simulado) {
-  return ehSimuladoGeral(simulado)
-    ? 'Simulados Gerais'
-    : normalizarMateria(simulado?.materia);
-}
+import {
+  MATERIAS_SIMULADOS,
+  normalizarMateria,
+  normalizarMateriaSimulado,
+  calcularIndicadores
+} from './dadosSimulados.js';
 
 const MATERIA_ESTILO = {
   Matemática: { sigla: '∑', classe: 'matematica' },
@@ -109,27 +69,11 @@ function estiloMateria(materia) {
   };
 }
 
-function obterCorMateria(materia) {
-  const mapa = {
-    Português: '#5DADE2',
-    'Língua Portuguesa': '#5DADE2',
-    Matemática: '#D95C5C',
-    História: '#A97745',
-    Geografia: '#62A85E',
-    Ciências: '#8D68C9',
-    'Simulados Gerais': '#4D78A8'
-  };
-
-  return mapa[materia] || '#5DADE2';
-}
-
 export function ListaSimulados({
-  materias,
   filtro,
   setFiltro,
   simulados,
   erro,
-  concluidos,
   historicoResultados,
   simuladosVisiveis,
   abrirSimulado,
@@ -142,66 +86,33 @@ export function ListaSimulados({
     ? estiloMateria(materiaSelecionada)
     : null;
 
+  const [busca, setBusca] = useState('');
+  const [situacao, setSituacao] = useState('todos');
+
+  function selecionarMateria(materia) {
+    setBusca('');
+    setSituacao('todos');
+    setFiltro(materia);
+  }
+
+  const textoBusca = busca.trim().toLocaleLowerCase('pt-BR');
+  const filtrados = simuladosVisiveis.filter((simulado) => {
+    if (situacao !== 'todos' && simulado.status !== situacao) return false;
+    if (!textoBusca) return true;
+    return [simulado.titulo, simulado.descricao, simulado.topico]
+      .some((texto) => String(texto || '').toLocaleLowerCase('pt-BR').includes(textoBusca));
+  });
   const gruposPorMateria = Array.from(
-    simuladosVisiveis.reduce(
-      (mapa, simulado) => {
-        const materia = normalizarMateriaSimulado(simulado) || 'Sem matéria';
-
-        if (!mapa.has(materia)) {
-          mapa.set(materia, []);
-        }
-
-        mapa.get(materia).push(simulado);
-
-        return mapa;
-      },
-      new Map()
-    )
+    filtrados.reduce((mapa, simulado) => {
+      const materia = normalizarMateriaSimulado(simulado);
+      if (!mapa.has(materia)) mapa.set(materia, []);
+      mapa.get(materia).push(simulado);
+      return mapa;
+    }, new Map())
   );
 
-  const realizados = Math.max(
-    concluidos,
-    historicoResultados.length
-  );
-
-  const desempenhoPorMateria = Object.entries(
-    historicoResultados.reduce((acc, item) => {
-      const materia = normalizarMateriaSimulado({ materia: item.materia }) || 'Geral';
-
-      if (materia === 'Simulados Gerais' || materia === 'Geral') {
-        return acc;
-      }
-
-      if (!acc[materia]) {
-        acc[materia] = { acertos: 0, total: 0 };
-      }
-
-      acc[materia].acertos += Number(item.acertos || 0);
-      acc[materia].total += Number(item.totalQuestoes || 0);
-
-      return acc;
-    }, {})
-  )
-    .map(([materia, dados]) => ({
-      materia,
-      percentual:
-        dados.total > 0
-          ? Math.round((dados.acertos / dados.total) * 100)
-          : 0
-    }))
-    .filter((item) => item.percentual >= 0);
-
-  const materiaMelhor = desempenhoPorMateria.length
-    ? [...desempenhoPorMateria].sort(
-        (a, b) => b.percentual - a.percentual
-      )[0]
-    : null;
-
-  const materiaPior = desempenhoPorMateria.length
-    ? [...desempenhoPorMateria].sort(
-        (a, b) => a.percentual - b.percentual
-      )[0]
-    : null;
+  const indicadores = calcularIndicadores(historicoResultados);
+  const emAndamento = simulados.filter((item) => item.status === 'em-progresso');
 
   // As matérias ficam sempre visíveis. O administrador apenas alimenta
   // o card correspondente ao criar um novo simulado para aquela matéria.
@@ -273,7 +184,7 @@ export function ListaSimulados({
                             <span
                               className={`status-badge ${simulado.status}`}
                             >
-                              {STATUS_LABEL[simulado.status]}
+                              {STATUS_LABEL[simulado.status] || 'Não iniciado'}
                             </span>
                           </div>
 
@@ -310,7 +221,7 @@ export function ListaSimulados({
                           >
                             {carregandoQuestoes
                               ? 'Carregando...'
-                              : BTN_LABEL[simulado.status]}
+                              : (BTN_LABEL[simulado.status] || 'Iniciar')}
                           </button>
                         </article>
                       ))}
@@ -346,72 +257,39 @@ export function ListaSimulados({
       </div>
 
       {!materiaSelecionada && (
-      <div
-        className="stats-row"
-        style={{
-          marginBottom: '22px'
-        }}
-      >
-        <div
-          className="stat-card"
-          style={{ minHeight: '108px', justifyContent: 'center' }}
-        >
-          <div className="stat-value">
-            {realizados}
-          </div>
-          <div className="stat-label">
-            Simulados realizados
-          </div>
-        </div>
-
-        <div
-          className="stat-card"
-          style={{ minHeight: '108px', justifyContent: 'center' }}
-        >
-          <div
-            className="stat-value"
-            style={{
-              color: materiaMelhor
-                ? obterCorMateria(materiaMelhor.materia)
-                : 'var(--ink)'
-            }}
-          >
-            {materiaMelhor ? materiaMelhor.materia : '—'}
-          </div>
-          <div className="stat-label">
-            Melhor taxa de acertos
-          </div>
-          {materiaMelhor && (
-            <span className="simulados-stat-detail">
-              {materiaMelhor.percentual}% de acertos
-            </span>
+        <>
+          <section className="simulados-resumo" aria-label="Resumo dos simulados">
+            <div className="simulados-resumo-item">
+              <span className="simulados-resumo-label">Tentativas realizadas</span>
+              <strong>{historicoResultados === null ? '—' : indicadores.tentativas}</strong>
+              <span className="simulados-resumo-hint">Resultados salvos na sua conta</span>
+            </div>
+            <div className="simulados-resumo-item">
+              <span className="simulados-resumo-label">Média das tentativas</span>
+              <strong>{indicadores.media === null ? '—' : `${indicadores.media}%`}</strong>
+              <span className="simulados-resumo-hint">Aproveitamento nas questões</span>
+            </div>
+            <div className="simulados-resumo-item">
+              <span className="simulados-resumo-label">Matérias praticadas</span>
+              <strong>{historicoResultados === null ? '—' : indicadores.materias.length}</strong>
+              <span className="simulados-resumo-hint">Com resultados por disciplina</span>
+            </div>
+          </section>
+          {indicadores.foco && (
+            <div className="simulados-destaques">
+              <div className="simulados-destaque">
+                  <div>
+                    <span className="simulados-destaque-label">Sugestão de revisão</span>
+                    <h2>{indicadores.foco.materia}</h2>
+                    <p>{indicadores.foco.percentual}% de acertos nas tentativas dessa matéria. Que tal praticar mais?</p>
+                  </div>
+                  <button type="button" className="simulados-destaque-acao simulados-destaque-acao-secundaria" onClick={() => selecionarMateria(indicadores.foco.materia)}>
+                    Ver simulados →
+                  </button>
+                </div>
+            </div>
           )}
-        </div>
-
-        <div
-          className="stat-card"
-          style={{ minHeight: '108px', justifyContent: 'center' }}
-        >
-          <div
-            className="stat-value"
-            style={{
-              color: materiaPior
-                ? obterCorMateria(materiaPior.materia)
-                : 'var(--ink)'
-            }}
-          >
-            {materiaPior ? materiaPior.materia : '—'}
-          </div>
-          <div className="stat-label">
-            Pior taxa de acertos
-          </div>
-          {materiaPior && (
-            <span className="simulados-stat-detail">
-              {materiaPior.percentual}% de acertos
-            </span>
-          )}
-        </div>
-      </div>
+        </>
       )}
 
       {erro && (
@@ -438,7 +316,7 @@ export function ListaSimulados({
                   key={materia}
                   type="button"
                   className="materia-simulado-card"
-                  onClick={() => setFiltro(materia)}
+                  onClick={() => selecionarMateria(materia)}
                 >
                   <div className={`materia-simulado-cover materia-cover-${estilo.classe}`}>
                     {obterCapaMateria(materia) ? (
@@ -464,6 +342,9 @@ export function ListaSimulados({
                       <span>{listaMateria.length} {listaMateria.length === 1 ? 'simulado' : 'simulados'}</span>
                       <span>{quantidadeQuestoes} questões</span>
                     </div>
+                    {listaMateria.some((item) => item.status === 'em-progresso') && (
+                      <span className="materia-simulado-em-andamento">● Você tem simulado em andamento</span>
+                    )}
                   </div>
 
                   <span className="materia-simulado-arrow" aria-hidden="true">→</span>
@@ -478,16 +359,39 @@ export function ListaSimulados({
             <button
               type="button"
               className="simulados-voltar-materias"
-              onClick={() => setFiltro('Todas')}
+              onClick={() => selecionarMateria('Todas')}
             >
               ← Voltar para matérias
             </button>
           </div>
 
-          {simuladosVisiveis.length === 0 ? (
-            <div className="stat-card simulados-empty-card">
-              <h2>Nenhum simulado encontrado.</h2>
-              <p>Os simulados cadastrados pelo administrador aparecerão aqui.</p>
+          <div className="simulados-filtros">
+            <label className="simulados-busca-label" htmlFor="busca-simulados">Buscar nesta matéria</label>
+            <input
+              id="busca-simulados"
+              type="search"
+              className="simulados-busca"
+              value={busca}
+              onChange={(evento) => setBusca(evento.target.value)}
+              placeholder="Pesquisar por título ou conteúdo..."
+            />
+            <label className="simulados-situacao-label" htmlFor="situacao-simulados">Situação</label>
+            <select id="situacao-simulados" className="simulados-situacao" value={situacao} onChange={(evento) => setSituacao(evento.target.value)}>
+              <option value="todos">Todos os simulados</option>
+              <option value="nao-iniciado">Não iniciados</option>
+              <option value="em-progresso">Em andamento</option>
+              <option value="concluido">Concluídos</option>
+            </select>
+          </div>
+          {filtrados.length === 0 ? (
+            <div className="stat-card simulados-empty-card" role="status">
+              <h2>{simuladosVisiveis.length === 0 ? 'Nenhum simulado disponível ainda.' : 'Nenhum simulado corresponde aos filtros.'}</h2>
+              <p>{simuladosVisiveis.length === 0
+                ? 'Os simulados cadastrados pelo administrador aparecerão aqui.'
+                : 'Tente outro termo ou escolha uma situação diferente.'}</p>
+              {simuladosVisiveis.length > 0 && (
+                <button type="button" className="simulados-limpar-filtros" onClick={() => { setBusca(''); setSituacao('todos'); }}>Limpar filtros</button>
+              )}
             </div>
           ) : (
             renderSimulados()

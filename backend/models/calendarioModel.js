@@ -82,8 +82,25 @@ function excluirDataImportante(id, callback) {
     );
 }
 
+
+// Exposição pública somente da data da próxima prova, sem outros dados do calendário.
+function buscarProximoVestibulinho(hoje, callback) {
+    const sql = `
+        SELECT data
+        FROM datas_importantes
+        WHERE data >= ?
+          AND (LOWER(titulo) LIKE '%vestibulinho%'
+               OR LOWER(tipo) LIKE '%vestibulinho%')
+        ORDER BY data ASC, id ASC
+        LIMIT 1
+    `;
+
+    db.get(sql, [hoje], callback);
+}
+
 module.exports = {
     listarDatasImportantes,
+    buscarProximoVestibulinho,
     buscarDataImportantePorId,
     criarDataImportante,
     atualizarDataImportante,
