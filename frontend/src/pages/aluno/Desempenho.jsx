@@ -8,6 +8,8 @@ import { GraficoEvolucao } from './desempenho/GraficoEvolucao.jsx';
 import { ComparacaoAproveitamento } from './desempenho/ComparacaoAproveitamento.jsx';
 import { MetaConsistencia } from './desempenho/MetaConsistencia.jsx';
 import { Historico } from './desempenho/Historico.jsx';
+import { DiagnosticoEstudo } from './desempenho/DiagnosticoEstudo.jsx';
+import { analisarResultadosPorMateria, sugerirRevisoes, resumirEvolucao } from '../../utils/desempenhoInsights.js';
 
 import { request } from '../../services/api.js';
 
@@ -588,6 +590,10 @@ export default function Desempenho() {
         }, [resultadosCronologicos]);
 
 
+    const materiasAnalisadas = useMemo(() => analisarResultadosPorMateria(resultados), [resultados]);
+    const sugestoesRevisao = useMemo(() => sugerirRevisoes(resultados), [resultados]);
+    const evolucaoComparativa = useMemo(() => resumirEvolucao(resultadosCronologicos), [resultadosCronologicos]);
+
     // =====================================================
     // CARREGANDO
     // =====================================================
@@ -727,6 +733,13 @@ export default function Desempenho() {
                 }
             />
 
+
+            <DiagnosticoEstudo
+                materias={materiasAnalisadas}
+                sugestoes={sugestoesRevisao}
+                evolucao={evolucaoComparativa}
+                possuiResultados={resultados.length > 0}
+            />
 
             <GraficoEvolucao
                 resultadosCronologicos={

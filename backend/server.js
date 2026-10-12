@@ -68,6 +68,7 @@ require("./config/ensureCalendario");
 require("./config/ensureCronogramasModelos");
 require("./config/ensureResultados");
 require("./config/ensureXP");
+require("./config/ensureRanking");
 
 // =====================================================
 // APP

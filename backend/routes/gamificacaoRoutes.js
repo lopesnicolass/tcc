@@ -38,4 +38,11 @@ router.post(
 );
 
 
+// Ranking exclusivo para alunos autenticados, com participação voluntária.
+const ranking = require('../controllers/rankingController');
+router.get('/ranking', autenticarToken, ranking.listar);
+router.get('/ranking/configuracao', autenticarToken, ranking.configuracao);
+router.put('/ranking/configuracao', autenticarToken, ranking.atualizarConfiguracao);
+router.get('/ranking/foto/:id', autenticarToken, ranking.foto);
+
 module.exports = router;

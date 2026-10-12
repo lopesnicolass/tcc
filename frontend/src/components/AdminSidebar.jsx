@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import logoIcon from '../assets/tenna_logo.webp';
 import ThemeToggle from './ThemeToggle.jsx';
 
@@ -118,20 +119,24 @@ function Icon({ name, size = 20 }) {
   );
 }
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ mobileOpen = false, onClose = () => {} }) {
   const navigate = useNavigate();
+  const fecharRef = useRef(null);
+  useEffect(() => { if (mobileOpen) fecharRef.current?.focus(); }, [mobileOpen]);
 
   const abrirVisaoEstudante = () => {
     sessionStorage.setItem('etecamp_admin_preview', 'true');
+    onClose();
     navigate('/home');
   };
 
   return (
-    <aside className="sidebar admin-sidebar">
+    <aside id="tenna-admin-nav" aria-label="Menu administrativo" className={`sidebar admin-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
 
       {/* LOGO */}
 
       <div className="sidebar-brand admin-sidebar-brand">
+        <button type="button" className="tenna-mobile-drawer-close" ref={fecharRef} onClick={onClose} aria-label="Fechar menu">×</button>
         <img
           src={logoIcon}
           alt="Tenna"
@@ -181,6 +186,7 @@ export default function AdminSidebar() {
                     item.to === '/admin' ||
                     item.to === '/admin/conteudos'
                   }
+                  onClick={onClose}
                   className={({ isActive }) =>
                     `sidebar-link admin-sidebar-link ${
                       isActive ? 'active' : ''

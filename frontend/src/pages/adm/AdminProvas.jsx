@@ -1,5 +1,5 @@
 import '../../styles/adm/AdminProvas.css';
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { API_URL, request } from '../../services/api.js';
 
 export default function AdminProvas() {
@@ -10,14 +10,31 @@ export default function AdminProvas() {
     const [provas, setProvas] = useState([]);
     const [mensagem, setMensagem] = useState("");
     const [carregando, setCarregando] = useState(false);
+    const [busca, setBusca] = useState('');
+    const [erroLista, setErroLista] = useState('');
+    const [carregandoLista, setCarregandoLista] = useState(true);
+    const [excluindoId, setExcluindoId] = useState(null);
+    const provaInputRef = useRef(null);
+    const gabaritoInputRef = useRef(null);
+
+    const provasFiltradas = useMemo(() => {
+        const termo = busca.trim().toLocaleLowerCase('pt-BR');
+        return [...provas]
+            .filter((prova) => !termo || `${prova.titulo || ''} ${prova.ano || ''}`.toLocaleLowerCase('pt-BR').includes(termo))
+            .sort((a, b) => Number(b.ano || 0) - Number(a.ano || 0));
+    }, [provas, busca]);
 
     async function carregarProvas() {
+        setCarregandoLista(true);
+        setErroLista('');
         try {
-            const dados = await request("/provas");
-
-            setProvas(dados.provas || []);
+            const dados = await request('/provas');
+            setProvas(Array.isArray(dados?.provas) ? dados.provas : []);
         } catch (erro) {
-            console.error("Erro ao carregar provas:", erro);
+            console.error('Erro ao carregar provas:', erro);
+            setErroLista(erro.message || 'Não foi possível consultar as provas.');
+        } finally {
+            setCarregandoLista(false);
         }
     }
 
@@ -29,15 +46,27 @@ export default function AdminProvas() {
         event.preventDefault();
         setMensagem("");
 
-        if (!ano || !titulo || !arquivoProva || !arquivoGabarito) {
+        if (!ano || !titulo.trim() || !arquivoProva || !arquivoGabarito) {
             setMensagem("error:Preencha todos os campos antes de cadastrar.");
+            return;
+        }
+
+        if (!Number.isInteger(Number(ano)) || Number(ano) < 2000 || Number(ano) > 2100) {
+            setMensagem('error:Informe um ano válido entre 2000 e 2100.');
+            return;
+        }
+
+        if (![arquivoProva, arquivoGabarito].every((arquivo) =>
+            arquivo && (/\.pdf$/i.test(arquivo.name) || arquivo.type === 'application/pdf')
+        )) {
+            setMensagem('error:Selecione dois arquivos PDF válidos.');
             return;
         }
 
         const formData = new FormData();
 
         formData.append("ano", ano);
-        formData.append("titulo", titulo);
+        formData.append("titulo", titulo.trim());
         formData.append("arquivo_prova", arquivoProva);
         formData.append("arquivo_gabarito", arquivoGabarito);
 
@@ -60,10 +89,10 @@ export default function AdminProvas() {
             setArquivoProva(null);
             setArquivoGabarito(null);
 
-            document.getElementById("arquivoProva").value = "";
-            document.getElementById("arquivoGabarito").value = "";
+            if (provaInputRef.current) provaInputRef.current.value = '';
+            if (gabaritoInputRef.current) gabaritoInputRef.current.value = '';
 
-            carregarProvas();
+            await carregarProvas();
 
         } catch (erro) {
             console.error(erro);
@@ -79,6 +108,7 @@ export default function AdminProvas() {
     }
 
     async function excluirProva(id) {
+        if (excluindoId !== null) return;
         const confirmar = window.confirm(
             "Tem certeza que deseja excluir esta prova?\n\nA prova e o gabarito serão apagados."
         );
@@ -87,6 +117,7 @@ export default function AdminProvas() {
             return;
         }
 
+        setExcluindoId(id);
         try {
             await request(
                 `/provas/${id}`,
@@ -98,7 +129,7 @@ export default function AdminProvas() {
 
             setMensagem("success:Prova excluída com sucesso!");
 
-            carregarProvas();
+            await carregarProvas();
 
         } catch (erro) {
             console.error(erro);
@@ -108,6 +139,8 @@ export default function AdminProvas() {
                     ? "error:" + erro.message
                     : "error:Não foi possível conectar ao servidor."
             );
+        } finally {
+            setExcluindoId(null);
         }
     }
 
@@ -163,6 +196,7 @@ export default function AdminProvas() {
 
                             <input
                                 id="ano"
+                                required
                                 type="number"
                                 min="2000"
                                 max="2100"
@@ -183,6 +217,7 @@ export default function AdminProvas() {
 
                             <input
                                 id="titulo"
+                                required
                                 type="text"
                                 value={titulo}
                                 onChange={(e) =>
@@ -226,6 +261,8 @@ export default function AdminProvas() {
 
                             <input
                                 id="arquivoProva"
+                                ref={provaInputRef}
+                                required
                                 type="file"
                                 accept=".pdf,application/pdf"
                                 onChange={(e) =>
@@ -272,6 +309,8 @@ export default function AdminProvas() {
 
                             <input
                                 id="arquivoGabarito"
+                                ref={gabaritoInputRef}
+                                required
                                 type="file"
                                 accept=".pdf,application/pdf"
                                 onChange={(e) =>
@@ -293,6 +332,7 @@ export default function AdminProvas() {
 
                     {mensagem && (
                         <div
+                            role={mensagem.startsWith('success:') ? 'status' : 'alert'}
                             className={
                                 mensagem.startsWith("success:")
                                     ? "admin-provas-message success"
@@ -343,17 +383,37 @@ export default function AdminProvas() {
 
                 </div>
 
-                {provas.length === 0 ? (
+                <div className="admin-provas-list-toolbar">
+                    <div className="admin-provas-list-counter">
+                        <strong>{carregandoLista || erroLista ? '—' : provas.length}</strong>
+                        <span>{provas.length === 1 ? 'prova cadastrada' : 'provas cadastradas'}</span>
+                    </div>
+                    <label className="admin-provas-search">
+                        <span className="sr-only">Buscar provas por título ou ano</span>
+                        <input type="search" placeholder="Buscar por ano ou título" value={busca} onChange={(event) => setBusca(event.target.value)} />
+                    </label>
+                    <button className="admin-provas-refresh" type="button" onClick={carregarProvas} disabled={carregandoLista}>
+                        {carregandoLista ? 'Atualizando...' : 'Atualizar'}
+                    </button>
+                </div>
+
+                {erroLista && <div className="admin-provas-message error" role="alert">{erroLista} <button type="button" onClick={carregarProvas}>Tentar novamente</button></div>}
+
+                {carregandoLista ? (
+                    <div className="mural-empty">Carregando provas...</div>
+                ) : erroLista ? null : provas.length === 0 ? (
 
                     <div className="mural-empty">
                         Nenhuma prova cadastrada ainda.
                     </div>
 
+                ) : provasFiltradas.length === 0 ? (
+                    <div className="mural-empty">Nenhuma prova corresponde à busca. <button className="admin-provas-clean-search" type="button" onClick={() => setBusca('')}>Limpar busca</button></div>
                 ) : (
 
                     <div className="provas-list">
 
-                        {provas.map((prova) => (
+                        {provasFiltradas.map((prova) => (
 
                             <div
                                 className="prova-row"
@@ -391,11 +451,10 @@ export default function AdminProvas() {
                                     <button
                                         type="button"
                                         className="admin-delete-prova"
-                                        onClick={() =>
-                                            excluirProva(prova.id)
-                                        }
+                                        onClick={() => excluirProva(prova.id)}
+                                        disabled={excluindoId !== null}
                                     >
-                                        Excluir
+                                        {excluindoId === prova.id ? 'Excluindo...' : 'Excluir'}
                                     </button>
 
                                 </div>

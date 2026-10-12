@@ -95,3 +95,294 @@
     gap: 8px;
   }
 }
+
+/* === DIAGNÓSTICO POR MATÉRIA E REVISÕES (Tenna) === */
+.desempenho-page .desempenho-diagnostico {
+  margin-bottom: 24px;
+}
+.desempenho-diagnostico-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 15px;
+  padding: 0 3px;
+}
+.desempenho-diagnostico-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #2264af;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .12em;
+}
+.desempenho-diagnostico-topo h2 {
+  margin: 0;
+  color: var(--ink, #173f70);
+  font-size: clamp(19px, 2vw, 24px);
+  line-height: 1.25;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.desempenho-diagnostico-topo p {
+  margin: 7px 0 0;
+  color: var(--muted, #617a96);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.desempenho-evolucao-painel {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--line, #dae6f4);
+  border-radius: 15px;
+  background: var(--card, #fff);
+  text-align: right;
+}
+.desempenho-evolucao-painel span,
+.desempenho-evolucao-painel small {
+  color: var(--muted, #627b96);
+  font-size: 11px;
+}
+.desempenho-evolucao-painel strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 25px;
+  line-height: 1.1;
+}
+.desempenho-evolucao-painel strong.positivo { color: #18834b; }
+.desempenho-evolucao-painel strong.negativo { color: #ba5a31; }
+.desempenho-evolucao-painel strong.neutro { color: var(--ink, #173f70); }
+.desempenho-diagnostico-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  gap: 20px;
+  align-items: stretch;
+}
+.desempenho-diagnostico-card {
+  min-width: 0;
+  border: 1px solid var(--line, #e4eaf3);
+  border-radius: 24px;
+  padding: 25px;
+  background: var(--card, #fff);
+  box-shadow: 0 10px 32px rgba(21, 72, 125, .06);
+}
+.desempenho-diagnostico-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.desempenho-diagnostico-cabecalho h3 {
+  margin: 0;
+  color: var(--ink, #173f70);
+  font-size: 18px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.desempenho-diagnostico-cabecalho p {
+  margin: 6px 0 0;
+  color: var(--muted, #8191a6);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.desempenho-diagnostico-total {
+  flex-shrink: 0;
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: rgba(33, 150, 243, .1);
+  color: var(--accent-dark, #1759b1);
+  font-weight: 800;
+  font-size: 10px;
+}
+.desempenho-diagnostico-materias { display: grid; gap: 18px; }
+.desempenho-diagnostico-materia { min-width: 0; }
+.desempenho-diagnostico-linha,
+.desempenho-diagnostico-nome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.desempenho-diagnostico-linha { justify-content: space-between; margin-bottom: 9px; }
+.desempenho-diagnostico-nome { min-width: 0; }
+.desempenho-diagnostico-nome strong {
+  color: var(--ink, #1f4776);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.desempenho-diagnostico-ordem {
+  color: #7d99b8;
+  font-size: 10px;
+  font-weight: 800;
+}
+.desempenho-diagnostico-porcentagem {
+  color: var(--ink, #173f70);
+  font-size: 15px;
+  font-weight: 800;
+}
+.desempenho-diagnostico-barra {
+  overflow: hidden;
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(61, 125, 191, .14);
+}
+.desempenho-diagnostico-barra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6ab5ff, #237ad4);
+}
+.desempenho-diagnostico-amostra {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted, #7089a4);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.desempenho-diagnostico-nota {
+  margin: 20px 0 0;
+  color: var(--muted, #7c91a8);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.desempenho-diagnostico-sem-dados {
+  padding: 25px 15px;
+  border-radius: 14px;
+  background: var(--paper, #f4f8fd);
+  color: var(--muted, #6b809c);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.desempenho-diagnostico-sugestoes {
+  display: flex;
+  flex-direction: column;
+}
+.desempenho-revisoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.desempenho-revisao-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  background: var(--paper, #f4f8ff);
+  border-radius: 15px;
+  border: 1px solid var(--line, #e6eef8);
+}
+.desempenho-revisao-icone {
+  flex: 0 0 35px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(27, 107, 208, .12);
+  color: var(--accent-dark, #1457ad);
+  font-weight: 850;
+  font-size: 12px;
+}
+.desempenho-revisao-texto { display: grid; min-width: 0; gap: 4px; }
+.desempenho-revisao-texto span {
+  color: var(--accent-dark, #2162a9);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+.desempenho-revisao-texto strong {
+  color: var(--ink, #173f70);
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.desempenho-revisao-texto small { color: var(--muted, #6c849e); font-size: 10px; }
+.desempenho-revisao-link {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent-dark, #115cae);
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.desempenho-revisao-link:hover { text-decoration: underline; }
+.desempenho-revisao-link:focus-visible,
+.desempenho-diagnostico-btn:focus-visible,
+.desempenho-diagnostico-acao a:focus-visible {
+  outline: 3px solid #75baff;
+  outline-offset: 3px;
+}
+.desempenho-diagnostico-acao { margin-top: auto; padding-top: 20px; }
+.desempenho-diagnostico-acao a,
+.desempenho-diagnostico-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 17px;
+  border-radius: 12px;
+  background: #186aca;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.desempenho-diagnostico-acao a:hover,
+.desempenho-diagnostico-btn:hover { background: #1055ac; }
+.desempenho-diagnostico-vazio {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  margin: 0 0 22px;
+  background: var(--card, white);
+  border: 1px solid var(--line, #dfeaf5);
+  border-radius: 20px;
+}
+.desempenho-diagnostico-vazio-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #e2efff;
+  color: #1769bd;
+  font-size: 24px;
+}
+.desempenho-diagnostico-vazio h2 {
+  margin: 0 0 4px;
+  color: var(--ink, #173f70);
+  font-size: 18px;
+}
+.desempenho-diagnostico-vazio p {
+  margin: 0;
+  color: var(--muted, #748ba3);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.desempenho-diagnostico-vazio .desempenho-diagnostico-btn { margin-left: auto; flex-shrink: 0; }
+@media (max-width: 1020px) {
+  .desempenho-diagnostico-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .desempenho-diagnostico-topo { flex-direction: column; align-items: stretch; }
+  .desempenho-evolucao-painel { align-items: flex-start; text-align: left; }
+  .desempenho-diagnostico-card { padding: 20px 17px; }
+  .desempenho-diagnostico-vazio { flex-wrap: wrap; padding: 18px; }
+  .desempenho-diagnostico-vazio .desempenho-diagnostico-btn { margin-left: 0; }
+}
+@media (max-width: 380px) {
+  .desempenho-revisao-item { flex-wrap: wrap; }
+  .desempenho-revisao-link { margin-left: 47px; }
+}

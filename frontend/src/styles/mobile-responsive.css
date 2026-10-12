@@ -1,0 +1,295 @@
+/* ============================================================
+   TENNA — NAVEGAÇÃO MÓVEL
+   Apenas no mobile: a sidebar vira painel acessível por botão.
+   Desktop, cores originais da logo e funcionalidades mantidos.
+   ============================================================ */
+.tenna-mobile-topbar,
+.tenna-mobile-scrim,
+.tenna-mobile-drawer-close { display: none; }
+.calendar-mobile-help { display: none; }
+
+@media (max-width: 760px) {
+  body.tenna-mobile-menu-open { overflow: hidden; }
+  .dashboard.student-area,
+  .dashboard.admin-area { display: flex; flex-direction: column; min-width: 0; }
+  .student-area .dashboard-content,
+  .admin-area .dashboard-content {
+    min-width: 0;
+    width: 100%;
+    padding: 20px 16px 42px;
+  }
+
+  .tenna-mobile-topbar {
+    width: 100%;
+    height: 62px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--card);
+    box-shadow: 0 3px 14px rgba(4, 30, 65, .06);
+  }
+  .tenna-mobile-menu-button {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .tenna-mobile-menu-button:focus-visible,
+  .tenna-mobile-drawer-close:focus-visible { outline: 3px solid #6bb6f3; outline-offset: 2px; }
+  .tenna-mobile-logo { display: block; max-width: 116px; max-height: 42px; width: auto; height: auto; object-fit: contain; }
+  .tenna-mobile-area-label {
+    margin-left: auto;
+    font: 700 11px/1.2 'IBM Plex Sans', sans-serif;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .tenna-mobile-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    border: 0;
+    background: rgba(3, 20, 43, .61);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+  }
+  .student-area .student-sidebar,
+  .admin-area .admin-sidebar,
+  .student-area .student-sidebar.sidebar-collapsed {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    width: min(84vw, 320px);
+    max-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding: 0 16px 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(-105%);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 200ms ease, visibility 200ms ease;
+    box-shadow: 12px 0 34px rgba(2, 12, 32, .2);
+  }
+  .student-area .student-sidebar.mobile-open,
+  .admin-area .admin-sidebar.mobile-open { transform: translateX(0); visibility: visible; pointer-events: auto; }
+  .student-area .student-sidebar .student-sidebar-brand,
+  .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+    position: relative;
+    width: calc(100% + 32px);
+    min-height: 94px;
+    margin: 0 -16px 8px;
+    padding: 18px 54px 18px 20px;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 0 0 auto;
+    border: 0;
+    align-self: auto;
+  }
+  .student-area .student-sidebar .sidebar-logo-full,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-logo-full {
+    display: block;
+    width: 160px;
+    height: auto;
+    max-width: 100%;
+    padding: 0;
+    filter: none;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .admin-area .admin-sidebar .admin-sidebar-brand {
+    position: relative;
+    flex: 0 0 auto;
+    min-height: 88px;
+    margin: 0;
+    padding: 18px 56px 12px 6px;
+  }
+  .tenna-mobile-drawer-close {
+    appearance: none;
+    display: grid;
+    place-items: center;
+    position: absolute;
+    z-index: 3;
+    right: 14px;
+    top: 21px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .13);
+    color: #fff;
+    font-size: 25px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .student-area .student-sidebar .sidebar-collapse-btn { display: none; }
+  .student-area .student-sidebar .sidebar-nav,
+  .admin-area .admin-sidebar .admin-sidebar-nav {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    overflow: visible;
+  }
+  .student-area .student-sidebar .sidebar-link,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link,
+  .admin-area .admin-sidebar .sidebar-link {
+    width: 100%;
+    min-height: 45px;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 9px 12px;
+    text-align: left;
+  }
+  .student-area .student-sidebar .sidebar-link .label,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link .label,
+  .admin-area .admin-sidebar .sidebar-link .label { display: inline; white-space: normal; }
+  .student-area .student-sidebar .student-theme-toggle-wrap,
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap { width: 100%; margin: 0; }
+  .student-area .student-sidebar .sidebar-streak,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 92px;
+    display: flex;
+    margin: auto 0 0;
+    padding: 12px;
+    justify-content: flex-start;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak-content,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak-arrow { display: block; }
+  .admin-area .admin-sidebar .admin-sidebar-navigation { flex: 1 0 auto; }
+  .admin-area .admin-sidebar .admin-sidebar-footer { margin-top: auto; }
+  .admin-area .admin-sidebar .admin-sidebar-status { flex: 0 0 auto; }
+
+  /* Calendário mensal compacto: os compromissos completos aparecem no painel do dia. */
+  .calendar-page .calendar-card { overflow: hidden; min-width: 0; }
+  .calendar-page .calendar-weekdays,
+  .calendar-page .calendar-grid {
+    width: 100%;
+    min-width: 0 !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .calendar-page .calendar-weekdays { padding: 10px 3px; }
+  .calendar-page .calendar-weekdays span { font-size: 10px; letter-spacing: 0; }
+  .calendar-page .calendar-day {
+    box-sizing: border-box;
+    min-height: 68px !important;
+    height: auto;
+    padding: 6px 2px;
+  }
+  .calendar-page .calendar-day-number { margin: 0 auto; width: 28px; height: 28px; font-size: 13px; }
+  .calendar-page .calendar-event,
+  .calendar-page .calendar-more { display: none; }
+  .calendar-page .calendar-day:has(.calendar-event) .calendar-day-number::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 5px;
+    margin: 2px auto 0;
+    border-radius: 50%;
+    background: #2392ea;
+  }
+  .calendar-page .calendar-toolbar { display: flex; flex-wrap: wrap; gap: 10px; }
+  .calendar-page .calendar-toolbar-left,
+  .calendar-page .calendar-toolbar-actions { width: 100%; min-width: 0; }
+  .calendar-page .calendar-month-nav { justify-content: space-between; width: 100%; gap: 7px; }
+  .calendar-page .calendar-month-nav h2 { min-width: 0; font-size: clamp(16px, 4vw, 20px); }
+  .calendar-mobile-help {
+    display: block;
+    margin: 0;
+    padding: 8px 12px;
+    color: var(--muted);
+    font-size: 12px;
+    background: var(--paper);
+  }
+  .calendar-page .calendar-overview > div { min-width: 0; }
+  .calendar-page .calendar-overview strong { font-size: 21px; }
+  .calendar-page .calendar-actions-row { flex-wrap: wrap; }
+
+  .student-area .home-page .home-grid,
+  .student-area .home-page .home-hero { grid-template-columns: minmax(0, 1fr); }
+  .student-area .home-page .home-left-stack,
+  .student-area .home-page .home-side-stack { min-width: 0; }
+  .student-area .home-page .home-ranking-player { min-width: 0; }
+  .student-area .home-page .home-ranking-player-name { min-width: 0; }
+  .student-area .home-page .home-ranking-player-name strong { overflow-wrap: anywhere; }
+  .student-area .home-page .home-ranking-heading { flex-wrap: wrap; gap: 12px; }
+
+  /* Campos e botões utilizáveis por toque em todas as telas. */
+  .student-area input:not([type='checkbox']):not([type='radio']),
+  .student-area select,
+  .student-area textarea,
+  .admin-area input:not([type='checkbox']):not([type='radio']),
+  .admin-area select,
+  .admin-area textarea { max-width: 100%; min-width: 0; font-size: max(16px, 1rem); }
+  .student-area button,
+  .admin-area button { touch-action: manipulation; }
+  .student-area .tenna-auto-plan .tenna-auto-config-head,
+  .student-area .tenna-auto-plan .tenna-auto-choices { grid-template-columns: minmax(0, 1fr); }
+  .student-area .tenna-auto-plan .tenna-auto-config { padding: 20px 16px; }
+  .student-area .tenna-auto-plan .tenna-auto-months-grid,
+  .student-area .tenna-auto-plan .tenna-auto-days-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+
+  .student-area .simulados-page .simulados-resumo,
+  .student-area .flashcards-page .flashcards-decks-grid { grid-template-columns: minmax(0, 1fr); }
+  .student-area .flashcards-page .flashcards-deck { min-width: 0; }
+  .student-area .perfil-page .perfil-achievements-grid { grid-template-columns: minmax(0, 1fr); }
+  .student-area .desempenho-page .desempenho-diagnostico-grid { grid-template-columns: minmax(0, 1fr); }
+  .student-area .focus-page .focus-main-grid { grid-template-columns: minmax(0, 1fr); }
+  .student-area .focus-page .focus-header { align-items: stretch; flex-direction: column; }
+  .student-area .focus-page .focus-header-actions { flex-wrap: wrap; }
+
+  /* Formulários e painéis administrativos: sem largura mínima rígida. */
+  .admin-area .admin-calendar-layout,
+  .admin-area .admin-cronogramas-layout,
+  .admin-area .editor-layout { grid-template-columns: minmax(0, 1fr) !important; }
+  .admin-area .editor-sidebar { position: static; }
+  .admin-area .page-header { align-items: flex-start; flex-wrap: wrap; }
+  .admin-area .admin-modal,
+  .admin-area .editor-modal { max-width: calc(100vw - 28px); max-height: calc(100dvh - 36px); overflow-y: auto; }
+  .admin-area table { max-width: 100%; }
+}
+
+@media (max-width: 420px) {
+  .student-area .dashboard-content,
+  .admin-area .dashboard-content { padding: 16px 12px 32px; }
+  .tenna-mobile-area-label { font-size: 10px; }
+  .calendar-page .calendar-day { min-height: 60px !important; }
+  .calendar-page .calendar-day-number { width: 25px; height: 25px; }
+  .student-area .home-page .home-stats-row { grid-template-columns: 1fr; }
+  .student-area .tenna-auto-plan .tenna-auto-months-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .student-area .tenna-auto-plan .tenna-auto-days-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .student-area .student-sidebar,
+  .admin-area .admin-sidebar { transition: none; }
+}

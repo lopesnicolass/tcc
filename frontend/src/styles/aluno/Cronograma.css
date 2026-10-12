@@ -2402,3 +2402,76 @@ html[data-theme='dark'] .calendar-full-add:hover {
     aspect-ratio: 1 / 1;
   }
 }
+
+/* Refinamento do calendário — títulos legíveis e resumo confiável. */
+.calendar-page .calendar-day {
+  aspect-ratio: auto;
+  min-height: 124px;
+  height: auto;
+  min-width: 0;
+  overflow: hidden;
+}
+.calendar-page .calendar-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  line-height: 1.3;
+}
+.calendar-page .calendar-event-icon { margin-top: 1px; }
+.calendar-page .calendar-event-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.calendar-page .calendar-day:focus-visible,
+.calendar-page .calendar-task:focus-visible,
+.calendar-page .calendar-check:focus-visible {
+  outline: 3px solid var(--color-primary-300, #77b5f5);
+  outline-offset: -3px;
+}
+.calendar-page .calendar-day-progress {
+  padding: 14px 18px 0;
+}
+.calendar-page .calendar-day-progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+.calendar-page .calendar-day-progress-text strong { color: var(--color-text); font-weight: 800; }
+.calendar-page .calendar-day-progress-track {
+  margin-top: 8px;
+  height: 7px;
+  border-radius: 50px;
+  background: var(--color-primary-100, #e8f2fc);
+  overflow: hidden;
+}
+.calendar-page .calendar-day-progress-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary-600, #2389ed);
+  transition: width .2s ease;
+}
+.calendar-page .calendar-task-info strong { overflow-wrap: anywhere; }
+.calendar-page .calendar-task.done .calendar-check {
+  background: var(--color-primary-800);
+  border-color: var(--color-primary-800);
+  color: white;
+}
+@media (max-width: 700px) {
+  .calendar-page .calendar-grid,
+  .calendar-page .calendar-weekdays { min-width: 720px; }
+  .calendar-page .calendar-day { min-height: 112px; }
+}
+html[data-theme='dark'] .calendar-page .calendar-day-progress-track { background: rgba(125,170,219,.2); }

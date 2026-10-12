@@ -7,6 +7,7 @@ import {
   xpForLevel
 } from '../../context/GamificationContext.jsx';
 import Icon from '../../components/Icon.jsx';
+import RankingXP from '../../components/RankingXP.jsx';
 import { API_URL, obterToken } from '../../services/api.js';
 import { diasAteVestibulinho } from '../../utils/vestibulinho.js';
 import { formatarData, obterStatusData, selecionarProximasAtividades } from '../../utils/homeAtividades.js';
@@ -809,6 +810,9 @@ export default function Home() {
         </div>
         </div>
       </div>
+
+      {/* RANKING DOS ESTUDANTES */}
+      <RankingXP xp={xp} usuarioId={usuarioId} />
 
       {/* MODAL DE NÍVEIS */}
       {showLevels && (

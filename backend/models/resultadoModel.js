@@ -70,7 +70,9 @@ function buscarResultadosPorUsuario(
             r.data_realizacao,
 
             s.titulo AS simulado_nome,
-            COALESCE(m.nome, s.materia) AS materia
+            COALESCE(m.nome, s.materia) AS materia,
+            t.id AS topico_id,
+            t.nome AS assunto
 
         FROM resultados r
 

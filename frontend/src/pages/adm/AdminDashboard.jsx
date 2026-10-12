@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { request } from '../../services/api.js';
+import { contarSeDisponivel, resumirFontesAdministrativas } from '../../utils/adminOverview.js';
 
 const ICONS = {
   users: (
@@ -52,11 +53,6 @@ function Icon({ name, size = 20 }) {
   );
 }
 
-function getArray(payload, key) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.[key])) return payload[key];
-  return [];
-}
 
 function formatDate(value) {
   if (!value) return '—';
@@ -71,17 +67,17 @@ function formatDate(value) {
   }).format(date);
 }
 
-function StatCard({ icon, value, label, detail, loading }) {
+function StatCard({ icon, value, label, detail, loading, unavailable }) {
   return (
     <article className="admin-overview-stat">
       <div className="admin-overview-stat-top">
         <div className="admin-overview-stat-icon">
           <Icon name={icon} size={21} />
         </div>
-        <span className="admin-stat-detail">{detail}</span>
+        <span className="admin-stat-detail">{unavailable && !loading ? 'Indisponível' : detail}</span>
       </div>
       <div className="admin-overview-stat-value">
-        {loading ? <span className="admin-skeleton admin-skeleton-number" /> : value}
+        {loading ? <span className="admin-skeleton admin-skeleton-number" /> : unavailable ? '—' : value}
       </div>
       <div className="admin-overview-stat-label">{label}</div>
     </article>
@@ -109,6 +105,7 @@ export default function AdminDashboard() {
     provas: [],
   });
   const [carregando, setCarregando] = useState(true);
+  const [fontes, setFontes] = useState({ usuarios: false, simulados: false, questoes: false, provas: false });
   const [erro, setErro] = useState('');
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null);
 
@@ -135,25 +132,13 @@ export default function AdminDashboard() {
         })
       );
 
-      const novoDados = respostas.reduce(
-        (acc, item) => {
-          const keys = {
-            usuarios: 'usuarios',
-            simulados: 'simulados',
-            questoes: 'questoes',
-            provas: 'provas',
-          };
+      const { dados: novoDados, status } = resumirFontesAdministrativas(respostas);
+      setFontes(status);
 
-          acc[item.chave] = item.ok ? getArray(item.payload, keys[item.chave]) : [];
-          return acc;
-        },
-        { usuarios: [], simulados: [], questoes: [], provas: [] }
-      );
-
-      const falhas = respostas.filter((item) => !item.ok);
+      const falhas = Object.entries(status).filter(([, ok]) => !ok);
       if (falhas.length) {
         setErro(
-          falhas.some((item) => item.chave === 'usuarios')
+          !status.usuarios
             ? 'Não foi possível carregar todos os dados administrativos. Verifique sua permissão de administrador.'
             : 'Algumas informações não puderam ser carregadas. Os dados disponíveis continuam sendo exibidos.'
         );
@@ -163,6 +148,8 @@ export default function AdminDashboard() {
       setUltimaAtualizacao(new Date());
     } catch (error) {
       console.error('Erro ao carregar dashboard administrativo:', error);
+      setFontes({ usuarios: false, simulados: false, questoes: false, provas: false });
+      setDados({ usuarios: [], simulados: [], questoes: [], provas: [] });
       setErro('Não foi possível conectar ao servidor.');
     } finally {
       setCarregando(false);
@@ -189,6 +176,11 @@ export default function AdminDashboard() {
   );
 
   const alunos = Math.max(dados.usuarios.length - admins, 0);
+  const statusGeral = Object.values(fontes).every(Boolean);
+  const statusTexto = carregando ? 'Verificando informações' : statusGeral ? 'Dados carregados' : 'Dados parciais';
+  const statusDescricao = carregando
+    ? 'Consultando as informações'
+    : statusGeral ? 'Todas as consultas concluídas' : 'Uma ou mais consultas falharam';
 
   return (
     <div className="admin-dashboard-page admin-overview-page">
@@ -200,9 +192,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-hero-actions">
-          <div className="admin-connection-badge">
+          <div className={`admin-connection-badge ${!carregando && !statusGeral ? 'admin-connection-warning' : ''}`} role="status">
             <span className="admin-status-dot" />
-            <span><strong>Sistema conectado</strong><small>Dados atualizados do servidor</small></span>
+            <span><strong>{statusTexto}</strong><small>{statusDescricao}</small></span>
           </div>
           <button
             type="button"
@@ -229,25 +221,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <section className="admin-overview-card admin-quick-card admin-primary-card">
-        <div className="admin-section-heading admin-section-heading-row">
-          <div>
-            <span className="admin-section-kicker">COMECE POR AQUI</span>
-            <h2>Ações rápidas</h2>
-            <p>Acesse diretamente as áreas que você mais utiliza no gerenciamento da plataforma.</p>
-          </div>
-          <span className="admin-section-hint">5 áreas principais</span>
-        </div>
-
-        <div className="admin-quick-grid">
-          <QuickAction to="/admin/conteudos" icon="book" title="Gerenciar conteúdos" description="Matérias e tópicos" />
-          <QuickAction to="/admin/simulados" icon="check" title="Gerenciar simulados" description="Simulados e questões" />
-          <QuickAction to="/admin/provas" icon="file" title="Adicionar prova" description="Provas e gabaritos" />
-          <QuickAction to="/admin/usuarios" icon="users" title="Gerenciar usuários" description="Alunos e administradores" />
-          <QuickAction to="/admin/flashcards" icon="book" title="FlashCards" description="Cartões de estudo" />
-        </div>
-      </section>
-
       <section className="admin-overview-stats" aria-label="Resumo da plataforma">
         <div className="admin-stats-heading">
           <div>
@@ -257,10 +230,31 @@ export default function AdminDashboard() {
           <span>Dados atuais</span>
         </div>
         <div className="admin-stats-cards">
-          <StatCard icon="users" value={dados.usuarios.length} label="Usuários cadastrados" detail={`${alunos} alunos`} loading={carregando} />
-          <StatCard icon="book" value={dados.questoes.length} label="Questões cadastradas" detail="Banco de questões" loading={carregando} />
-          <StatCard icon="check" value={dados.simulados.length} label="Simulados" detail="Disponíveis no sistema" loading={carregando} />
-          <StatCard icon="file" value={dados.provas.length} label="Provas anteriores" detail="Arquivos cadastrados" loading={carregando} />
+          <StatCard icon="users" value={contarSeDisponivel(dados.usuarios, fontes.usuarios)} label="Usuários cadastrados" detail={`${alunos} alunos`} loading={carregando} unavailable={!fontes.usuarios} />
+          <StatCard icon="book" value={contarSeDisponivel(dados.questoes, fontes.questoes)} label="Questões cadastradas" detail="Banco de questões" loading={carregando} unavailable={!fontes.questoes} />
+          <StatCard icon="check" value={contarSeDisponivel(dados.simulados, fontes.simulados)} label="Simulados" detail="Disponíveis no sistema" loading={carregando} unavailable={!fontes.simulados} />
+          <StatCard icon="file" value={contarSeDisponivel(dados.provas, fontes.provas)} label="Provas anteriores" detail="Arquivos cadastrados" loading={carregando} unavailable={!fontes.provas} />
+        </div>
+      </section>
+
+      <section className="admin-overview-card admin-quick-card admin-primary-card">
+        <div className="admin-section-heading admin-section-heading-row">
+          <div>
+            <span className="admin-section-kicker">COMECE POR AQUI</span>
+            <h2>Ações rápidas</h2>
+            <p>Acesse diretamente as áreas que você mais utiliza no gerenciamento da plataforma.</p>
+          </div>
+          <span className="admin-section-hint">7 áreas de gerenciamento</span>
+        </div>
+
+        <div className="admin-quick-grid">
+          <QuickAction to="/admin/conteudos" icon="book" title="Gerenciar conteúdos" description="Matérias e tópicos" />
+          <QuickAction to="/admin/simulados" icon="check" title="Gerenciar simulados" description="Simulados e questões" />
+          <QuickAction to="/admin/provas" icon="file" title="Adicionar prova" description="Provas e gabaritos" />
+          <QuickAction to="/admin/usuarios" icon="users" title="Gerenciar usuários" description="Alunos e administradores" />
+          <QuickAction to="/admin/flashcards" icon="book" title="Flashcards" description="Cartões de estudo" />
+          <QuickAction to="/admin/cronogramas" icon="activity" title="Cronogramas" description="Planos de estudo" />
+          <QuickAction to="/admin/calendario" icon="activity" title="Calendário" description="Datas importantes" />
         </div>
       </section>
 
@@ -275,7 +269,9 @@ export default function AdminDashboard() {
             <Link to="/admin/usuarios" className="admin-see-all">Ver todos <Icon name="arrow" size={15} /></Link>
           </div>
 
-          {usuariosRecentes.length ? (
+          {!fontes.usuarios && !carregando ? (
+            <div className="admin-empty-state"><strong>Dados indisponíveis</strong><p>Não foi possível consultar os usuários. Tente atualizar os dados.</p></div>
+          ) : usuariosRecentes.length ? (
             <div className="admin-recent-list">
               {usuariosRecentes.map((usuario) => (
                 <div className="admin-recent-user" key={usuario.id}>
@@ -308,7 +304,9 @@ export default function AdminDashboard() {
             <Link to="/admin/provas" className="admin-see-all">Gerenciar <Icon name="arrow" size={15} /></Link>
           </div>
 
-          {provasRecentes.length ? (
+          {!fontes.provas && !carregando ? (
+            <div className="admin-empty-state"><strong>Dados indisponíveis</strong><p>Não foi possível consultar as provas. Tente atualizar os dados.</p></div>
+          ) : provasRecentes.length ? (
             <div className="admin-proof-list-new">
               {provasRecentes.map((prova) => (
                 <div className="admin-proof-item-new" key={prova.id}>
@@ -332,14 +330,23 @@ export default function AdminDashboard() {
 
         <section className="admin-overview-card admin-health-card admin-system-card">
           <div className="admin-section-heading">
-            <span className="admin-section-kicker">STATUS</span>
-            <h2>Sistema</h2>
-            <p>Informações rápidas sobre o ambiente administrativo.</p>
+            <span className="admin-section-kicker">CONSULTAS</span>
+            <h2>Estado das informações</h2>
+            <p>Disponibilidade das informações consultadas pelo painel — não substitui um monitoramento do servidor.</p>
           </div>
           <div className="admin-health-list">
-            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="shield" size={18} /></span><div><strong>Acesso administrativo</strong><small>Área protegida por autenticação</small></div><span className="admin-health-badge">Protegido</span></div>
-            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="activity" size={18} /></span><div><strong>Usuários</strong><small>{admins} administrador(es) · {alunos} aluno(s)</small></div><span className="admin-health-badge">Ativo</span></div>
-            <div className="admin-health-row"><span className="admin-health-icon"><Icon name="book" size={18} /></span><div><strong>Banco de questões</strong><small>{dados.questoes.length} questão(ões) disponível(is)</small></div><span className="admin-health-badge">Online</span></div>
+            {[
+              ['Usuários', 'usuarios'], ['Simulados', 'simulados'],
+              ['Questões', 'questoes'], ['Provas', 'provas'],
+            ].map(([nome, chave]) => (
+              <div className="admin-health-row" key={chave}>
+                <span className="admin-health-icon"><Icon name="activity" size={18} /></span>
+                <div><strong>{nome}</strong><small>{carregando ? 'Consultando...' : fontes[chave] ? 'Consulta concluída' : 'Falha na consulta'}</small></div>
+                <span className={`admin-health-badge ${!carregando && !fontes[chave] ? 'is-unavailable' : ''}`}>
+                  {carregando ? 'Aguarde' : fontes[chave] ? 'Disponível' : 'Indisponível'}
+                </span>
+              </div>
+            ))}
           </div>
         </section>
       </div>

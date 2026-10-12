@@ -1,14 +1,30 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar.jsx';
+import MobileNavigationBar from '../components/MobileNavigationBar.jsx';
 import '../styles/dashboard.css';
+import '../styles/mobile-responsive.css';
 
 export default function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAdminPreview, setIsAdminPreview] = useState(() =>
     sessionStorage.getItem('etecamp_admin_preview') === 'true'
   );
+
+  useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setMobileMenuOpen(false); };
+    document.addEventListener('keydown', closeOnEscape);
+    document.body.classList.add('tenna-mobile-menu-open');
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+      document.body.classList.remove('tenna-mobile-menu-open');
+    };
+  }, [mobileMenuOpen]);
 
   const ocultarSidebar = /^\/conteudos\/\d+\/?$/.test(location.pathname);
 
@@ -24,7 +40,13 @@ export default function DashboardLayout() {
         ocultarSidebar ? 'dashboard-sem-sidebar' : ''
       }`}
     >
-      {!ocultarSidebar && <Sidebar />}
+      {!ocultarSidebar && (
+        <>
+          <MobileNavigationBar label="Estudante" menuId="tenna-student-nav" expanded={mobileMenuOpen} onOpen={() => setMobileMenuOpen(true)} />
+          {mobileMenuOpen && <button type="button" className="tenna-mobile-scrim" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
+          <Sidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        </>
+      )}
 
       {isAdminPreview && (
         <div className="admin-preview-banner" role="status">

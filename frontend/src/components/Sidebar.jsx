@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGamification } from '../context/GamificationContext.jsx';
 import logoIcon from '../assets/tenna_logo.webp';
 import ThemeToggle from './ThemeToggle.jsx';
@@ -40,8 +40,10 @@ const ICONS = {
   user: <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" />,
 };
 
-export default function Sidebar() {
+export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const { streak, lastActiveDate } = useGamification();
+  const fecharRef = useRef(null);
+  useEffect(() => { if (mobileOpen) fecharRef.current?.focus(); }, [mobileOpen]);
   const [collapsed, setCollapsed] = useState(false);
   const [streakOpen, setStreakOpen] = useState(false);
 
@@ -64,8 +66,9 @@ export default function Sidebar() {
   }, [streakOpen]);
 
   return (
-    <aside className={`sidebar student-sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
+    <aside id="tenna-student-nav" aria-label="Menu do estudante" className={`sidebar student-sidebar ${collapsed ? 'sidebar-collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className="sidebar-brand student-sidebar-brand">
+        <button type="button" className="tenna-mobile-drawer-close" ref={fecharRef} onClick={onClose} aria-label="Fechar menu">×</button>
         <img src={logoIcon} alt="Tenna" className="sidebar-logo-full" />
         <button
           type="button"
@@ -86,6 +89,7 @@ export default function Sidebar() {
             key={item.to}
             to={item.to}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+            onClick={onClose}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               {ICONS[item.icon]}

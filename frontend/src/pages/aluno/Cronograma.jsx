@@ -6,6 +6,7 @@ import { getSubjectStyle } from '../../utils/subjects.js';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 import { request } from '../../services/api.js';
+import { eventosVisiveisDia, resumirDia, resumirMes } from '../../utils/calendarioResumo.js';
 
 const STORAGE_KEY =
   'tenna_calendario_atividades';
@@ -364,69 +365,21 @@ export default function Cronograma() {
       (item) => item.data === selectedDate
     );
 
-  const monthImportantDates =
-    datasImportantes.filter(
-      (item) =>
-        item.data?.startsWith(
-          `${currentMonth.getFullYear()}-${pad(
-            currentMonth.getMonth() + 1
-          )}`
-        )
-    );
-
   const monthPrefix =
-    `${currentMonth.getFullYear()}-${pad(
-      currentMonth.getMonth() + 1
-    )}`;
+    `${currentMonth.getFullYear()}-${pad(currentMonth.getMonth() + 1)}`;
 
-  const monthActivities =
-    activities.filter(
-      (a) =>
-        a.data?.startsWith(
-          monthPrefix
-        )
-    );
-
-  const doneCount =
-    monthActivities.filter(
-      (a) => a.done
-    ).length;
-
-  const totalHours =
-    monthActivities.reduce(
-      (sum, a) => {
-        const [h, m] =
-          (
-            a.horario ||
-            '0:00'
-          )
-            .split(':')
-            .map(Number);
-
-        return (
-          sum +
-          (Number.isFinite(h)
-            ? h
-            : 0) +
-          (Number.isFinite(m)
-            ? m / 60
-            : 0)
-        );
-      },
-      0
-    );
+  const resumoMes = resumirMes(activities, monthPrefix);
+  const resumoDia = resumirDia(selectedActivities);
 
   function changeMonth(delta) {
-    setCurrentMonth(
-      (prev) =>
-        new Date(
-          prev.getFullYear(),
-          prev.getMonth() + delta,
-          1
-        )
-    );
+    const proximoMes = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
+    // Mantém o painel do dia sincronizado com o mês visualizado.
+    const diaAnterior = Number(selectedDate.slice(-2)) || 1;
+    const ultimoDia = new Date(proximoMes.getFullYear(), proximoMes.getMonth() + 1, 0).getDate();
+    const diaSelecionado = new Date(proximoMes.getFullYear(), proximoMes.getMonth(), Math.min(diaAnterior, ultimoDia));
+    setCurrentMonth(proximoMes);
+    setSelectedDate(dateKey(diaSelecionado));
   }
-
   function goToday() {
     const today =
       new Date();
@@ -905,13 +858,13 @@ export default function Cronograma() {
 
               <div className="calendar-toolbar-stats">
                 <span>
-                  <strong>{monthActivities.length}</strong> atividades
+                  <strong>{resumoMes.atividades}</strong> atividades
                 </span>
                 <span>
-                  <strong>{doneCount}</strong> concluídas
+                  <strong>{resumoMes.concluidas}</strong> concluídas
                 </span>
                 <span>
-                  <strong>{totalHours.toFixed(1)}h</strong> planejadas
+                  <strong>{resumoMes.diasPlanejados}</strong> dias planejados
                 </span>
               </div>
             </div>
@@ -941,6 +894,8 @@ export default function Cronograma() {
             </div>
 
           </div>
+
+          <p className="calendar-mobile-help">Toque em uma data para ver suas atividades abaixo.</p>
 
           <div className="calendar-weekdays">
 
@@ -978,9 +933,7 @@ export default function Cronograma() {
                       key
                   );
 
-                const totalDayEvents =
-                  dayActivities.length +
-                  dayImportantDates.length;
+                const eventosDia = eventosVisiveisDia(dayActivities, dayImportantDates, 2);
 
                 const inMonth =
                   day.getMonth() ===
@@ -1013,81 +966,56 @@ export default function Cronograma() {
                           : ''
                       }`
                     }
-                    onClick={() =>
-                      setSelectedDate(
-                        key
-                      )
-                    }
+                    type="button"
+                    aria-pressed={selected}
+                    aria-label={`${day.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}: ${eventosDia.total} ${eventosDia.total === 1 ? 'evento' : 'eventos'}`}
+                    onClick={() => {
+                      setSelectedDate(key);
+                      if (!inMonth) {
+                        setCurrentMonth(new Date(day.getFullYear(), day.getMonth(), 1));
+                      }
+                    }}
                   >
 
                     <span className="calendar-day-number">
                       {day.getDate()}
                     </span>
 
-                    {dayImportantDates
-                      .slice(0, 2)
-                      .map((item) => (
-                        <span
-                          key={`important-${item.id}`}
-                          className="calendar-event calendar-important-event"
-                        >
-                          <span className="calendar-event-icon">📌</span>
-                          {item.titulo}
-                        </span>
-                      ))}
-
-                    {dayActivities
-                      .slice(0, 2)
-                      .map((a) => {
-
-                        const style =
-                          getSubjectStyle(
-                            a.materia
-                          );
-
+                    {eventosDia.visiveis.map(({ tipo, item }) => {
+                      if (tipo === 'importante') {
                         return (
-
                           <span
-                            key={a.id}
-                            className={
-                              `calendar-event ${
-                                a.done
-                                  ? 'done'
-                                  : ''
-                              }`
-                            }
-                            style={{
-                              background:
-                                getPostItMateriaStyle(a.materia).bg,
-                              borderLeftColor:
-                                getPostItMateriaStyle(a.materia).color,
-                              color:
-                                getPostItMateriaStyle(a.materia).color
-                            }}
+                            key={`important-${item.id}`}
+                            className="calendar-event calendar-important-event"
+                            title={item.titulo}
                           >
-
-                            <span className="calendar-event-icon">
-                              <SubjectIcon
-                                materia={
-                                  a.materia
-                                }
-                                size={11}
-                              />
-                            </span>
-
-                            {a.nome}
-
+                            <span className="calendar-event-icon" aria-hidden="true">📌</span>
+                            <span className="calendar-event-text">{item.titulo}</span>
                           </span>
-
                         );
-                      })}
+                      }
 
-                    {dayActivities.length > 2 && (
-
-                      <span className="calendar-more">
-                        +{dayActivities.length - 2} mais
-                      </span>
-
+                      const cor = getPostItMateriaStyle(item.materia);
+                      return (
+                        <span
+                          key={`activity-${item.id}`}
+                          className={`calendar-event ${item.done ? 'done' : ''}`}
+                          title={`${item.horario || ''} · ${item.nome}`}
+                          style={{
+                            background: cor.bg,
+                            borderLeftColor: cor.color,
+                            color: cor.color,
+                          }}
+                        >
+                          <span className="calendar-event-icon" aria-hidden="true">
+                            <SubjectIcon materia={item.materia} size={11} />
+                          </span>
+                          <span className="calendar-event-text">{item.nome}</span>
+                        </span>
+                      );
+                    })}
+                    {eventosDia.restantes > 0 && (
+                      <span className="calendar-more">+{eventosDia.restantes} mais</span>
                     )}
 
                   </button>
@@ -1129,6 +1057,9 @@ export default function Cronograma() {
             </div>
 
             <button
+              type="button"
+              aria-label="Adicionar atividade neste dia"
+              title="Adicionar atividade neste dia"
               className="calendar-add-small"
               onClick={() =>
                 openCreate()
@@ -1158,6 +1089,18 @@ export default function Cronograma() {
                   </div>
                 </article>
               ))}
+            </div>
+          )}
+
+          {resumoDia.total > 0 && (
+            <div className="calendar-day-progress" aria-label={`${resumoDia.concluidas} de ${resumoDia.total} atividades concluídas`}>
+              <div className="calendar-day-progress-text">
+                <strong>Progresso do dia</strong>
+                <span>{resumoDia.concluidas} de {resumoDia.total} concluídas</span>
+              </div>
+              <div className="calendar-day-progress-track" role="progressbar" aria-valuenow={resumoDia.concluidas} aria-valuemin={0} aria-valuemax={resumoDia.total}>
+                <span style={{ width: `${Math.round((resumoDia.concluidas / resumoDia.total) * 100)}%` }} />
+              </div>
             </div>
           )}
 
@@ -1224,11 +1167,17 @@ export default function Cronograma() {
                         }`
                       }
                       key={activity.id}
-                      onClick={() =>
-                        openEdit(
-                          activity
-                        )
-                      }
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Editar atividade ${activity.nome}`}
+                      onClick={() => openEdit(activity)}
+                      onKeyDown={(evento) => {
+                        if (evento.target !== evento.currentTarget) return;
+                        if (evento.key === 'Enter' || evento.key === ' ') {
+                          evento.preventDefault();
+                          openEdit(activity);
+                        }
+                      }}
                       style={{
                         background: getPostItMateriaStyle(activity.materia).bg,
                         borderColor: getPostItMateriaStyle(activity.materia).color
@@ -1237,6 +1186,9 @@ export default function Cronograma() {
 
                       <button
                         className="calendar-check"
+                        type="button"
+                        aria-label={activity.done ? `Marcar ${activity.nome} como pendente` : `Concluir ${activity.nome}`}
+                        aria-pressed={Boolean(activity.done)}
                         onClick={(e) => {
                           e.stopPropagation();
 

@@ -16,6 +16,7 @@ import Icon
   from '../../components/Icon.jsx';
 import { request } from '../../services/api.js';
 import { gerarPlanoPrioritario, resumirPrioridades, rotuloFrequencia } from '../../utils/planoPrioridade.js';
+import { avaliarPrazo, mesesAntesDaProva, dataFormatadaPtBr } from '../../utils/prazoVestibulinho.js';
 const STORAGE_KEY =
   'tenna_plano_automatico';
 const pad = (n) =>
@@ -40,24 +41,42 @@ function getUserKey() {
     'anonimo'
   );
 }
-function savePlan(
-  plan
-) {
-  localStorage.setItem(
-    `${STORAGE_KEY}_${getUserKey()}`,
-    JSON.stringify(plan)
-  );
+function carregarPlanoSalvo() {
+  try {
+    const valor = JSON.parse(localStorage.getItem(`${STORAGE_KEY}_${getUserKey()}`) || 'null');
+    const plano = Array.isArray(valor) ? valor : valor?.plan;
+    if (!Array.isArray(plano) || plano.length === 0 || !plano.every((mes) =>
+      Array.isArray(mes?.semanas) && mes.semanas.every((semana) =>
+        Array.isArray(semana?.days) && semana.days.every((dia) => Array.isArray(dia?.items))
+      )
+    )) return null;
+    return {
+      plan: plano,
+      months: Array.isArray(valor) ? plano.length : Number(valor.months || plano.length),
+      days: Array.isArray(valor) ? 3 : Number(valor.days || 3),
+    };
+  } catch {
+    return null;
+  }
+}
+function savePlan(plan, months, days) {
+  try {
+    localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify({ plan, months, days }));
+  } catch (erro) {
+    console.warn('Não foi possível salvar o plano neste navegador.', erro);
+  }
 }
 export default function PlanoAutomatico() {
   const navigate =
     useNavigate();
   const { addXP } =
     useGamification();
+  const planoAnterior = useMemo(carregarPlanoSalvo, []);
   const [
     months,
     setMonths
   ] =
-    useState(6);
+    useState(planoAnterior?.months || 6);
   const [
     maxMonths,
     setMaxMonths
@@ -67,12 +86,12 @@ export default function PlanoAutomatico() {
     days,
     setDays
   ] =
-    useState(3);
+    useState(planoAnterior?.days || 3);
   const [
     plan,
     setPlan
   ] =
-    useState(null);
+    useState(planoAnterior?.plan || null);
   const [
     selected,
     setSelected
@@ -117,12 +136,42 @@ export default function PlanoAutomatico() {
     setModeloError
   ] =
     useState('');
+  const [editandoPlano, setEditandoPlano] = useState(false);
+  const [dataVestibulinho, setDataVestibulinho] = useState(null);
+  const [consultandoVestibulinho, setConsultandoVestibulinho] = useState(true);
+  const [mesesAlterados, setMesesAlterados] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    request('/calendario/vestibulinho')
+      .then((resposta) => {
+        if (ativo) setDataVestibulinho(resposta?.data || null);
+      })
+      .catch(() => {
+        if (ativo) setDataVestibulinho(null);
+      })
+      .finally(() => {
+        if (ativo) setConsultandoVestibulinho(false);
+      });
+    return () => { ativo = false; };
+  }, []);
+
+  const prazoRecomendado = useMemo(
+    () => mesesAntesDaProva(maxMonths, dataVestibulinho),
+    [maxMonths, dataVestibulinho]
+  );
+  const prazoSelecionado = avaliarPrazo(months, dataVestibulinho);
+
+  useEffect(() => {
+    if (prazoRecomendado === null || mesesAlterados || plan || planoAnterior?.plan) return;
+    setMonths(prazoRecomendado > 0 ? prazoRecomendado : 1);
+  }, [prazoRecomendado, mesesAlterados, plan, planoAnterior]);
+
   useEffect(() => {
     async function carregarCronogramaModelo() {
       setCarregandoModelo(true);
       setModeloError('');
       setCronogramaModelo(null);
-      setPlan(null);
       try {
         let modeloAdmin = null;
         try {
@@ -171,7 +220,9 @@ export default function PlanoAutomatico() {
           Math.min(12, Number(modeloAdmin?.meses || 12))
         );
         setMaxMonths(limiteMeses);
-        setMonths((atual) => Math.min(Math.max(1, atual), limiteMeses));
+        if (!planoAnterior?.plan) {
+          setMonths((atual) => Math.min(Math.max(1, atual), limiteMeses));
+        }
         setCronogramaModelo({
           ...(modeloAdmin || {}),
           nome: modeloAdmin?.nome || 'Plano priorizado para o Vestibulinho ETEC',
@@ -309,11 +360,7 @@ export default function PlanoAutomatico() {
                 alvo.setDate(
                   domingo.getDate() +
                     indiceDia +
-                    7 *
-                      (
-                        month.numero -
-                        1
-                      ) +
+                    28 * (month.numero - 1) +
                     7 *
                       (
                         week.number -
@@ -376,7 +423,8 @@ export default function PlanoAutomatico() {
     setPlan(planoGerado);
     setSelected(1);
     setOpenWeeks(new Set(['1-1']));
-    savePlan(planoGerado);
+    savePlan(planoGerado, mesesDoPlano, days);
+    setEditandoPlano(false);
     const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
     if (!usuarioId) return;
     const atividades = montarAtividadesDoPlano(planoGerado);
@@ -458,11 +506,7 @@ export default function PlanoAutomatico() {
         alvo.setDate(
           domingo.getDate() +
             indiceDia +
-            7 *
-              (
-                month.numero -
-                1
-              ) +
+            28 * (month.numero - 1) +
             7 *
               (
                 week.number -
@@ -560,237 +604,176 @@ export default function PlanoAutomatico() {
     focoItem?.materia;
   const focoTopico =
     focoItem?.topico;
+  function mudarMeses(quantidade) {
+    setMesesAlterados(true);
+    setMonths(quantidade);
+  }
+  const mostrandoConfig = !plan || editandoPlano;
   return (
     <div className="tenna-auto-plan page-shell">
-      <section className="tenna-auto-intro">
-        <div className="tenna-auto-intro-copy">
-          <span className="tenna-auto-kicker">
-            PLANO AUTOMÁTICO
-          </span>
-          <h2>
-            Uma jornada para você saber{' '}
-            <span>
-              o que estudar
-            </span>
-          </h2>
-          <p>
-            O Tenna organiza sua preparação para o Vestibulinho
-            de acordo com o tempo que você tem, priorizando conteúdos essenciais
-            e reservando momentos para praticar com provas anteriores.
-          </p>
-        </div>
-        <div className="tenna-auto-intro-badge">
-          <Icon
-            name="target"
-            size={26}
-            color="#fff"
-          />
-          <small>
-            Seu foco
-          </small>
-        </div>
-      </section>
-      <section className="tenna-auto-config">
-        <div className="tenna-auto-config-head">
-          <div className="tenna-auto-config-title">
-            <div>
-              <h3>
-                Monte seu plano
-              </h3>
-              <p>
-                Escolha quantos meses e dias por semana você consegue estudar. O plano seleciona os conteúdos pela prioridade cadastrada.
-              </p>
-              {plan && (
-                <span className="tenna-auto-ready">
-                  ✓ Plano criado
-                </span>
-              )}
+      {mostrandoConfig && (
+        <>
+          <section className="tenna-auto-intro tenna-auto-intro-new">
+            <div className="tenna-auto-intro-copy">
+              <span className="tenna-auto-kicker">PLANEJAMENTO INTELIGENTE</span>
+              <h2>Um plano feito para <span>seu tempo</span></h2>
+              <p>Escolha até quando você quer estudar e quantos dias terá disponíveis. O Tenna organiza os assuntos e as revisões.</p>
             </div>
-          </div>
-          <div className="tenna-auto-personalized">
-            <div className="tenna-auto-personalized-icon">
-              <Icon
-                name="target"
-                size={27}
-                color="var(--accent-dark)"
-              />
+            <div className="tenna-auto-deadline" aria-live="polite">
+              <Icon name="calendar" size={21} color="#fff" />
+              <div>
+                <small>PRÓXIMO VESTIBULINHO</small>
+                <strong>{dataFormatadaPtBr(dataVestibulinho) || (consultandoVestibulinho ? 'Consultando data...' : 'Data não cadastrada')}</strong>
+              </div>
             </div>
-            <div className="tenna-auto-personalized-copy">
-              <strong>
-                Seu plano será adaptado ao seu ritmo
-              </strong>
-              <span>
-                ✓ Prioriza os conteúdos essenciais em planos curtos
-              </span>
-              <span>
-                ✓ Usa a recorrência observada nas provas quando ela foi cadastrada
-              </span>
-              <span>
-                ✓ Reserva uma sessão mensal para revisão e questões anteriores
+          </section>
+          <section className="tenna-auto-config tenna-auto-config-new">
+            <div className="tenna-auto-config-simple-head">
+              <div>
+                <span className="tenna-auto-config-kicker">PERSONALIZE SEUS ESTUDOS</span>
+                <h3>Monte seu cronograma</h3>
+                <p>Escolha sua duração em blocos de quatro semanas e os dias de estudo. Você poderá ajustar tudo depois.</p>
+              </div>
+              <span className="tenna-auto-config-simple-icon" aria-hidden="true">
+                <Icon name="target" size={24} color="var(--accent-dark)" />
               </span>
             </div>
-            <div
-              className="tenna-auto-personalized-deco"
-              aria-hidden="true"
-            >
-              ✦
-            </div>
-          </div>
-        </div>
-        <div className="tenna-auto-options">
-          <div className="tenna-auto-option-group">
-            <span className="tenna-auto-label">
-              Tempo disponível para estudar
-            </span>
-            <div className="tenna-auto-pills">
-              {Array.from({ length: maxMonths }, (_, indice) => indice + 1).map((quantidade) => (
-                <button
-                  key={quantidade}
-                  type="button"
-                  className={`tenna-auto-pill ${months === quantidade ? 'selected' : ''}`}
-                  onClick={() => setMonths(quantidade)}
-                  aria-pressed={months === quantidade}
-                >
-                  <strong>{quantidade}</strong>
-                  <span>{quantidade === 1 ? 'mês' : 'meses'}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="tenna-auto-option-group">
-            <span className="tenna-auto-label">
-              Dias de estudo por semana
-            </span>
-            <div className="tenna-auto-pills days">
-              {[1, 2, 3, 4, 5, 6, 7].map(
-                (d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    className={
-                      `tenna-auto-pill ${
-                        days === d
-                          ? 'selected'
-                          : ''
-                      }`
-                    }
-                    onClick={() =>
-                      setDays(d)
-                    }
-                  >
-                    <strong>
-                      {d}x
-                    </strong>
-                    <span>
-                      por semana
+            <div className="tenna-auto-choices">
+              <div className="tenna-auto-choice-block">
+                <div className="tenna-auto-choice-heading">
+                  <div>
+                    <span className="tenna-auto-config-kicker">01 / DURAÇÃO</span>
+                    <h4>Quantos meses você quer estudar?</h4>
+                  </div>
+                  {prazoRecomendado !== null && (
+                    <span className="tenna-auto-recommended">
+                      {prazoRecomendado === 0 ? 'Prova em menos de 1 mês' : `Até ${prazoRecomendado} ${prazoRecomendado === 1 ? 'mês' : 'meses'} antes da prova`}
                     </span>
+                  )}
+                </div>
+                <div className="tenna-auto-months-grid" role="group" aria-label="Duração do plano em meses">
+                  {Array.from({ length: maxMonths }, (_, indice) => indice + 1).map((quantidade) => {
+                    const ultrapassa = avaliarPrazo(quantidade, dataVestibulinho).ultrapassa;
+                    return (
+                      <button
+                        type="button"
+                        key={quantidade}
+                        className={`tenna-auto-month-choice${months === quantidade ? ' selected' : ''}${ultrapassa ? ' beyond-exam' : ''}`}
+                        onClick={() => mudarMeses(quantidade)}
+                        aria-pressed={months === quantidade}
+                        aria-label={`${quantidade} ${quantidade === 1 ? 'mês' : 'meses'}${ultrapassa ? ', termina depois do Vestibulinho' : ''}`}
+                        disabled={carregandoModelo || !cronogramaModelo || syncingPlan}
+                      >
+                        <strong>{quantidade}</strong>
+                        <span>{quantidade === 1 ? 'mês' : 'meses'}</span>
+                        {ultrapassa && <small>Após a prova</small>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {dataVestibulinho && (
+                  <div className="tenna-auto-month-legend">
+                    <span className="tenna-auto-legend-dot" aria-hidden="true" />
+                    <span>Cada mês equivale a 4 semanas. Os meses cinzas terminam após a prova, mas podem ser escolhidos.</span>
+                  </div>
+                )}
+                {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
+                  <div className="tenna-auto-date-warning" role="status">
+                    <Icon name="calendar" size={18} />
+                    <span>Esse período ultrapassa a data do Vestibulinho. Você pode gerar o plano mesmo assim, mas parte dos estudos ficará para depois da prova.</span>
+                  </div>
+                )}
+                {!consultandoVestibulinho && !dataVestibulinho && (
+                  <p className="tenna-auto-date-unknown">A data da prova não está disponível. Todas as durações continuam liberadas.</p>
+                )}
+              </div>
+              <div className="tenna-auto-choice-block">
+                <div className="tenna-auto-choice-heading">
+                  <div>
+                    <span className="tenna-auto-config-kicker">02 / FREQUÊNCIA</span>
+                    <h4>Quantos dias por semana?</h4>
+                  </div>
+                </div>
+                <div className="tenna-auto-days-grid" role="group" aria-label="Dias de estudo por semana">
+                  {[1, 2, 3, 4, 5, 6, 7].map((quantidade) => (
+                    <button
+                      type="button"
+                      key={quantidade}
+                      className={`tenna-auto-day-choice${days === quantidade ? ' selected' : ''}`}
+                      onClick={() => setDays(quantidade)}
+                      aria-pressed={days === quantidade}
+                      disabled={syncingPlan}
+                    >
+                      <strong>{quantidade}x</strong>
+                      <span>semana</span>
+                    </button>
+                  ))}
+                </div>
+                <p className="tenna-auto-choice-help">O planejamento distribui os conteúdos pelos dias que você escolher.</p>
+              </div>
+            </div>
+            <div className="tenna-auto-config-action">
+              <div className="tenna-auto-choice-summary">
+                <strong>Seu plano</strong>
+                <span>{months} {months === 1 ? 'mês' : 'meses'} de preparação · {days} {days === 1 ? 'dia' : 'dias'} por semana</span>
+                <small>
+                  {carregandoModelo
+                    ? 'Carregando conteúdos disponíveis...'
+                    : cronogramaModelo
+                      ? `${cronogramaModelo.sessoes_preenchidas} tópicos disponíveis para organizar`
+                      : modeloError || 'Catálogo indisponível'}
+                </small>
+              </div>
+              <div className="tenna-auto-config-buttons">
+                {plan && editandoPlano && (
+                  <button type="button" className="tenna-auto-secondary-button" onClick={() => setEditandoPlano(false)}>
+                    Voltar ao plano
                   </button>
-                )
-              )}
+                )}
+                <button
+                  type="button"
+                  className="mural-btn primary"
+                  onClick={generate}
+                  disabled={syncingPlan || carregandoModelo || !cronogramaModelo}
+                >
+                  {syncingPlan ? 'Salvando...' : plan ? 'Atualizar meu plano' : 'Gerar meu plano'}
+                  {!syncingPlan && <Icon name="arrowRight" size={16} />}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-        {plan && prioritySummary && (
-          <div className="tenna-auto-priority-summary" role="status">
-            <strong>Como o plano priorizou os conteúdos</strong>
-            <div className="tenna-auto-priority-counts">
-              <span><b>{prioritySummary.essenciais}</b> essenciais</span>
-              <span><b>{prioritySummary.importantes}</b> importantes</span>
-              <span><b>{prioritySummary.complementares}</b> complementares</span>
-            </div>
-            <p>
-              O plano selecionou {prioritySummary.totalSelecionados} de {prioritySummary.totalDisponiveis} tópicos ativos, distribuídos em {prioritySummary.materiasDisponiveis} matérias cadastradas. A seleção só cobre os conteúdos que já existem no catálogo.
-            </p>
-            {prioritySummary.foraDoPlano > 0 && (
-              <p>
-                {prioritySummary.foraDoPlano} tópico(s) não entraram neste plano por falta de tempo. Aumente os meses ou os dias semanais para ampliar a cobertura.
-              </p>
-            )}
-            {prioritySummary.materiasFaltantes.length > 0 && (
-              <p>
-                Este plano não conseguiu incluir tópicos de: {prioritySummary.materiasFaltantes.join(', ')}. Com tão poucas sessões, não é possível cobrir todas as matérias; aumente o tempo disponível para ampliar a cobertura.
-              </p>
-            )}
-            {prioritySummary.recorrenciaNaoAnalisada > 0 && (
-              <p>
-                A recorrência de {prioritySummary.recorrenciaNaoAnalisada} tópico(s) ainda não foi analisada. Até isso ser preenchido no cadastro administrativo, o plano usa a prioridade pedagógica como critério principal.
-              </p>
-            )}
-          </div>
-        )}
-        <div className="tenna-auto-config-bottom">
-          <div className="tenna-auto-config-note-wrap">
-            {carregandoModelo ? (
-              <span className="tenna-auto-config-note">
-                <Icon
-                  name="book"
-                  size={14}
-                  color="var(--accent-dark)"
-                />
-                Carregando o cronograma definido pelo administrador...
-              </span>
-            ) : cronogramaModelo ? (
-              <span className="tenna-auto-config-note">
-                <Icon
-                  name="book"
-                  size={14}
-                  color="var(--accent-dark)"
-                />
-                {cronogramaModelo.modeloAdministradorConfigurado
-                  ? 'Modelo de referência:'
-                  : 'Base do cronograma:'}{' '}
-                <strong>
-                  {cronogramaModelo.nome}
-                </strong>
-                {' · '}
-                {cronogramaModelo.meses}{' '}
-                {cronogramaModelo.meses === 1
-                  ? 'mês'
-                  : 'meses'}
-                {' · '}
-                {
-                  cronogramaModelo.sessoes_preenchidas
-                }{' '}
-                tópicos ativos no catálogo para personalizar o plano
-              </span>
-            ) : (
-              <span className="tenna-auto-config-note error">
-                <Icon
-                  name="book"
-                  size={14}
-                  color="var(--accent-dark)"
-                />
-                {
-                  modeloError ||
-                  'O administrador ainda não configurou um cronograma automático.'
-                }
-              </span>
-            )}
-          </div>
-          <button
-            className="mural-btn primary"
-            onClick={
-              generate
-            }
-            disabled={
-              syncingPlan ||
-              carregandoModelo ||
-              !cronogramaModelo
-            }
-          >
-            {syncingPlan
-              ? 'Gerando e salvando...'
-              : 'Gerar meu plano'}
-          </button>
-          {syncError && (
-            <span className="tenna-auto-error">
-              {syncError}
-            </span>
-          )}
-        </div>
-      </section>
-      {plan && (
+            {modeloError && cronogramaModelo && <p className="tenna-auto-info-note">{modeloError}</p>}
+            {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
+          </section>
+        </>
+      )}
+      {plan && !editandoPlano && (
         <div className="tenna-auto-result">
+          <section className="tenna-auto-generated-head">
+            <div>
+              <span className="tenna-auto-config-kicker">SEU CRONOGRAMA ESTÁ PRONTO</span>
+              <h2>Seu plano de estudos</h2>
+              <p>{months} {months === 1 ? 'mês' : 'meses'} · {days} {days === 1 ? 'dia' : 'dias'} por semana</p>
+            </div>
+            <button type="button" className="tenna-auto-secondary-button" onClick={() => setEditandoPlano(true)}>
+              Ajustar planejamento
+            </button>
+          </section>
+          {syncingPlan && <p className="tenna-auto-sync-status" role="status">Salvando as atividades no calendário...</p>}
+          {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
+          {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
+            <div className="tenna-auto-date-warning" role="status">
+              <Icon name="calendar" size={18} />
+              <span>Este plano vai além da data do Vestibulinho. Se quiser concluir antes, use “Ajustar planejamento”.</span>
+            </div>
+          )}
+          {prioritySummary && (
+            <details className="tenna-auto-plan-details">
+              <summary>Como os conteúdos foram priorizados</summary>
+              <p>{prioritySummary.totalSelecionados} de {prioritySummary.totalDisponiveis} tópicos selecionados, em {prioritySummary.materiasDisponiveis} matérias.</p>
+              {prioritySummary.foraDoPlano > 0 && <p>{prioritySummary.foraDoPlano} tópico(s) ficaram fora do plano pela duração escolhida.</p>}
+              {prioritySummary.materiasFaltantes.length > 0 && <p>Matérias não contempladas: {prioritySummary.materiasFaltantes.join(', ')}.</p>}
+            </details>
+          )}
           <section className="tenna-auto-next">
             <div className="tenna-auto-next-icon">
               <SubjectIcon

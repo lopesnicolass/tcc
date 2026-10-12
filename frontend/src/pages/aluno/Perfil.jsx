@@ -1,7 +1,10 @@
 import '../../styles/aluno/Perfil.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { request } from '../../services/api.js';
+import { LEVEL_TITLES, xpForLevel } from '../../context/GamificationContext.jsx';
+import Icon from '../../components/Icon.jsx';
+import { CATEGORIAS_CONQUISTAS, calcularNivelPorXp, montarConquistas } from '../../utils/conquistas.js';
 
 export default function Perfil() {
 
@@ -16,10 +19,12 @@ export default function Perfil() {
   const usuarioSalvo =
     localStorage.getItem('etecamp_usuario');
 
-  const usuarioInicial =
-    usuarioSalvo
-      ? JSON.parse(usuarioSalvo)
-      : null;
+  let usuarioInicial = null;
+  try {
+    usuarioInicial = usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
+  } catch {
+    usuarioInicial = null;
+  }
 
   // =====================================================
   // ESTADOS
@@ -55,26 +60,92 @@ export default function Perfil() {
   const [erro, setErro] =
     useState('');
 
-  const [conquistaNotaMaxima, setConquistaNotaMaxima] = useState(null);
+  const [dadosConquistas, setDadosConquistas] = useState({
+    resultados: null,
+    topicos: null,
+    sessoes: null,
+    gamificacao: null
+  });
   const [carregandoConquistas, setCarregandoConquistas] = useState(true);
+  const [atualizacaoConquistas, setAtualizacaoConquistas] = useState(0);
+  const [filtroConquistas, setFiltroConquistas] = useState('Todas');
+  const [participaRanking, setParticipaRanking] = useState(null);
+  const [salvandoRanking, setSalvandoRanking] = useState(false);
+  const [erroRanking, setErroRanking] = useState('');
 
   useEffect(() => {
     let ativo = true;
-    request('/resultados/me', {}, 'Não foi possível consultar conquistas.')
-      .then((dados) => {
-        if (!ativo) return;
-        const resultados = Array.isArray(dados?.resultados) ? dados.resultados : [];
-        setConquistaNotaMaxima(
-          resultados.some((resultado) => Number(resultado.porcentagem) >= 100)
-        );
-      })
-      .catch((erroConquistas) => {
-        console.error('Erro ao carregar conquistas:', erroConquistas);
-        if (ativo) setConquistaNotaMaxima(null);
-      })
-      .finally(() => { if (ativo) setCarregandoConquistas(false); });
+    request('/gamificacao/ranking/configuracao')
+      .then((dados) => { if (ativo) setParticipaRanking(Boolean(dados.participando)); })
+      .catch(() => { if (ativo) setErroRanking('Não foi possível consultar sua participação no ranking.'); });
     return () => { ativo = false; };
   }, []);
+
+  async function alternarRanking() {
+    if (participaRanking === null || salvandoRanking) return;
+    setSalvandoRanking(true);
+    setErroRanking('');
+    try {
+      const dados = await request('/gamificacao/ranking/configuracao', {
+        method: 'PUT',
+        body: JSON.stringify({ participando: !participaRanking })
+      });
+      setParticipaRanking(Boolean(dados.participando));
+    } catch (falha) {
+      setErroRanking(falha.message || 'Não foi possível alterar sua participação.');
+    } finally {
+      setSalvandoRanking(false);
+    }
+  }
+
+
+  // Busca resultados já registrados no servidor. Falhas parciais não viram
+  // medalhas bloqueadas: os itens sem fonte aparecem como não verificados.
+  useEffect(() => {
+    let ativo = true;
+    async function carregarConquistas() {
+      setCarregandoConquistas(true);
+      const chamadas = [
+        request('/resultados/me'),
+        request('/conteudos/progresso'),
+        request('/flashcards/resultados/sessoes'),
+        request('/gamificacao')
+      ];
+      const [res, progresso, flashcards, gamificacao] = await Promise.allSettled(chamadas);
+      if (!ativo) return;
+      setDadosConquistas({
+        resultados: res.status === 'fulfilled' && Array.isArray(res.value?.resultados)
+          ? res.value.resultados : null,
+        topicos: progresso.status === 'fulfilled' && Array.isArray(progresso.value?.topicos)
+          ? progresso.value.topicos : null,
+        sessoes: flashcards.status === 'fulfilled' && Array.isArray(flashcards.value?.sessoes)
+          ? flashcards.value.sessoes : null,
+        gamificacao: gamificacao.status === 'fulfilled' && Number.isFinite(Number(gamificacao.value?.xp))
+          ? gamificacao.value : null
+      });
+      setCarregandoConquistas(false);
+    }
+    carregarConquistas();
+    return () => { ativo = false; };
+  }, [atualizacaoConquistas]);
+
+  const conquistas = useMemo(
+    () => montarConquistas(dadosConquistas),
+    [dadosConquistas]
+  );
+  const conquistasVisiveis = conquistas.filter((item) =>
+    filtroConquistas === 'Todas' || item.categoria === filtroConquistas
+  );
+  const totalDesbloqueadas = conquistas.filter((item) => item.desbloqueada).length;
+  const faltandoVerificar = conquistas.some((item) => !item.verificado);
+  const dadosXP = dadosConquistas.gamificacao;
+  const nivelInfo = dadosXP ? calcularNivelPorXp(dadosXP.xp, xpForLevel) : null;
+  const tituloNivel = nivelInfo
+    ? LEVEL_TITLES[Math.min(nivelInfo.nivel - 1, LEVEL_TITLES.length - 1)]
+    : 'Aguardando dados';
+  const progressoNivel = nivelInfo
+    ? Math.round((nivelInfo.xpNoNivel / nivelInfo.xpProximoNivel) * 100)
+    : 0;
 
   // =====================================================
   // CONVERTER BLOB DO SQLITE PARA IMAGEM
@@ -664,6 +735,31 @@ export default function Perfil() {
         </div>
       )}
 
+      <section className="perfil-hero" aria-labelledby="perfil-titulo">
+        <div className="perfil-hero-intro">
+          <span className="perfil-hero-kicker"><Icon name="trophy" size={15} /> SUA JORNADA</span>
+          <h1 id="perfil-titulo">Seu espaço de conquistas</h1>
+          <p>Acompanhe seu nível, veja o que já conquistou e descubra seus próximos objetivos.</p>
+        </div>
+        <div className="perfil-hero-dados">
+          <div className="perfil-level-details">
+            <span className="perfil-level-badge">{nivelInfo ? nivelInfo.nivel : '—'}</span>
+            <div>
+              <span className="perfil-level-label">NÍVEL ATUAL</span>
+              <strong>{tituloNivel}</strong>
+            </div>
+          </div>
+          <div className="perfil-level-track" role="progressbar" aria-label="Progresso do nível" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressoNivel}>
+            <span style={{ width: `${progressoNivel}%` }} />
+          </div>
+          <div className="perfil-level-foot">
+            <span>{nivelInfo ? `${nivelInfo.xpNoNivel} / ${nivelInfo.xpProximoNivel} XP no nível` : 'XP indisponível'}</span>
+            <span>{dadosXP ? `${Number(dadosXP.xp).toLocaleString('pt-BR')} XP total` : '—'}</span>
+          </div>
+          <div className="perfil-hero-streak"><Icon name="calendar" size={16} /><strong>{dadosXP ? Number(dadosXP.streak) || 0 : '—'}</strong> dias de sequência atual</div>
+        </div>
+      </section>
+
       <div className="perfil-grid">
 
         <form
@@ -968,45 +1064,112 @@ export default function Perfil() {
 
           </div>
 
-          <div className="panel-card perfil-achievements-card">
-            <div className="perfil-card-heading">
+          <section className="perfil-ranking-card" aria-labelledby="perfil-ranking-titulo">
+            <div className="perfil-ranking-top">
+              <Icon name="trophy" size={22} />
               <div>
-                <span className="perfil-section-kicker">SEU PROGRESSO</span>
-                <h3>Conquistas</h3>
-              </div>
-              <span className="perfil-card-dot" aria-hidden="true"></span>
-            </div>
-
-            <div className="achievement-list">
-              <div className={`achievement-item ${conquistaNotaMaxima === true ? 'achievement-unlocked' : 'achievement-locked'}`}>
-                <div className="achievement-icon" aria-hidden="true">
-                  {conquistaNotaMaxima === true ? '🏆' : '🔒'}
-                </div>
-                <div className="achievement-text">
-                  <strong>Nota Máxima {conquistaNotaMaxima === true ? '· Conquistada' : conquistaNotaMaxima === false ? '· Bloqueada' : '· Não verificada'}</strong>
-                  <span>Objetivo: acertar 100% em um simulado.</span>
-                </div>
-              </div>
-
-              <div className="achievement-item achievement-locked">
-                <div className="achievement-icon" aria-hidden="true">🔒</div>
-                <div className="achievement-text">
-                  <strong>Meta Semanal · Ainda não verificada</strong>
-                  <span>Objetivo: registrar 20h de estudo em uma semana.</span>
-                </div>
+                <h3 id="perfil-ranking-titulo">Ranking da turma</h3>
+                <p>Escolha se deseja aparecer no Top 3 de XP da Home.</p>
               </div>
             </div>
-
-            <div className="perfil-achievement-footer">
-              <span>{carregandoConquistas
-                ? 'Consultando seus resultados...'
-                : 'As conquistas dependem de dados verificados. O controle de horas semanais será implementado na próxima etapa.'}
-              </span>
-            </div>
-          </div>
+            <p className="perfil-ranking-description">
+              Ao participar, estudantes logados poderão ver seu nome, foto de perfil e XP. Você pode sair quando quiser.
+            </p>
+            <button
+              type="button"
+              className={`perfil-ranking-toggle ${participaRanking ? 'is-active' : ''}`}
+              onClick={alternarRanking}
+              disabled={participaRanking === null || salvandoRanking}
+              aria-pressed={Boolean(participaRanking)}
+            >
+              {participaRanking === null ? 'Consultando...' : salvandoRanking ? 'Salvando...' : participaRanking ? 'Participando · Sair do ranking' : 'Participar do ranking'}
+            </button>
+            {erroRanking && <p className="perfil-ranking-error" role="alert">{erroRanking}</p>}
+          </section>
         </div>
 
       </div>
+
+      <section className="perfil-achievements-section panel-card" aria-labelledby="perfil-conquistas-titulo">
+        <div className="perfil-achievements-heading">
+          <div>
+            <span className="perfil-section-kicker">METAS DO SEU ESTUDO</span>
+            <h2 id="perfil-conquistas-titulo">Suas conquistas</h2>
+            <p>Medalhas liberadas conforme seu progresso registrado no Tenna.</p>
+          </div>
+          <div className="perfil-achievements-counter" aria-live="polite">
+            <strong>{carregandoConquistas ? '—' : totalDesbloqueadas} / {conquistas.length}</strong>
+            <span>desbloqueadas</span>
+          </div>
+        </div>
+
+        <div className="perfil-achievements-controls">
+          <div className="perfil-achievements-filters" aria-label="Filtrar conquistas">
+            {CATEGORIAS_CONQUISTAS.map((categoria) => (
+              <button key={categoria} type="button"
+                className={`perfil-achievements-filter ${filtroConquistas === categoria ? 'active' : ''}`}
+                aria-pressed={filtroConquistas === categoria}
+                onClick={() => setFiltroConquistas(categoria)}>
+                {categoria}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="perfil-achievements-refresh"
+            onClick={() => setAtualizacaoConquistas((anterior) => anterior + 1)}
+            disabled={carregandoConquistas}>
+            <Icon name="refresh" size={15} /> {carregandoConquistas ? 'Atualizando...' : 'Atualizar progresso'}
+          </button>
+        </div>
+
+        {faltandoVerificar && !carregandoConquistas && (
+          <p className="perfil-achievements-notice" role="status">
+            Algumas informações não puderam ser consultadas. Tente atualizar para verificar as medalhas pendentes.
+          </p>
+        )}
+
+        <div className="perfil-achievements-grid">
+          {conquistasVisiveis.map((conquista) => {
+            const status = !conquista.verificado ? 'Não verificada'
+              : conquista.desbloqueada ? 'Conquistada' : 'Bloqueada';
+            return (
+              <article key={conquista.id}
+                className={`perfil-badge-card ${conquista.desbloqueada ? 'perfil-badge-unlocked' : 'perfil-badge-locked'}`}>
+                <div className="perfil-badge-top">
+                  <div className="perfil-badge-icon" aria-hidden="true"><Icon name={conquista.icone} size={23} /></div>
+                  <span className={`perfil-badge-status ${conquista.desbloqueada ? 'is-unlocked' : ''}`}>
+                    {carregandoConquistas ? 'Carregando' : status}
+                  </span>
+                </div>
+                <span className="perfil-badge-category">{conquista.categoria}</span>
+                <h3>{conquista.titulo}</h3>
+                <p>{conquista.descricao}</p>
+                <div className="perfil-badge-bottom">
+                  <div className="perfil-badge-count">
+                    <span>Progresso</span>
+                    <strong>{conquista.verificado && !carregandoConquistas
+                      ? `${conquista.progresso} / ${conquista.meta}` : '—'}</strong>
+                  </div>
+                  <div className="perfil-badge-progress" role="progressbar"
+                    aria-label={`Progresso: ${conquista.titulo}`}
+                    aria-valuemin={0} aria-valuemax={conquista.meta}
+                    aria-valuenow={conquista.verificado ? conquista.progresso : 0}>
+                    <span style={{ width: `${!carregandoConquistas ? conquista.porcentagem : 0}%` }} />
+                  </div>
+                </div>
+                {!conquista.desbloqueada && conquista.verificado && !carregandoConquistas && (
+                  <button type="button" className="perfil-badge-link"
+                    onClick={() => navigate(conquista.destino)}>
+                    Ir estudar <Icon name="arrowRight" size={15} />
+                  </button>
+                )}
+              </article>
+            );
+          })}
+        </div>
+        <p className="perfil-achievements-explainer">
+          As conquistas refletem seu progresso atual. Elas não concedem XP adicional. A meta de horas semanais não aparece porque o Tenna ainda não registra horas efetivas de estudo.
+        </p>
+      </section>
 
     </div>
 

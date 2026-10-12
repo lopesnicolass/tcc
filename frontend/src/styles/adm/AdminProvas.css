@@ -449,3 +449,16 @@
     width:100%;
   }
 }
+
+/* Busca e indicadores das provas — extensão da área administrativa */
+.admin-area .admin-provas-list-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--paper);}
+.admin-area .admin-provas-list-counter{display:flex;align-items:center;gap:8px;margin-right:auto;}
+.admin-area .admin-provas-list-counter strong{font:800 23px/1 'Space Grotesk',sans-serif;color:var(--ink);}
+.admin-area .admin-provas-list-counter span{font-size:12px;font-weight:700;color:var(--muted);}
+.admin-area .admin-provas-search{flex:1 1 210px;max-width:320px;}
+.admin-area .admin-provas-search input{width:100%;min-height:42px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);font:inherit;font-size:13px;}
+.admin-area .admin-provas-refresh{min-height:42px;padding:0 15px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;cursor:pointer;}
+.admin-area .admin-provas-refresh:disabled,.admin-area .admin-delete-prova:disabled{opacity:.6;cursor:wait;}
+.admin-area .admin-provas-message{margin:0 0 14px;padding:12px 14px;border-radius:12px;background:rgba(220,66,57,.08);color:var(--error);font-size:13px;}
+.admin-area .admin-provas-message button,.admin-area .admin-provas-clean-search{padding:0;border:0;background:transparent;color:var(--accent-dark);font-weight:800;text-decoration:underline;cursor:pointer;}
+@media(max-width:650px){.admin-area .admin-provas-list-counter{width:100%;}.admin-area .admin-provas-search{max-width:none;}.admin-area .admin-provas-refresh{flex:0 0 auto;}}
