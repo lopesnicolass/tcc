@@ -1,0 +1,418 @@
+/* TENNA | Cronograma: jornada do aluno.
+   Estilos isolados para não afetar outras páginas do projeto. */
+.tenna-auto-plan .studyplan-result {
+  --sp-ink: #102c55;
+  --sp-muted: #617694;
+  --sp-blue: #1462c8;
+  --sp-line: #deE8f4;
+  --sp-surface: #fff;
+  --sp-soft: #f5f9ff;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  width: 100%;
+  padding-bottom: 32px;
+  color: var(--sp-ink);
+}
+.tenna-auto-plan .studyplan-result *,
+.tenna-auto-plan .studyplan-result *::before,
+.tenna-auto-plan .studyplan-result *::after { box-sizing: border-box; }
+.tenna-auto-plan .studyplan-result h1,
+.tenna-auto-plan .studyplan-result h2,
+.tenna-auto-plan .studyplan-result h3,
+.tenna-auto-plan .studyplan-result h4,
+.tenna-auto-plan .studyplan-result p { margin: 0; }
+.tenna-auto-plan .studyplan-result button { font-family: inherit; cursor: pointer; }
+.tenna-auto-plan .studyplan-result button:disabled { opacity: .55; cursor: not-allowed; }
+.tenna-auto-plan .studyplan-result button:focus-visible,
+.tenna-auto-plan .studyplan-result summary:focus-visible {
+  outline: 3px solid #69c4ff;
+  outline-offset: 3px;
+}
+.tenna-auto-plan .studyplan-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .15em;
+  line-height: 1.3;
+  color: #2e6eb9;
+  text-transform: uppercase;
+}
+.tenna-auto-plan .studyplan-eyebrow-light { color: #a9d8ff; }
+.tenna-auto-plan .studyplan-eyebrow-mark {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #77e1cc;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(119,225,204,.15);
+}
+
+/* Introdução: progressão sem reproduzir os três cards antigos. */
+.tenna-auto-plan .studyplan-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: center;
+  gap: 36px;
+  overflow: hidden;
+  min-height: 234px;
+  padding: 35px clamp(25px, 3vw, 43px);
+  background: linear-gradient(112deg, #092a61 0%, #1054a6 58%, #1688e4 100%);
+  border-radius: 26px;
+  color: #fff;
+  box-shadow: 0 20px 38px -30px rgba(7,49,115,.9);
+  isolation: isolate;
+}
+.tenna-auto-plan .studyplan-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -225px;
+  right: -95px;
+  width: 560px;
+  height: 560px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 50px rgba(255,255,255,.025), 0 0 0 108px rgba(255,255,255,.023);
+}
+.tenna-auto-plan .studyplan-hero::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 310px;
+  height: 310px;
+  left: 43%;
+  bottom: -280px;
+  background: #68dbff;
+  border-radius: 50%;
+  filter: blur(75px);
+  opacity: .2;
+}
+.tenna-auto-plan .studyplan-hero-copy { position: relative; min-width: 0; }
+.tenna-auto-plan .studyplan-hero h1 {
+  max-width: 650px;
+  margin: 15px 0 11px;
+  font: 800 clamp(30px, 3vw, 45px)/1.08 'Space Grotesk', sans-serif;
+  letter-spacing: -.055em;
+  color: white;
+}
+.tenna-auto-plan .studyplan-hero h1 span { color: #9fd8ff; }
+.tenna-auto-plan .studyplan-hero-copy > p {
+  max-width: 595px;
+  color: #d9eaff;
+  line-height: 1.55;
+  font-size: 13px;
+}
+.tenna-auto-plan .studyplan-hero-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 21px;
+  margin-top: 23px;
+  color: #e1efff;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.tenna-auto-plan .studyplan-hero-info > span { display: inline-flex; align-items: center; gap: 7px; }
+.tenna-auto-plan .studyplan-hero-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.tenna-auto-plan .studyplan-hero-progress {
+  padding: 16px 18px 19px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 18px;
+  background: rgba(255,255,255,.105);
+  backdrop-filter: blur(8px);
+}
+.tenna-auto-plan .studyplan-progress-number { display: flex; justify-content: space-between; align-items: flex-end; gap: 6px; }
+.tenna-auto-plan .studyplan-progress-number strong {
+  font: 800 39px/.95 'Space Grotesk',sans-serif;
+  letter-spacing: -.06em;
+  color: #fff;
+}
+.tenna-auto-plan .studyplan-progress-number strong small { font-size: 20px; margin-left: 2px; }
+.tenna-auto-plan .studyplan-progress-number > span { max-width: 89px; color: #d5e8fc; font-size: 11px; line-height: 1.3; text-align: right; }
+.tenna-auto-plan .studyplan-hero-meter { overflow: hidden; height: 6px; margin-top: 17px; border-radius: 100px; background: rgba(255,255,255,.2); }
+.tenna-auto-plan .studyplan-hero-meter span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#70e7cf,#b1f3e9); transition: width .3s ease; }
+.tenna-auto-plan .studyplan-hero-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tenna-auto-plan .studyplan-hero-links button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.27);
+  border-radius: 11px;
+  background: rgba(255,255,255,.105);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  transition: background .15s ease;
+}
+.tenna-auto-plan .studyplan-hero-links button:hover { background: rgba(255,255,255,.23); }
+
+/* A próxima sessão é o único card de ação principal. */
+.tenna-auto-plan .studyplan-next {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 30px;
+  border: 1px solid #d9e6f7;
+  border-radius: 21px;
+  background: var(--sp-surface);
+  box-shadow: 0 13px 38px -36px rgba(9,45,110,.7);
+  overflow: hidden;
+}
+.tenna-auto-plan .studyplan-next::before { content:''; position:absolute; width:4px; height:calc(100% - 44px); left:0; top:22px; border-radius:0 6px 6px 0; background:linear-gradient(#159cf0,#0c4fa5); }
+.tenna-auto-plan .studyplan-next-main { min-width: 0; }
+.tenna-auto-plan .studyplan-next-label { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tenna-auto-plan .studyplan-next-icon { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: #e9f4ff; color: #125ec3; }
+.tenna-auto-plan .studyplan-next-subject { display: inline-flex; align-items: center; gap: 7px; color: #376fa9; font-size: 12px; font-weight: 750; }
+.tenna-auto-plan .studyplan-next-copy h2 { max-width: 720px; margin: 5px 0 6px; color: var(--sp-ink); font: 800 clamp(25px,2.3vw,34px)/1.14 'Space Grotesk',sans-serif; letter-spacing: -.035em; }
+.tenna-auto-plan .studyplan-next-copy p { color: var(--sp-muted); font-size: 12px; line-height: 1.55; }
+.tenna-auto-plan .studyplan-next-action { display: flex; flex-direction: column; align-items: flex-end; gap: 11px; }
+.tenna-auto-plan .studyplan-next-action-label { color: #6a7f9b; font-size: 11px; font-weight: 600; }
+.tenna-auto-plan .studyplan-primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 48px;
+  white-space: nowrap;
+  padding: 13px 20px;
+  border: 1px solid #1156b1;
+  border-radius: 12px;
+  background: #1156b1;
+  box-shadow: 0 10px 20px -15px rgba(5,57,146,.8);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  transition: transform .15s ease, background .15s ease;
+}
+.tenna-auto-plan .studyplan-primary-button:hover:not(:disabled) { background: #0b438f; transform: translateY(-2px); }
+
+/* Uma faixa compacta substitui os cards de progresso / ritmo. */
+.tenna-auto-plan .studyplan-stats {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 0;
+  padding: 16px 6px;
+  border: 1px solid var(--sp-line);
+  background: var(--sp-surface);
+  border-radius: 19px;
+}
+.tenna-auto-plan .studyplan-stat { min-width:0; display:flex; gap:12px; align-items:center; padding: 2px clamp(12px,2vw,28px); }
+.tenna-auto-plan .studyplan-stat:not(:last-child) { border-right: 1px solid var(--sp-line); }
+.tenna-auto-plan .studyplan-stat-icon { display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:13px;background:#eff6ff;color:#1766c6; }
+.tenna-auto-plan .studyplan-stat > div { display:flex;flex-direction:column;gap:3px;min-width:0; }
+.tenna-auto-plan .studyplan-stat strong { white-space: nowrap; font:800 23px/1.05 'Space Grotesk',sans-serif; color:var(--sp-ink);letter-spacing:-.035em; }
+.tenna-auto-plan .studyplan-stat strong small { font:600 12px 'IBM Plex Sans',sans-serif;color:#7890ac;letter-spacing:0; }
+.tenna-auto-plan .studyplan-stat > div > span { color:var(--sp-muted);font-size:11px;line-height:1.3; }
+
+/* Jornada, meses e semanas: superfície única, níveis de informação progressivos. */
+.tenna-auto-plan .studyplan-journey { margin-top: 8px; padding: clamp(20px,2.5vw,31px); background:var(--sp-surface);border:1px solid var(--sp-line);border-radius:23px; }
+.tenna-auto-plan .studyplan-section-heading { display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px; }
+.tenna-auto-plan .studyplan-section-heading h2 { margin: 7px 0 5px; font:800 clamp(23px,2.4vw,31px)/1.12 'Space Grotesk',sans-serif;color:var(--sp-ink);letter-spacing:-.038em; }
+.tenna-auto-plan .studyplan-section-heading p { color:var(--sp-muted);font-size:12px;line-height:1.5; }
+.tenna-auto-plan .studyplan-stage-count { display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:10px 13px;border-radius:999px;background:#edf5ff;color:#235eaa;font-size:11px;font-weight:800; }
+.tenna-auto-plan .studyplan-month-tabs { display:flex;align-items:stretch;gap:9px;overflow-x:auto;scrollbar-width:thin;padding:0 0 15px;margin-bottom:0; }
+.tenna-auto-plan .studyplan-month-tab {
+  flex: 0 0 auto;
+  display:flex;align-items:center;gap:10px;
+  min-width: 137px;
+  padding: 12px 14px;
+  text-align:left;
+  border:1px solid #dfebf6;
+  border-radius:13px;
+  background:#f7faff;
+  color:var(--sp-ink);
+  transition:background .15s ease,border-color .15s ease;
+}
+.tenna-auto-plan .studyplan-month-tab:hover { border-color:#a9cbef;background:#eff7ff; }
+.tenna-auto-plan .studyplan-month-tab.active { background:#e9f3ff;border:1.5px solid #318df0;box-shadow:0 0 0 2px rgba(49,141,240,.08); }
+.tenna-auto-plan .studyplan-month-tab-number { display:grid;place-items:center;flex:0 0 33px;width:33px;height:33px;border-radius:11px;background:#e6eef8;color:#3d74ae;font-size:12px;font-weight:800; }
+.tenna-auto-plan .studyplan-month-tab.active .studyplan-month-tab-number { background:#155bc1;color:#fff; }
+.tenna-auto-plan .studyplan-month-tab > span:last-child { display:flex;flex-direction:column;gap:3px;min-width:0; }
+.tenna-auto-plan .studyplan-month-tab strong { font-size:12px;color:inherit;white-space:nowrap; }
+.tenna-auto-plan .studyplan-month-tab small { font-size:10px;color:#7188a8;white-space:nowrap; }
+.tenna-auto-plan .studyplan-month-panel { padding-top:20px;border-top:1px solid var(--sp-line); }
+.tenna-auto-plan .studyplan-month-heading { display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:17px; }
+.tenna-auto-plan .studyplan-month-heading h3 { margin:7px 0 4px; font:800 clamp(21px,2vw,27px)/1.2 'Space Grotesk',sans-serif;color:var(--sp-ink);text-transform:none;letter-spacing:-.03em; }
+.tenna-auto-plan .studyplan-month-heading p {font-size:12px;color:var(--sp-muted);line-height:1.5;}
+.tenna-auto-plan .studyplan-month-metrics { display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px; }
+.tenna-auto-plan .studyplan-month-metrics > span { display:inline-flex;align-items:center;gap:6px;padding:8px 10px;white-space:nowrap;background:#f3f8ff;border:1px solid #e1ebf7;border-radius:10px;color:#476e9d;font-size:11px;font-weight:700; }
+.tenna-auto-plan .studyplan-weeks { display:flex;flex-direction:column;gap:9px; }
+.tenna-auto-plan .studyplan-week { border:1px solid #e1eaf5;border-radius:15px;overflow:hidden;background:var(--sp-surface); }
+.tenna-auto-plan .studyplan-week.open { border-color:#b5d2f2;box-shadow:0 9px 27px -28px rgba(22,89,177,.8); }
+.tenna-auto-plan .studyplan-week-toggle {
+  width:100%;display:flex;align-items:center;gap:14px;min-height:66px;padding:12px 16px;
+  border:0;background:transparent;text-align:left;color:var(--sp-ink);
+}
+.tenna-auto-plan .studyplan-week-toggle:hover { background:#f7fbff; }
+.tenna-auto-plan .studyplan-week.open .studyplan-week-toggle { background:#f4f9ff; }
+.tenna-auto-plan .studyplan-week-number { display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border-radius:12px;color:#1f69c1;background:#eaf4ff;font-size:12px;font-weight:800; }
+.tenna-auto-plan .studyplan-week.open .studyplan-week-number { background:#1558b5;color:#fff; }
+.tenna-auto-plan .studyplan-week-title { display:flex;flex-direction:column;gap:4px;min-width:0;flex:1; }
+.tenna-auto-plan .studyplan-week-title strong { font-size:13px;color:var(--sp-ink); }
+.tenna-auto-plan .studyplan-week-title small { font-size:11px;color:var(--sp-muted);line-height:1.4; }
+.tenna-auto-plan .studyplan-week-progress { display:block;flex:0 0 108px;width:108px;height:5px;overflow:hidden;background:#e4edf7;border-radius:999px; }
+.tenna-auto-plan .studyplan-week-progress > span { display:block;height:100%;background:linear-gradient(90deg,#1670d0,#53c9b1);border-radius:inherit;transition:width .3s ease; }
+.tenna-auto-plan .studyplan-week-chevron { display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;color:#7191b3;transition:transform .15s ease;transform:rotate(90deg); }
+.tenna-auto-plan .studyplan-week.open .studyplan-week-chevron { transform:rotate(-90deg); }
+.tenna-auto-plan .studyplan-week-body { display:flex;flex-direction:column;gap:0;padding:2px 18px 8px;border-top:1px solid #e1edf9;background:var(--sp-surface); }
+.tenna-auto-plan .studyplan-day { display:grid;grid-template-columns:94px minmax(0,1fr);gap:16px;padding:15px 0; }
+.tenna-auto-plan .studyplan-day + .studyplan-day { border-top:1px solid #e9eff7; }
+.tenna-auto-plan .studyplan-day-label {display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding-top:3px;}
+.tenna-auto-plan .studyplan-day-label > span {font-size:10px;letter-spacing:.11em;font-weight:850;color:#1765bb;}
+.tenna-auto-plan .studyplan-day-label strong {font-size:12px;color:#577397;}
+.tenna-auto-plan .studyplan-lessons {display:flex;flex-direction:column;gap:9px;min-width:0;}
+.tenna-auto-plan .studyplan-lesson {
+  position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  min-width:0;min-height:94px;padding:14px 16px 14px 18px;
+  border:1px solid #e1eaf4;border-radius:12px;background:var(--sp-surface);
+}
+.tenna-auto-plan .studyplan-lesson::before {content:'';position:absolute;top:16px;bottom:16px;left:0;width:3px;background:var(--study-color);border-radius:0 4px 4px 0;}
+.tenna-auto-plan .studyplan-lesson.completed {background:#f8fcfa;border-color:#d6e9df;}
+.tenna-auto-plan .studyplan-lesson-details {min-width:0;flex:1;}
+.tenna-auto-plan .studyplan-lesson-subject {display:inline-flex;align-items:center;gap:6px;color:var(--study-color);font-size:11px;font-weight:800;}
+.tenna-auto-plan .studyplan-lesson h4 {margin:5px 0 6px;font:750 16px/1.2 'Space Grotesk',sans-serif;letter-spacing:-.02em;color:var(--sp-ink);overflow-wrap:anywhere;}
+.tenna-auto-plan .studyplan-lesson-meta {display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--sp-muted);line-height:1.35;}
+.tenna-auto-plan .studyplan-done-tag {display:inline-flex;align-items:center;gap:4px;color:#277953;font-weight:800;}
+.tenna-auto-plan .studyplan-lesson-actions {display:flex;justify-content:flex-end;align-items:center;gap:8px;flex:0 0 auto;}
+.tenna-auto-plan .studyplan-lesson-actions button {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;white-space:nowrap;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:800;}
+.tenna-auto-plan .studyplan-complete-button {background:var(--sp-surface);border:1px solid #cfdfef;color:#3a6fa8;}
+.tenna-auto-plan .studyplan-complete-button:hover:not(:disabled) {background:#eef7ff;}
+.tenna-auto-plan .studyplan-complete-button.active {color:#227a53;background:#e5f5ec;border-color:#bde4cd;}
+.tenna-auto-plan .studyplan-open-button {background:#eaf3ff;border:1px solid #d4e5fa;color:#1254a9;}
+.tenna-auto-plan .studyplan-open-button:hover {background:#145ab5;color:#fff;border-color:#145ab5;}
+.tenna-auto-plan .studyplan-empty-week {padding:18px;color:var(--sp-muted);font-size:12px;}
+.tenna-auto-plan .studyplan-method {background:var(--sp-surface);border:1px solid var(--sp-line);border-radius:13px;overflow:hidden;}
+.tenna-auto-plan .studyplan-method summary {display:flex;align-items:center;gap:9px;padding:15px 19px;color:#376fae;font-size:12px;font-weight:750;cursor:pointer;list-style:none;}
+.tenna-auto-plan .studyplan-method summary::-webkit-details-marker {display:none;}
+.tenna-auto-plan .studyplan-method summary svg:last-child {margin-left:auto;transform:rotate(90deg);}
+.tenna-auto-plan .studyplan-method[open] summary svg:last-child {transform:rotate(-90deg);}
+.tenna-auto-plan .studyplan-method > div {padding:0 20px 16px;}
+.tenna-auto-plan .studyplan-method p {font-size:12px;color:var(--sp-muted);line-height:1.55;margin:6px 0;}
+
+/* Configuração inicial: menos molduras e maior peso para a ação final. */
+.tenna-auto-plan .tenna-auto-intro-new {min-height:135px;padding:24px 30px;border-radius:23px;}
+.tenna-auto-plan .tenna-auto-intro-new h2 {font-size:clamp(27px,2.5vw,35px);letter-spacing:-.035em;}
+.tenna-auto-plan .tenna-auto-intro-new p {font-size:12.5px;max-width:590px;}
+.tenna-auto-plan .tenna-auto-config-new {padding:clamp(20px,2.5vw,32px);gap:20px;box-shadow:0 12px 36px -35px rgba(12,49,113,.75);}
+.tenna-auto-plan .tenna-auto-config-simple-head h3 {font-size:clamp(23px,2.3vw,30px);}
+.tenna-auto-plan .tenna-auto-config-simple-head p {max-width:560px;font-size:12px;}
+.tenna-auto-plan .tenna-auto-choices {gap:14px;}
+.tenna-auto-plan .tenna-auto-choice-block {padding:19px;border-color:#e1eafa;background:#fbfdff;border-radius:17px;}
+.tenna-auto-plan .tenna-auto-choice-heading h4 {font-size:16px;}
+.tenna-auto-plan .tenna-auto-month-choice,
+.tenna-auto-plan .tenna-auto-day-choice {border-radius:11px;min-height:59px;}
+.tenna-auto-plan .tenna-auto-config-action {padding:18px 20px;border-radius:14px;}
+.tenna-auto-plan .tenna-auto-config-buttons .mural-btn.primary {min-height:46px;background:#1055b2;}
+
+/* Respeita os contrastes do tema escuro também na nova interface. */
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result {
+  --sp-ink:#eaf3ff; --sp-muted:#afc5db; --sp-line:#33516d;
+  --sp-surface:#142b46; --sp-soft:#1b3857;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-next {border-color:#355477;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-next-icon,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat-icon,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stage-count {background:#21476f;color:#b9deff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-next-subject,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-eyebrow:not(.studyplan-eyebrow-light) {color:#94c9ff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-next-action-label {color:#b1c9dc;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat strong small {color:#b1c9dc;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab {background:#193856;border-color:#365b7e;color:#ecf5ff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab.active {background:#1d4d82;border-color:#73bbff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab small {color:#c1d1e0;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab-number,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-metrics > span,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-number {background:#21496f;color:#d6eaff;border-color:#3e617d;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-toggle:hover,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week.open .studyplan-week-toggle {background:#1d3b5b;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson {border-color:#35516e;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-body {border-color:#35516e;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-day + .studyplan-day {border-color:#35516e;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-day-label strong {color:#b4cce4;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson.completed {background:#173e3e;border-color:#386c62;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-complete-button {background:#1b3959;border-color:#436687;color:#d2e9ff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-complete-button.active {background:#225747;border-color:#46836a;color:#dcffed;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-open-button {background:#20538a;border-color:#3d71a6;color:#ecf5ff;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-done-tag {color:#83e3b3;}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-choice-block {background:#152b45;border-color:var(--line);}
+
+@media (max-width:1100px) {
+  .tenna-auto-plan .studyplan-hero {grid-template-columns:minmax(0,1fr) 226px;gap:20px;}
+  .tenna-auto-plan .studyplan-lesson {align-items:flex-start;flex-direction:column;gap:10px;}
+  .tenna-auto-plan .studyplan-lesson-actions {align-self:flex-end;}
+}
+@media (max-width:780px) {
+  .tenna-auto-plan .studyplan-hero {grid-template-columns:1fr;min-height:0;padding:28px 24px;gap:23px;}
+  .tenna-auto-plan .studyplan-hero h1 {font-size:clamp(28px,6vw,37px);}
+  .tenna-auto-plan .studyplan-hero-side {flex-direction:row;align-items:stretch;}
+  .tenna-auto-plan .studyplan-hero-progress {flex:1;}
+  .tenna-auto-plan .studyplan-hero-links {display:flex;flex-direction:column;justify-content:center;min-width:155px;}
+  .tenna-auto-plan .studyplan-next {grid-template-columns:1fr;gap:19px;padding:22px;}
+  .tenna-auto-plan .studyplan-next-action {align-items:stretch;}
+  .tenna-auto-plan .studyplan-next-action-label {display:none;}
+  .tenna-auto-plan .studyplan-primary-button {align-self:flex-start;}
+  .tenna-auto-plan .studyplan-stat {gap:8px;padding:0 12px;}
+  .tenna-auto-plan .studyplan-stat-icon {width:34px;height:34px;flex-basis:34px;}
+  .tenna-auto-plan .studyplan-stat strong {font-size:19px;}
+  .tenna-auto-plan .studyplan-day {grid-template-columns:80px minmax(0,1fr);gap:10px;}
+}
+@media (max-width:560px) {
+  .tenna-auto-plan .studyplan-result {gap:13px;}
+  .tenna-auto-plan .studyplan-hero {border-radius:19px;padding:23px 19px;}
+  .tenna-auto-plan .studyplan-hero-side {flex-direction:column;gap:9px;}
+  .tenna-auto-plan .studyplan-hero-links {flex-direction:row;}
+  .tenna-auto-plan .studyplan-hero-links button {flex:1;}
+  .tenna-auto-plan .studyplan-hero-progress {padding:13px 15px;}
+  .tenna-auto-plan .studyplan-hero-info {margin-top:16px;}
+  .tenna-auto-plan .studyplan-next {border-radius:17px;padding:20px 17px;}
+  .tenna-auto-plan .studyplan-next-copy h2 {font-size:25px;}
+  .tenna-auto-plan .studyplan-primary-button {width:100%;}
+  .tenna-auto-plan .studyplan-stats {grid-template-columns:1fr;padding:6px 16px;}
+  .tenna-auto-plan .studyplan-stat {min-height:65px;padding:9px 0;}
+  .tenna-auto-plan .studyplan-stat:not(:last-child) {border-right:0;border-bottom:1px solid var(--sp-line);}
+  .tenna-auto-plan .studyplan-journey {padding:19px 14px;border-radius:17px;}
+  .tenna-auto-plan .studyplan-section-heading {align-items:flex-start;flex-direction:column;gap:10px;}
+  .tenna-auto-plan .studyplan-month-tab {min-width:128px;}
+  .tenna-auto-plan .studyplan-month-heading {align-items:flex-start;flex-direction:column;gap:13px;}
+  .tenna-auto-plan .studyplan-month-metrics {justify-content:flex-start;}
+  .tenna-auto-plan .studyplan-week-toggle {padding:11px;gap:10px;}
+  .tenna-auto-plan .studyplan-week-progress {display:none;}
+  .tenna-auto-plan .studyplan-week-body {padding:3px 11px;}
+  .tenna-auto-plan .studyplan-day {display:block;padding:13px 0;}
+  .tenna-auto-plan .studyplan-day-label {flex-direction:row;align-items:center;gap:9px;margin-bottom:10px;}
+  .tenna-auto-plan .studyplan-lesson {padding:14px 12px 14px 15px;}
+  .tenna-auto-plan .studyplan-lesson-actions {align-self:stretch;justify-content:flex-start;flex-wrap:wrap;}
+  .tenna-auto-plan .studyplan-lesson-actions button {flex:1;}
+  .tenna-auto-plan .tenna-auto-choices {grid-template-columns:1fr;}
+  .tenna-auto-plan .tenna-auto-config-new {padding:17px;}
+  .tenna-auto-plan .tenna-auto-choice-block {padding:14px;}
+}
+@media (prefers-reduced-motion:reduce) {
+  .tenna-auto-plan .studyplan-result * {transition:none !important;animation:none !important;}
+}
+
+/* Durações complementares são opt-in, sem impedir a seleção. */
+.tenna-auto-plan .studyplan-more-months {
+  display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:5px 0;
+  border:0;background:transparent;color:#1b63b5;font:750 11.5px 'IBM Plex Sans',sans-serif;
+  cursor:pointer;
+}
+.tenna-auto-plan .studyplan-more-months svg {transform:rotate(90deg);}
+.tenna-auto-plan .studyplan-more-months[aria-expanded='true'] svg {transform:rotate(-90deg);}
+.tenna-auto-plan .studyplan-more-months:hover {text-decoration:underline;}
+.tenna-auto-plan .studyplan-more-months:focus-visible {outline:3px solid #73c8ff;outline-offset:3px;border-radius:3px;}
+.tenna-auto-plan .studyplan-config-info {padding:0;color:var(--muted);font-size:11px;}
+.tenna-auto-plan .studyplan-config-info summary {display:list-item;cursor:pointer;color:var(--accent-dark);font-weight:700;}
+.tenna-auto-plan .studyplan-config-info p {font-size:11px;margin:7px 0 0;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-more-months,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-config-info summary {color:#9fd1ff;}
