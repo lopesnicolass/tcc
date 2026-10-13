@@ -1,0 +1,209 @@
+/* TENNA · Experiência de estudo renovada. Preferências definidas pelo administrador. */
+.pagina-experiencia {
+  --pagina-tema: #1464d9;
+  --pagina-tema-escuro: #0b3679;
+  --pagina-tema-claro: #e9f4ff;
+  max-width: 1280px;
+}
+
+.pagina-experiencia .pagina-back-button {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 10px 15px;
+  font-size: 12px;
+  color: var(--pagina-tema);
+  box-shadow: 0 4px 15px rgba(10, 41, 87, .05);
+}
+.pagina-experiencia .pagina-hero {
+  isolation: isolate;
+  min-height: 260px;
+  padding: clamp(27px, 4vw, 42px) clamp(25px, 4.5vw, 54px);
+  margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 34px 34px 78px 34px;
+  background:
+    radial-gradient(ellipse at 93% 13%, rgba(255,255,255,.24), transparent 38%),
+    radial-gradient(ellipse at 65% 120%, rgba(255,255,255,.10), transparent 48%),
+    linear-gradient(118deg, var(--pagina-tema-escuro), var(--pagina-tema) 75%, color-mix(in srgb, var(--pagina-tema) 76%, #71caff));
+  box-shadow: 0 22px 48px -26px color-mix(in srgb, var(--pagina-tema) 38%, transparent);
+}
+.pagina-experiencia .pagina-hero::before {
+  width: 420px; height: 420px; top: -260px; right: -120px;
+  border: 1px solid rgba(255,255,255,.26);
+  background: rgba(255,255,255,.035);
+}
+.pagina-experiencia .pagina-hero::after {
+  width: 360px; height: 360px; left: auto; bottom: -295px; right: 14%;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.05);
+}
+.pagina-experiencia .pagina-hero-top { margin-bottom: 35px; }
+.pagina-experiencia .pagina-breadcrumb { font-weight: 600; font-size: 12px; color: rgba(255,255,255,.83); }
+.pagina-experiencia .pagina-materia-badge {
+  background: rgba(255,255,255,.92) !important;
+  color: var(--pagina-tema-escuro) !important;
+  border: 1px solid rgba(255,255,255,.85);
+  padding: 10px 15px;
+  font-size: 12px;
+  box-shadow: 0 7px 18px rgba(3,26,62,.09);
+}
+.pagina-experiencia .pagina-hero-content { align-items: center; gap: 20px; min-height: 138px; }
+.pagina-experiencia .pagina-hero-icon {
+  flex: 0 0 67px; width: 67px; height: 67px;
+  border-radius: 24px; background: rgba(255,255,255,.15);
+  backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.28);
+  box-shadow: inset 0 1px rgba(255,255,255,.2), 0 12px 24px rgba(4,27,68,.12);
+}
+.pagina-experiencia .pagina-kicker { color: #d9eafd; font-size: 11px; margin-bottom: 9px; letter-spacing: .17em; }
+.pagina-experiencia .pagina-hero h1 {
+  max-width: 680px; font-size: clamp(30px, 3.5vw, 47px);
+  letter-spacing: -.045em; line-height: 1.12;
+}
+.pagina-experiencia .pagina-hero p { font-size: 14px; color: rgba(255,255,255,.87); max-width: 640px; }
+.pagina-hero-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+.pagina-hero-chips span {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 12px; border: 1px solid rgba(255,255,255,.16);
+  border-radius: 99px; background: rgba(255,255,255,.13);
+  color: #fff; font-size: 12px; font-weight: 700;
+}
+.pagina-hero-art { width: 205px; height: 190px; flex: 0 0 205px; position: relative; margin-left: auto; }
+.pagina-art-halo { position: absolute; inset: 10px; border: 1px dashed rgba(255,255,255,.4); border-radius: 50%; transform: rotate(-18deg); }
+.pagina-art-halo::before { content: ''; position: absolute; inset: 22px; border: 2px solid rgba(255,255,255,.15); border-radius: 50%; }
+.pagina-art-symbol {
+  position: absolute; width: 117px; height: 117px; top: 38px; left: 45px;
+  display: grid; place-items: center; transform: rotate(-9deg);
+  border: 1px solid rgba(255,255,255,.48);
+  border-radius: 38px; background: linear-gradient(135deg,rgba(255,255,255,.27),rgba(255,255,255,.07));
+  box-shadow: 12px 15px 0 rgba(255,255,255,.10), 0 22px 25px rgba(3,26,62,.15);
+}
+.pagina-art-star { position: absolute; color: #ffe18d; font-size: 23px; }
+.pagina-art-star-a { top: 5px; right: 28px; }
+.pagina-art-star-b { bottom: 7px; left: 12px; font-size: 32px; }
+.pagina-art-star-c { bottom: 19px; right: 5px; font-size: 16px; }
+.pagina-foco-toggle {
+  position: relative; z-index: 2; display: inline-flex; align-items: center;
+  margin: 20px 0 0; padding: 9px 14px; border-radius: 99px;
+  background: #fff; border: 1px solid rgba(255,255,255,.5);
+  color: var(--pagina-tema-escuro); font: 800 12px 'IBM Plex Sans',sans-serif;
+  cursor: pointer; box-shadow: 0 7px 18px rgba(3,26,62,.12);
+}
+.pagina-foco-toggle:focus-visible, .pagina-indice-items a:focus-visible, .pagina-experiencia button:focus-visible {
+  outline: 3px solid #ffc857; outline-offset: 3px;
+}
+
+.pagina-experiencia .pagina-layout { grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; }
+.pagina-experiencia .pagina-main { gap: 0; }
+.pagina-study-intro { display: flex; align-items: center; gap: 14px; margin: 0 0 23px; padding: 0 4px; }
+.pagina-study-intro-symbol { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 19px; background: var(--pagina-tema-claro); color: var(--pagina-tema); }
+.pagina-study-intro span:not(.pagina-study-count) { display: block; color: var(--pagina-tema); font: 800 10px 'IBM Plex Sans',sans-serif; letter-spacing: .14em; }
+.pagina-study-intro h2 { margin: 3px 0; color: var(--ink); font: 800 clamp(21px,2.5vw,27px) 'Space Grotesk',sans-serif; letter-spacing: -.035em; }
+.pagina-study-intro p { margin: 0; color: var(--muted); font-size: 13px; }
+.pagina-study-count { flex-shrink: 0; margin-left: auto; background: var(--card); border: 1px solid var(--line); border-radius: 40px; padding: 8px 12px; color: var(--pagina-tema); font-size: 12px; font-weight: 800; }
+.pagina-etapa { position: relative; display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 14px; scroll-margin-top: 24px; padding-bottom: 18px; }
+.pagina-etapa:not(:last-of-type)::before { content: ''; position: absolute; top: 52px; bottom: -5px; left: 23px; width: 2px; background: linear-gradient(var(--pagina-tema), transparent); opacity: .27; }
+.pagina-etapa-marker { position: relative; z-index: 1; width: 47px; height: 47px; display: grid; place-items: center; border-radius: 17px; border: 4px solid var(--color-background, #edf6ff); background: var(--pagina-tema); color: #fff; font: 800 13px 'Space Grotesk',sans-serif; box-shadow: 0 6px 15px color-mix(in srgb,var(--pagina-tema) 25%,transparent); }
+.pagina-etapa-content { min-width: 0; padding-top: 5px; }
+.pagina-etapa-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px 3px; color: var(--pagina-tema); font: 800 10px 'IBM Plex Sans',sans-serif; letter-spacing: .16em; }
+.pagina-etapa-sparkle { color: var(--pagina-tema); font-size: 18px; opacity: .55; }
+.pagina-experiencia .pagina-content-block { padding: clamp(23px,3vw,34px); border: 1px solid color-mix(in srgb, var(--pagina-tema) 12%, var(--line)); border-radius: 25px 25px 25px 11px; background: var(--card); box-shadow: 0 16px 38px -31px rgba(10,48,100,.48); }
+.pagina-experiencia .pagina-content-block::before { display: none; }
+.pagina-experiencia .pagina-content-block h2 { color: var(--ink); font-size: clamp(19px,2.2vw,23px); margin: 0 0 16px; letter-spacing: -.035em; }
+.pagina-experiencia .pagina-rich-text { font-size: 15.5px; line-height: 2; max-width: 75ch; }
+.pagina-experiencia .pagina-highlight { background: color-mix(in srgb,var(--pagina-tema-claro) 70%, var(--card)); border-left: 4px solid var(--pagina-tema); }
+.pagina-experiencia .pagina-list li { line-height: 1.7; }
+.pagina-experiencia .pagina-study-button { background: var(--pagina-tema); border-radius: 15px; }
+.pagina-experiencia .pagina-study-button:hover { background: var(--pagina-tema-escuro); }
+.pagina-experiencia .pagina-aside { gap: 15px; }
+.pagina-indice-card,.pagina-mensagem-card { border: 1px solid color-mix(in srgb,var(--pagina-tema) 14%,var(--line)); border-radius: 23px; background: var(--card); box-shadow: 0 14px 30px -27px rgba(11,47,97,.35); }
+.pagina-indice-card { padding: 20px 18px; }
+.pagina-indice-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+.pagina-indice-header .pagina-indice-symbol { background: var(--pagina-tema-claro); color: var(--pagina-tema); border-radius: 13px; width: 39px; height: 39px; display: grid; place-items: center; }
+.pagina-indice-header small { display: block; font-size: 9px; letter-spacing: .12em; color: var(--muted); font-weight: 800; }
+.pagina-indice-header strong { display: block; margin-top: 3px; color: var(--ink); font-size: 17px; }
+.pagina-indice-items { display: flex; flex-direction: column; gap: 2px; max-height: 310px; overflow-y: auto; }
+.pagina-indice-items a { display: flex; align-items: center; gap: 10px; padding: 9px; border-radius: 12px; color: var(--ink); text-decoration: none; transition: background .15s,transform .15s; }
+.pagina-indice-items a:hover { background: var(--pagina-tema-claro); transform: translateX(2px); }
+.pagina-indice-items a span { flex: 0 0 28px; height: 28px; border-radius: 10px; background: var(--pagina-tema-claro); display: grid; place-items: center; color: var(--pagina-tema); font-size: 10px; font-weight: 800; }
+.pagina-indice-items a strong { min-width: 0; font-weight: 650; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
+.pagina-experiencia .pagina-progress-card { padding: 22px; border-radius: 24px; background: var(--card); }
+.pagina-experiencia .pagina-progress-card::before { background: var(--pagina-tema); }
+.pagina-experiencia .pagina-progress-card > strong { color: var(--ink); }
+.pagina-progress-numeros { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 7px; font-size: 11px; font-weight: 700; color: var(--muted); }
+.pagina-progress-numeros strong { color: var(--pagina-tema); font-size: 14px; }
+.pagina-experiencia .pagina-progress-track > span { background: linear-gradient(90deg,var(--pagina-tema-escuro),var(--pagina-tema)); }
+.pagina-mensagem-card { position: relative; padding: 20px 20px 21px; background: color-mix(in srgb, var(--pagina-tema-claro) 68%, var(--card)); }
+.pagina-mensagem-card > span { position: absolute; right: 19px; top: 14px; font-size: 24px; color: var(--pagina-tema); opacity: .5; }
+.pagina-mensagem-card strong { color: var(--pagina-tema-escuro); font-size: 13px; }
+.pagina-mensagem-card p { color: var(--ink); font-size: 13px; line-height: 1.7; margin: 8px 0 0; white-space: pre-wrap; }
+.pagina-experiencia .pagina-aside-card { border-radius: 23px; }
+.pagina-experiencia[data-modo-foco='ativo'] .pagina-layout { display: block; max-width: 900px; margin: 0 auto; }
+.pagina-experiencia[data-modo-foco='ativo'] .pagina-aside { display: none; }
+.pagina-experiencia[data-modo-foco='ativo'] .pagina-study-intro { padding-top: 15px; }
+.pagina-formato-cartoes .pagina-etapa { display: block; padding-bottom: 22px; }
+.pagina-formato-cartoes .pagina-etapa::before,.pagina-formato-cartoes .pagina-etapa-marker { display: none; }
+.pagina-formato-cartoes .pagina-etapa-content { padding: 0; }
+.pagina-formato-cartoes .pagina-etapa-eyebrow { margin-left: 12px; }
+.pagina-formato-cartoes .pagina-content-block { border-radius: 27px; }
+
+html[data-theme='dark'] .pagina-experiencia .pagina-hero { box-shadow: none; }
+html[data-theme='dark'] .pagina-study-intro-symbol,html[data-theme='dark'] .pagina-indice-header .pagina-indice-symbol,html[data-theme='dark'] .pagina-indice-items a span { background: color-mix(in srgb,var(--pagina-tema) 19%,#15263c); color: #b6dbff; }
+html[data-theme='dark'] .pagina-mensagem-card,html[data-theme='dark'] .pagina-experiencia .pagina-highlight { background: color-mix(in srgb,var(--pagina-tema) 13%,var(--card)); }
+html[data-theme='dark'] .pagina-mensagem-card strong { color: #c9dcff; }
+html[data-theme='dark'] .pagina-indice-items a:hover { background: color-mix(in srgb,var(--pagina-tema) 18%,var(--card)); }
+html[data-theme='dark'] .pagina-etapa-marker { border-color: var(--dark-bg); }
+html[data-theme='dark'] .pagina-experiencia .pagina-back-button,html[data-theme='dark'] .pagina-progress-numeros strong { color: #aacfff; }
+
+@media (max-width: 1100px) {
+  .pagina-hero-art { width: 155px; flex-basis: 155px; transform: scale(.85); transform-origin: center; }
+  .pagina-experiencia .pagina-layout { grid-template-columns: minmax(0,1fr) 270px; gap: 18px; }
+}
+@media (max-width: 850px) {
+  .pagina-hero-art { display: none; }
+  .pagina-experiencia .pagina-layout { grid-template-columns: 1fr; }
+  .pagina-experiencia .pagina-aside { position: static; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .pagina-indice-card { grid-column: 1/-1; }
+  .pagina-indice-items { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 620px) {
+  .pagina-experiencia .pagina-hero { padding: 25px 20px; min-height: auto; border-radius: 27px 27px 49px 27px; }
+  .pagina-experiencia .pagina-hero-top { align-items: flex-start; flex-direction: column; gap: 13px; margin-bottom: 23px; }
+  .pagina-experiencia .pagina-hero-content { gap: 12px; align-items: flex-start; }
+  .pagina-experiencia .pagina-hero-icon { width: 49px; height: 49px; flex-basis: 49px; border-radius: 16px; }
+  .pagina-experiencia .pagina-hero h1 { font-size: clamp(24px,7vw,35px); overflow-wrap: anywhere; }
+  .pagina-hero-chips span { font-size: 11px; }
+  .pagina-study-intro { flex-wrap: wrap; gap: 10px; }
+  .pagina-study-intro-symbol { width: 43px; height: 43px; border-radius: 14px; }
+  .pagina-study-count { display: none; }
+  .pagina-etapa { grid-template-columns: 32px minmax(0,1fr); gap: 8px; }
+  .pagina-etapa-marker { width: 32px; height: 32px; border-radius: 12px; font-size: 11px; border-width: 3px; }
+  .pagina-etapa:not(:last-of-type)::before { left: 15px; top: 35px; }
+  .pagina-experiencia .pagina-content-block { padding: 20px; border-radius: 20px 20px 20px 9px; }
+  .pagina-experiencia .pagina-aside,.pagina-indice-items { grid-template-columns: 1fr; }
+  .pagina-indice-card { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pagina-indice-items a, .pagina-experiencia .pagina-progress-track > span { transition: none; }
+  .pagina-indice-items a:hover { transform: none; }
+}
+
+/* Variações de bloco de texto que o CMS oferece ao professor */
+.pagina-experiencia .pagina-text-block[data-estilo='destaque'] {
+  border-left: 5px solid var(--pagina-tema);
+  background: color-mix(in srgb,var(--pagina-tema-claro) 44%,var(--card));
+}
+.pagina-experiencia .pagina-text-block[data-estilo='resumo'] {
+  background: color-mix(in srgb,var(--pagina-tema-claro) 78%,var(--card));
+  border-color: color-mix(in srgb,var(--pagina-tema) 20%,transparent);
+  border-radius: 25px;
+}
+html[data-theme='dark'] .pagina-experiencia .pagina-text-block[data-estilo='destaque'],
+html[data-theme='dark'] .pagina-experiencia .pagina-text-block[data-estilo='resumo'] {
+  background: color-mix(in srgb,var(--pagina-tema) 14%,var(--card));
+}
+/* Mantenha as cores de aviso/sucesso, independentes da paleta da aula. */
+.pagina-experiencia .pagina-highlight.warning { background: color-mix(in srgb,#ffde83 24%,var(--card)); border-left-color: #d99a16; }
+.pagina-experiencia .pagina-highlight.success { background: color-mix(in srgb,#6bd8a2 19%,var(--card)); border-left-color: #25915d; }
+.pagina-experiencia .pagina-highlight.danger { background: color-mix(in srgb,#f7a39a 21%,var(--card)); border-left-color: #c44e47; }
+.pagina-experiencia .pagina-study-button.completed { background: #258359; }

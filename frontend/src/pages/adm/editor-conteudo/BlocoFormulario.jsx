@@ -53,6 +53,14 @@ export function BlocoFormulario({
     case 'texto':
       return (
         <>
+          <label className="editor-field">
+            <span className="editor-field-label">Apresentação deste bloco</span>
+            <select value={dados.estilo || 'padrao'} onChange={(event) => atualizarDado('estilo', event.target.value)}>
+              <option value="padrao">Padrão · leitura tranquila</option>
+              <option value="destaque">Destaque · foco no conceito</option>
+              <option value="resumo">Resumo · bloco colorido</option>
+            </select>
+          </label>
           {campo(
             'Título',
             dados.titulo,

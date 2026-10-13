@@ -2050,3 +2050,282 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
   .flashcards-filter-actions { justify-content: flex-end; }
 }
 
+
+
+/* =====================================================
+   FLASHCARDS POR ASSUNTO — apresentação sem painel de fundo
+   A área dos cartões fica livre; apenas os tópicos são separados.
+   O visual dos baralhos e da sessão de jogo não é alterado.
+   ===================================================== */
+
+.flashcards-page .materia-section {
+  --flashcards-topic-accent: #286ec1;
+  --flashcards-topic-rgb: 40, 110, 193;
+  margin: 28px 0 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.flashcards-page .materia-portugues { --flashcards-topic-accent: #2886d0; --flashcards-topic-rgb: 40, 134, 208; }
+.flashcards-page .materia-matematica { --flashcards-topic-accent: #cf665c; --flashcards-topic-rgb: 207, 102, 92; }
+.flashcards-page .materia-historia { --flashcards-topic-accent: #a57652; --flashcards-topic-rgb: 165, 118, 82; }
+.flashcards-page .materia-geografia { --flashcards-topic-accent: #408d67; --flashcards-topic-rgb: 64, 141, 103; }
+.flashcards-page .materia-ciencias { --flashcards-topic-accent: #8b6cc2; --flashcards-topic-rgb: 139, 108, 194; }
+
+.flashcards-page .materia-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-bottom: 14px;
+  padding: 0 2px 8px;
+}
+.flashcards-page .materia-section-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--flashcards-topic-accent);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+.flashcards-page .materia-section-title {
+  display: block;
+  margin: 0;
+  color: var(--ink);
+  font: 800 clamp(19px, 2vw, 24px)/1.2 'Space Grotesk', sans-serif;
+}
+.flashcards-page .materia-section-description {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.flashcards-page .materia-section-count {
+  flex: none;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--flashcards-topic-rgb), .18);
+  border-radius: 999px;
+  background: rgba(var(--flashcards-topic-rgb), .075);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+/* Seções leves: só um divisor e um cabeçalho; nada de "caixa branca" atrás. */
+.flashcards-page .flashcards-content-section {
+  position: relative;
+  margin: 0;
+  padding: 24px 0 32px;
+  border-top: 1px solid rgba(var(--flashcards-topic-rgb), .22);
+  background: transparent;
+}
+.flashcards-page .flashcards-content-section::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--flashcards-topic-accent);
+}
+.flashcards-page .flashcards-content-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.flashcards-page .flashcards-content-heading-main {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+.flashcards-page .flashcards-content-index {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(var(--flashcards-topic-rgb), .18);
+  border-radius: 15px;
+  background: rgba(var(--flashcards-topic-rgb), .10);
+  color: var(--flashcards-topic-accent);
+  font: 800 19px/1 'Space Grotesk', sans-serif;
+}
+.flashcards-page .flashcards-content-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.flashcards-page .flashcards-content-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 800 clamp(17px, 1.7vw, 20px)/1.25 'Space Grotesk', sans-serif;
+  overflow-wrap: anywhere;
+}
+.flashcards-page .flashcards-content-count {
+  flex-shrink: 0;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(var(--flashcards-topic-rgb), .09);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+/* =====================================================
+   DETALHE DA MATÉRIA — cabeçalho na cor do baralho
+   As cores acompanham as capas dos baralhos da seleção.
+   ===================================================== */
+.flashcards-page .flashcards-materia-hero {
+  --materia-cor: #2363bc;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  min-height: 155px;
+  padding: 32px 36px;
+  margin-bottom: 20px;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(112deg, color-mix(in srgb, var(--materia-cor) 82%, #092e63) 0%, var(--materia-cor) 100%);
+  box-shadow: 0 12px 25px -19px rgba(16, 50, 91, .45);
+}
+.flashcards-page .flashcards-materia-portugues { --materia-cor: #208be3; }
+.flashcards-page .flashcards-materia-matematica { --materia-cor: #e3585b; }
+.flashcards-page .flashcards-materia-historia { --materia-cor: #aa7959; }
+.flashcards-page .flashcards-materia-geografia { --materia-cor: #36a363; }
+.flashcards-page .flashcards-materia-ciencias { --materia-cor: #9061cd; }
+.flashcards-page .flashcards-materia-hero::before {
+  content: '';
+  position: absolute;
+  right: -80px;
+  top: -160px;
+  width: 340px;
+  height: 340px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .065);
+}
+.flashcards-page .flashcards-materia-hero-content { position: relative; z-index: 1; }
+.flashcards-page .flashcards-materia-hero-label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, .82);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+.flashcards-page .flashcards-materia-hero h1 {
+  margin: 0;
+  color: #fff;
+  font: 800 clamp(28px, 3vw, 38px)/1.12 'Space Grotesk', system-ui, sans-serif;
+}
+/* Três folhas sutis como elemento visual, sem textos ou contadores extras. */
+.flashcards-page .flashcards-materia-hero-art {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 105px;
+  width: 105px;
+  height: 82px;
+  margin-right: 16px;
+  transform: rotate(-8deg);
+}
+.flashcards-page .flashcards-materia-hero-art span {
+  position: absolute;
+  display: block;
+  width: 66px;
+  height: 77px;
+  border: 1px solid rgba(255,255,255,.33);
+  border-radius: 10px;
+  background: rgba(255,255,255,.11);
+  box-shadow: 0 6px 20px rgba(14,32,64,.08);
+}
+.flashcards-page .flashcards-materia-hero-art span:nth-child(1) { left: 9px; top: 0; transform: rotate(-12deg); }
+.flashcards-page .flashcards-materia-hero-art span:nth-child(2) { left: 20px; top: 1px; transform: rotate(0deg); }
+.flashcards-page .flashcards-materia-hero-art span:nth-child(3) { left: 32px; top: 4px; transform: rotate(11deg); background: rgba(255,255,255,.18); }
+
+/* Cartões de perguntas: retorno ao modelo compacto anterior.
+   Sem número no canto, faixa colorida ou efeito de elevação exagerado. */
+.flashcards-page .flashcard-grid {
+  grid-template-columns: repeat(auto-fill, minmax(195px, 205px));
+  gap: 14px;
+}
+.flashcards-page button.flashcard {
+  height: 175px;
+  transition: none;
+}
+.flashcards-page button.flashcard:hover { transform: none; }
+.flashcards-page .flashcard-face {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 5px 16px rgba(13,71,161,.045);
+}
+.flashcards-page .flashcard-face.front {
+  color: var(--ink);
+  background: linear-gradient(180deg,#fff 0%,#f9fbfd 100%);
+}
+.flashcards-page .flashcard-face.back {
+  color: #fff;
+  background: linear-gradient(135deg,var(--ink) 0%,#0b397f 100%);
+}
+.flashcards-page .flashcard-face.front::before { content: none; }
+.flashcards-page .flashcard:hover .flashcard-face.front {
+  transform: translateY(-2px);
+  border-color: rgba(33,150,243,.28);
+  box-shadow: 0 10px 22px rgba(13,71,161,.08);
+}
+.flashcards-page .flashcard-side-label { color: #567aab; }
+.flashcards-page .flashcard-face.back .flashcard-side-label { color: #cde5ff; }
+.flashcards-page button.flashcard:focus-visible { outline: 3px solid var(--flashcards-topic-accent); outline-offset: 4px; }
+
+html[data-theme='dark'] .flashcards-page .flashcard-face.front {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme='dark'] .flashcards-page .flashcard-face.back { background: #103769; }
+html[data-theme='dark'] .flashcards-page .flashcard-side-label { color: #a7ccff; }
+
+/* Assuntos sobre o fundo da página, sem painéis brancos intermediários. */
+.flashcards-page .flashcards-detalhe-topo { margin-bottom: 18px; }
+.flashcards-page .materia-section { margin-top: 0; }
+.flashcards-page .flashcards-content-section:first-child { border-top: 0; padding-top: 10px; }
+.flashcards-page .flashcards-content-section:first-child::before { display: none; }
+
+@media (max-width: 620px) {
+  .flashcards-page .flashcards-materia-hero { min-height: 126px; padding: 26px 22px; border-radius: 16px; }
+  .flashcards-page .flashcards-materia-hero-art { transform: scale(.65) rotate(-8deg); transform-origin: right center; margin-right: 0; flex-basis: 76px; }
+  .flashcards-page .flashcard-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 195px), 1fr)); }
+}
+@media (max-width: 480px) {
+  .flashcards-page .flashcard-grid { grid-template-columns: minmax(0, 1fr); }
+  .flashcards-page button.flashcard { height: 185px; }
+  .flashcards-page .flashcards-content-heading { flex-wrap: wrap; }
+  .flashcards-page .flashcards-content-count { margin-left: 59px; }
+}
+
+/* Apenas a pergunta ou a resposta aparece em cada face do cartão. */
+.flashcards-page .flashcard-face {
+  align-items: center;
+  justify-content: center;
+}
+.flashcards-page .flashcard-face-text {
+  flex: initial;
+  min-height: auto;
+  max-width: 100%;
+}

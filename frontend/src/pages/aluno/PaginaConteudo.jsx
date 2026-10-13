@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
+import { normalizarAparencia, obterPaleta } from '../../utils/aparenciaConteudo.js';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 
@@ -8,6 +9,7 @@ import BlocoQuestoes from './conteudos/BlocoQuestoes.jsx';
 import BlocoChecklist from './conteudos/BlocoChecklist.jsx';
 
 import '../../styles/aluno/PaginaConteudo.css';
+import '../../styles/aluno/PaginaConteudoExtra.css';
 import { API_URL, obterToken } from '../../services/api.js';
 
 function normalizarDados(bloco) {
@@ -122,6 +124,8 @@ export default function PaginaConteudo() {
 
   const [blocos, setBlocos] =
     useState([]);
+
+  const [modoFoco, setModoFoco] = useState(false);
 
   const [carregando, setCarregando] =
     useState(true);
@@ -659,6 +663,24 @@ export default function PaginaConteudo() {
       [pagina?.materia]
     );
 
+  const aparencia = useMemo(
+    () => normalizarAparencia(pagina?.aparencia),
+    [pagina?.aparencia]
+  );
+  const paleta = obterPaleta(aparencia);
+  const progressoPercentual = estudado ? 100 : 0;
+  const tituloBloco = (bloco, indice) => {
+    const dados = normalizarDados(bloco);
+    const nomes = {
+      texto: 'Explicação', destaque: 'Para lembrar',
+      video: 'Videoaula', imagem: 'Ilustração',
+      pdf: 'Material complementar', lista: 'Resumo em tópicos',
+      flashcards: 'Revisão ativa', questoes: 'Pratique',
+      simulado: 'Simulado', checklist: 'Checklist',
+    };
+    return dados.titulo || `${nomes[bloco.tipo] || 'Atividade'} ${indice + 1}`;
+  };
+
   /* ========================================================
      RENDERIZAR BLOCOS
      ======================================================== */
@@ -678,6 +700,7 @@ export default function PaginaConteudo() {
         return (
           <section
             className="pagina-content-block pagina-text-block"
+            data-estilo={['padrao', 'destaque', 'resumo'].includes(dados.estilo) ? dados.estilo : 'padrao'}
             key={bloco.id}
           >
             {dados.titulo && (
@@ -1248,7 +1271,15 @@ export default function PaginaConteudo() {
     '';
 
   return (
-    <div className="pagina-conteudo-page page-shell">
+    <div
+      className={`pagina-conteudo-page page-shell pagina-experiencia pagina-formato-${aparencia.formato}`}
+      data-modo-foco={modoFoco ? 'ativo' : 'inativo'}
+      style={{
+        '--pagina-tema': paleta.cor,
+        '--pagina-tema-escuro': paleta.escura,
+        '--pagina-tema-claro': paleta.clara,
+      }}
+    >
       <button
         type="button"
         className="pagina-back-button"
@@ -1270,7 +1301,7 @@ export default function PaginaConteudo() {
         className="pagina-hero"
         style={{
           '--pagina-accent':
-            materiaStyle.color,
+            paleta.cor,
 
           '--pagina-accent-bg':
             materiaStyle.bg,
@@ -1333,7 +1364,7 @@ export default function PaginaConteudo() {
 
           <div>
             <span className="pagina-kicker">
-              MATERIAL DE ESTUDO
+              {aparencia.rotulo || 'MATERIAL DE ESTUDO'}
             </span>
 
             <h1>
@@ -1345,17 +1376,56 @@ export default function PaginaConteudo() {
                 {pagina.descricao}
               </p>
             )}
+            <div className="pagina-hero-chips">
+              <span><Icon name="book" size={15} /> {blocos.length} etapas</span>
+              <span><Icon name="clock" size={15} /> {aparencia.minutos} min de leitura</span>
+              <span><Icon name="check" size={15} /> {estudado ? 'Concluído' : 'No seu ritmo'}</span>
+            </div>
+          </div>
+          <div className="pagina-hero-art" aria-hidden="true">
+            <span className="pagina-art-halo" />
+            <span className="pagina-art-symbol"><SubjectIcon materia={pagina.materia} size={54} color="#fff" /></span>
+            <span className="pagina-art-star pagina-art-star-a">✦</span>
+            <span className="pagina-art-star pagina-art-star-b">✳</span>
+            <span className="pagina-art-star pagina-art-star-c">✦</span>
           </div>
         </div>
+        <button
+          type="button"
+          className="pagina-foco-toggle"
+          aria-pressed={modoFoco}
+          onClick={() => setModoFoco((atual) => !atual)}
+        >
+          {modoFoco ? 'Sair do modo foco' : 'Ativar modo foco'}
+        </button>
       </header>
 
       <div className="pagina-layout">
-        <main className="pagina-main">
-          {blocos.length >
-          0 ? (
-            blocos.map(
-              renderBloco
-            )
+        <main className="pagina-main" id="inicio-do-estudo">
+          <div className="pagina-study-intro">
+            <div className="pagina-study-intro-symbol"><Icon name="book" size={22} /></div>
+            <div>
+              <span>PREPARE SEU CADERNO</span>
+              <h2>Sua jornada de estudo</h2>
+              <p>Acompanhe cada etapa e avance no seu próprio ritmo.</p>
+            </div>
+            <span className="pagina-study-count">{blocos.length} etapas</span>
+          </div>
+          {blocos.length > 0 ? (
+            blocos.map((bloco, indice) => (
+              <div className="pagina-etapa" id={`etapa-${bloco.id}`} key={bloco.id}>
+                <div className="pagina-etapa-marker" aria-hidden="true">
+                  <span>{String(indice + 1).padStart(2, '0')}</span>
+                </div>
+                <div className="pagina-etapa-content">
+                  <div className="pagina-etapa-eyebrow">
+                    <span>ETAPA {String(indice + 1).padStart(2, '0')}</span>
+                    <span className="pagina-etapa-sparkle" aria-hidden="true">✦</span>
+                  </div>
+                  {renderBloco(bloco)}
+                </div>
+              </div>
+            ))
           ) : (
             <div className="pagina-state-card">
               <div className="pagina-state-icon">
@@ -1377,6 +1447,22 @@ export default function PaginaConteudo() {
         </main>
 
         <aside className="pagina-aside">
+          {aparencia.mostrarIndice && blocos.length > 0 && (
+            <nav className="pagina-indice-card" aria-label="Etapas desta página">
+              <div className="pagina-indice-header">
+                <span className="pagina-indice-symbol"><Icon name="book" size={17} /></span>
+                <div><small>NAVEGUE PELO CONTEÚDO</small><strong>Nesta aula</strong></div>
+              </div>
+              <div className="pagina-indice-items">
+                {blocos.map((bloco, indice) => (
+                  <a key={bloco.id} href={`#etapa-${bloco.id}`}>
+                    <span>{String(indice + 1).padStart(2, '0')}</span>
+                    <strong>{tituloBloco(bloco, indice)}</strong>
+                  </a>
+                ))}
+              </div>
+            </nav>
+          )}
           <div className="pagina-progress-card">
             <div className="pagina-progress-heading">
               <span className="pagina-aside-label">
@@ -1405,15 +1491,11 @@ export default function PaginaConteudo() {
                 : 'Quando terminar de revisar, marque este tópico como estudado.'}
             </p>
 
-            <div
-              className="pagina-progress-track"
-              aria-hidden="true"
-            >
-              <span
-                style={{
-                  width: estudado ? '100%' : '0%',
-                }}
-              />
+            <div className="pagina-progress-numeros">
+              <span>Progresso do tópico</span><strong>{progressoPercentual}%</strong>
+            </div>
+            <div className="pagina-progress-track" aria-hidden="true">
+              <span style={{ width: `${progressoPercentual}%` }} />
             </div>
 
             <button
@@ -1443,6 +1525,13 @@ export default function PaginaConteudo() {
             </button>
           </div>
 
+          {aparencia.mensagem && (
+            <div className="pagina-mensagem-card">
+              <span aria-hidden="true">✦</span>
+              <strong>Um incentivo pra você</strong>
+              <p>{aparencia.mensagem}</p>
+            </div>
+          )}
           <div className="pagina-aside-card">
             <span className="pagina-aside-label">
               SOBRE ESTE TÓPICO

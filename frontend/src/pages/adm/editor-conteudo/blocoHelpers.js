@@ -93,6 +93,7 @@ export function dadosIniciais(tipo) {
       return {
         titulo: '',
         texto: '',
+        estilo: 'padrao',
       };
 
     case 'destaque':

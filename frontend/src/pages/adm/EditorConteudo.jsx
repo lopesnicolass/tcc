@@ -14,6 +14,8 @@ import {
 
 import { BlocoFormulario } from './editor-conteudo/BlocoFormulario.jsx';
 import { previewBloco } from './editor-conteudo/BlocoPreview.jsx';
+import { APARENCIA_PADRAO, TEMAS_CONTEUDO, normalizarAparencia, obterPaleta } from '../../utils/aparenciaConteudo.js';
+import '../../styles/adm/EditorConteudoVisual.css';
 
 export default function EditorConteudo({
   topicoId,
@@ -43,6 +45,10 @@ export default function EditorConteudo({
 
   const [descricao, setDescricao] =
     useState('');
+
+  const [aparencia, setAparencia] = useState({ ...APARENCIA_PADRAO });
+  const atualizarAparencia = (chave, valor) => setAparencia((anterior) => ({ ...anterior, [chave]: valor }));
+  const paleta = obterPaleta(aparencia);
 
   const [publicado, setPublicado] =
     useState(false);
@@ -89,6 +95,7 @@ export default function EditorConteudo({
         setPagina(null);
         setTitulo(topicoNome || '');
         setDescricao('');
+        setAparencia({ ...APARENCIA_PADRAO });
         setPublicado(false);
         setBlocos([]);
         return;
@@ -105,6 +112,7 @@ export default function EditorConteudo({
       setDescricao(
         dados.pagina.descricao || ''
       );
+      setAparencia(normalizarAparencia(dados.pagina.aparencia));
 
       setPublicado(
         Number(dados.pagina.publicado) === 1 ||
@@ -215,6 +223,7 @@ export default function EditorConteudo({
           topicoNome ||
           'Conteúdo',
         descricao: descricao.trim(),
+        aparencia,
         publicado: publicado ? 1 : 0,
       };
 
@@ -293,6 +302,7 @@ export default function EditorConteudo({
             topicoNome ||
             'Conteúdo',
           descricao: descricao.trim(),
+          aparencia,
           publicado: publicado ? 1 : 0,
         }),
       }
@@ -786,6 +796,7 @@ export default function EditorConteudo({
                         topicoId: Number(topicoId),
                         titulo: titulo.trim() || topicoNome || 'Conteúdo',
                         descricao: descricao.trim(),
+                        aparencia,
                         publicado: proximoStatus ? 1 : 0,
                       }),
                     }
@@ -800,6 +811,7 @@ export default function EditorConteudo({
                       body: JSON.stringify({
                         titulo: titulo.trim() || topicoNome || 'Conteúdo',
                         descricao: descricao.trim(),
+                        aparencia,
                         publicado: proximoStatus ? 1 : 0,
                       }),
                     }
@@ -915,6 +927,78 @@ export default function EditorConteudo({
                 }
               )}
             </div>
+          </section>
+
+          <section className="panel-card editor-panel editor-visual-panel">
+            <div className="editor-panel-title">
+              <span className="editor-panel-kicker">IDENTIDADE VISUAL</span>
+              <h2>Personalização da aula</h2>
+              <p>Escolha a aparência que os alunos verão nesta página. As opções são salvas com o conteúdo.</p>
+            </div>
+
+            <label className="editor-field-label" id="editor-paleta-label">Paleta da aula</label>
+            <div className="editor-tema-grid" role="group" aria-labelledby="editor-paleta-label">
+              {TEMAS_CONTEUDO.map((tema) => (
+                <button
+                  type="button"
+                  key={tema.id}
+                  className={`editor-tema-opcao ${aparencia.tema === tema.id ? 'is-active' : ''}`}
+                  aria-pressed={aparencia.tema === tema.id}
+                  onClick={() => atualizarAparencia('tema', tema.id)}
+                >
+                  <span className="editor-tema-bolinha" style={{ background: tema.cor }} />
+                  <span>{tema.nome}</span>
+                  {aparencia.tema === tema.id && <Icon name="check" size={16} />}
+                </button>
+              ))}
+            </div>
+
+            <div className="editor-visual-fields">
+              <label className="editor-field">
+                <span className="editor-field-label">Estilo de leitura</span>
+                <select value={aparencia.formato} onChange={(e) => atualizarAparencia('formato', e.target.value)}>
+                  <option value="trilha">Trilha com etapas e linha do tempo</option>
+                  <option value="cartoes">Cartões independentes</option>
+                </select>
+              </label>
+              <label className="editor-field">
+                <span className="editor-field-label">Tempo estimado (minutos)</span>
+                <input type="number" min="1" max="180" value={aparencia.minutos}
+                  onChange={(e) => atualizarAparencia('minutos', e.target.value === '' ? '' : Number(e.target.value))} />
+              </label>
+              <label className="editor-field editor-visual-full">
+                <span className="editor-field-label">Etiqueta do cabeçalho</span>
+                <input maxLength={48} value={aparencia.rotulo}
+                  onChange={(e) => atualizarAparencia('rotulo', e.target.value)}
+                  placeholder="Ex.: EXPLORE E APRENDA" />
+              </label>
+              <label className="editor-field editor-visual-full">
+                <span className="editor-field-label">Mensagem motivadora</span>
+                <textarea rows={2} maxLength={180} value={aparencia.mensagem}
+                  onChange={(e) => atualizarAparencia('mensagem', e.target.value)}
+                  placeholder="Uma mensagem que acompanha o estudante..." />
+              </label>
+            </div>
+
+            <label className="editor-indice-toggle">
+              <input type="checkbox" checked={aparencia.mostrarIndice}
+                onChange={(e) => atualizarAparencia('mostrarIndice', e.target.checked)} />
+              <span>Mostrar índice de navegação para os alunos</span>
+            </label>
+
+            <div className="editor-visual-preview" style={{ '--visual-cor': paleta.cor, '--visual-escura': paleta.escura, '--visual-clara': paleta.clara }}>
+              <div className="editor-visual-minihero">
+                <small>PRÉVIA DA AULA · {aparencia.rotulo || 'MATERIAL DE ESTUDO'}</small>
+                <strong>{titulo || topicoNome || 'Título da aula'}</strong>
+                <span>{aparencia.minutos || 8} min de leitura · {blocos.length} etapas</span>
+                <b aria-hidden="true">✦</b>
+              </div>
+              <div className="editor-visual-minibody">
+                <span>01</span>
+                <div><strong>{blocosOrdenados[0]?.dados?.titulo || 'Primeira etapa do estudo'}</strong><small>Assim o início da aula será apresentado ao aluno.</small></div>
+              </div>
+            </div>
+            <span className="editor-visual-help">Prévia simplificada. Clique em “Salvar página” para aplicar as alterações.</span>
           </section>
 
           <section className="panel-card editor-panel">

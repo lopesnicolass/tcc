@@ -1071,6 +1071,8 @@ db.run(`
 
             descricao TEXT DEFAULT '',
 
+            aparencia TEXT NOT NULL DEFAULT '{}',
+
             publicado INTEGER NOT NULL DEFAULT 1,
 
             created_at DATETIME
@@ -1087,6 +1089,16 @@ db.run(`
         )
     `);
 
+
+    // Migração não destrutiva para bancos criados antes da personalização.
+    db.all("PRAGMA table_info(paginas_conteudo)", (erro, colunas) => {
+        if (erro) return console.error("Erro ao verificar aparência:", erro);
+        if (!colunas.some((coluna) => coluna.name === "aparencia")) {
+            db.run("ALTER TABLE paginas_conteudo ADD COLUMN aparencia TEXT NOT NULL DEFAULT '{}'", (falha) => {
+                if (falha) console.error("Erro ao adicionar aparência:", falha);
+            });
+        }
+    });
 
     // =====================================================
     // BLOCOS DAS PÁGINAS DE CONTEÚDO

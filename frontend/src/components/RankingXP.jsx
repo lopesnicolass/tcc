@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL, obterToken, request } from '../services/api.js';
 import Icon from './Icon.jsx';
 
-const MEDALHAS = ['🥇', '🥈', '🥉'];
 const POSICAO_LABEL = ['1º lugar', '2º lugar', '3º lugar'];
 
 export default function RankingXP({ xp, usuarioId }) {
@@ -76,18 +75,19 @@ export default function RankingXP({ xp, usuarioId }) {
     posicao: indice + 1
   }));
 
-  const podium = [
-    alunosExibidos[1],
-    alunosExibidos[0],
-    alunosExibidos[2]
-  ].filter(Boolean);
-
   return (
     <section className="home-ranking panel-card" aria-labelledby="home-ranking-title">
+      <div className="home-ranking-decor" aria-hidden="true">
+        <span className="home-ranking-decor-orb home-ranking-decor-orb-left" />
+        <span className="home-ranking-decor-orb home-ranking-decor-orb-right" />
+        <span className="home-ranking-decor-star home-ranking-decor-star-one">✦</span>
+        <span className="home-ranking-decor-star home-ranking-decor-star-two">✧</span>
+        <span className="home-ranking-decor-star home-ranking-decor-star-three">✦</span>
+      </div>
       <div className="home-ranking-heading">
         <div>
           <span className="home-ranking-kicker"><Icon name="trophy" size={15} /> DESTAQUES DA TURMA</span>
-          <h2 id="home-ranking-title">Ranking de XP</h2>
+          <h2 id="home-ranking-title">Ranking de <em>XP</em></h2>
           <p>Os 3 estudantes participantes com mais pontos acumulados.</p>
         </div>
         {!participando && !carregando && !erro && (
@@ -110,10 +110,13 @@ export default function RankingXP({ xp, usuarioId }) {
         </div>
       ) : (
         <ol className="home-ranking-list">
-          {podium.map((aluno) => (
+          {alunosExibidos.map((aluno) => (
             <li className={`home-ranking-player home-ranking-place-${aluno.posicao}`} key={aluno.id}>
-              <span className="home-ranking-medal" aria-label={POSICAO_LABEL[aluno.posicao - 1]}>
-                {MEDALHAS[aluno.posicao - 1]}
+              {aluno.posicao === 1 && (
+                <span className="home-ranking-crown" aria-hidden="true"><Icon name="crown" size={27} /></span>
+              )}
+              <span className="home-ranking-medal" role="img" aria-label={POSICAO_LABEL[aluno.posicao - 1]}>
+                <span aria-hidden="true">{aluno.posicao}</span>
               </span>
               <span className="home-ranking-avatar">
                 {fotos[aluno.id] ? (

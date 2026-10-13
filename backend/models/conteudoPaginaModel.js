@@ -1,14 +1,15 @@
 const db = require("../config/db");
 
-function criarPagina(topicoId, titulo, descricao, callback) {
+function criarPagina(topicoId, titulo, descricao, aparencia, callback) {
     const sql = `
         INSERT INTO paginas_conteudo
         (
             topico_id,
             titulo,
-            descricao
+            descricao,
+            aparencia
         )
-        VALUES (?, ?, ?)
+        VALUES (?, ?, ?, ?)
     `;
 
     db.run(
@@ -16,7 +17,8 @@ function criarPagina(topicoId, titulo, descricao, callback) {
         [
             topicoId,
             titulo,
-            descricao || ""
+            descricao || "",
+            JSON.stringify(aparencia || {})
         ],
         function (erro) {
             if (erro) {
@@ -39,6 +41,7 @@ function listarPaginas(callback) {
                 p.topico_id,
                 p.titulo,
                 p.descricao,
+                p.aparencia,
                 p.publicado,
                 p.created_at,
                 p.updated_at,
@@ -68,6 +71,7 @@ function buscarPaginaPorId(id, callback) {
                 p.topico_id,
                 p.titulo,
                 p.descricao,
+                p.aparencia,
                 p.publicado,
                 p.created_at,
                 p.updated_at,
@@ -94,6 +98,7 @@ function buscarPaginaPorTopico(topicoId, callback) {
                 p.topico_id,
                 p.titulo,
                 p.descricao,
+                p.aparencia,
                 p.publicado,
                 p.created_at,
                 p.updated_at,
@@ -139,6 +144,11 @@ function atualizarPagina(id, dados, callback) {
                     ? dados.descricao
                     : atual.descricao;
 
+            const aparencia =
+                dados.aparencia !== undefined
+                    ? JSON.stringify(dados.aparencia)
+                    : atual.aparencia;
+
             const publicado =
                 dados.publicado !== undefined
                     ? (dados.publicado ? 1 : 0)
@@ -150,6 +160,7 @@ function atualizarPagina(id, dados, callback) {
                     SET
                         titulo = ?,
                         descricao = ?,
+                        aparencia = ?,
                         publicado = ?,
                         updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
@@ -157,6 +168,7 @@ function atualizarPagina(id, dados, callback) {
                 [
                     titulo,
                     descricao,
+                    aparencia,
                     publicado,
                     id
                 ],

@@ -1,5 +1,6 @@
 const conteudoPaginaModel =
     require("../models/conteudoPaginaModel");
+const { normalizarAparencia } = require("../utils/aparenciaConteudo");
 
 const TIPOS_BLOCO_VALIDOS = [
     "texto",
@@ -248,6 +249,7 @@ function criarPagina(
         topicoId,
         titulo,
         descricao,
+        aparencia,
         publicado
     } = req.body || {};
 
@@ -283,6 +285,13 @@ function criarPagina(
         });
     }
 
+
+    let aparenciaSegura;
+    try {
+        aparenciaSegura = normalizarAparencia(aparencia);
+    } catch (erro) {
+        return res.status(400).json({ erro: erro.message });
+    }
 
     conteudoPaginaModel.buscarPaginaPorTopico(
         idTopico,
@@ -322,6 +331,8 @@ function criarPagina(
                         descricao
                     ).trim()
                     : "",
+
+                aparenciaSegura,
 
                 (
                     erro,
@@ -474,6 +485,14 @@ function atualizarPagina(
             );
     }
 
+
+    if (dados.aparencia !== undefined) {
+        try {
+            dados.aparencia = normalizarAparencia(dados.aparencia);
+        } catch (erro) {
+            return res.status(400).json({ erro: erro.message });
+        }
+    }
 
     conteudoPaginaModel.atualizarPagina(
         id,

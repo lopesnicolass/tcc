@@ -30,6 +30,8 @@ export const ICON_PATHS = {
     'M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-9',
   trophy:
     'M8 4h8v4a4 4 0 0 1-8 0V4Zm4 8v5M8 20h8M10 17h4M6 6H4v2a4 4 0 0 0 4 4M18 6h2v2a4 4 0 0 1-4 4',
+  crown:
+    'm2.5 8 4.3 4.2L12 5l5.2 7.2L21.5 8l-1.7 11H4.2L2.5 8ZM4 22h16',
   edit:
     'm4 20 4-.9L19 8.1a2.1 2.1 0 0 0-3-3L5 16.1 4 20Zm10.5-13.5 3 3',
   file:

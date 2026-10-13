@@ -1,0 +1,27 @@
+/* CMS: opções de aparência por tópico */
+.editor-visual-panel .editor-panel-title p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 7px 0 0; }
+.editor-tema-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 11px 0 20px; }
+.editor-tema-opcao { display: flex; align-items: center; gap: 9px; padding: 13px 12px; text-align: left; background: var(--card); border: 2px solid var(--line); border-radius: 15px; color: var(--ink); font: 700 13px 'IBM Plex Sans',sans-serif; cursor: pointer; }
+.editor-tema-opcao.is-active { border-color: var(--accent); background: var(--paper); box-shadow: 0 3px 11px rgba(26,83,154,.07); }
+.editor-tema-opcao:hover { border-color: var(--accent); }
+.editor-tema-opcao:focus-visible { outline: 3px solid #ffbf52; outline-offset: 2px; }
+.editor-tema-opcao svg { margin-left: auto; color: var(--accent); flex-shrink: 0; }
+.editor-tema-bolinha { display: inline-block; width: 23px; height: 23px; border: 3px solid rgba(255,255,255,.75); border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 1px rgba(20,74,131,.1); }
+.editor-visual-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-bottom: 16px; }
+.editor-visual-full { grid-column: 1/-1; }
+.editor-visual-fields .editor-field textarea { min-height: 82px; resize: vertical; }
+.editor-indice-toggle { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; margin: 0 0 20px; }
+.editor-indice-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+.editor-visual-preview { padding: 11px; border-radius: 21px; border: 1px dashed var(--line); background: var(--paper); }
+.editor-visual-minihero { position: relative; display: flex; flex-direction: column; gap: 7px; padding: 22px 22px 25px; border-radius: 18px 18px 35px 18px; overflow: hidden; color: #fff; background: linear-gradient(115deg,var(--visual-escura),var(--visual-cor)); }
+.editor-visual-minihero small { position: relative; z-index: 1; color: rgba(255,255,255,.8); font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.editor-visual-minihero strong { position: relative; z-index: 1; max-width: 85%; font: 800 22px 'Space Grotesk',sans-serif; letter-spacing: -.035em; }
+.editor-visual-minihero span { position: relative; z-index: 1; font-size: 12px; color: rgba(255,255,255,.86); }
+.editor-visual-minihero b { position: absolute; right: 26px; top: 28px; color: rgba(255,255,255,.45); font-size: 64px; font-weight: 400; }
+.editor-visual-minibody { display: flex; align-items: center; gap: 11px; padding: 16px 12px 7px; }
+.editor-visual-minibody > span { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 11px; display: grid; place-items: center; background: var(--visual-cor); color: #fff; font-size: 11px; font-weight: 800; }
+.editor-visual-minibody div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.editor-visual-minibody strong { color: var(--ink); font-size: 13px; }
+.editor-visual-minibody small { color: var(--muted); font-size: 11px; }
+.editor-visual-help { display: block; margin-top: 11px; color: var(--muted); font-size: 11px; }
+@media (max-width: 630px) { .editor-tema-grid,.editor-visual-fields { grid-template-columns: 1fr; } .editor-visual-full { grid-column: auto; } }

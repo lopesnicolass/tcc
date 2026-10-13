@@ -14,6 +14,9 @@ export function previewBloco(bloco) {
     case 'texto':
       return (
         <>
+          {dados.estilo && dados.estilo !== 'padrao' && (
+            <span className="editor-preview-tag">Visual: {dados.estilo === 'destaque' ? 'Destaque' : 'Resumo'}</span>
+          )}
           {dados.titulo && (
             <h3>{dados.titulo}</h3>
           )}

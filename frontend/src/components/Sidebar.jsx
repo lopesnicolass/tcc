@@ -16,11 +16,11 @@ const NAV_ITEMS = [
   { to: '/provas', label: 'Provas', icon: 'file' },
   { to: '/desempenho', label: 'Desempenho', icon: 'chart' },
   { to: '/flashcards', label: 'FlashCards', icon: 'layers' },
-  {
-  to: '/terrario',
-  label: 'Terrário',
-  icon: 'terrarium'
-},
+//   {
+//   to: '/terrario',
+//   label: 'Terrário',
+//   icon: 'terrarium'
+// },
   { to: '/perfil', label: 'Perfil', icon: 'user' },
 ];
 
