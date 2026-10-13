@@ -1,455 +1,400 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import './Terrario.css';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useGamification } from '../context/GamificationContext.jsx';
+import './Terrario.css';
 
-const STORAGE_KEY = 'tenna_focus_friend_v1';
+import salaImg from './assets/sala-ninho.webp';
+import mesaImg from './assets/mesa.webp';
+import bancoImg from './assets/banquinho.webp';
+import camaImg from './assets/cama.webp';
+import luminariaImg from './assets/luminaria.webp';
+import vasinhoImg from './assets/vasinho.webp';
 
-const PRESETS = [15, 25, 45, 60];
-
-const BEANS = [
-  { id: 'baunilha', name: 'Baunilha', className: 'bean-vanilla', price: 0 },
-  { id: 'cacau', name: 'Cacau', className: 'bean-cocoa', price: 18 },
-  { id: 'menta', name: 'Menta', className: 'bean-mint', price: 28 },
-  { id: 'lavanda', name: 'Lavanda', className: 'bean-lavender', price: 38 },
+/** Primeira experiência jogável: recompensas locais, sem modificar o XP oficial. */
+const ITEMS = [
+  { id: 'vasinho', name: 'Vasinho de broto', price: 0, img: vasinhoImg, width: 10, x: 30, y: 78, subtitle: 'Seu primeiro presente', category: 'Chão' },
+  { id: 'mesa', name: 'Mesa de estudos', price: 10, img: mesaImg, width: 29, x: 67, y: 74, subtitle: 'Para organizar as ideias', category: 'Chão' },
+  { id: 'banquinho', name: 'Banquinho de terra', price: 6, img: bancoImg, width: 13, x: 59, y: 82, subtitle: 'Um lugar para sentar', category: 'Chão' },
+  { id: 'luminaria', name: 'Luminária de raiz', price: 12, img: luminariaImg, width: 12, x: 84, y: 68, subtitle: 'Uma luz aconchegante', category: 'Chão' },
+  { id: 'cama', name: 'Ninho de folhas', price: 16, img: camaImg, width: 27, x: 33, y: 81, subtitle: 'Cantinho de descanso', category: 'Chão' },
 ];
 
-const DECOR = [
-  { id: 'planta', name: 'Plantinha', icon: '🪴', price: 0, className: 'decor-plant' },
-  { id: 'abajur', name: 'Abajur', icon: '🛋️', price: 12, className: 'decor-lamp' },
-  { id: 'livros', name: 'Livros', icon: '📚', price: 16, className: 'decor-books' },
-  { id: 'caneca', name: 'Caneca', icon: '☕', price: 20, className: 'decor-mug' },
-  { id: 'quadro', name: 'Quadro', icon: '🖼️', price: 24, className: 'decor-frame' },
-  { id: 'radio', name: 'Rádio', icon: '📻', price: 32, className: 'decor-radio' },
-  { id: 'almofada', name: 'Almofada', icon: '🛏️', price: 36, className: 'decor-cushion' },
-  { id: 'estrela', name: 'Luz de estrela', icon: '✨', price: 44, className: 'decor-stars' },
-];
-
-const DEFAULT_DATA = {
-  beans: ['baunilha'],
-  activeBean: 'baunilha',
-  decor: ['planta'],
-  coins: 0,
+const DURATIONS = [1, 15, 25, 45];
+const BASE_STATE = {
+  seeds: 0,
   sessions: 0,
   focusMinutes: 0,
+  owned: ['vasinho'],
+  visible: [],
+  positions: Object.fromEntries(ITEMS.map(({ id, x, y }) => [id, { x, y }])),
+  duration: 25,
+  status: 'idle',
+  remaining: 25 * 60,
+  endsAt: null,
+  lastReward: null,
 };
 
-function loadSavedData() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (!saved) return DEFAULT_DATA;
+function clamp(number, min, max) {
+  return Math.min(max, Math.max(min, number));
+}
 
-    return {
-      ...DEFAULT_DATA,
-      ...saved,
-      beans: Array.isArray(saved.beans) && saved.beans.length ? saved.beans : DEFAULT_DATA.beans,
-      decor: Array.isArray(saved.decor) && saved.decor.length ? saved.decor : DEFAULT_DATA.decor,
+function safeNumber(value, fallback, min, max) {
+  const n = Number(value);
+  return Number.isFinite(n) ? clamp(n, min, max) : fallback;
+}
+
+function storageKey() {
+  // Evita misturar protótipos de alunos que usam o mesmo navegador.
+  try {
+    const token = localStorage.getItem('token');
+    if (token?.split('.').length === 3) {
+      const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(part));
+      const id = payload.id ?? payload.usuarioId ?? payload.userId ?? payload.sub;
+      if (id !== undefined && id !== null) return `tenna_terrario_mvp_v1_${String(id)}`;
+    }
+  } catch { /* fallback apenas para o protótipo */ }
+  return 'tenna_terrario_mvp_v1_local';
+}
+
+function rewardsFor(minutes) {
+  return minutes === 1 ? 2 : Math.round(minutes * 0.64);
+}
+
+function applyTime(state, now) {
+  if (state.status !== 'running' || !state.endsAt) return state;
+  const remaining = Math.max(0, Math.ceil((state.endsAt - now) / 1000));
+  if (remaining > 0) return remaining === state.remaining ? state : { ...state, remaining };
+
+  // A conclusão e as sementes entram na mesma atualização, uma única vez.
+  const seedsEarned = rewardsFor(state.duration);
+  return {
+    ...state,
+    status: 'completed',
+    remaining: 0,
+    endsAt: null,
+    seeds: state.seeds + seedsEarned,
+    sessions: state.sessions + 1,
+    focusMinutes: state.focusMinutes + state.duration,
+    lastReward: seedsEarned,
+  };
+}
+
+function initialState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey()) || 'null');
+    if (!saved || typeof saved !== 'object') return { ...BASE_STATE };
+    const known = ITEMS.map((item) => item.id);
+    const owned = [...new Set(['vasinho', ...(Array.isArray(saved.owned) ? saved.owned : [])])].filter((id) => known.includes(id));
+    const positions = Object.fromEntries(ITEMS.map((item) => {
+      const position = saved.positions?.[item.id];
+      return [item.id, {
+        x: safeNumber(position?.x, item.x, 12, 88),
+        y: safeNumber(position?.y, item.y, 56, 86),
+      }];
+    }));
+    const duration = DURATIONS.includes(saved.duration) ? saved.duration : 25;
+    const status = ['idle', 'running', 'paused', 'completed'].includes(saved.status) ? saved.status : 'idle';
+    const hydrated = {
+      ...BASE_STATE,
+      seeds: safeNumber(saved.seeds, 0, 0, 1000000),
+      sessions: safeNumber(saved.sessions, 0, 0, 100000),
+      focusMinutes: safeNumber(saved.focusMinutes, 0, 0, 10000000),
+      owned,
+      visible: (Array.isArray(saved.visible) ? saved.visible : []).filter((id) => owned.includes(id)),
+      positions,
+      duration,
+      status,
+      remaining: safeNumber(saved.remaining, duration * 60, 0, duration * 60),
+      endsAt: status === 'running' && Number.isFinite(saved.endsAt) ? saved.endsAt : null,
+      lastReward: saved.lastReward ?? null,
     };
+    if (status === 'running' && !hydrated.endsAt) return { ...hydrated, status: 'paused' };
+    return applyTime(hydrated, Date.now());
   } catch {
-    return DEFAULT_DATA;
+    return { ...BASE_STATE };
   }
 }
 
-function formatTime(totalSeconds) {
-  const safe = Math.max(0, Number(totalSeconds) || 0);
-  const minutes = Math.floor(safe / 60);
-  const seconds = safe % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+function reducer(state, action) {
+  switch (action.type) {
+    case 'TICK': return applyTime(state, action.now);
+    case 'DURATION':
+      if (state.status === 'running' || state.status === 'paused') return state;
+      return { ...state, duration: action.duration, remaining: action.duration * 60, status: 'idle', lastReward: null };
+    case 'START':
+      if (state.status === 'running') return state;
+      return {
+        ...state,
+        status: 'running',
+        remaining: state.status === 'paused' ? state.remaining : state.duration * 60,
+        endsAt: action.now + (state.status === 'paused' ? state.remaining : state.duration * 60) * 1000,
+        lastReward: null,
+      };
+    case 'PAUSE':
+      if (state.status !== 'running') return state;
+      return { ...applyTime(state, action.now), status: action.now < state.endsAt ? 'paused' : 'completed', endsAt: null };
+    case 'CANCEL':
+      return { ...state, status: 'idle', remaining: state.duration * 60, endsAt: null, lastReward: null };
+    case 'BUY': {
+      const item = ITEMS.find((candidate) => candidate.id === action.id);
+      if (!item || state.owned.includes(item.id) || state.seeds < item.price) return state;
+      return { ...state, seeds: state.seeds - item.price, owned: [...state.owned, item.id], visible: [...state.visible, item.id] };
+    }
+    case 'TOGGLE': {
+      if (!state.owned.includes(action.id)) return state;
+      return { ...state, visible: state.visible.includes(action.id) ? state.visible.filter((id) => id !== action.id) : [...state.visible, action.id] };
+    }
+    case 'MOVE': {
+      if (!state.owned.includes(action.id)) return state;
+      return { ...state, positions: { ...state.positions, [action.id]: { x: clamp(action.x, 12, 88), y: clamp(action.y, 56, 86) } } };
+    }
+    default: return state;
+  }
 }
 
-function Bean({ skin, working, sad }) {
-  const bean = BEANS.find((item) => item.id === skin) || BEANS[0];
+function formatTime(seconds) {
+  const safe = Math.max(0, Math.ceil(seconds));
+  return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${String(safe % 60).padStart(2, '0')}`;
+}
 
+function TennaAnt({ working, cheering }) {
   return (
-    <div className={`focus-bean ${bean.className} ${working ? 'is-working' : ''} ${sad ? 'is-sad' : ''}`} aria-hidden="true">
-      <div className="focus-bean-shadow" />
-      <div className="focus-bean-body">
-        <span className="bean-face bean-face-left" />
-        <span className="bean-face bean-face-right" />
-        <span className="bean-mouth" />
-        <span className="bean-blush bean-blush-left" />
-        <span className="bean-blush bean-blush-right" />
-      </div>
-      <div className="focus-bean-feet">
-        <span />
-        <span />
-      </div>
-    </div>
+    <svg className={`terr-tenna-svg ${working ? 'is-studying' : ''} ${cheering ? 'is-cheering' : ''}`} viewBox="0 0 190 230" role="img" aria-label={working ? 'Tenna estudando' : cheering ? 'Tenna comemorando' : 'Tenna, a formiguinha azul'}>
+      <defs>
+        <linearGradient id="terrAntFace" x1=".2" y1="0" x2=".8" y2="1"><stop stopColor="#62c7ff"/><stop offset=".55" stopColor="#248cf0"/><stop offset="1" stopColor="#075ac4"/></linearGradient>
+        <linearGradient id="terrAntBody" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#48b6ff"/><stop offset="1" stopColor="#0f59c5"/></linearGradient>
+      </defs>
+      <ellipse cx="96" cy="216" rx="55" ry="10" fill="#43321f" opacity=".17" />
+      <path d="M65 49 Q34 18 50 14 Q64 8 77 43" fill="none" stroke="#125bbd" strokeWidth="12" strokeLinecap="round"/>
+      <path d="M117 43 Q142 10 155 19 Q166 28 128 55" fill="none" stroke="#125bbd" strokeWidth="12" strokeLinecap="round"/>
+      <ellipse cx="49" cy="15" rx="14" ry="9" fill="#238cff" transform="rotate(-24 49 15)"/>
+      <ellipse cx="156" cy="19" rx="14" ry="9" fill="#238cff" transform="rotate(28 156 19)"/>
+      <ellipse cx="95" cy="172" rx="42" ry="45" fill="url(#terrAntBody)" stroke="#134ca8" strokeWidth="4"/>
+      <path d="M73 196 L64 213 M120 196 L130 213" stroke="#175dbb" strokeWidth="15" strokeLinecap="round"/>
+      <ellipse cx="59" cy="215" rx="18" ry="8" fill="#0a4fa8"/><ellipse cx="136" cy="215" rx="18" ry="8" fill="#0a4fa8"/>
+      <path d="M60 150 Q32 158 33 178 M132 147 Q156 159 153 179" fill="none" stroke="#1a72dd" strokeWidth="13" strokeLinecap="round"/>
+      <circle cx="32" cy="179" r="11" fill="#268eea"/><circle cx="154" cy="178" r="11" fill="#268eea"/>
+      <ellipse cx="95" cy="96" rx="74" ry="64" fill="url(#terrAntFace)" stroke="#1358b9" strokeWidth="4"/>
+      <ellipse cx="69" cy="90" rx="19" ry="25" fill="white"/><ellipse cx="119" cy="90" rx="19" ry="25" fill="white"/>
+      <ellipse cx="73" cy="91" rx="11" ry="18" fill="#13345e"/><ellipse cx="117" cy="91" rx="11" ry="18" fill="#13345e"/>
+      <ellipse cx="76" cy="83" rx="4" ry="7" fill="white"/><ellipse cx="120" cy="83" rx="4" ry="7" fill="white"/>
+      <ellipse cx="40" cy="113" rx="15" ry="8" fill="#ff91ab" opacity=".44"/><ellipse cx="151" cy="113" rx="15" ry="8" fill="#ff91ab" opacity=".44"/>
+      <path d="M80 119 Q95 137 111 119" stroke="#083f8d" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      {working && <g className="terr-tenna-book"><rect x="53" y="154" width="82" height="49" rx="7" fill="#e9f5ff" stroke="#0b56b1" strokeWidth="4"/><path d="M94 157 V199 M63 167 H83 M106 167 H124 M64 180 H84 M105 180 H122" stroke="#8dbbea" strokeWidth="3" strokeLinecap="round"/><path d="M133 143 L145 178" stroke="#db9a49" strokeWidth="7" strokeLinecap="round"/></g>}
+      {cheering && <g fill="#ffd16b"><path d="M24 35 l3 -12 4 12 12 4 -12 4 -4 12 -3 -12 -12 -4z"/><path d="M156 49 l2 -9 3 9 9 3 -9 2 -3 9 -2 -9 -9 -2z"/></g>}
+    </svg>
   );
 }
 
 export default function Terrario() {
-  const { xp, streak, level, title, addXP } = useGamification();
-
-  const [data, setData] = useState(loadSavedData);
-  const [durationMinutes, setDurationMinutes] = useState(25);
-  const [remaining, setRemaining] = useState(25 * 60);
-  const [running, setRunning] = useState(false);
-  const [finishedRecently, setFinishedRecently] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
-  const [message, setMessage] = useState('Escolha um tempo e comece sua sessão.');
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [data]);
+  const { level, title } = useGamification();
+  const [game, dispatch] = useReducer(reducer, undefined, initialState);
+  const [decorate, setDecorate] = useState(false);
+  const [selected, setSelected] = useState('vasinho');
+  const [drag, setDrag] = useState(null);
+  const [notice, setNotice] = useState('');
+  const stageRef = useRef(null);
+  const draggingRef = useRef(null);
 
   useEffect(() => {
-    if (!running) return undefined;
-
-    const timer = window.setInterval(() => {
-      setRemaining((current) => Math.max(0, current - 1));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [running]);
-
-  const completeFocus = useCallback(() => {
-    const reward = Math.max(4, Math.round(durationMinutes * 0.4));
-
-    setRunning(false);
-    setFinishedRecently(true);
-    setMessage(`Sessão concluída! Você ganhou ${reward} estrelas.`);
-    setData((current) => ({
-      ...current,
-      coins: current.coins + reward,
-      sessions: current.sessions + 1,
-      focusMinutes: current.focusMinutes + durationMinutes,
-    }));
-
-    addXP(0, 'atividade concluída');
-  }, [addXP, durationMinutes]);
+    try { localStorage.setItem(storageKey(), JSON.stringify(game)); } catch { /* armazenamento desabilitado */ }
+  }, [game]);
 
   useEffect(() => {
-    if (running && remaining === 0) {
-      completeFocus();
-    }
-  }, [completeFocus, remaining, running]);
+    if (game.status !== 'running') return undefined;
+    const tick = () => dispatch({ type: 'TICK', now: Date.now() });
+    const interval = window.setInterval(tick, 250);
+    window.addEventListener('focus', tick);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', tick);
+      document.removeEventListener('visibilitychange', tick);
+    };
+  }, [game.status]);
 
-  const progress = useMemo(() => {
-    const total = Math.max(1, durationMinutes * 60);
-    return Math.min(1, Math.max(0, (total - remaining) / total));
-  }, [durationMinutes, remaining]);
+  const progress = game.status === 'completed' ? 100 : Math.round((1 - game.remaining / (game.duration * 60)) * 100);
+  const selectedItem = ITEMS.find((item) => item.id === selected);
+  const selectedOwned = selectedItem && game.owned.includes(selectedItem.id);
+  const selectedVisible = selectedItem && game.visible.includes(selectedItem.id);
+  const roomItems = ITEMS.filter((item) => game.visible.includes(item.id));
+  const sortedItems = useMemo(() => [...roomItems].sort((a, b) => game.positions[a.id].y - game.positions[b.id].y), [roomItems, game.positions]);
+  const sessionsUntilNextRoom = Math.max(0, 5 - game.sessions);
 
-  const activeBean = BEANS.find((item) => item.id === data.activeBean) || BEANS[0];
-  const ownedDecor = DECOR.filter((item) => data.decor.includes(item.id));
-  const nextReward = Math.max(1, Math.round(durationMinutes * 0.4));
-  const totalFocusHours = Math.floor(data.focusMinutes / 60);
-  const totalFocusRest = data.focusMinutes % 60;
-
-  function selectDuration(minutes) {
-    if (running) return;
-    setDurationMinutes(minutes);
-    setRemaining(minutes * 60);
-    setFinishedRecently(false);
-    setMessage(`Sessão de ${minutes} minutos pronta.`);
+  function coordinates(evt) {
+    const bounds = stageRef.current?.getBoundingClientRect();
+    if (!bounds) return null;
+    return {
+      x: clamp(((evt.clientX - bounds.left) / bounds.width) * 100, 12, 88),
+      y: clamp(((evt.clientY - bounds.top) / bounds.height) * 100, 56, 86),
+    };
   }
 
-  function startFocus() {
-    if (remaining === 0) setRemaining(durationMinutes * 60);
-    setFinishedRecently(false);
-    setRunning(true);
-    setMessage('Seu companheiro começou a focar com você.');
+  function startDragging(evt, itemId) {
+    if (!decorate || evt.button !== 0) return;
+    evt.preventDefault();
+    evt.currentTarget.setPointerCapture(evt.pointerId);
+    draggingRef.current = itemId;
+    setSelected(itemId);
+    const point = coordinates(evt);
+    if (point) setDrag({ id: itemId, ...point });
   }
 
-  function pauseFocus() {
-    setRunning(false);
-    setMessage('Sessão pausada. Retome quando estiver pronto.');
+  function moveDragging(evt) {
+    if (!draggingRef.current) return;
+    const point = coordinates(evt);
+    if (point) setDrag({ id: draggingRef.current, ...point });
   }
 
-  function stopFocus() {
-    setRunning(false);
-    setRemaining(durationMinutes * 60);
-    setFinishedRecently(false);
-    setMessage('Sessão encerrada sem recompensa. A próxima tentativa começa limpa.');
+  function finishDragging(evt) {
+    if (!draggingRef.current) return;
+    const point = coordinates(evt) || drag;
+    if (point) dispatch({ type: 'MOVE', id: draggingRef.current, ...point });
+    draggingRef.current = null;
+    setDrag(null);
   }
 
-  function buyBean(bean) {
-    if (data.beans.includes(bean.id)) {
-      setData((current) => ({ ...current, activeBean: bean.id }));
-      setMessage(`${bean.name} agora é seu companheiro.`);
+  function updateWithKeyboard(evt, item) {
+    if (!decorate) return;
+    const directions = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] };
+    const movement = directions[evt.key];
+    if (!movement) return;
+    evt.preventDefault();
+    const pos = game.positions[item.id];
+    dispatch({ type: 'MOVE', id: item.id, x: pos.x + movement[0], y: pos.y + movement[1] });
+  }
+
+  function purchase(item) {
+    setSelected(item.id);
+    if (game.owned.includes(item.id)) {
+      dispatch({ type: 'TOGGLE', id: item.id });
+      setNotice(game.visible.includes(item.id) ? `${item.name} guardado no inventário.` : `${item.name} voltou à sala.`);
       return;
     }
-
-    if (data.coins < bean.price) {
-      setMessage(`Você precisa de mais ${bean.price - data.coins} estrelas.`);
+    if (game.seeds < item.price) {
+      setNotice(`Faltam ${item.price - game.seeds} sementes para desbloquear ${item.name.toLowerCase()}.`);
       return;
     }
-
-    setData((current) => ({
-      ...current,
-      coins: current.coins - bean.price,
-      beans: [...current.beans, bean.id],
-      activeBean: bean.id,
-    }));
-    setMessage(`${bean.name} desbloqueado.`);
-  }
-
-  function buyDecor(item) {
-    if (data.decor.includes(item.id)) return;
-    if (data.coins < item.price) {
-      setMessage(`Você precisa de mais ${item.price - data.coins} estrelas.`);
-      return;
-    }
-
-    setData((current) => ({
-      ...current,
-      coins: current.coins - item.price,
-      decor: [...current.decor, item.id],
-    }));
-    setMessage(`${item.name} entrou no seu quarto.`);
+    dispatch({ type: 'BUY', id: item.id });
+    setNotice(`${item.name} desbloqueado! Ative "Decorar" para mudar de lugar.`);
   }
 
   return (
-    <div className="focus-page">
-      <header className="focus-header">
-        <div>
-          <span className="focus-kicker">SEU CANTINHO DE FOCO</span>
-          <h1>Meu companheiro de foco</h1>
-          <p>Estude no seu ritmo. Seu companheiro trabalha junto com você.</p>
+    <main className="terr-page">
+      <header className="terr-header">
+        <div className="terr-header-copy">
+          <span className="terr-eyebrow">UM CANTINHO SÓ SEU · TERRÁRIO DA TENNA</span>
+          <h1>Um pequeno ninho. Grandes conquistas.</h1>
+          <p>Estude com a Tenna, ganhe sementes de teste e transforme a primeira sala do formigueiro.</p>
         </div>
-
-        <div className="focus-header-actions">
-          <div className="focus-wallet" title="Estrelas acumuladas">
-            <span className="focus-wallet-icon">✦</span>
-            <div>
-              <strong>{data.coins}</strong>
-              <small>estrelas</small>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="focus-shop-button"
-            onClick={() => setShopOpen((value) => !value)}
-          >
-            {shopOpen ? 'Fechar loja' : 'Abrir loja'}
-          </button>
+        <div className="terr-header-stats">
+          <div className="terr-wallet"><span aria-hidden="true">🌱</span><div><strong>{game.seeds}</strong><small>Sementes</small></div></div>
+          <div className="terr-level"><span>NÍVEL DO ALUNO</span><strong>{level} · {title}</strong></div>
         </div>
       </header>
 
-      <section className="focus-main-grid">
-        <div className="focus-room-card">
-          <div className="focus-room-topbar">
-            <div>
-              <strong>Quarto do {activeBean.name}</strong>
-              <span>{running ? 'Seu companheiro está trabalhando.' : 'Deixe o ambiente do seu jeitinho.'}</span>
-            </div>
-            <div className={`focus-status ${running ? 'is-active' : ''}`}>
-              <span />
-              {running ? 'FOCANDO' : 'PRONTO'}
-            </div>
-          </div>
-
-          <div className={`focus-room ${running ? 'focus-room-working' : ''}`}>
-            <div className="focus-window">
-              <span className="focus-cloud focus-cloud-one" />
-              <span className="focus-cloud focus-cloud-two" />
-              <span className="focus-sun" />
-            </div>
-
-            <div className="focus-wall-shelf">
-              <span />
-              <span />
-              <span />
-            </div>
-
-            <div className="focus-desk">
-              <div className="focus-desk-top" />
-              <div className="focus-desk-leg focus-desk-leg-left" />
-              <div className="focus-desk-leg focus-desk-leg-right" />
-              <div className="focus-monitor">
-                <div className="focus-monitor-glow" />
-                <span>FOCO</span>
-              </div>
-            </div>
-
-            <div className="focus-bean-wrap">
-              <Bean skin={data.activeBean} working={running} sad={finishedRecently === false && !running && remaining !== durationMinutes * 60 && remaining > 0} />
-              {running && <span className="focus-knitting">✦</span>}
-            </div>
-
-            <div className="focus-rug" />
-            <div className="focus-floor-plant" aria-hidden="true">🪴</div>
-            <div className="focus-room-cat" aria-hidden="true">✦</div>
-
-            {ownedDecor.map((item) => (
-              <div key={item.id} className={`focus-decor ${item.className}`} title={item.name}>
-                {item.icon}
-              </div>
-            ))}
-
-            {running && (
-              <div className="focus-room-overlay">
-                <div className="focus-timer-bubble">
-                  <span>tempo restante</span>
-                  <strong>{formatTime(remaining)}</strong>
-                  <small>não interrompa seu companheiro 💛</small>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="focus-room-footer">
-            <div>
-              <strong>{message}</strong>
-              <span>{finishedRecently ? 'Ótimo trabalho. Use suas estrelas para personalizar o quarto.' : `${nextReward} estrelas ao concluir esta sessão.`}</span>
-            </div>
-            <div className="focus-mini-stats">
-              <span>{data.sessions} sessões</span>
-              <span>{data.focusMinutes} min focados</span>
-            </div>
-          </div>
-        </div>
-
-        <aside className="focus-control-card">
-          <div className="focus-control-heading">
-            <span>SESSÃO</span>
-            <strong>Hora de focar</strong>
-          </div>
-
-          <div className="focus-timer-ring" aria-label={`Tempo restante ${formatTime(remaining)}`}>
-            <svg viewBox="0 0 160 160" aria-hidden="true">
-              <circle className="focus-ring-base" cx="80" cy="80" r="64" />
-              <circle
-                className="focus-ring-progress"
-                cx="80"
-                cy="80"
-                r="64"
-                strokeDasharray="402"
-                strokeDashoffset={402 - (402 * progress)}
-              />
-            </svg>
-            <div className="focus-timer-center">
-              <strong>{formatTime(remaining)}</strong>
-              <span>{running ? 'em andamento' : 'pronto para começar'}</span>
-            </div>
-          </div>
-
-          <div className="focus-presets">
-            {PRESETS.map((minutes) => (
-              <button
-                key={minutes}
-                type="button"
-                className={durationMinutes === minutes ? 'active' : ''}
-                onClick={() => selectDuration(minutes)}
-                disabled={running}
-              >
-                {minutes} min
+      <div className="terr-layout">
+        <section className="terr-scene-card" aria-labelledby="terr-scene-title">
+          <div className="terr-scene-topbar">
+            <div><span className="terr-kicker">SALA 01 · SEU PONTO DE PARTIDA</span><h2 id="terr-scene-title">Ninho Inicial</h2></div>
+            <div className="terr-scene-actions">
+              <span className={`terr-status ${game.status === 'running' ? 'is-working' : ''}`}><span />{game.status === 'running' ? 'Tenna focada' : 'Tenna em casa'}</span>
+              <button type="button" className={`terr-decorate-button ${decorate ? 'active' : ''}`} onClick={() => setDecorate((value) => !value)} aria-pressed={decorate}>
+                {decorate ? '✓ Terminar decoração' : '✦ Decorar sala'}
               </button>
-            ))}
-          </div>
-
-          <div className="focus-session-actions">
-            {!running ? (
-              <button type="button" className="focus-primary-button" onClick={startFocus}>
-                Começar foco
-              </button>
-            ) : (
-              <button type="button" className="focus-primary-button" onClick={pauseFocus}>
-                Pausar
-              </button>
-            )}
-            <button type="button" className="focus-secondary-button" onClick={stopFocus}>
-              Encerrar
-            </button>
-          </div>
-
-          <div className="focus-profile-card">
-            <Bean skin={data.activeBean} working={false} />
-            <div>
-              <strong>Nível {level} · {title}</strong>
-              <span>{xp} XP · {streak} dias de sequência</span>
             </div>
           </div>
-        </aside>
-      </section>
-
-      <section className="focus-progress-grid">
-        <div className="focus-info-card">
-          <span className="focus-info-icon">⏱</span>
-          <div>
-            <strong>{data.sessions}</strong>
-            <span>sessões concluídas</span>
-          </div>
-        </div>
-
-        <div className="focus-info-card">
-          <span className="focus-info-icon">✦</span>
-          <div>
-            <strong>{data.coins}</strong>
-            <span>estrelas guardadas</span>
-          </div>
-        </div>
-
-        <div className="focus-info-card">
-          <span className="focus-info-icon">⌛</span>
-          <div>
-            <strong>{totalFocusHours}h {totalFocusRest}m</strong>
-            <span>tempo total de foco</span>
-          </div>
-        </div>
-      </section>
-
-      {shopOpen && (
-        <section className="focus-shop-panel">
-          <div className="focus-shop-heading">
-            <div>
-              <span className="focus-kicker">PERSONALIZAÇÃO</span>
-              <h2>Deixe o quarto com a sua cara</h2>
-            </div>
-            <strong>✦ {data.coins}</strong>
-          </div>
-
-          <div className="focus-shop-section">
-            <div className="focus-shop-section-title">
-              <strong>Companheiros</strong>
-              <span>Troque o visual do seu companheiro.</span>
-            </div>
-            <div className="focus-shop-grid">
-              {BEANS.map((bean) => {
-                const owned = data.beans.includes(bean.id);
-                const active = data.activeBean === bean.id;
+          <div className="terr-scene-shell">
+            <div className={`terr-scene ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef}>
+              <img className="terr-scene-background" src={salaImg} alt="Sala subterrânea vazia de terra com paredes arredondadas, raízes e chão livre para decoração" draggable="false" />
+              <div className="terr-scene-story" aria-hidden="true">{game.status === 'running' ? 'Shhh... a Tenna está estudando!' : game.status === 'completed' ? 'Boa! Mais uma sessão concluída!' : 'Nosso primeiro cantinho 🌱'}</div>
+              {sortedItems.map((item) => {
+                const pos = drag?.id === item.id ? drag : game.positions[item.id];
                 return (
-                  <article key={bean.id} className={`focus-shop-item ${active ? 'is-active' : ''}`}>
-                    <div className="focus-shop-preview">
-                      <Bean skin={bean.id} working={false} />
-                    </div>
-                    <div className="focus-shop-item-copy">
-                      <strong>{bean.name}</strong>
-                      <span>{owned ? 'Desbloqueado' : `${bean.price} estrelas`}</span>
-                    </div>
-                    <button type="button" onClick={() => buyBean(bean)} disabled={active}>
-                      {active ? 'Usando' : owned ? 'Usar' : 'Desbloquear'}
-                    </button>
-                  </article>
+                  <button
+                    type="button"
+                    key={item.id}
+                    className={`terr-scene-item ${decorate ? 'movable' : ''} ${selected === item.id && decorate ? 'selected' : ''}`}
+                    style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: `${item.width}%`, zIndex: Math.round(pos.y) }}
+                    onPointerDown={(evt) => startDragging(evt, item.id)}
+                    onPointerMove={moveDragging}
+                    onPointerUp={finishDragging}
+                    onPointerCancel={finishDragging}
+                    onKeyDown={(evt) => updateWithKeyboard(evt, item)}
+                    onClick={() => setSelected(item.id)}
+                    aria-label={`${item.name}${decorate ? ', arraste ou use as setas para reposicionar' : ''}`}
+                    title={decorate ? `Mover ${item.name}` : item.name}
+                  >
+                    <img src={item.img} alt="" draggable="false" />
+                  </button>
                 );
               })}
+              <div className="terr-character" style={{ zIndex: 78 }}>
+                <TennaAnt working={game.status === 'running'} cheering={game.status === 'completed'} />
+              </div>
+              {game.status === 'running' && <div className="terr-inroom-timer" role="timer">Foco · {formatTime(game.remaining)}</div>}
+              {decorate && <div className="terr-decor-hint">Arraste os objetos ou selecione e use as setas do teclado</div>}
             </div>
           </div>
-
-          <div className="focus-shop-section">
-            <div className="focus-shop-section-title">
-              <strong>Decorações</strong>
-              <span>Use as recompensas das suas sessões para renovar o quarto.</span>
-            </div>
-            <div className="focus-shop-grid focus-shop-grid-decor">
-              {DECOR.map((item) => {
-                const owned = data.decor.includes(item.id);
-                return (
-                  <article key={item.id} className={`focus-shop-item ${owned ? 'is-active' : ''}`}>
-                    <div className="focus-decor-preview">{item.icon}</div>
-                    <div className="focus-shop-item-copy">
-                      <strong>{item.name}</strong>
-                      <span>{owned ? 'No quarto' : `${item.price} estrelas`}</span>
-                    </div>
-                    <button type="button" onClick={() => buyDecor(item)} disabled={owned}>
-                      {owned ? 'Comprado' : 'Comprar'}
-                    </button>
-                  </article>
-                );
-              })}
-            </div>
+          <div className="terr-scene-bottom">
+            <div className="terr-room-journey"><span>PRÓXIMO CAPÍTULO</span><strong>O Cantinho de Estudos</strong><small>{sessionsUntilNextRoom === 0 ? 'Meta alcançada! Próxima sala em desenvolvimento.' : `Faltam ${sessionsUntilNextRoom} sessões para a meta de 5`}</small></div>
+            <div className="terr-room-progress"><div><span>{Math.min(game.sessions, 5)} de 5 sessões</span><strong>{Math.min(100, game.sessions * 20)}%</strong></div><div className="terr-progress-track"><span style={{ width: `${Math.min(100, game.sessions * 20)}%` }}/></div></div>
           </div>
         </section>
-      )}
-    </div>
+
+        <aside className="terr-sidebar">
+          <section className="terr-sidecard terr-timer-card" aria-labelledby="terr-timer-heading">
+            <span className="terr-kicker">ESTUDE COM A TENNA</span>
+            <h2 id="terr-timer-heading">Hora do foco</h2>
+            <p>Escolha um tempo e comece. A Tenna estuda com você.</p>
+            <div className="terr-timer-clock" style={{ '--progress': `${progress}%` }} role="timer" aria-label={`Restam ${formatTime(game.remaining)}`}>
+              <div className="terr-timer-inner"><strong>{formatTime(game.remaining)}</strong><span>{game.status === 'running' ? 'FOCANDO' : game.status === 'paused' ? 'EM PAUSA' : game.status === 'completed' ? 'CONCLUÍDO!' : 'PRONTO PARA COMEÇAR'}</span></div>
+            </div>
+            <div className="terr-duration-label">Duração da sessão</div>
+            <div className="terr-duration-options">
+              {DURATIONS.map((minutes) => <button key={minutes} type="button" disabled={game.status === 'running' || game.status === 'paused'} className={minutes === game.duration ? 'active' : ''} onClick={() => dispatch({ type: 'DURATION', duration: minutes })}>{minutes} min</button>)}
+            </div>
+            <small className="terr-test-note">1 minuto é o modo de teste deste protótipo.</small>
+            <div className="terr-timer-buttons">
+              {game.status === 'running' ? (
+                <button type="button" className="terr-primary" onClick={() => dispatch({ type: 'PAUSE', now: Date.now() })}>Pausar sessão</button>
+              ) : (
+                <button type="button" className="terr-primary" onClick={() => dispatch({ type: 'START', now: Date.now() })}>{game.status === 'paused' ? 'Retomar sessão' : game.status === 'completed' ? 'Começar outra sessão' : 'Começar foco'}</button>
+              )}
+              {(game.status === 'running' || game.status === 'paused') && <button type="button" className="terr-secondary" onClick={() => dispatch({ type: 'CANCEL' })}>Encerrar</button>}
+            </div>
+            <div className="terr-session-feedback" role="status">
+              {game.status === 'completed' ? `Você ganhou ${game.lastReward} sementes! Sua sala está esperando por você.` : game.status === 'paused' ? 'Pode retomar quando quiser. Seu tempo foi guardado.' : `Complete a sessão para receber ${rewardsFor(game.duration)} sementes.`}
+            </div>
+          </section>
+          <section className="terr-sidecard terr-stats-card">
+            <div><span className="terr-stat-emoji">✦</span><strong>{game.sessions}</strong><small>Sessões de foco</small></div>
+            <div><span className="terr-stat-emoji">◷</span><strong>{game.focusMinutes} min</strong><small>Tempo dedicado</small></div>
+          </section>
+        </aside>
+      </div>
+
+      <section className="terr-inventory" aria-labelledby="terr-inventory-heading">
+        <div className="terr-inventory-header"><div><span className="terr-kicker">LOJINHA DO NINHO</span><h2 id="terr-inventory-heading">Crie seu cantinho</h2><p>Os itens são independentes do cenário. Compre, guarde e mova à vontade.</p></div><span className="terr-inventory-balance">🌱 {game.seeds} sementes</span></div>
+        <div className="terr-items-grid">
+          {ITEMS.map((item) => {
+            const owned = game.owned.includes(item.id);
+            const visible = game.visible.includes(item.id);
+            return (
+              <article key={item.id} className={`terr-item-card ${selected === item.id ? 'active' : ''}`}>
+                <button type="button" className="terr-item-preview" onClick={() => { setSelected(item.id); if (owned) setDecorate(true); }} aria-label={`Selecionar ${item.name}`}><img src={item.img} alt="" loading="lazy"/></button>
+                <div className="terr-item-desc"><strong>{item.name}</strong><small>{item.subtitle}</small></div>
+                <div className="terr-item-bottom"><span>{owned ? '✓ Desbloqueado' : `🌱 ${item.price}`}</span><button type="button" onClick={() => purchase(item)}>{owned ? visible ? 'Guardar' : 'Colocar' : 'Comprar'}</button></div>
+              </article>
+            );
+          })}
+        </div>
+        <div className="terr-inventory-foot">
+          <span role="status">{notice || (selectedOwned && selectedVisible && decorate ? `${selectedItem.name} selecionado. Arraste dentro da sala ou use as setas do teclado.` : 'Dica: experimente o foco de 1 minuto para ganhar suas primeiras sementes.')}</span>
+          <button type="button" onClick={() => setDecorate(true)}>Organizar decorações →</button>
+        </div>
+      </section>
+      <p className="terr-prototype-note">Protótipo local: sessões, sementes e posições ficam salvas neste navegador. O XP oficial não muda e o desbloqueio das demais salas ainda não está ativo. A persistência segura no backend ficará para a próxima etapa.</p>
+    </main>
   );
 }
