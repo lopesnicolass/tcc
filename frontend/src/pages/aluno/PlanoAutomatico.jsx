@@ -17,6 +17,22 @@ import Icon
 import { request } from '../../services/api.js';
 import { gerarPlanoPrioritario, resumirPrioridades, rotuloFrequencia } from '../../utils/planoPrioridade.js';
 import { avaliarPrazo, mesesAntesDaProva, dataFormatadaPtBr } from '../../utils/prazoVestibulinho.js';
+import { getSubjectStyle } from '../../utils/subjects.js';
+// Paleta exclusiva da trilha: preserva a identidade do Tenna e diferencia as matérias.
+const PALETTE_STUDY = {
+  matematica: { color: '#C73C4B', bg: '#FFF0F1' },
+  portugues: { color: '#146CC7', bg: '#EAF5FF' },
+  historia: { color: '#996331', bg: '#FDF3E7' },
+  geografia: { color: '#268452', bg: '#EAF8EF' },
+  ciencias: { color: '#7B49B4', bg: '#F4ECFF' },
+};
+function corMateriaPlano(materia) {
+  const slug = String(materia || '').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const key = Object.keys(PALETTE_STUDY).find((nome) => slug.includes(nome));
+  return key ? PALETTE_STUDY[key] : getSubjectStyle(materia || 'Outro');
+}
+
 const STORAGE_KEY =
   'tenna_plano_automatico';
 const pad = (n) =>
@@ -140,6 +156,9 @@ export default function PlanoAutomatico() {
   const [dataVestibulinho, setDataVestibulinho] = useState(null);
   const [consultandoVestibulinho, setConsultandoVestibulinho] = useState(true);
   const [mesesAlterados, setMesesAlterados] = useState(false);
+  const [studiedTopics, setStudiedTopics] = useState({});
+  const [loadingProgress, setLoadingProgress] = useState(false);
+  const [savingTopicId, setSavingTopicId] = useState(null);
 
   useEffect(() => {
     let ativo = true;
@@ -246,6 +265,95 @@ export default function PlanoAutomatico() {
     }
     carregarCronogramaModelo();
   }, []);
+
+  async function carregarProgressoPlano() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setStudiedTopics({});
+      return;
+    }
+
+    try {
+      setLoadingProgress(true);
+      const resposta = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/conteudos/progresso`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const dados = await resposta.json().catch(() => ({}));
+      if (!resposta.ok) {
+        throw new Error(dados.erro || dados.mensagem || 'Não foi possível carregar o progresso do plano.');
+      }
+      const mapa = {};
+      (Array.isArray(dados.topicos) ? dados.topicos : []).forEach((item) => {
+        mapa[String(item.topico_id)] = Boolean(item.estudado);
+      });
+      setStudiedTopics(mapa);
+    } catch (erro) {
+      console.error('Erro ao carregar progresso do plano:', erro);
+    } finally {
+      setLoadingProgress(false);
+    }
+  }
+
+  useEffect(() => {
+    carregarProgressoPlano();
+  }, []);
+
+  function abrirDestinoItem(item) {
+    if (item?.topicoId) {
+      navigate(`/conteudos/${item.topicoId}`);
+      return;
+    }
+
+    if (item?.tipo === 'pratica') {
+      navigate(item?.key?.startsWith('revisao:') ? '/provas' : '/simulados');
+      return;
+    }
+
+    navigate('/conteudos');
+  }
+
+  async function alternarEstudoItem(item) {
+    if (!item?.topicoId) {
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.alert('Sua sessão expirou. Faça login novamente.');
+      return;
+    }
+
+    const topicoId = Number(item.topicoId);
+    const novoStatus = !Boolean(studiedTopics[String(topicoId)]);
+
+    try {
+      setSavingTopicId(topicoId);
+      const resposta = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/conteudos/progresso/${topicoId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ estudado: novoStatus })
+      });
+      const dados = await resposta.json().catch(() => ({}));
+      if (!resposta.ok) {
+        throw new Error(dados.erro || dados.mensagem || 'Não foi possível atualizar o progresso deste conteúdo.');
+      }
+      setStudiedTopics((prev) => ({
+        ...prev,
+        [String(topicoId)]: novoStatus
+      }));
+    } catch (erro) {
+      console.error('Erro ao atualizar tópico do plano:', erro);
+      window.alert(erro.message || 'Não foi possível atualizar o progresso deste conteúdo.');
+    } finally {
+      setSavingTopicId(null);
+    }
+  }
+
   const phases = [
     'Fundamentos',
     'Construção de conhecimento',
@@ -261,53 +369,86 @@ export default function PlanoAutomatico() {
         selected
     ) ||
     plan?.[0];
-  const progress =
-    useMemo(
-      () => {
-        if (!plan) {
-          return 0;
-        }
-        try {
-          const done =
-            JSON.parse(
-              localStorage.getItem(
-                `conteudosEstudados_${getUserKey()}`
-              ) || '{}'
-            );
-          const keys = [
-            ...new Set(
-              plan.flatMap(
-                (m) =>
-                  m.semanas.flatMap(
-                    (w) =>
-                      w.days.flatMap(
-                        (d) =>
-                          d.items
-                            .filter((item) => item.tipo !== 'pratica' && item.topicoId)
-                            .map((item) => item.key)
-                      )
-                  )
+
+  const topicoIdsDoPlano = useMemo(
+    () => (
+      plan
+        ? [...new Set(
+            plan.flatMap((month) =>
+              month.semanas.flatMap((week) =>
+                week.days.flatMap((day) =>
+                  day.items
+                    .filter((item) => item.topicoId)
+                    .map((item) => String(item.topicoId))
+                )
               )
             )
-          ];
-          return keys.length
-            ? Math.round(
-                (
-                  keys.filter(
-                    (k) =>
-                      done[k]
-                  ).length /
-                  keys.length
-                ) *
-                100
-              )
-            : 0;
-        } catch {
-          return 0;
-        }
-      },
-      [plan]
-    );
+          )]
+        : []
+    ),
+    [plan]
+  );
+
+  const totalPlanSessions = useMemo(
+    () => (
+      plan
+        ? plan.reduce(
+            (total, month) =>
+              total + month.semanas.reduce(
+                (subtotal, week) =>
+                  subtotal + week.days.reduce(
+                    (dayTotal, day) => dayTotal + day.items.length,
+                    0
+                  ),
+                0
+              ),
+            0
+          )
+        : 0
+    ),
+    [plan]
+  );
+
+  const studiedPlanTopics = useMemo(
+    () => topicoIdsDoPlano.filter((id) => studiedTopics[id]).length,
+    [topicoIdsDoPlano, studiedTopics]
+  );
+
+  const progress = useMemo(
+    () => (
+      topicoIdsDoPlano.length
+        ? Math.round((studiedPlanTopics / topicoIdsDoPlano.length) * 100)
+        : 0
+    ),
+    [studiedPlanTopics, topicoIdsDoPlano]
+  );
+
+  const nextPendingItem = useMemo(
+    () => {
+      if (!plan) return null;
+      const allItems = plan.flatMap((month) =>
+        month.semanas.flatMap((week) =>
+          week.days.flatMap((day) =>
+            day.items.map((item) => ({
+              ...item,
+              dayLabel: day.day,
+              monthNumber: month.numero,
+              weekNumber: week.number,
+            }))
+          )
+        )
+      );
+
+      return (
+        allItems.find((item) => item.topicoId && !studiedTopics[String(item.topicoId)]) ||
+        allItems.find((item) => item.topicoId) ||
+        allItems.find(Boolean) ||
+        null
+      );
+    },
+    [plan, studiedTopics]
+  );
+
   const prioritySummary = useMemo(
     () => plan && cronogramaModelo
       ? resumirPrioridades(plan, cronogramaModelo.sessoes)
@@ -588,7 +729,7 @@ export default function PlanoAutomatico() {
       );
     }
   }
-  const focoItem =
+  const focoItem = nextPendingItem ||
     current?.semanas
       ?.flatMap(
         (week) =>
@@ -748,24 +889,108 @@ export default function PlanoAutomatico() {
       )}
       {plan && !editandoPlano && (
         <div className="tenna-auto-result">
-          <section className="tenna-auto-generated-head">
-            <div>
-              <span className="tenna-auto-config-kicker">SEU CRONOGRAMA ESTÁ PRONTO</span>
-              <h2>Seu plano de estudos</h2>
-              <p>{months} {months === 1 ? 'mês' : 'meses'} · {days} {days === 1 ? 'dia' : 'dias'} por semana</p>
+          <section className="tenna-auto-generated-hero">
+            <div className="tenna-auto-generated-hero-copy">
+              <span className="tenna-auto-config-kicker">✦ SUA TRILHA DE ESTUDOS</span>
+              <h2>Seu caminho até o Vestibulinho</h2>
+              <p>{months} {months === 1 ? 'mês' : 'meses'} de preparação · {days} {days === 1 ? 'dia' : 'dias'} por semana</p>
+              <div className="tenna-auto-generated-chips">
+                <span><Icon name="book" size={14} /> {topicoIdsDoPlano.length} conteúdos</span>
+                <span><Icon name="calendar" size={14} /> {totalPlanSessions} sessões de estudo</span>
+                {prazoSelecionado.conhecido && (
+                  <span className={prazoSelecionado.ultrapassa ? 'warn' : 'ok'}>
+                    {prazoSelecionado.ultrapassa ? 'Termina após a prova' : 'Termina antes da prova'}
+                  </span>
+                )}
+              </div>
             </div>
-            <button type="button" className="tenna-auto-secondary-button" onClick={() => setEditandoPlano(true)}>
-              Ajustar planejamento
-            </button>
+            <div className="tenna-auto-generated-hero-actions">
+              <button type="button" className="tenna-auto-secondary-button" onClick={() => navigate('/cronograma')}>
+                <Icon name="calendar" size={16} /> Ver calendário
+              </button>
+              <button type="button" className="mural-btn primary" onClick={() => setEditandoPlano(true)}>
+                <Icon name="edit" size={16} /> Ajustar plano
+              </button>
+            </div>
           </section>
+
           {syncingPlan && <p className="tenna-auto-sync-status" role="status">Salvando as atividades no calendário...</p>}
           {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
           {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
             <div className="tenna-auto-date-warning" role="status">
               <Icon name="calendar" size={18} />
-              <span>Este plano vai além da data do Vestibulinho. Se quiser concluir antes, use “Ajustar planejamento”.</span>
+              <span>Este plano vai além da data do Vestibulinho. Você ainda pode usar o cronograma, mas uma parte dos estudos ficará para depois da prova.</span>
             </div>
           )}
+
+          <section className="tenna-auto-overview-grid">
+            <article className="tenna-auto-overview-card tenna-auto-overview-focus">
+              <div className="tenna-auto-focus-glow" aria-hidden="true"><Icon name="target" size={134} /></div>
+              <div className="tenna-auto-overview-head">
+                <span className="tenna-auto-overview-icon"><SubjectIcon materia={focoMateria || 'Outro'} size={18} /></span>
+                <div>
+                  <small>COMECE POR AQUI</small>
+                  <strong>{focoMateria || 'Seu próximo estudo'}</strong>
+                </div>
+              </div>
+              <h3>{focoTopico || 'Seu plano já está organizado.'}</h3>
+              <p>
+                {focoItem?.topicoId
+                  ? `Mês ${focoItem.monthNumber} · Semana ${focoItem.weekNumber} · ${focoItem.dayLabel}`
+                  : focoItem?.tipo === 'pratica'
+                    ? 'Bloco de prática para revisar e consolidar o conteúdo.'
+                    : 'Abra o plano e comece pelo primeiro bloco recomendado.'}
+              </p>
+              <div className="tenna-auto-overview-actions">
+                <button
+                  type="button"
+                  className="mural-btn primary"
+                  onClick={() => focoItem && abrirDestinoItem(focoItem)}
+                  disabled={!focoItem}
+                >
+                  {focoItem?.topicoId ? 'Estudar agora' : focoItem?.tipo === 'pratica' ? 'Ir para prática' : 'Começar agora'}
+                  <Icon name="arrowRight" size={16} />
+                </button>
+              </div>
+            </article>
+
+            <article className="tenna-auto-overview-card">
+              <div className="tenna-auto-overview-head">
+                <span className="tenna-auto-overview-icon"><Icon name="chart" size={18} /></span>
+                <div>
+                  <small>PROGRESSO GERAL</small>
+                  <strong>{progress}% concluído</strong>
+                </div>
+              </div>
+              <div className="tenna-auto-progress-main">
+                <div className="tenna-auto-progress-ring" style={{ '--progress': `${progress}%` }} role="img" aria-label={`${progress}% dos conteúdos estudados`}>
+                  <div><strong>{progress}%</strong><small>concluído</small></div>
+                </div>
+                <div className="tenna-auto-progress-details">
+                  <strong>{studiedPlanTopics} <span>de {topicoIdsDoPlano.length}</span></strong>
+                  <p>conteúdos estudados</p>
+                  <small>Todo assunto concluído aproxima você da prova.</small>
+                </div>
+              </div>
+            </article>
+
+            <article className="tenna-auto-overview-card">
+              <div className="tenna-auto-overview-head">
+                <span className="tenna-auto-overview-icon"><Icon name="calendar" size={18} /></span>
+                <div>
+                  <small>SEU RITMO</small>
+                  <strong>Um passo de cada vez</strong>
+                </div>
+              </div>
+              <div className="tenna-auto-rhythm-stats">
+                <div><strong>{days}<small>x</small></strong><span>por semana</span></div>
+                <div><strong>{months}</strong><span>{months === 1 ? 'mês' : 'meses'}</span></div>
+                <div><strong>{totalPlanSessions}</strong><span>sessões</span></div>
+              </div>
+              <p className="tenna-auto-rhythm-message">{loadingProgress ? 'Sincronizando seu progresso...' : 'Sua rotina está pronta. Comece pelo primeiro assunto!'}</p>
+            </article>
+          </section>
+
           {prioritySummary && (
             <details className="tenna-auto-plan-details">
               <summary>Como os conteúdos foram priorizados</summary>
@@ -774,379 +999,175 @@ export default function PlanoAutomatico() {
               {prioritySummary.materiasFaltantes.length > 0 && <p>Matérias não contempladas: {prioritySummary.materiasFaltantes.join(', ')}.</p>}
             </details>
           )}
-          <section className="tenna-auto-next">
-            <div className="tenna-auto-next-icon">
-              <SubjectIcon
-                materia={
-                  focoMateria
-                }
-                size={20}
-              />
-            </div>
-            <div className="tenna-auto-next-info">
-              <span>
-                PRÓXIMO FOCO
-              </span>
-              <strong>
-                {focoMateria}
-              </strong>
-              <p>
-                {focoTopico}
-              </p>
-            </div>
-            <button
-              className="tenna-auto-next-button"
-              onClick={() =>
-                navigate(
-                  '/conteudos'
-                )
-              }
-            >
-              Estudar conteúdo
-              <Icon
-                name="arrowRight"
-                size={14}
-              />
-            </button>
-          </section>
+
           <section className="tenna-auto-journey">
             <div className="tenna-auto-journey-head">
               <div>
-                <span className="tenna-auto-step">
-                  02
-                </span>
+                <span className="tenna-auto-step">02</span>
                 <div>
-                  <h3>
-                    Sua jornada
-                  </h3>
-                  <p>
-                    {months}{' '}
-                    {months === 1
-                      ? 'mês'
-                      : 'meses'}
-                    {' · '}
-                    {days}x por semana
-                  </p>
+                  <h3>Escolha sua etapa</h3>
+                  <p>Acompanhe mês a mês e abra as semanas para estudar.</p>
                 </div>
               </div>
-              <div className="tenna-auto-progress-value">
-                <strong>
-                  {progress}%
-                </strong>
-                <span>
-                  concluído
-                </span>
+              <div className="tenna-auto-journey-status">
+                <Icon name="layers" size={17} /> Etapa {current?.numero || 1} de {months}
               </div>
-            </div>
-            <div className="tenna-auto-progress-track">
-              <span
-                style={{
-                  width:
-                    `${progress}%`
-                }}
-              />
             </div>
             <div className="tenna-auto-timeline-wrap">
               <div className="tenna-auto-timeline-line" />
               <div className="tenna-auto-timeline">
-                {plan.map(
-                  (m) => (
-                    <button
-                      key={
-                        m.numero
-                      }
-                      className={
-                        `tenna-auto-timeline-item ${
-                          m.numero ===
-                          selected
-                            ? 'active'
-                            : ''
-                        }`
-                      }
-                      onClick={() =>
-                        setSelected(
-                          m.numero
-                        )
-                      }
-                    >
-                      <span className="tenna-auto-timeline-dot">
-                        {m.numero}
-                      </span>
-                      <strong>
-                        Mês {m.numero}
-                      </strong>
-                      <small>
-                        {m.numero ===
-                        1
-                          ? 'Começo'
-                          : m.numero ===
-                              months
-                            ? 'Reta final'
-                            : 'Preparação'}
-                      </small>
-                    </button>
-                  )
-                )}
+                {plan.map((m) => (
+                  <button
+                    key={m.numero}
+                    type="button"
+                    className={`tenna-auto-timeline-item ${m.numero === selected ? 'active' : ''}`}
+                    aria-pressed={m.numero === selected}
+                    onClick={() => {
+                      setSelected(m.numero);
+                      setOpenWeeks((prev) => new Set([...prev, `${m.numero}-1`]));
+                    }}
+                  >
+                    <span className="tenna-auto-timeline-dot">{pad(m.numero)}</span>
+                    <span className="tenna-auto-timeline-labels">
+                      <strong>Mês {m.numero}</strong>
+                      <small>{m.numero === 1 ? 'Ponto de partida' : m.numero === months ? 'Reta final' : 'Em preparação'}</small>
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           </section>
-          <section className="tenna-auto-month">
+
+          <section className="tenna-auto-month tenna-auto-month-updated">
             <div className="tenna-auto-month-head">
               <div className="tenna-auto-month-title">
-                <div
-                  className="tenna-auto-month-icon"
-                  style={{
-                    color:
-                      'var(--accent-dark)'
-                  }}
-                >
-                  <Icon
-                    name="calendar"
-                    size={22}
-                  />
+                <div className="tenna-auto-month-icon" style={{ color: 'var(--accent-dark)' }}>
+                  <Icon name="calendar" size={22} />
                 </div>
                 <div>
-                  <span>
-                    MÊS {current.numero}
-                    {' · '}
-                    {
-                      phases[
-                        Math.min(
-                          current.numero -
-                            1,
-                          phases.length -
-                            1
-                        )
-                      ]
-                    }
-                  </span>
-                  <h3>
-                    {current.nome}
-                  </h3>
+                  <span>MÊS {current.numero} · {phases[Math.min(current.numero - 1, phases.length - 1)]}</span>
+                  <h3>{current.nome}</h3>
                   <p>
-                    {current.semanas.reduce(
-                      (
-                        n,
-                        w
-                      ) =>
-                        n +
-                        w.days.filter(
-                          (
-                            day
-                          ) =>
-                            day.items
-                              .length
-                        ).length,
-                      0
-                    )}
-                    {' dias de estudo organizados'}
+                    {current.semanas.reduce((n, w) => n + w.days.filter((day) => day.items.length).length, 0)} dias planejados. Abra uma semana e escolha o que estudar.
                   </p>
                 </div>
               </div>
-              <div className="tenna-auto-month-count">
-                <strong>
-                  {
-                    current.semanas
-                      .length
-                  }
-                </strong>
-                <span>
-                  semanas
-                </span>
+              <div className="tenna-auto-month-badges">
+                <span>{current.semanas.length} semanas</span>
+                <span>{current.semanas.reduce((n, w) => n + w.days.reduce((acc, day) => acc + day.items.length, 0), 0)} sessões</span>
               </div>
             </div>
             <div className="tenna-auto-weeks">
-              {current.semanas.map(
-                (w) => {
-                  const key =
-                    `${current.numero}-${w.number}`;
-                  const open =
-                    openWeeks.has(
-                      key
-                    );
-                  const adding =
-                    addingWeek ===
-                    key;
-                  return (
-                    <article
-                      className={
-                        `tenna-auto-week ${
-                          open
-                            ? 'open'
-                            : ''
-                        }`
-                      }
-                      key={
-                        key
+              {current.semanas.map((w) => {
+                const key = `${current.numero}-${w.number}`;
+                const open = openWeeks.has(key);
+                const weekItems = w.days.flatMap((day) => day.items);
+                const weekStudyItems = weekItems.filter((item) => item.topicoId);
+                const weekDoneCount = weekStudyItems.filter((item) => studiedTopics[String(item.topicoId)]).length;
+                return (
+                  <article className={`tenna-auto-week ${open ? 'open' : ''}`} key={key}>
+                    <button
+                      type="button"
+                      className="tenna-auto-week-head"
+                      onClick={() =>
+                        setOpenWeeks((prev) => {
+                          const n = new Set(prev);
+                          n.has(key) ? n.delete(key) : n.add(key);
+                          return n;
+                        })
                       }
                     >
-                      <button
-                        className="tenna-auto-week-head"
-                        onClick={() =>
-                          setOpenWeeks(
-                            (prev) => {
-                              const n =
-                                new Set(
-                                  prev
-                                );
-                              n.has(
-                                key
-                              )
-                                ? n.delete(
-                                    key
-                                  )
-                                : n.add(
-                                    key
-                                  );
-                              return n;
-                            }
-                          )
-                        }
-                      >
-                        <span className="tenna-auto-week-number">
-                          {pad(
-                            w.number
-                          )}
+                      <span className="tenna-auto-week-number">{pad(w.number)}</span>
+                      <span className="tenna-auto-week-title">
+                        <strong>Semana {w.number}</strong>
+                        <small>
+                          {w.days.filter((day) => day.items.length).length} dias de estudo · {weekDoneCount} de {weekStudyItems.length} concluídos
+                        </small>
+                        <span className="tenna-auto-week-meter" aria-hidden="true">
+                          <span style={{ width: `${weekStudyItems.length ? Math.round(weekDoneCount / weekStudyItems.length * 100) : 0}%` }} />
                         </span>
-                        <span className="tenna-auto-week-title">
-                          <strong>
-                            Semana {w.number}
-                          </strong>
-                          <small>
-                            {
-                              w.days.filter(
-                                (
-                                  day
-                                ) =>
-                                  day.items
-                                    .length
-                              ).length
-                            }
-                            {' dias com conteúdo'}
-                          </small>
-                        </span>
-                        <span className="tenna-auto-week-status">
-                          {open
-                            ? 'Fechar'
-                            : 'Ver semana'}
-                          <b>
-                            ›
-                          </b>
-                        </span>
-                      </button>
-                      {open && (
-                        <div className="tenna-auto-week-body">
-                          <div className="tenna-auto-day-list">
-                            {w.days.map(
-                              (
-                                d,
-                                i
-                              ) => {
-                                const primeiroItem =
-                                  d.items[0];
-                                return (
-                                  <div
-                                    className={
-                                      `tenna-auto-day ${
-                                        d.items.length
-                                          ? ''
-                                          : 'empty'
-                                      }`
-                                    }
-                                    key={i}
-                                  >
-                                    <div className="tenna-auto-day-name">
-                                      {
-                                        d.day
-                                          .slice(
-                                            0,
-                                            3
-                                          )
-                                          .toUpperCase()
-                                      }
-                                    </div>
-                                    <div className="tenna-auto-day-icon">
-                                      <SubjectIcon
-                                        materia={
-                                          primeiroItem?.materia ||
-                                          'Estudo'
-                                        }
-                                        size={16}
-                                      />
-                                    </div>
-                                    <div className="tenna-auto-day-content">
-                                      {d.items.length ? (
-                                        d.items.map(
-                                          (
-                                            item,
-                                            itemIndex
-                                          ) => (
-                                            <div
-                                              className="tenna-auto-day-item"
-                                              key={
-                                                itemIndex
-                                              }
+                      </span>
+                      <span className="tenna-auto-week-status">{open ? 'Fechar' : 'Ver semana'}<b>›</b></span>
+                    </button>
+
+                    {open && (
+                      <div className="tenna-auto-week-body">
+                        <div className="tenna-auto-days-grid-plan">
+                          {w.days.map((d, i) => (
+                            <section className={`tenna-auto-day-card ${d.items.length ? '' : 'empty'}`} key={i}>
+                              <div className="tenna-auto-day-card-head">
+                                <span className="tenna-auto-day-card-chip">{d.day.slice(0, 3).toUpperCase()}</span>
+                                <div>
+                                  <strong>{d.day}</strong>
+                                  <span>{d.items.length ? `${d.items.length} ${d.items.length === 1 ? 'conteúdo planejado' : 'conteúdos planejados'}` : 'Dia reservado para respiro ou ajuste'}</span>
+                                </div>
+                              </div>
+
+                              <div className="tenna-auto-day-items-enhanced">
+                                {d.items.length ? (
+                                  d.items.map((item, itemIndex) => {
+                                    const style = corMateriaPlano(item.materia || 'Outro');
+                                    const studied = item.topicoId ? Boolean(studiedTopics[String(item.topicoId)]) : false;
+                                    const isSaving = savingTopicId === Number(item.topicoId);
+                                    return (
+                                      <article
+                                        className={`tenna-auto-study-card ${studied ? 'done' : ''}`}
+                                        key={`${key}-${i}-${itemIndex}`}
+                                        style={{ '--study-color': style.color, '--study-bg': style.bg }}
+                                      >
+                                        <div className="tenna-auto-study-card-top">
+                                          <span className="tenna-auto-study-subject"><SubjectIcon materia={item.materia} size={13} /> {item.materia}</span>
+                                          {item.topicoId && (
+                                            <button
+                                              type="button"
+                                              className={`tenna-auto-study-toggle ${studied ? 'done' : ''}`}
+                                              onClick={() => alternarEstudoItem(item)}
+                                              disabled={isSaving}
                                             >
-                                              <strong>
-                                                {
-                                                  item.materia
-                                                }
-                                              </strong>
-                                              <span>
-                                                {item.topico}
-                                              </span>
-                                              {item.tipo === 'pratica' ? (
-                                                <small className="tenna-auto-item-priority pratica">
-                                                  {item.key?.startsWith('revisao:')
-                                                    ? 'Revisão mensal · questões de provas anteriores'
-                                                    : 'Prática e revisão de erros'}
-                                                </small>
-                                              ) : (
-                                                <small className={`tenna-auto-item-priority prioridade-${item.prioridade || 2}`} title={rotuloFrequencia(item.frequenciaProvas)}>
-                                                  {item.prioridadeLabel || 'Importante'} · {item.tempoEstimado || 45} min
-                                                </small>
-                                              )}
-                                            </div>
-                                          )
-                                        )
-                                      ) : (
-                                        <div className="tenna-auto-day-item vazio">
-                                          <strong>
-                                            Dia reservado
-                                          </strong>
-                                          <span>
-                                            Nenhum conteúdo foi distribuído para este dia.
-                                          </span>
+                                              {isSaving ? 'Salvando...' : studied ? '✓ Estudado' : '✓ Concluir'}
+                                            </button>
+                                          )}
                                         </div>
-                                      )}
-                                    </div>
+
+                                        <h4>{item.topico}</h4>
+
+                                        <div className="tenna-auto-study-meta">
+                                          {item.tipo === 'pratica' ? (
+                                            <span className="tenna-auto-item-priority pratica">
+                                              {item.key?.startsWith('revisao:') ? 'Revisão mensal · questões de provas anteriores' : 'Prática e revisão de erros'}
+                                            </span>
+                                          ) : (
+                                            <span className={`tenna-auto-item-priority prioridade-${item.prioridade || 2}`} title={rotuloFrequencia(item.frequenciaProvas)}>
+                                              {item.prioridadeLabel || 'Importante'} · {item.tempoEstimado || 45} min
+                                            </span>
+                                          )}
+                                          {item.topicoId && <span className={`tenna-auto-study-state ${studied ? 'done' : ''}`}>{studied ? 'Concluído' : 'Pendente'}</span>}
+                                        </div>
+
+                                        <div className="tenna-auto-study-actions">
+                                          <button type="button" className="tenna-auto-study-open" onClick={() => abrirDestinoItem(item)}>
+                                            {item.topicoId ? 'Estudar conteúdo' : item.tipo === 'pratica' ? 'Praticar agora' : 'Abrir'}
+                                            <Icon name="arrowRight" size={14} />
+                                          </button>
+                                        </div>
+                                      </article>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="tenna-auto-day-empty-enhanced">
+                                    <Icon name="calendar" size={16} />
+                                    <span>Sem conteúdo obrigatório neste dia.</span>
                                   </div>
-                                );
-                              }
-                            )}
-                          </div>
-                          <button
-                            className="mural-btn primary"
-                            onClick={() =>
-                              addWeek(
-                                current,
-                                w
-                              )
-                            }
-                            disabled={
-                              adding
-                            }
-                          >
-                            {adding
-                              ? 'Adicionando...'
-                              : '+ Adicionar semana ao meu calendário'}
-                          </button>
+                                )}
+                              </div>
+                            </section>
+                          ))}
                         </div>
-                      )}
-                    </article>
-                  );
-                }
-              )}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           </section>
         </div>

@@ -4,6 +4,7 @@ import { API_URL, obterToken, request } from '../services/api.js';
 import Icon from './Icon.jsx';
 
 const MEDALHAS = ['🥇', '🥈', '🥉'];
+const POSICAO_LABEL = ['1º lugar', '2º lugar', '3º lugar'];
 
 export default function RankingXP({ xp, usuarioId }) {
   const navigate = useNavigate();
@@ -70,6 +71,17 @@ export default function RankingXP({ xp, usuarioId }) {
     };
   }, [xp, usuarioId, recarregar]);
 
+  const alunosExibidos = alunos.map((aluno, indice) => ({
+    ...aluno,
+    posicao: indice + 1
+  }));
+
+  const podium = [
+    alunosExibidos[1],
+    alunosExibidos[0],
+    alunosExibidos[2]
+  ].filter(Boolean);
+
   return (
     <section className="home-ranking panel-card" aria-labelledby="home-ranking-title">
       <div className="home-ranking-heading">
@@ -98,10 +110,10 @@ export default function RankingXP({ xp, usuarioId }) {
         </div>
       ) : (
         <ol className="home-ranking-list">
-          {alunos.map((aluno, indice) => (
-            <li className={`home-ranking-player home-ranking-place-${indice + 1}`} key={aluno.id}>
-              <span className="home-ranking-medal" aria-label={`${indice + 1}º lugar`}>
-                {MEDALHAS[indice]}
+          {podium.map((aluno) => (
+            <li className={`home-ranking-player home-ranking-place-${aluno.posicao}`} key={aluno.id}>
+              <span className="home-ranking-medal" aria-label={POSICAO_LABEL[aluno.posicao - 1]}>
+                {MEDALHAS[aluno.posicao - 1]}
               </span>
               <span className="home-ranking-avatar">
                 {fotos[aluno.id] ? (
@@ -112,7 +124,7 @@ export default function RankingXP({ xp, usuarioId }) {
               </span>
               <span className="home-ranking-player-name">
                 <strong>{aluno.nome}</strong>
-                <small>{aluno.id === usuarioId ? 'Você · ' : ''}{indice + 1}º lugar</small>
+                <small>{aluno.id === usuarioId ? 'Você · ' : ''}{POSICAO_LABEL[aluno.posicao - 1]}</small>
               </span>
               <span className="home-ranking-score"><strong>{Number(aluno.xp).toLocaleString('pt-BR')}</strong><small>XP</small></span>
             </li>

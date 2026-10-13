@@ -370,6 +370,13 @@ export default function Cronograma() {
 
   const resumoMes = resumirMes(activities, monthPrefix);
   const resumoDia = resumirDia(selectedActivities);
+  const progressoMes = resumoMes.atividades > 0
+    ? Math.round((resumoMes.concluidas / resumoMes.atividades) * 100)
+    : 0;
+  const selectedDateObject = new Date(`${selectedDate}T12:00:00`);
+  const numeroDiaSelecionado = selectedDateObject.getDate();
+  const mesDiaSelecionado = selectedDateObject.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+
 
   function changeMonth(delta) {
     const proximoMes = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
@@ -778,14 +785,11 @@ export default function Cronograma() {
           </span>
 
           <h2>
-            Organize seu{' '}
-            <span>
-              calendário de estudos
-            </span>
+            Seu calendário, <span>seu ritmo.</span>
           </h2>
 
           <p>
-            Organize suas atividades, acompanhe seu ritmo e mantenha seus estudos em dia.
+            Visualize seus compromissos, celebre cada tarefa concluída e siga firme até o Vestibulinho.
           </p>
 
         </div>
@@ -830,6 +834,7 @@ export default function Cronograma() {
           <div className="calendar-toolbar">
 
             <div className="calendar-toolbar-left">
+              <span className="calendar-month-eyebrow"><Icon name="calendar" size={14} /> VISÃO MENSAL</span>
               <div className="calendar-month-nav">
 
                 <button
@@ -858,13 +863,13 @@ export default function Cronograma() {
 
               <div className="calendar-toolbar-stats">
                 <span>
-                  <strong>{resumoMes.atividades}</strong> atividades
+                  <strong>{resumoMes.atividades}</strong> {resumoMes.atividades === 1 ? 'atividade' : 'atividades'}
                 </span>
                 <span>
-                  <strong>{resumoMes.concluidas}</strong> concluídas
+                  <strong>{resumoMes.concluidas}</strong> {resumoMes.concluidas === 1 ? 'concluída' : 'concluídas'}
                 </span>
                 <span>
-                  <strong>{resumoMes.diasPlanejados}</strong> dias planejados
+                  <strong>{resumoMes.diasPlanejados}</strong> {resumoMes.diasPlanejados === 1 ? 'dia planejado' : 'dias planejados'}
                 </span>
               </div>
             </div>
@@ -895,7 +900,23 @@ export default function Cronograma() {
 
           </div>
 
-          <p className="calendar-mobile-help">Toque em uma data para ver suas atividades abaixo.</p>
+          <div className="calendar-month-insight">
+            <div className="calendar-month-insight-copy">
+              <span className="calendar-month-insight-icon"><Icon name="checkSquare" size={16} /></span>
+              <div>
+                <strong>Seu progresso neste mês</strong>
+                <span>{resumoMes.atividades > 0 ? `${resumoMes.concluidas} de ${resumoMes.atividades} atividades concluídas` : 'Seu mês está pronto para ser planejado'}</span>
+              </div>
+            </div>
+            <div className="calendar-month-insight-indicator">
+              <strong>{progressoMes}%</strong>
+              <div className="calendar-month-insight-track" role="progressbar" aria-label="Progresso de atividades do mês" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressoMes}>
+                <span style={{ width: `${progressoMes}%` }} />
+              </div>
+            </div>
+          </div>
+
+          <p className="calendar-mobile-help">Selecione um dia para ver ou editar suas atividades.</p>
 
           <div className="calendar-weekdays">
 
@@ -946,6 +967,8 @@ export default function Cronograma() {
                 const isToday =
                   key ===
                   todayKey;
+                const hasEvents = eventosDia.total > 0;
+                const allDone = dayActivities.length > 0 && dayActivities.every((activity) => activity.done);
 
                 return (
 
@@ -964,7 +987,7 @@ export default function Cronograma() {
                         isToday
                           ? 'today'
                           : ''
-                      }`
+                      } ${hasEvents ? 'has-events' : ''} ${allDone ? 'all-done' : ''}`
                     }
                     type="button"
                     aria-pressed={selected}
@@ -977,8 +1000,10 @@ export default function Cronograma() {
                     }}
                   >
 
-                    <span className="calendar-day-number">
-                      {day.getDate()}
+                    <span className="calendar-day-topline">
+                      <span className="calendar-day-number">{day.getDate()}</span>
+                      {isToday && <span className="calendar-today-label">HOJE</span>}
+                      {!isToday && hasEvents && <span className="calendar-event-count" aria-hidden="true">{eventosDia.total}</span>}
                     </span>
 
                     {eventosDia.visiveis.map(({ tipo, item }) => {
@@ -1017,6 +1042,7 @@ export default function Cronograma() {
                     {eventosDia.restantes > 0 && (
                       <span className="calendar-more">+{eventosDia.restantes} mais</span>
                     )}
+                    {hasEvents && <span className="calendar-day-mobile-dot" aria-hidden="true" />}
 
                   </button>
 
@@ -1031,43 +1057,30 @@ export default function Cronograma() {
         <aside className="calendar-sidebar-card">
 
           <div className="calendar-selected-head">
-
-            <div>
-
-              <span>
-                ATIVIDADES DO DIA
-              </span>
-
-              <h2>
-                {new Date(
-                  `${selectedDate}T12:00:00`
-                ).toLocaleDateString(
-                  'pt-BR',
-                  {
-                    weekday:
-                      'long',
-                    day:
-                      'numeric',
-                    month:
-                      'long'
-                  }
-                )}
-              </h2>
-
+            <div className="calendar-date-badge" aria-hidden="true">
+              <strong>{numeroDiaSelecionado}</strong>
+              <span>{mesDiaSelecionado}</span>
             </div>
-
+            <div className="calendar-selected-copy">
+              <span>SUA AGENDA DO DIA</span>
+              <h2>
+                {selectedDateObject.toLocaleDateString('pt-BR', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long'
+                })}
+              </h2>
+              <p>{resumoDia.total > 0 ? `${resumoDia.total} ${resumoDia.total === 1 ? 'atividade planejada' : 'atividades planejadas'}` : 'Um novo dia para organizar seus estudos'}</p>
+            </div>
             <button
               type="button"
               aria-label="Adicionar atividade neste dia"
               title="Adicionar atividade neste dia"
               className="calendar-add-small"
-              onClick={() =>
-                openCreate()
-              }
+              onClick={() => openCreate()}
             >
               +
             </button>
-
           </div>
 
           {selectedImportantDates.length > 0 && (
@@ -1179,8 +1192,8 @@ export default function Cronograma() {
                         }
                       }}
                       style={{
-                        background: getPostItMateriaStyle(activity.materia).bg,
-                        borderColor: getPostItMateriaStyle(activity.materia).color
+                        '--calendar-subject-bg': getPostItMateriaStyle(activity.materia).bg,
+                        '--calendar-subject-color': getPostItMateriaStyle(activity.materia).color
                       }}
                     >
 
@@ -1233,9 +1246,7 @@ export default function Cronograma() {
 
                       </div>
 
-                      <span className="calendar-task-arrow">
-                        ›
-                      </span>
+                      <span className="calendar-task-arrow" aria-hidden="true"><Icon name="chevron" size={18} /></span>
 
                     </article>
 
@@ -1247,14 +1258,11 @@ export default function Cronograma() {
 
           </div>
 
-          <button
-            className="calendar-full-add"
-            onClick={() =>
-              openCreate()
-            }
-          >
-            + Adicionar atividade neste dia
-          </button>
+          {selectedActivities.length > 0 && (
+            <button className="calendar-full-add" onClick={() => openCreate()}>
+              + Adicionar outra atividade
+            </button>
+          )}
 
         </aside>
 

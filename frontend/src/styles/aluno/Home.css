@@ -1310,3 +1310,267 @@ html[data-theme='dark'] .home-ranking-place-1 {
   .home-ranking-heading { align-items: flex-start; }
   .home-ranking-join { width: 100%; }
 }
+
+/* =========================================================
+   AJUSTE DE LAYOUT — HOME (progresso + atividades + ranking)
+   ========================================================= */
+
+.home-main-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.home-top-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, .75fr);
+  align-items: stretch;
+}
+
+.home-top-grid > .panel-card,
+.home-extras-grid > .panel-card {
+  height: 100%;
+}
+
+.home-page .home-performance-card,
+.home-page .home-activities-card {
+  height: 100%;
+}
+
+.home-page .home-activities-card {
+  min-height: 100%;
+}
+
+.home-page .home-activities-card .activity-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.home-page .home-activities-card .activities-empty-message {
+  flex: 1;
+}
+
+.home-extras-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.home-page .home-next-card,
+.home-page .home-result-card {
+  min-height: 220px;
+  padding: clamp(22px, 2vw, 28px);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 24px rgba(24, 55, 82, .08);
+}
+
+.home-page .home-next-card {
+  background:
+    radial-gradient(circle at right top, rgba(33,150,243,.12), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(244,249,255,.95));
+}
+
+.home-page .home-result-card {
+  background:
+    radial-gradient(circle at right top, rgba(240,138,36,.12), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,250,243,.95));
+}
+
+.home-page .home-extra-copy h3 {
+  font-size: clamp(1.35rem, 2vw, 1.6rem);
+}
+
+/* =========================================================
+   RANKING XP — versão centralizada com 1º lugar no meio
+   ========================================================= */
+
+.home-page .home-ranking {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(24px, 2.3vw, 34px);
+  border-radius: 28px;
+  border: 1px solid rgba(33, 98, 181, .12);
+  background:
+    radial-gradient(circle at 15% 15%, rgba(255, 209, 102, .10), transparent 24%),
+    radial-gradient(circle at 85% 15%, rgba(33, 150, 243, .08), transparent 24%),
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,251,255,.98));
+  box-shadow: 0 12px 30px rgba(16, 53, 92, .08);
+}
+
+.home-page .home-ranking::before {
+  content: '';
+  position: absolute;
+  inset: auto -90px -120px auto;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(33,150,243,.05);
+  pointer-events: none;
+}
+
+.home-page .home-ranking-heading {
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.home-page .home-ranking-heading > div {
+  max-width: 620px;
+}
+
+.home-page .home-ranking-kicker {
+  justify-content: center;
+  color: var(--color-primary-800);
+}
+
+.home-page .home-ranking-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: end;
+  max-width: 980px;
+  margin: 0 auto 18px;
+}
+
+.home-page .home-ranking-player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  min-height: 230px;
+  padding: 22px 18px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(33, 98, 181, .12);
+  background: rgba(255,255,255,.84);
+  box-shadow: 0 10px 22px rgba(20, 60, 106, .07);
+}
+
+.home-page .home-ranking-place-1 {
+  min-height: 270px;
+  transform: translateY(-10px);
+  border-color: rgba(230, 175, 56, .48);
+  background: linear-gradient(180deg, rgba(255,248,226,.98), rgba(255,255,255,.98));
+  box-shadow: 0 16px 34px rgba(230, 175, 56, .16);
+}
+
+.home-page .home-ranking-place-2,
+.home-page .home-ranking-place-3 {
+  margin-top: 28px;
+}
+
+.home-page .home-ranking-place-2 {
+  background: linear-gradient(180deg, rgba(246,249,255,.98), rgba(255,255,255,.98));
+}
+
+.home-page .home-ranking-place-3 {
+  background: linear-gradient(180deg, rgba(251,247,244,.98), rgba(255,255,255,.98));
+}
+
+.home-page .home-ranking-medal {
+  font-size: 28px;
+}
+
+.home-page .home-ranking-avatar {
+  width: 72px;
+  height: 72px;
+  flex-basis: 72px;
+  border-width: 3px;
+  box-shadow: 0 8px 20px rgba(33,150,243,.10);
+}
+
+.home-page .home-ranking-place-1 .home-ranking-avatar {
+  width: 84px;
+  height: 84px;
+  flex-basis: 84px;
+  border-color: rgba(240, 184, 61, .45);
+  box-shadow: 0 10px 24px rgba(230, 175, 56, .18);
+}
+
+.home-page .home-ranking-player-name {
+  align-items: center;
+  gap: 6px;
+}
+
+.home-page .home-ranking-player-name strong {
+  font-size: 1rem;
+}
+
+.home-page .home-ranking-place-1 .home-ranking-player-name strong {
+  font-size: 1.18rem;
+}
+
+.home-page .home-ranking-player-name small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(33,150,243,.08);
+  color: var(--color-primary-800);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.home-page .home-ranking-place-1 .home-ranking-player-name small {
+  background: rgba(240, 184, 61, .18);
+  color: #9a6a00;
+}
+
+.home-page .home-ranking-score {
+  margin-top: auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-page .home-ranking-score strong {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+}
+
+.home-page .home-ranking-note {
+  text-align: center;
+  font-size: 11.5px;
+}
+
+/* =========================================================
+   Responsivo dos novos blocos
+   ========================================================= */
+
+@media (max-width: 1120px) {
+  .home-top-grid,
+  .home-extras-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-page .home-ranking-list {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+
+  .home-page .home-ranking-place-1,
+  .home-page .home-ranking-place-2,
+  .home-page .home-ranking-place-3 {
+    margin-top: 0;
+    transform: none;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-page .home-ranking {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .home-page .home-next-card,
+  .home-page .home-result-card {
+    min-height: 0;
+  }
+
+  .home-page .home-ranking-player {
+    min-height: 0;
+    padding: 18px 14px;
+  }
+}

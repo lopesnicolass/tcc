@@ -503,8 +503,8 @@ export default function Home() {
       </div>
 
       {/* CONTEÚDO PRINCIPAL */}
-      <div className="home-grid">
-        <div className="home-left-stack">
+      <div className="home-main-layout">
+        <div className="home-grid home-top-grid">
           <div className="panel-card home-performance-card">
             <div className="home-panel-heading">
               <div>
@@ -613,206 +613,206 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
 
-        <div className="home-side-stack">
-        <div className="panel-card home-activities-card">
-          <div className="home-panel-heading">
-            <div>
-              <h3>Próximas atividades</h3>
-              <p>
-                Seus próximos compromissos de estudo.
-              </p>
-            </div>
+          <div className="panel-card home-activities-card">
+            <div className="home-panel-heading">
+              <div>
+                <h3>Próximas atividades</h3>
+                <p>
+                  Seus próximos compromissos de estudo.
+                </p>
+              </div>
 
-            <button
-              type="button"
-              className="home-panel-link"
-              onClick={() => navigate('/cronograma')}
-            >
-              Ver calendário →
-            </button>
-          </div>
-
-          {resumoIndisponivel ? (
-            <div className="activities-empty-message" role="status">
-              {erroResumo ? 'Não foi possível mostrar suas atividades.' : 'Carregando suas atividades...'}
-            </div>
-          ) : proximasAtividades.length === 0 ? (
-            <div className="activities-empty-message home-activities-empty">
-              <span className="home-empty-icon"><Icon name="calendar" size={22} /></span>
-              <strong>Nenhuma atividade próxima</strong>
-              <span>Crie sua próxima atividade para organizar os estudos.</span>
-              <button type="button" className="home-empty-action" onClick={() => navigate('/cronograma')}>
-                Abrir calendário <Icon name="arrowRight" size={16} />
+              <button
+                type="button"
+                className="home-panel-link"
+                onClick={() => navigate('/cronograma')}
+              >
+                Ver calendário →
               </button>
             </div>
-          ) : (
-            <div className="activity-list">
-              {proximasAtividades.map(
-                (atividade) => {
-                  const status =
-                    obterStatusData(atividade);
 
-                  return (
-                    <button
-                      type="button"
-                      className="activity-item"
-                      key={atividade.id ?? `${atividade.data}-${atividade.horario}-${atividade.nome}`}
-                      onClick={() => navigate('/cronograma')}
-                      aria-label={`Ver no calendário: ${atividade.nome}, ${formatarData(atividade.data)}`}
-                    >
-                      <div className="activity-item-info">
-                        <span className="activity-name">
-                          {atividade.nome}
-                        </span>
+            {resumoIndisponivel ? (
+              <div className="activities-empty-message" role="status">
+                {erroResumo ? 'Não foi possível mostrar suas atividades.' : 'Carregando suas atividades...'}
+              </div>
+            ) : proximasAtividades.length === 0 ? (
+              <div className="activities-empty-message home-activities-empty">
+                <span className="home-empty-icon"><Icon name="calendar" size={22} /></span>
+                <strong>Nenhuma atividade próxima</strong>
+                <span>Crie sua próxima atividade para organizar os estudos.</span>
+                <button type="button" className="home-empty-action" onClick={() => navigate('/cronograma')}>
+                  Abrir calendário <Icon name="arrowRight" size={16} />
+                </button>
+              </div>
+            ) : (
+              <div className="activity-list">
+                {proximasAtividades.map(
+                  (atividade) => {
+                    const status =
+                      obterStatusData(atividade);
 
-                        <span className="activity-subject">
-                          {atividade.materia || 'Estudo'}
-                        </span>
-                      </div>
-
-                      <div className="activity-item-date">
-                        {status && (
-                          <span className="activity-status">
-                            {status}
+                    return (
+                      <button
+                        type="button"
+                        className="activity-item"
+                        key={atividade.id ?? `${atividade.data}-${atividade.horario}-${atividade.nome}`}
+                        onClick={() => navigate('/cronograma')}
+                        aria-label={`Ver no calendário: ${atividade.nome}, ${formatarData(atividade.data)}`}
+                      >
+                        <div className="activity-item-info">
+                          <span className="activity-name">
+                            {atividade.nome}
                           </span>
-                        )}
 
-                        <span className="date">
-                          {formatarData(atividade.data)}
-                        </span>
-
-                        {atividade.horario && (
-                          <span className="time">
-                            {atividade.horario}
+                          <span className="activity-subject">
+                            {atividade.materia || 'Estudo'}
                           </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                }
+                        </div>
+
+                        <div className="activity-item-date">
+                          {status && (
+                            <span className="activity-status">
+                              {status}
+                            </span>
+                          )}
+
+                          <span className="date">
+                            {formatarData(atividade.data)}
+                          </span>
+
+                          {atividade.horario && (
+                            <span className="time">
+                              {atividade.horario}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RANKING DOS ESTUDANTES */}
+        <RankingXP xp={xp} usuarioId={usuarioId} />
+
+        <div className="home-extras-grid">
+          <div className="panel-card home-next-card">
+            <div className="home-extra-icon">
+              <Icon name="book" size={22} />
+            </div>
+
+            <div className="home-extra-copy">
+              <span className="home-extra-kicker">
+                SEU PRÓXIMO PASSO
+              </span>
+
+              {resumoIndisponivel ? (
+                <>
+                  <h3>{erroResumo ? 'Próximo estudo indisponível' : 'Preparando seu próximo estudo...'}</h3>
+                  <p>{erroResumo ? 'Tente novamente quando seus dados estiverem disponíveis.' : 'Buscando seus conteúdos pendentes.'}</p>
+                </>
+              ) : proximoTopico ? (
+                <>
+                  <h3>{proximoTopico.nome}</h3>
+                  <p>{proximoTopico.materia} · Conteúdo pendente</p>
+
+                  <button
+                    type="button"
+                    className="home-extra-button"
+                    onClick={() =>
+                      navigate(
+                        `/conteudos/${proximoTopico.id}`
+                      )
+                    }
+                  >
+                    Abrir conteúdo →
+                  </button>
+                </>
+              ) : totalConteudos === 0 ? (
+                <>
+                  <h3>Explore os simulados</h3>
+                  <p>Ainda não há conteúdos cadastrados para revisão.</p>
+                  <button type="button" className="home-extra-button" onClick={() => navigate('/simulados')}>
+                    Ver simulados <Icon name="arrowRight" size={16} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h3>Você revisou tudo!</h3>
+                  <p>
+                    Continue praticando com simulados e flashcards.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="home-extra-button"
+                    onClick={() => navigate('/simulados')}
+                  >
+                    Fazer um simulado →
+                  </button>
+                </>
               )}
             </div>
-          )}
-        </div>
-
-        <div className="panel-card home-next-card">
-          <div className="home-extra-icon">
-            <Icon name="book" size={22} />
           </div>
 
-          <div className="home-extra-copy">
-            <span className="home-extra-kicker">
-              SEU PRÓXIMO PASSO
-            </span>
+          <div className="panel-card home-result-card">
+            <div className="home-extra-icon home-result-icon">
+              <Icon name="trophy" size={22} />
+            </div>
 
-            {resumoIndisponivel ? (
-              <>
-                <h3>{erroResumo ? 'Próximo estudo indisponível' : 'Preparando seu próximo estudo...'}</h3>
-                <p>{erroResumo ? 'Tente novamente quando seus dados estiverem disponíveis.' : 'Buscando seus conteúdos pendentes.'}</p>
-              </>
-            ) : proximoTopico ? (
-              <>
-                <h3>{proximoTopico.nome}</h3>
-                <p>{proximoTopico.materia} · Conteúdo pendente</p>
+            <div className="home-extra-copy">
+              <span className="home-extra-kicker">
+                ÚLTIMO RESULTADO
+              </span>
 
-                <button
-                  type="button"
-                  className="home-extra-button"
-                  onClick={() =>
-                    navigate(
-                      `/conteudos/${proximoTopico.id}`
-                    )
-                  }
-                >
-                  Abrir conteúdo →
-                </button>
-              </>
-            ) : totalConteudos === 0 ? (
-              <>
-                <h3>Explore os simulados</h3>
-                <p>Ainda não há conteúdos cadastrados para revisão.</p>
-                <button type="button" className="home-extra-button" onClick={() => navigate('/simulados')}>
-                  Ver simulados <Icon name="arrowRight" size={16} />
-                </button>
-              </>
-            ) : (
-              <>
-                <h3>Você revisou tudo!</h3>
-                <p>
-                  Continue praticando com simulados e flashcards.
-                </p>
+              {resumoIndisponivel ? (
+                <>
+                  <h3>{erroResumo ? 'Resultado indisponível' : 'Carregando resultados...'}</h3>
+                  <p>Seu histórico será exibido quando estiver disponível.</p>
+                </>
+              ) : ultimoResultado ? (
+                <>
+                  <h3>
+                    {ultimoResultado.simulado_nome ||
+                      'Simulado realizado'}
+                  </h3>
 
-                <button
-                  type="button"
-                  className="home-extra-button"
-                  onClick={() => navigate('/simulados')}
-                >
-                  Fazer um simulado →
-                </button>
-              </>
-            )}
+                  <p>
+                    <strong className="home-result-percentage">
+                      {Number(ultimoResultado.porcentagem || 0).toFixed(0)}% de acertos
+                    </strong>
+                    {' · '}
+                    {ultimoResultado.acertos} de{' '}
+                    {ultimoResultado.total_questoes} questões
+                    {formatarDataResultado(ultimoResultado.data_realizacao)
+                      ? ` · ${formatarDataResultado(ultimoResultado.data_realizacao)}`
+                      : ''}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3>Ainda não há resultados.</h3>
+                  <p>
+                    Faça seu primeiro simulado para começar a acompanhar sua evolução.
+                  </p>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="home-extra-button"
+                onClick={() => navigate(ultimoResultado ? '/desempenho' : '/simulados')}
+              >
+                {ultimoResultado ? 'Ver desempenho →' : 'Fazer um simulado →'}
+              </button>
+            </div>
           </div>
-        </div>
-
-        <div className="panel-card home-result-card">
-          <div className="home-extra-icon home-result-icon">
-            <Icon name="trophy" size={22} />
-          </div>
-
-          <div className="home-extra-copy">
-            <span className="home-extra-kicker">
-              ÚLTIMO RESULTADO
-            </span>
-
-            {resumoIndisponivel ? (
-              <>
-                <h3>{erroResumo ? 'Resultado indisponível' : 'Carregando resultados...'}</h3>
-                <p>Seu histórico será exibido quando estiver disponível.</p>
-              </>
-            ) : ultimoResultado ? (
-              <>
-                <h3>
-                  {ultimoResultado.simulado_nome ||
-                    'Simulado realizado'}
-                </h3>
-
-                <p>
-                  <strong className="home-result-percentage">
-                    {Number(ultimoResultado.porcentagem || 0).toFixed(0)}% de acertos
-                  </strong>
-                  {' · '}
-                  {ultimoResultado.acertos} de{' '}
-                  {ultimoResultado.total_questoes} questões
-                  {formatarDataResultado(ultimoResultado.data_realizacao)
-                    ? ` · ${formatarDataResultado(ultimoResultado.data_realizacao)}`
-                    : ''}
-                </p>
-              </>
-            ) : (
-              <>
-                <h3>Ainda não há resultados.</h3>
-                <p>
-                  Faça seu primeiro simulado para começar a acompanhar sua evolução.
-                </p>
-              </>
-            )}
-
-            <button
-              type="button"
-              className="home-extra-button"
-              onClick={() => navigate(ultimoResultado ? '/desempenho' : '/simulados')}
-            >
-              {ultimoResultado ? 'Ver desempenho →' : 'Fazer um simulado →'}
-            </button>
-          </div>
-        </div>
         </div>
       </div>
-
-      {/* RANKING DOS ESTUDANTES */}
-      <RankingXP xp={xp} usuarioId={usuarioId} />
 
       {/* MODAL DE NÍVEIS */}
       {showLevels && (

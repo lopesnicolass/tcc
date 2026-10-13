@@ -1833,3 +1833,1014 @@ html[data-theme='dark'] .tenna-auto-date-warning { background: #42331c; border-c
   white-space: nowrap;
 }
 .tenna-auto-plan .tenna-auto-next-button:hover { background: var(--paper); border-color: var(--accent); }
+
+/* =========================================================
+   REFORMULAÇÃO — ÁREA GERADA DO CRONOGRAMA
+   ========================================================= */
+.tenna-auto-generated-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 30px;
+  border-radius: var(--radius-2xl);
+  border: 1px solid #d9e7f5;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(111, 175, 248, 0.18), transparent 28%),
+    linear-gradient(135deg, #ffffff 0%, #f6fbff 100%);
+  box-shadow: 0 14px 35px -28px rgba(13, 71, 161, .45);
+}
+.tenna-auto-generated-hero-copy h2 {
+  margin: 4px 0 6px;
+  font-family: "Space Grotesk";
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.04;
+  color: var(--ink);
+}
+.tenna-auto-generated-hero-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.tenna-auto-generated-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.tenna-auto-generated-chips span,
+.tenna-auto-month-badges span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #edf5fd;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+.tenna-auto-generated-chips span.warn {
+  background: #fff3e6;
+  color: #b86a11;
+}
+.tenna-auto-generated-chips span.ok {
+  background: #e9f8ef;
+  color: #2e7d4c;
+}
+.tenna-auto-generated-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.tenna-auto-overview-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 16px;
+}
+.tenna-auto-overview-card {
+  background: var(--card);
+  border: 1px solid #d9e7f5;
+  border-radius: var(--radius-xl);
+  padding: 22px;
+  box-shadow: 0 10px 26px -22px rgba(13, 71, 161, .4);
+}
+.tenna-auto-overview-focus {
+  background: linear-gradient(135deg, #ffffff 0%, #f5faff 100%);
+}
+.tenna-auto-overview-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tenna-auto-overview-head small {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--accent-dark);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+.tenna-auto-overview-head strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+.tenna-auto-overview-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--accent-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 42px;
+}
+.tenna-auto-overview-card h3 {
+  margin: 18px 0 8px;
+  color: var(--ink);
+  font-family: "Space Grotesk";
+  font-size: 22px;
+  line-height: 1.15;
+}
+.tenna-auto-overview-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.tenna-auto-overview-actions {
+  margin-top: 18px;
+}
+.tenna-auto-overview-big {
+  margin: 18px 0 10px;
+  color: var(--ink);
+  font-family: "Space Grotesk";
+  font-size: 44px;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+.tenna-auto-overview-big span {
+  font-size: 20px;
+  color: var(--muted);
+}
+.tenna-auto-progress-track.compact {
+  margin: 16px 0 0;
+  height: 7px;
+}
+.tenna-auto-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tenna-auto-overview-list li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.tenna-auto-overview-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-light);
+}
+.tenna-auto-month-updated .tenna-auto-month-head {
+  align-items: flex-start;
+}
+.tenna-auto-month-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tenna-auto-days-grid-plan {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.tenna-auto-day-card {
+  background: #f7fbff;
+  border: 1px solid #e0ecf8;
+  border-radius: 18px;
+  padding: 14px;
+}
+.tenna-auto-day-card.empty {
+  background: #fbfcfe;
+}
+.tenna-auto-day-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.tenna-auto-day-card-head strong {
+  display: block;
+  color: var(--ink);
+  font-size: 15px;
+}
+.tenna-auto-day-card-head span:last-child,
+.tenna-auto-day-card-head div > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.tenna-auto-day-card-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 12px;
+  background: #e8f2fc;
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+.tenna-auto-day-items-enhanced {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tenna-auto-study-card {
+  border-radius: 16px;
+  border: 1px solid var(--study-bg);
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 8px 18px -18px rgba(13, 71, 161, .3);
+}
+.tenna-auto-study-card.done {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+}
+.tenna-auto-study-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tenna-auto-study-subject {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--study-bg);
+  color: var(--study-color);
+  font-size: 11px;
+  font-weight: 800;
+}
+.tenna-auto-study-toggle {
+  border: 1px solid #cfe0f2;
+  background: #fff;
+  color: var(--ink-soft);
+  border-radius: 999px;
+  min-height: 30px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tenna-auto-study-toggle.done {
+  border-color: #bfdcc7;
+  background: #eff9f2;
+  color: #2e7d4c;
+}
+.tenna-auto-study-card h4 {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.25;
+}
+.tenna-auto-study-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tenna-auto-study-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eef3f9;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .03em;
+}
+.tenna-auto-study-state.done {
+  background: #eaf7ee;
+  color: #2e7d4c;
+}
+.tenna-auto-study-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+.tenna-auto-study-open {
+  border: 0;
+  background: transparent;
+  color: var(--accent-dark);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.tenna-auto-day-empty-enhanced {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 1080px) {
+  .tenna-auto-overview-grid,
+  .tenna-auto-days-grid-plan {
+    grid-template-columns: 1fr;
+  }
+
+  .tenna-auto-generated-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tenna-auto-generated-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 700px) {
+  .tenna-auto-generated-hero,
+  .tenna-auto-overview-card {
+    padding: 20px 18px;
+  }
+
+  .tenna-auto-generated-hero-copy h2 {
+    font-size: 28px;
+  }
+
+  .tenna-auto-generated-hero-actions,
+  .tenna-auto-overview-actions,
+  .tenna-auto-study-actions {
+    width: 100%;
+  }
+
+  .tenna-auto-generated-hero-actions .mural-btn,
+  .tenna-auto-generated-hero-actions .tenna-auto-secondary-button,
+  .tenna-auto-overview-actions .mural-btn,
+  .tenna-auto-study-open {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tenna-auto-month-badges {
+    margin-top: 10px;
+  }
+
+  .tenna-auto-day-card {
+    padding: 12px;
+  }
+
+  .tenna-auto-study-card-top,
+  .tenna-auto-study-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* =========================================================
+   TENNA / CRONOGRAMA — TRILHA DE ESTUDOS (2026)
+   Design exclusivo da tela gerada. Os estilos da configuração
+   continuam intactos; o restante do sistema não é afetado.
+   ========================================================= */
+.tenna-auto-plan .tenna-auto-result {
+  gap: 18px;
+}
+
+/* Capa da jornada */
+.tenna-auto-plan .tenna-auto-generated-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  align-items: center;
+  gap: 22px;
+  min-height: 214px;
+  padding: 32px 36px;
+  border: 0;
+  border-radius: 25px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(93, 188, 255, .26) 0 15%, transparent 32%),
+    linear-gradient(116deg, #0b3a86 0%, #1555b6 48%, #198ce8 100%);
+  box-shadow: 0 22px 38px -29px rgba(6, 55, 137, .72);
+}
+.tenna-auto-plan .tenna-auto-generated-hero::before,
+.tenna-auto-plan .tenna-auto-generated-hero::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.tenna-auto-plan .tenna-auto-generated-hero::before {
+  right: -96px;
+  bottom: -204px;
+  width: 405px;
+  height: 405px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  box-shadow: 0 0 0 43px rgba(255,255,255,.06), 0 0 0 95px rgba(255,255,255,.035);
+}
+.tenna-auto-plan .tenna-auto-generated-hero::after {
+  top: -105px;
+  left: 45%;
+  width: 210px;
+  height: 210px;
+  background: rgba(255,255,255,.06);
+}
+.tenna-auto-plan .tenna-auto-generated-hero-copy,
+.tenna-auto-plan .tenna-auto-generated-hero-actions {
+  position: relative;
+  z-index: 1;
+}
+.tenna-auto-plan .tenna-auto-generated-hero .tenna-auto-config-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #c7eaff;
+  letter-spacing: .15em;
+  font-size: 11px;
+}
+.tenna-auto-plan .tenna-auto-generated-hero h2 {
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(29px, 3.4vw, 42px);
+  letter-spacing: -.035em;
+  line-height: 1.1;
+  margin: 0 0 10px;
+  max-width: 640px;
+}
+.tenna-auto-plan .tenna-auto-generated-hero-copy > p {
+  color: #d8eeff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.tenna-auto-plan .tenna-auto-generated-chips {
+  margin-top: 20px;
+  gap: 8px;
+}
+.tenna-auto-plan .tenna-auto-generated-chips span,
+.tenna-auto-plan .tenna-auto-generated-chips span.ok,
+.tenna-auto-plan .tenna-auto-generated-chips span.warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 31px;
+  color: #f7fbff;
+  background: rgba(255, 255, 255, .16);
+  border: 1px solid rgba(255, 255, 255, .21);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  backdrop-filter: blur(7px);
+}
+.tenna-auto-plan .tenna-auto-generated-chips span.ok {color:#e5ffe9}
+.tenna-auto-plan .tenna-auto-generated-chips span.warn {color:#fff0cf}
+.tenna-auto-plan .tenna-auto-generated-hero-actions {
+  flex-direction: column;
+  min-width: 188px;
+  align-items: stretch;
+  justify-content: center;
+}
+.tenna-auto-plan .tenna-auto-generated-hero-actions button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 800;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-shadow: none;
+  transition: transform .15s ease, background .15s ease;
+}
+.tenna-auto-plan .tenna-auto-generated-hero-actions button:hover:not(:disabled) {transform: translateY(-2px)}
+.tenna-auto-plan .tenna-auto-generated-hero-actions .tenna-auto-secondary-button {
+  color: #fff;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.56);
+}
+.tenna-auto-plan .tenna-auto-generated-hero-actions .tenna-auto-secondary-button:hover {
+  background: rgba(255,255,255,.19);
+}
+.tenna-auto-plan .tenna-auto-generated-hero-actions .mural-btn.primary {
+  background: #fff;
+  border: 1px solid #fff;
+  color: #0a479f;
+  box-shadow: 0 9px 22px -14px rgba(0,0,0,.55);
+}
+.tenna-auto-plan .tenna-auto-generated-hero-actions .mural-btn.primary:hover {
+  background: #ecf7ff;
+  color: #0a479f;
+}
+
+/* Três cards com funções e personalidades distintas */
+.tenna-auto-plan .tenna-auto-overview-grid {
+  grid-template-columns: minmax(0, 1.26fr) repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+.tenna-auto-plan .tenna-auto-overview-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 235px;
+  padding: 23px 23px 22px;
+  border: 1px solid #d8e7f5;
+  border-radius: 21px;
+  box-shadow: 0 12px 27px -25px rgba(13,71,161,.4);
+  background: var(--card);
+}
+.tenna-auto-plan .tenna-auto-overview-focus {
+  background: linear-gradient(140deg, #e9f4ff 0%, #f7fbff 67%, #fff 100%);
+  border-color: #c7e3fb;
+}
+.tenna-auto-plan .tenna-auto-focus-glow {
+  position: absolute;
+  top: -36px;
+  right: -35px;
+  color: #1680e4;
+  opacity: .07;
+  transform: rotate(-9deg);
+  pointer-events: none;
+  z-index: -1;
+}
+.tenna-auto-plan .tenna-auto-overview-head {gap: 11px}
+.tenna-auto-plan .tenna-auto-overview-icon {
+  flex-basis: 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+  background: #e7f3fd;
+  color: #0b59b6;
+}
+.tenna-auto-plan .tenna-auto-overview-head small {
+  display: block;
+  margin-bottom: 4px;
+  color: #4276b1;
+  font-size: 10px;
+  letter-spacing: .12em;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-overview-head strong {
+  display: block;
+  color: #0c428c;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.tenna-auto-plan .tenna-auto-overview-focus h3 {
+  color: #0b3d84;
+  font-size: clamp(22px, 2.3vw, 29px);
+  font-weight: 800;
+  margin: 15px 0 6px;
+  line-height: 1.14;
+}
+.tenna-auto-plan .tenna-auto-overview-focus p {
+  color: #50749a;
+  font-size: 12px;
+}
+.tenna-auto-plan .tenna-auto-overview-focus .tenna-auto-overview-actions {margin-top: 15px}
+.tenna-auto-plan .tenna-auto-overview-focus .mural-btn.primary {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 41px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #0d4aab;
+  border: 1px solid #0d4aab;
+  color: #fff;
+  box-shadow: 0 8px 17px -11px rgba(13,71,161,.7);
+  font-size: 12px;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-overview-focus .mural-btn.primary:hover:not(:disabled) {
+  background: #0a398b;
+  border-color: #0a398b;
+  color: #fff;
+}
+.tenna-auto-plan .tenna-auto-overview-card:nth-child(3) {
+  background: linear-gradient(135deg, #ffffff, #f6f7ff);
+}
+.tenna-auto-plan .tenna-auto-overview-card:nth-child(3) .tenna-auto-overview-icon {
+  background: #edeeff;
+  color: #6653b6;
+}
+.tenna-auto-plan .tenna-auto-progress-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 21px;
+}
+.tenna-auto-plan .tenna-auto-progress-ring {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 106px;
+  width: 106px;
+  height: 106px;
+  border-radius: 50%;
+  background: conic-gradient(#1688e9 0 var(--progress), #e1edfa var(--progress) 100%);
+}
+.tenna-auto-plan .tenna-auto-progress-ring > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--card);
+}
+.tenna-auto-plan .tenna-auto-progress-ring strong {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1;
+}
+.tenna-auto-plan .tenna-auto-progress-ring small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.tenna-auto-plan .tenna-auto-progress-details {min-width:0}
+.tenna-auto-plan .tenna-auto-progress-details > strong {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 31px;
+  line-height: 1;
+  color: var(--ink);
+}
+.tenna-auto-plan .tenna-auto-progress-details > strong span {font-size:18px;color:var(--muted)}
+.tenna-auto-plan .tenna-auto-progress-details p {
+  font-size: 12px;
+  margin-top: 3px;
+  color: var(--ink-soft);
+}
+.tenna-auto-plan .tenna-auto-progress-details > small {
+  display: block;
+  margin-top: 8px;
+  color: #5c83ae;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.tenna-auto-plan .tenna-auto-rhythm-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 8px;
+  margin: 22px 0 14px;
+}
+.tenna-auto-plan .tenna-auto-rhythm-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width:0;
+  gap: 3px;
+  border-radius: 13px;
+  padding: 11px 5px;
+  background: #eff2ff;
+}
+.tenna-auto-plan .tenna-auto-rhythm-stats strong {
+  color: #3b4fa9;
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1;
+  font-size: 22px;
+}
+.tenna-auto-plan .tenna-auto-rhythm-stats strong small {font-size:13px}
+.tenna-auto-plan .tenna-auto-rhythm-stats span {color:#5365a0;font-size:10px;font-weight:700;text-align:center}
+.tenna-auto-plan .tenna-auto-overview-card .tenna-auto-rhythm-message {
+  color: #596e97;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+/* Prioridade abre sem competir com os indicadores */
+.tenna-auto-plan .tenna-auto-plan-details {
+  border-radius: 14px;
+  box-shadow: none;
+}
+.tenna-auto-plan .tenna-auto-plan-details summary {font-size: 12px}
+
+/* Etapas em cartões clicáveis em vez de uma linha enorme vazia */
+.tenna-auto-plan .tenna-auto-journey {
+  padding: 24px 26px;
+  background: var(--card);
+  border-radius: 22px;
+}
+.tenna-auto-plan .tenna-auto-journey h3 {font-size:25px}
+.tenna-auto-plan .tenna-auto-journey p {font-size:12.5px;line-height:1.45}
+.tenna-auto-plan .tenna-auto-journey .tenna-auto-step {
+  width: 43px;
+  height: 43px;
+  flex-basis: 43px;
+  color: #1b63b8;
+  background: #e4f3ff;
+}
+.tenna-auto-plan .tenna-auto-journey-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 13px;
+  border-radius: 999px;
+  background: #e9f3fe;
+  color: #1359ab;
+  font-size: 12px;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-timeline-wrap {
+  padding: 14px 0 3px;
+  overflow-x: auto;
+}
+.tenna-auto-plan .tenna-auto-timeline-wrap::after,
+.tenna-auto-plan .tenna-auto-timeline-line {display:none}
+.tenna-auto-plan .tenna-auto-timeline {
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+  gap: 11px;
+}
+.tenna-auto-plan .tenna-auto-timeline-item {
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+  align-items: center;
+  gap: 12px;
+  min-width: 157px;
+  padding: 12px 14px;
+  border: 1px solid #d8e6f5;
+  border-radius: 16px;
+  background: #f6faff;
+}
+.tenna-auto-plan .tenna-auto-timeline-item.active {
+  background: #e8f4ff;
+  border-color: #4896e3;
+  box-shadow: inset 0 0 0 1px #4896e3;
+}
+.tenna-auto-plan .tenna-auto-timeline-item:hover {background:#e9f3ff}
+.tenna-auto-plan .tenna-auto-timeline-dot {
+  flex: 0 0 37px;
+  width: 37px;
+  height: 37px;
+  box-shadow: none;
+  background: #fff;
+  font-weight: 800;
+  font-size: 12px;
+  color: #356baf;
+}
+.tenna-auto-plan .tenna-auto-timeline-item.active .tenna-auto-timeline-dot {
+  color: #fff;
+  background: #1053b4;
+  border-color: #1053b4;
+  transform: none;
+}
+.tenna-auto-plan .tenna-auto-timeline-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.tenna-auto-plan .tenna-auto-timeline-item strong {color:#0a468f;font-size:13px}
+.tenna-auto-plan .tenna-auto-timeline-item small {color:#5b79a2;font-size:10.5px}
+
+/* Bloco mensal e semanas com personalidade */
+.tenna-auto-plan .tenna-auto-month {
+  border-radius: 22px;
+  border: 1px solid #d9e7f5;
+  background: var(--card);
+  box-shadow: 0 16px 35px -30px rgba(11,61,132,.36);
+}
+.tenna-auto-plan .tenna-auto-month-head {
+  align-items: center;
+  padding: 23px 26px;
+  background: linear-gradient(100deg, #edf6ff 0%, #f9fcff 100%);
+  border-bottom: 1px solid #dceafa;
+}
+.tenna-auto-plan .tenna-auto-month-icon {
+  background: #dbeeff;
+  border-radius: 17px;
+  color: #135ab0;
+}
+.tenna-auto-plan .tenna-auto-month-title h3 {font-size:clamp(21px,2.1vw,28px);color:#0c4ba0}
+.tenna-auto-plan .tenna-auto-month-title p {color:#5a7d9e;font-size:12px}
+.tenna-auto-plan .tenna-auto-month-badges span {
+  background: #fff;
+  border: 1px solid #cee2f5;
+  color: #2964a8;
+  font-size: 11px;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-weeks {padding:19px;}
+.tenna-auto-plan .tenna-auto-week {
+  border-radius: 16px;
+  border: 1px solid #dce8f5;
+  margin-bottom: 12px;
+  box-shadow: none;
+}
+.tenna-auto-plan .tenna-auto-week.open {border-color:#95c3ef;box-shadow:0 8px 19px -20px #0d47a1}
+.tenna-auto-plan .tenna-auto-week-head {
+  min-height: 72px;
+  padding: 14px 16px;
+  gap: 14px;
+  background: var(--card);
+}
+.tenna-auto-plan .tenna-auto-week-head:hover {background:#f5faff}
+.tenna-auto-plan .tenna-auto-week-number {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #e8f4fe;
+  color: #1c66b9;
+  font-size: 13px;
+}
+.tenna-auto-plan .tenna-auto-week.open .tenna-auto-week-number {
+  background: #0e54b4;
+  color: #fff;
+}
+.tenna-auto-plan .tenna-auto-week-title {gap:5px}
+.tenna-auto-plan .tenna-auto-week-title strong {font-size:15px;color:var(--ink)}
+.tenna-auto-plan .tenna-auto-week-title small {font-size:11px;color:var(--muted)}
+.tenna-auto-plan .tenna-auto-week-meter {
+  display:block;
+  width: min(240px,100%);
+  height:5px;
+  overflow:hidden;
+  border-radius:999px;
+  margin-top:3px;
+  background:#e5eef8;
+}
+.tenna-auto-plan .tenna-auto-week-meter > span {
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background: linear-gradient(90deg,#168fe9,#58c6b1);
+  transition:width .3s ease;
+}
+.tenna-auto-plan .tenna-auto-week-status {font-size:11px;color:#4d79aa}
+.tenna-auto-plan .tenna-auto-week-body {background:#fbfdff;padding:18px}
+.tenna-auto-plan .tenna-auto-days-grid-plan {gap:14px}
+.tenna-auto-plan .tenna-auto-day-card {
+  padding: 15px;
+  border: 1px solid #e0ebf6;
+  background: #f3f8fe;
+  border-radius: 17px;
+}
+.tenna-auto-plan .tenna-auto-day-card-head {gap:11px;margin-bottom:13px}
+.tenna-auto-plan .tenna-auto-day-card-head strong {font-size:13px;color:#174b91}
+.tenna-auto-plan .tenna-auto-day-card-head div > span {font-size:11px;color:#6785a9}
+.tenna-auto-plan .tenna-auto-day-card-chip {
+  width: 43px;
+  min-width: 43px;
+  height: 41px;
+  border-radius: 12px;
+  color: #1258b2;
+  background: #dfefff;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-study-card {
+  border: 1px solid #e1e8f1;
+  border-left: 4px solid var(--study-color);
+  border-radius: 13px;
+  padding: 16px 15px;
+  background: var(--card);
+  box-shadow: 0 5px 14px -17px rgba(14, 57, 112,.5);
+}
+.tenna-auto-plan .tenna-auto-study-card-top {margin-bottom:12px;gap:8px}
+.tenna-auto-plan .tenna-auto-study-subject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 29px;
+  padding: 6px 10px;
+  background: var(--study-bg);
+  color: var(--study-color);
+  font-size: 11px;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-study-toggle {
+  flex-shrink: 0;
+  min-height: 32px;
+  border-color: #c8daf0;
+  color: #2764aa;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+.tenna-auto-plan .tenna-auto-study-toggle:hover:not(:disabled) {background:#e7f4ff}
+.tenna-auto-plan .tenna-auto-study-toggle.done {color:#257747;background:#e5f5eb;border-color:#b3dfc1}
+.tenna-auto-plan .tenna-auto-study-card.done {background:linear-gradient(120deg,var(--card),#f2faf5)}
+.tenna-auto-plan .tenna-auto-study-card h4 {
+  margin-bottom: 11px;
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 800;
+}
+.tenna-auto-plan .tenna-auto-study-state {color:#5b7796;font-size:10.5px}
+.tenna-auto-plan .tenna-auto-study-actions {margin-top:12px}
+.tenna-auto-plan .tenna-auto-study-open {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  min-height: 35px;
+  background: #e9f3ff;
+  border: 1px solid #d0e5fa;
+  border-radius: 10px;
+  color: #0b54a9;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.tenna-auto-plan .tenna-auto-study-open:hover {
+  background:#0d55b2;
+  color:#fff;
+  border-color:#0d55b2;
+}
+.tenna-auto-plan .tenna-auto-study-open:focus-visible,
+.tenna-auto-plan .tenna-auto-study-toggle:focus-visible,
+.tenna-auto-plan .tenna-auto-generated-hero button:focus-visible {
+  outline: 3px solid #73c8ff;
+  outline-offset: 3px;
+}
+
+/* Modo escuro: preserva contraste sem alterar o restante do tema */
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-overview-card,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-journey,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month {background:var(--card);border-color:var(--line)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-overview-focus {background:linear-gradient(130deg,#17375d,var(--card))}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-overview-focus h3,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-overview-head strong,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month-title h3,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-day-card-head strong {color:#d4ecff}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-rhythm-stats>div,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-timeline-item,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-day-card,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-week-body {background:#142d4b;border-color:#355375}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-timeline-item.active {background:#16477c;border-color:#73bdff}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-timeline-item strong,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-rhythm-stats strong {color:#e4f4ff}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-rhythm-stats span,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-timeline-item small {color:#c0d4eb}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month-head {background:#173455;border-color:var(--line)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-week,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-week-head {background:var(--card);border-color:var(--line)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-week-head:hover {background:#1b3b5b}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-study-card {background:var(--card);border-top-color:var(--line);border-right-color:var(--line);border-bottom-color:var(--line)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-study-subject {background:var(--study-bg);color:var(--study-color)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-study-open {background:#174b83;color:#e6f4ff;border-color:#2a64a0}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-study-toggle {background:#183b63;color:#e0efff;border-color:#356ca3}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-progress-ring > div {background:var(--card)}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-overview-card .tenna-auto-rhythm-message,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-progress-details > small {color:#c0d4eb}
+
+@media (max-width: 1180px) {
+  .tenna-auto-plan .tenna-auto-overview-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tenna-auto-plan .tenna-auto-overview-focus {grid-column:1/-1}
+  .tenna-auto-plan .tenna-auto-generated-hero {align-items:flex-start;flex-direction:column}
+  .tenna-auto-plan .tenna-auto-generated-hero-actions {min-width:0;flex-direction:row}
+}
+@media (max-width: 760px) {
+  .tenna-auto-plan .tenna-auto-overview-grid,
+  .tenna-auto-plan .tenna-auto-days-grid-plan {grid-template-columns:minmax(0,1fr)}
+  .tenna-auto-plan .tenna-auto-overview-focus {grid-column:auto}
+  .tenna-auto-plan .tenna-auto-generated-hero {padding:25px 22px;min-height:0}
+  .tenna-auto-plan .tenna-auto-generated-hero h2 {font-size:31px}
+  .tenna-auto-plan .tenna-auto-generated-hero-actions {flex-direction:column;width:100%}
+  .tenna-auto-plan .tenna-auto-generated-hero-actions button {width:100%}
+  .tenna-auto-plan .tenna-auto-generated-chips {gap:7px}
+  .tenna-auto-plan .tenna-auto-overview-card {min-height:0}
+  .tenna-auto-plan .tenna-auto-journey {padding:20px 17px}
+  .tenna-auto-plan .tenna-auto-journey-head {align-items:flex-start;flex-direction:column;gap:12px}
+  .tenna-auto-plan .tenna-auto-month-head {padding:20px 16px;align-items:flex-start;flex-direction:column;gap:12px}
+  .tenna-auto-plan .tenna-auto-weeks {padding:11px}
+  .tenna-auto-plan .tenna-auto-week-body {padding:11px}
+  .tenna-auto-plan .tenna-auto-week-head {gap:10px;padding:13px 11px}
+  .tenna-auto-plan .tenna-auto-week-status {font-size:0}
+  .tenna-auto-plan .tenna-auto-day-card {padding:12px}
+  .tenna-auto-plan .tenna-auto-study-card {padding:13px}
+}
+@media (max-width:390px) {
+  .tenna-auto-plan .tenna-auto-progress-ring {flex:0 0 91px;width:91px;height:91px}
+  .tenna-auto-plan .tenna-auto-progress-ring > div {width:75px;height:75px}
+  .tenna-auto-plan .tenna-auto-study-card-top {align-items:flex-start;flex-wrap:wrap}
+  .tenna-auto-plan .tenna-auto-study-toggle {margin-left:auto}
+}
+@media (prefers-reduced-motion:reduce) {
+  .tenna-auto-plan .tenna-auto-result *,
+  .tenna-auto-plan .tenna-auto-result *::before,
+  .tenna-auto-plan .tenna-auto-result *::after {animation:none!important;transition:none!important}
+}
