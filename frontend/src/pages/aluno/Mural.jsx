@@ -1,5 +1,5 @@
 import '../../styles/aluno/Mural.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import { request } from '../../services/api.js';
 
@@ -12,6 +12,45 @@ const MATERIAS = [
 ];
 
 const MAX_CHARS = 200;
+
+// Ajusta apenas a fonte quando o texto ultrapassa a área disponível.
+// Mede o conteúdo real, incluindo palavras longas e quebras de linha.
+function PostitText({ texto }) {
+  const ref = useRef(null);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const fit = () => {
+      // Começa sempre no tamanho original para textos curtos.
+      let low = 9;
+      let high = 22;
+      element.style.fontSize = `${high}px`;
+      const fits = () => element.scrollHeight <= element.clientHeight + 1 &&
+        element.scrollWidth <= element.clientWidth + 1;
+      if (fits()) return;
+
+      for (let i = 0; i < 12; i++) {
+        const mid = (low + high) / 2;
+        element.style.fontSize = `${mid}px`;
+        if (fits()) low = mid;
+        else high = mid;
+      }
+      element.style.fontSize = `${Math.floor(low * 10) / 10}px`;
+    };
+
+    const observer = new ResizeObserver(fit);
+    if (element.parentElement) observer.observe(element.parentElement);
+    if (document.fonts?.ready) document.fonts.ready.then(fit);
+    fit();
+    return () => observer.disconnect();
+  }, [texto]);
+
+  return <p ref={ref} className="postit-text">{texto}</p>;
+}
+
+
 
 const COLOR_CLASS = {
   Português: 'postit-portugues',
@@ -131,6 +170,8 @@ export default function Mural() {
   const [showAddModal, setShowAddModal] =
     useState(false);
 
+  const [createStep, setCreateStep] = useState('choose');
+
   const [newText, setNewText] =
     useState('');
 
@@ -228,6 +269,7 @@ export default function Mural() {
   function openAddModal() {
 
     setNewText('');
+    setCreateStep('choose');
 
     setNewMateria(
       MATERIAS[0]
@@ -483,6 +525,26 @@ export default function Mural() {
 
   const textoBusca = busca.trim().toLowerCase();
 
+  const editAreaRef = useRef(null);
+  useLayoutEffect(() => {
+    if (!editingPostit || !editAreaRef.current) return;
+    const area = editAreaRef.current;
+    const fit = () => {
+      // Mantém a caligrafia grande; reduz somente se o texto não couber.
+      let size = 30;
+      area.style.fontSize = `${size}px`;
+      while (size > 14 && (area.scrollHeight > area.clientHeight + 2 || area.scrollWidth > area.clientWidth + 2)) {
+        size -= 1;
+        area.style.fontSize = `${size}px`;
+      }
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(area);
+    document.fonts?.ready?.then(fit);
+    return () => observer.disconnect();
+  }, [editText, editingPostit]);
+
   const visiveis = postits.filter((postit) => {
     const passaMateria =
       filtro === 'Todas' ||
@@ -555,18 +617,6 @@ export default function Mural() {
             e deixe seus principais lembretes
             sempre à vista.
           </p>
-
-        </div>
-
-        <div className="mural-actions">
-
-          <button
-            type="button"
-            className="mural-btn primary"
-            onClick={openAddModal}
-          >
-            + Adicionar post-it
-          </button>
 
         </div>
 
@@ -675,6 +725,10 @@ export default function Mural() {
 
           </label>
 
+          <button type="button" className="mural-add-inline" onClick={openAddModal}>
+            <span aria-hidden="true">+</span> Adicionar post-it
+          </button>
+
         </div>
 
       </div>
@@ -760,11 +814,7 @@ export default function Mural() {
 
                   </span>
 
-                  <p className="postit-text">
-
-                    {postit.texto}
-
-                  </p>
+                  <PostitText texto={postit.texto} />
 
                 </div>
               );
@@ -781,289 +831,68 @@ export default function Mural() {
       {/* ============================================= */}
 
       {showAddModal && (
-
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setShowAddModal(false)
-          }
-        >
-
-          <div
-            className="modal-card"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            <div className="modal-header">
-
-              <h2>
-                Adicione um novo post-it ao seu mural
-              </h2>
-
-              <p>
-                Post-its te ajudam a memorizar
-                o conteúdo mais rápido e fácil
-              </p>
-
-            </div>
-
-
-            <form
-              onSubmit={
-                handleAdd
-              }
-            >
-
-              <div className="modal-body">
-
-                <div className="modal-textarea-wrap">
-
-                  <textarea
-                    className="modal-textarea"
-                    placeholder="Faça sua anotação..."
-                    maxLength={
-                      MAX_CHARS
-                    }
-                    value={
-                      newText
-                    }
-                    onChange={(e) =>
-                      setNewText(
-                        e.target.value
-                      )
-                    }
-                    autoFocus
-                  />
-
-                  <span className="modal-charcount">
-
-                    {newText.length}/
-                    {MAX_CHARS}
-
-                  </span>
-
+        <div className="modal-overlay mural-create-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="mural-create-flow" role="dialog" aria-modal="true" aria-label="Adicionar post-it" onClick={(e) => e.stopPropagation()}>
+            {createStep === 'choose' ? (
+              <section className="mural-picker">
+                <button type="button" className="mural-picker-close" aria-label="Fechar" onClick={() => setShowAddModal(false)}>×</button>
+                <span className="mural-picker-eyebrow">SEU NOVO LEMBRETE</span>
+                <h2>Escolha seu post-it</h2>
+                <p>Selecione uma cor para começar a escrever.</p>
+                <div className="mural-picker-grid">
+                  {MATERIAS.map((materia) => (
+                    <button key={materia} type="button" className={`mural-picker-option ${COLOR_CLASS[materia] || 'postit-portugues'}`}
+                      onClick={() => { setNewMateria(materia); setCreateStep('write'); }} aria-label={`Escolher post-it de ${materia}`}>
+                      <span className="mural-picker-tape" aria-hidden="true" />
+                      <span className="mural-picker-option-name">{materia}</span>
+                      <span className="mural-picker-option-plus" aria-hidden="true">+</span>
+                    </button>
+                  ))}
                 </div>
-
-
-                <div className="modal-materia-list">
-
-                  <span className="modal-materia-label">
-
-                    Matéria
-
-                  </span>
-
-                  {MATERIAS.map(
-                    (materia) => (
-
-                      <button
-                        type="button"
-                        key={materia}
-                        className={
-                          `materia-pill ${
-                            newMateria ===
-                            materia
-                              ? 'selected'
-                              : ''
-                          } ${materiaPillClass(materia)}`
-                        }
-                        onClick={() =>
-                          setNewMateria(
-                            materia
-                          )
-                        }
-                      >
-                        {materia}
-                      </button>
-
-                    )
-                  )}
-
+              </section>
+            ) : (
+              <form className="mural-create-form" onSubmit={handleAdd}>
+                <div className="mural-create-toolbar">
+                  <button type="button" className="mural-create-back" onClick={() => setCreateStep('choose')}>← Trocar cor</button>
+                  <span>{newMateria}</span>
                 </div>
-
-              </div>
-
-
-              <div className="modal-actions">
-
-                <button
-                  type="button"
-                  className="mural-btn ghost"
-                  onClick={() =>
-                    setShowAddModal(
-                      false
-                    )
-                  }
-                >
-                  Cancelar
-                </button>
-
-                <button
-                  type="submit"
-                  className="mural-btn primary"
-                >
-                  Adicionar
-                </button>
-
-              </div>
-
-            </form>
-
+                <div className={`postit mural-create-paper ${COLOR_CLASS[newMateria] || 'postit-portugues'}`}>
+                  <button type="button" className="mural-edit-close" aria-label="Fechar criação" onClick={() => setShowAddModal(false)}>×</button>
+                  <textarea className="mural-create-text" aria-label="Escreva sua anotação"
+                    placeholder="Escreva sua anotação..." maxLength={MAX_CHARS}
+                    value={newText} onChange={(e) => setNewText(e.target.value)} autoFocus />
+                  <div className="mural-create-bottom">
+                    <span className="mural-create-count">{newText.length}/{MAX_CHARS}</span>
+                    <button className="mural-create-save" type="submit" disabled={!newText.trim()}>✓ Criar post-it</button>
+                  </div>
+                </div>
+              </form>
+            )}
           </div>
-
         </div>
-
       )}
 
-
-      {/* ============================================= */}
-      {/* MODAL EDITAR */}
-      {/* ============================================= */}
-
       {editingPostit && (
-
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setEditingPostit(
-              null
-            )
-          }
-        >
-
-          <div
-            className="modal-card"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-
-            <div className="modal-header">
-
-              <h2>
-                Post-it
-              </h2>
-
+        <div className="modal-overlay mural-edit-overlay" onClick={() => setEditingPostit(null)}>
+          <form className="mural-edit-form" onSubmit={handleSaveEdit} role="dialog" aria-modal="true" aria-label="Editar post-it" onClick={(e) => e.stopPropagation()}>
+            <div className={`postit mural-edit-paper ${COLOR_CLASS[editingPostit.materia] || 'postit-portugues'}`}>
+              <button type="button" className="mural-edit-close" aria-label="Fechar edição" title="Fechar" onClick={() => setEditingPostit(null)}>×</button>
+              <textarea
+                className="mural-edit-text"
+                ref={editAreaRef}
+                aria-label="Editar anotação"
+                maxLength={MAX_CHARS}
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                autoFocus
+              />
+              <div className="mural-edit-bottom">
+                <button type="button" className="mural-edit-delete" onClick={handleDelete}><span aria-hidden="true">✕</span> Excluir</button>
+                <button type="submit" className="mural-edit-save"><span aria-hidden="true">✓</span> Salvar</button>
+              </div>
             </div>
-
-
-            <form
-              onSubmit={
-                handleSaveEdit
-              }
-            >
-
-              <div className="modal-body">
-
-                <div className="modal-textarea-wrap">
-
-                  <textarea
-                    className="modal-textarea"
-                    maxLength={
-                      MAX_CHARS
-                    }
-                    value={
-                      editText
-                    }
-                    onChange={(e) =>
-                      setEditText(
-                        e.target.value
-                      )
-                    }
-                    autoFocus
-                  />
-
-                  <span className="modal-charcount">
-
-                    {editText.length}/
-                    {MAX_CHARS}
-
-                  </span>
-
-                </div>
-
-
-                <div className="modal-materia-list">
-
-                  <span className="modal-materia-label">
-
-                    Matéria
-
-                  </span>
-
-                  {MATERIAS.map(
-                    (materia) => (
-
-                      <button
-                        type="button"
-                        key={materia}
-                        className={
-                          `materia-pill ${
-                            editMateria ===
-                            materia
-                              ? 'selected'
-                              : ''
-                          } ${materiaPillClass(materia)}`
-                        }
-                        onClick={() =>
-                          setEditMateria(
-                            materia
-                          )
-                        }
-                      >
-                        {materia}
-                      </button>
-
-                    )
-                  )}
-
-                </div>
-
-              </div>
-
-
-              <div className="modal-actions">
-
-                <button
-                  type="button"
-                  className="mural-btn ghost"
-                  onClick={() =>
-                    setEditingPostit(
-                      null
-                    )
-                  }
-                >
-                  Cancelar
-                </button>
-
-                <button
-                  type="submit"
-                  className="mural-btn primary"
-                >
-                  Salvar
-                </button>
-
-              </div>
-
-            </form>
-
-
-            <button
-              type="button"
-              className="modal-delete"
-              onClick={
-                handleDelete
-              }
-            >
-              Excluir
-            </button>
-
-          </div>
-
+          </form>
         </div>
-
       )}
 
     </div>
