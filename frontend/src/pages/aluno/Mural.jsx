@@ -836,7 +836,6 @@ export default function Mural() {
             {createStep === 'choose' ? (
               <section className="mural-picker">
                 <button type="button" className="mural-picker-close" aria-label="Fechar" onClick={() => setShowAddModal(false)}>×</button>
-                <span className="mural-picker-eyebrow">SEU NOVO LEMBRETE</span>
                 <h2>Escolha seu post-it</h2>
                 <p>Selecione uma cor para começar a escrever.</p>
                 <div className="mural-picker-grid">
@@ -845,17 +844,12 @@ export default function Mural() {
                       onClick={() => { setNewMateria(materia); setCreateStep('write'); }} aria-label={`Escolher post-it de ${materia}`}>
                       <span className="mural-picker-tape" aria-hidden="true" />
                       <span className="mural-picker-option-name">{materia}</span>
-                      <span className="mural-picker-option-plus" aria-hidden="true">+</span>
                     </button>
                   ))}
                 </div>
               </section>
             ) : (
               <form className="mural-create-form" onSubmit={handleAdd}>
-                <div className="mural-create-toolbar">
-                  <button type="button" className="mural-create-back" onClick={() => setCreateStep('choose')}>← Trocar cor</button>
-                  <span>{newMateria}</span>
-                </div>
                 <div className={`postit mural-create-paper ${COLOR_CLASS[newMateria] || 'postit-portugues'}`}>
                   <button type="button" className="mural-edit-close" aria-label="Fechar criação" onClick={() => setShowAddModal(false)}>×</button>
                   <textarea className="mural-create-text" aria-label="Escreva sua anotação"
@@ -863,7 +857,7 @@ export default function Mural() {
                     value={newText} onChange={(e) => setNewText(e.target.value)} autoFocus />
                   <div className="mural-create-bottom">
                     <span className="mural-create-count">{newText.length}/{MAX_CHARS}</span>
-                    <button className="mural-create-save" type="submit" disabled={!newText.trim()}>✓ Criar post-it</button>
+                    <button className="mural-create-save" type="submit" disabled={!newText.trim()}>✓ Colar post-it</button>
                   </div>
                 </div>
               </form>
