@@ -28,15 +28,24 @@ export default function Auth() {
   const indicatorRef = useRef(null);
 
   useEffect(() => {
-    const activeBtn = view === 'login' ? loginBtnRef.current : cadBtnRef.current;
-    const activeView = view === 'login' ? loginViewRef.current : cadViewRef.current;
-    if (activeBtn && indicatorRef.current) {
-      indicatorRef.current.style.width = activeBtn.offsetWidth + 'px';
-      indicatorRef.current.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+    const updateHeight = () => {
+      const activeView = view === 'login' ? loginViewRef.current : cadViewRef.current;
+      if (activeView && viewportRef.current) {
+        viewportRef.current.style.height = `${activeView.scrollHeight}px`;
+      }
+    };
+    updateHeight();
+    const observer = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(updateHeight) : null;
+    if (observer) {
+      if (loginViewRef.current) observer.observe(loginViewRef.current);
+      if (cadViewRef.current) observer.observe(cadViewRef.current);
     }
-    if (activeView && viewportRef.current) {
-      viewportRef.current.style.height = activeView.offsetHeight + 'px';
-    }
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
   }, [view]);
 
   function fireToast(msg) {
@@ -172,11 +181,12 @@ export default function Auth() {
         </div>
 
         <div className="panel-form">
-          <div className="tab-switch">
-            <button ref={loginBtnRef} className={`tab-btn ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
+          <div className="tab-switch" role="tablist" aria-label="Acesso à conta">
+            <span className={`tab-indicator ${view === 'cadastro' ? 'tab-indicator-right' : ''}`} aria-hidden="true" />
+            <button ref={loginBtnRef} role="tab" aria-selected={view === 'login'} className={`tab-btn ${view === 'login' ? 'active' : ''}`} onClick={() => setView('login')}>
               Entrar
             </button>
-            <button ref={cadBtnRef} className={`tab-btn ${view === 'cadastro' ? 'active' : ''}`} onClick={() => setView('cadastro')}>
+            <button ref={cadBtnRef} role="tab" aria-selected={view === 'cadastro'} className={`tab-btn ${view === 'cadastro' ? 'active' : ''}`} onClick={() => setView('cadastro')}>
               Cadastrar
             </button>
           </div>
@@ -184,7 +194,7 @@ export default function Auth() {
           <div className="form-viewport" ref={viewportRef}>
             <div className="form-track" style={{ transform: view === 'login' ? 'translateX(0%)' : 'translateX(-50%)' }}>
 
-              <div className="view" ref={loginViewRef}>
+              <div className={`view ${view === 'login' ? 'view-current' : ''}`} ref={loginViewRef} aria-hidden={view !== 'login'} inert={view !== 'login'}>
                 <div className="form-head">
                   <p className="eyebrow">Bem-vindo de volta</p>
                   <h2>Entrar na plataforma</h2>
@@ -237,7 +247,7 @@ export default function Auth() {
                 </p>
               </div>
 
-              <div className="view" ref={cadViewRef}>
+              <div className={`view ${view === 'cadastro' ? 'view-current' : ''}`} ref={cadViewRef} aria-hidden={view !== 'cadastro'} inert={view !== 'cadastro'}>
                 <div className="form-head">
                   <p className="eyebrow">Comece agora</p>
                   <h2>Criar sua conta</h2>
