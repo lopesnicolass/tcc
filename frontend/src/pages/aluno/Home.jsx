@@ -625,10 +625,12 @@ export default function Home() {
 
               <button
                 type="button"
-                className="home-panel-link"
+                className="home-panel-link activity-calendar-shortcut"
                 onClick={() => navigate('/cronograma')}
+                title="Abrir calendário"
+                aria-label="Abrir calendário"
               >
-                Ver calendário →
+                <Icon name="calendar" size={17} />
               </button>
             </div>
 
@@ -647,7 +649,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="activity-list">
-                {proximasAtividades.map(
+                {proximasAtividades.slice(0, 4).map(
                   (atividade) => {
                     const status =
                       obterStatusData(atividade);
@@ -656,6 +658,7 @@ export default function Home() {
                       <button
                         type="button"
                         className="activity-item"
+                        style={{ '--activity-accent': obterCorProgressoMateria(atividade.materia) }}
                         key={atividade.id ?? `${atividade.data}-${atividade.horario}-${atividade.nome}`}
                         onClick={() => navigate('/cronograma')}
                         aria-label={`Ver no calendário: ${atividade.nome}, ${formatarData(atividade.data)}`}
@@ -691,15 +694,22 @@ export default function Home() {
                     );
                   }
                 )}
+                {Array.from({ length: Math.max(0, 4 - proximasAtividades.length) }, (_, index) => (
+                  <div className="activity-item activity-placeholder" key={`slot-vazio-${index}`}>
+                    <span className="activity-placeholder-icon" aria-hidden="true"><Icon name="calendar" size={17} /></span>
+                    <span className="activity-placeholder-label">Sem outra atividade programada</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* RANKING DOS ESTUDANTES */}
-        <RankingXP xp={xp} usuarioId={usuarioId} />
+        {/* RANKING em destaque, com atalhos de estudo logo abaixo */}
+        <div className="home-bottom-grid">
+          <RankingXP xp={xp} usuarioId={usuarioId} />
 
-        <div className="home-extras-grid">
+          <div className="home-extras-grid">
           <div className="panel-card home-next-card">
             <div className="home-extra-icon">
               <Icon name="book" size={22} />
@@ -729,7 +739,7 @@ export default function Home() {
                       )
                     }
                   >
-                    Abrir conteúdo →
+                    Continuar estudando <Icon name="arrowRight" size={17} />
                   </button>
                 </>
               ) : totalConteudos === 0 ? (
@@ -737,7 +747,7 @@ export default function Home() {
                   <h3>Explore os simulados</h3>
                   <p>Ainda não há conteúdos cadastrados para revisão.</p>
                   <button type="button" className="home-extra-button" onClick={() => navigate('/simulados')}>
-                    Ver simulados <Icon name="arrowRight" size={16} />
+                    Explorar simulados <Icon name="arrowRight" size={17} />
                   </button>
                 </>
               ) : (
@@ -752,7 +762,7 @@ export default function Home() {
                     className="home-extra-button"
                     onClick={() => navigate('/simulados')}
                   >
-                    Fazer um simulado →
+                    Praticar com simulado <Icon name="arrowRight" size={17} />
                   </button>
                 </>
               )}
@@ -807,9 +817,11 @@ export default function Home() {
                 className="home-extra-button"
                 onClick={() => navigate(ultimoResultado ? '/desempenho' : '/simulados')}
               >
-                {ultimoResultado ? 'Ver desempenho →' : 'Fazer um simulado →'}
+                {ultimoResultado ? 'Consultar desempenho' : 'Começar um simulado'}
+                <Icon name="arrowRight" size={17} />
               </button>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -824,13 +836,22 @@ export default function Home() {
             className="modal-card levels-modal"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="modal-header">
-              <h2>Níveis e XP</h2>
-              <p>
-                Veja quanto XP falta para subir de nível.
-              </p>
+            <div className="modal-header levels-modal-header">
+              <div>
+                <h2>Níveis e XP</h2>
+                <p>Acompanhe sua evolução e descubra os próximos níveis.</p>
+              </div>
+              <button type="button" className="levels-close" aria-label="Fechar níveis" onClick={() => setShowLevels(false)}>×</button>
             </div>
-
+            <div className="levels-current-feature">
+              <div className="levels-feature-symbol" aria-hidden="true">★</div>
+              <div className="levels-feature-copy">
+                <span className="levels-feature-eyebrow">SEU NÍVEL ATUAL</span>
+                <strong>Nível {level} · {title || LEVEL_TITLES[level - 1] || 'Estudante'}</strong>
+                <small>{xpForNext > 0 ? `${xpIntoLevel} de ${xpForNext} XP neste nível · ${Math.max(0, xpForNext - xpIntoLevel)} XP para evoluir` : `${xp} XP acumulados`}</small>
+              </div>
+            </div>
+            <div className="levels-list-heading">Todos os níveis</div>
             <div className="levels-list">
               {LEVEL_TITLES.map(
                 (nivelTitulo, index) => {
@@ -851,7 +872,7 @@ export default function Home() {
 
                       <div className="levels-row-info">
                         <strong>{nivelTitulo}</strong>
-                        <span>Nível {nivel}</span>
+                        <span>{nivel === level ? 'Seu nível atual' : nivel < level ? 'Concluído' : `Nível ${nivel}`}</span>
                       </div>
 
                       <div className="levels-row-xp">
@@ -863,14 +884,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="modal-actions">
-              <button
-                className="btn-primary landing-cta"
-                onClick={() => setShowLevels(false)}
-              >
-                Fechar
-              </button>
-            </div>
+
           </div>
         </div>
       )}

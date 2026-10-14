@@ -2,6 +2,17 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL, obterToken, request } from '../services/api.js';
 import Icon from './Icon.jsx';
+import { xpForLevel } from '../context/GamificationContext.jsx';
+
+function nivelPorXp(total) {
+  let nivel = 1;
+  let restante = Math.max(0, Number(total) || 0);
+  while (restante >= xpForLevel(nivel) && nivel < 1000) {
+    restante -= xpForLevel(nivel);
+    nivel += 1;
+  }
+  return nivel;
+}
 
 const POSICAO_LABEL = ['1º lugar', '2º lugar', '3º lugar'];
 
@@ -75,6 +86,8 @@ export default function RankingXP({ xp, usuarioId }) {
     posicao: indice + 1
   }));
 
+  const minhaPosicao = alunosExibidos.find((aluno) => String(aluno.id) === String(usuarioId))?.posicao;
+
   return (
     <section className="home-ranking panel-card" aria-labelledby="home-ranking-title">
       <div className="home-ranking-decor" aria-hidden="true">
@@ -86,10 +99,18 @@ export default function RankingXP({ xp, usuarioId }) {
       </div>
       <div className="home-ranking-heading">
         <div>
-          <span className="home-ranking-kicker"><Icon name="trophy" size={15} /> DESTAQUES DA TURMA</span>
+          
           <h2 id="home-ranking-title">Ranking de <em>XP</em></h2>
-          <p>Os 3 estudantes participantes com mais pontos acumulados.</p>
+          <p>Acompanhe sua posição entre os estudantes.</p>
         </div>
+        {participando && !carregando && !erro && (
+          <div className="home-ranking-my-position" aria-label="Sua posição no ranking">
+            <span>SUA COLOCAÇÃO</span>
+            <strong>{minhaPosicao ? `${minhaPosicao}º lugar` : 'Fora do top 3'}</strong>
+            <small>{minhaPosicao ? `de ${alunos.length} estudantes` : 'Continue acumulando XP'}</small>
+            <span className="home-ranking-position-icon" aria-hidden="true"><Icon name="trophy" size={20} /></span>
+          </div>
+        )}
         {!participando && !carregando && !erro && (
           <button type="button" className="home-ranking-join" onClick={() => navigate('/perfil')}>
             Participar do ranking →
@@ -127,7 +148,7 @@ export default function RankingXP({ xp, usuarioId }) {
               </span>
               <span className="home-ranking-player-name">
                 <strong>{aluno.nome}</strong>
-                <small>{aluno.id === usuarioId ? 'Você · ' : ''}{POSICAO_LABEL[aluno.posicao - 1]}</small>
+                <small><Icon name="star" size={12} /> {String(aluno.id) === String(usuarioId) ? 'Você · ' : ''}Nível {nivelPorXp(aluno.xp)}</small>
               </span>
               <span className="home-ranking-score"><strong>{Number(aluno.xp).toLocaleString('pt-BR')}</strong><small>XP</small></span>
             </li>
