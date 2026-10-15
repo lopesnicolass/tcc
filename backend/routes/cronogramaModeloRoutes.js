@@ -6,6 +6,7 @@ const autenticarToken = require('../middleware/authMiddleware');
 const verificarAdmin = require('../middleware/adminMiddleware');
 
 router.get('/ativo', autenticarToken, controller.ativo);
+router.get('/disponiveis', autenticarToken, controller.disponiveis);
 router.get('/', autenticarToken, verificarAdmin, controller.listar);
 router.post('/', autenticarToken, verificarAdmin, controller.criar);
 router.put('/:id', autenticarToken, verificarAdmin, controller.atualizar);

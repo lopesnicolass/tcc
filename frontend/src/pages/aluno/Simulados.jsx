@@ -1148,41 +1148,6 @@ export default function Simulados() {
       tempoTotalGasto
     );
 
-    const respondeu =
-      Object.keys(
-        respostas
-      ).length;
-
-    if (!tempoEsgotado) {
-      if (
-        respondeu <
-        questoes.length
-      ) {
-        const continuar =
-          window.confirm(
-            `Você respondeu ${respondeu} de ${questoes.length} questões.\n\nAs questões não respondidas serão consideradas erradas.\n\nDeseja finalizar mesmo assim?`
-          );
-
-        if (!continuar) {
-          finalizandoPorTempo.current =
-            false;
-
-          return;
-        }
-      }
-
-      const confirmar =
-        window.confirm(
-          'Deseja finalizar o simulado?'
-        );
-
-      if (!confirmar) {
-        finalizandoPorTempo.current =
-          false;
-
-        return;
-      }
-    }
 
     try {
       setSalvandoResultado(
@@ -1319,10 +1284,6 @@ export default function Simulados() {
           'Não foi possível salvar o resultado.'
       );
 
-      alert(
-        error.message ||
-          'Não foi possível salvar o resultado.'
-      );
     } finally {
       setSalvandoResultado(
         false
@@ -1568,6 +1529,7 @@ export default function Simulados() {
         finalizarSimulado={
           finalizarSimulado
         }
+        erro={erro}
       />
     );
   }

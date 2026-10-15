@@ -44,6 +44,8 @@ function prepararDados(req) {
     meses:
       Number(body.meses),
 
+    frequenciaDias: Number(body.frequenciaDias),
+
     sessoes:
       Array.isArray(body.sessoes)
         ? body.sessoes.map((item) => ({
@@ -88,6 +90,10 @@ function validarDados(dados) {
     );
   }
 
+
+  if (!Number.isInteger(dados.frequenciaDias) || dados.frequenciaDias < 1 || dados.frequenciaDias > 7) {
+    return 'Selecione de 1 a 7 dias de estudo por semana.';
+  }
 
   if (
     !Array.isArray(dados.sessoes) ||
@@ -140,41 +146,32 @@ function listar(req, res) {
 // =====================================================
 
 function ativo(req, res) {
-
-  modelo.buscarModeloPorFrequencia(
-    null,
-    (erro, cronograma) => {
-
-      if (erro) {
-
-        console.error(
-          '❌ Erro ao buscar cronograma base:',
-          erro
-        );
-
-        return res.status(500).json({
-          mensagem:
-            'Erro ao carregar o cronograma automático.'
-        });
-      }
-
-
-      if (!cronograma) {
-
-        return res.status(404).json({
-          mensagem:
-            'O administrador ainda não configurou o cronograma de estudos.'
-        });
-      }
-
-
-      return res.json({
-        cronograma
-      });
+  const meses = Number(req.query.meses);
+  const dias = Number(req.query.dias);
+  if (!Number.isInteger(meses) || meses < 1 || meses > 12 ||
+      !Number.isInteger(dias) || dias < 1 || dias > 7) {
+    return res.status(400).json({ mensagem: 'Informe meses (1 a 12) e dias (1 a 7).' });
+  }
+  modelo.buscarModeloPorCombinacao(meses, dias, (erro, cronograma) => {
+    if (erro) {
+      console.error('Erro ao buscar programação:', erro);
+      return res.status(500).json({ mensagem: 'Não foi possível carregar a programação.' });
     }
-  );
+    if (!cronograma) return res.status(404).json({
+      mensagem: `O administrador ainda não cadastrou o cronograma de ${meses} ${meses === 1 ? 'mês' : 'meses'} e ${dias} ${dias === 1 ? 'dia' : 'dias'} por semana.`
+    });
+    res.json({ cronograma });
+  });
 }
 
+function disponiveis(req, res) {
+  modelo.listarModelos((erro, cronogramas) => {
+    if (erro) return res.status(500).json({ mensagem: 'Não foi possível consultar os cronogramas disponíveis.' });
+    return res.json({ opcoes: cronogramas.filter((c) => c.ativo).map((c) => ({
+      id: c.id, meses: c.meses, dias: c.frequencia_dias, total: c.sessoes_preenchidas, atualizadoEm: c.atualizado_em,
+    })) });
+  });
+}
 
 // =====================================================
 // CRIAR
@@ -397,6 +394,7 @@ function ativar(req, res) {
 module.exports = {
   listar,
   ativo,
+  disponiveis,
   criar,
   atualizar,
   excluir,

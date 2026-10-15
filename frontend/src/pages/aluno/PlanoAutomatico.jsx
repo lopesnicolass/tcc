@@ -15,9 +15,9 @@ import SubjectIcon
   from '../../components/SubjectIcon.jsx';
 import Icon
   from '../../components/Icon.jsx';
-import { request } from '../../services/api.js';
-import { gerarPlanoPrioritario, resumirPrioridades } from '../../utils/planoPrioridade.js';
-import { avaliarPrazo, mesesAntesDaProva, dataFormatadaPtBr } from '../../utils/prazoVestibulinho.js';
+import { API_URL, request } from '../../services/api.js';
+import { gerarPlanoProgramado } from '../../utils/planoProgramado.js';
+import { avaliarPrazo } from '../../utils/prazoVestibulinho.js';
 import { getSubjectStyle } from '../../utils/subjects.js';
 // Paleta exclusiva da trilha: preserva a identidade do Tenna e diferencia as matérias.
 const PALETTE_STUDY = {
@@ -62,7 +62,7 @@ function carregarPlanoSalvo() {
   try {
     const valor = JSON.parse(localStorage.getItem(`${STORAGE_KEY}_${getUserKey()}`) || 'null');
     const plano = Array.isArray(valor) ? valor : valor?.plan;
-    if (!Array.isArray(plano) || plano.length === 0 || !plano.every((mes) =>
+    if (!valor?.modeloId || !Array.isArray(plano) || plano.length === 0 || !plano.every((mes) =>
       Array.isArray(mes?.semanas) && mes.semanas.every((semana) =>
         Array.isArray(semana?.days) && semana.days.every((dia) => Array.isArray(dia?.items))
       )
@@ -70,15 +70,17 @@ function carregarPlanoSalvo() {
     return {
       plan: plano,
       months: Array.isArray(valor) ? plano.length : Number(valor.months || plano.length),
-      days: Array.isArray(valor) ? 3 : Number(valor.days || 3),
+      days: Number(valor.days || 3),
+      modeloId: Number(valor.modeloId),
+      modeloAtualizadoEm: valor.modeloAtualizadoEm || null,
     };
   } catch {
     return null;
   }
 }
-function savePlan(plan, months, days) {
+function savePlan(plan, months, days, modeloId, modeloAtualizadoEm) {
   try {
-    localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify({ plan, months, days }));
+    localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify({ plan, months, days, modeloId, modeloAtualizadoEm }));
   } catch (erro) {
     console.warn('Não foi possível salvar o plano neste navegador.', erro);
   }
@@ -94,11 +96,6 @@ export default function PlanoAutomatico() {
     setMonths
   ] =
     useState(planoAnterior?.months || 6);
-  const [
-    maxMonths,
-    setMaxMonths
-  ] =
-    useState(12);
   const [
     days,
     setDays
@@ -138,11 +135,7 @@ export default function PlanoAutomatico() {
     setSyncError
   ] =
     useState('');
-  const [
-    cronogramaModelo,
-    setCronogramaModelo
-  ] =
-    useState(null);
+  const [, setCronogramaModelo] = useState(null);
   const [
     carregandoModelo,
     setCarregandoModelo
@@ -154,10 +147,8 @@ export default function PlanoAutomatico() {
   ] =
     useState('');
   const [editandoPlano, setEditandoPlano] = useState(false);
-  const [mostrarDuracoesExtras, setMostrarDuracoesExtras] = useState(false);
+  const [variacoesDisponiveis, setVariacoesDisponiveis] = useState([]);
   const [dataVestibulinho, setDataVestibulinho] = useState(null);
-  const [consultandoVestibulinho, setConsultandoVestibulinho] = useState(true);
-  const [mesesAlterados, setMesesAlterados] = useState(false);
   const [studiedTopics, setStudiedTopics] = useState({});
   const [loadingProgress, setLoadingProgress] = useState(false);
   const [savingTopicId, setSavingTopicId] = useState(null);
@@ -171,101 +162,51 @@ export default function PlanoAutomatico() {
       .catch(() => {
         if (ativo) setDataVestibulinho(null);
       })
-      .finally(() => {
-        if (ativo) setConsultandoVestibulinho(false);
-      });
     return () => { ativo = false; };
   }, []);
 
-  const prazoRecomendado = useMemo(
-    () => mesesAntesDaProva(maxMonths, dataVestibulinho),
-    [maxMonths, dataVestibulinho]
-  );
   const prazoSelecionado = avaliarPrazo(months, dataVestibulinho);
 
   useEffect(() => {
-    if (prazoRecomendado === null || mesesAlterados || plan || planoAnterior?.plan) return;
-    setMonths(prazoRecomendado > 0 ? prazoRecomendado : 1);
-  }, [prazoRecomendado, mesesAlterados, plan, planoAnterior]);
-
-  useEffect(() => {
-    async function carregarCronogramaModelo() {
+    let ativo = true;
+    async function carregarProgramacoes() {
       setCarregandoModelo(true);
       setModeloError('');
-      setCronogramaModelo(null);
       try {
-        let modeloAdmin = null;
-        try {
-          const respostaModelo = await request(
-            '/cronogramas-modelos/ativo',
-            {},
-            'Modelo de cronograma não configurado.'
-          );
-          modeloAdmin = respostaModelo.cronograma || null;
-        } catch (erroModelo) {
-          // O catálogo ativo é suficiente para gerar um plano priorizado.
-          // Se o administrador ainda não criou um modelo, usamos 12 meses como limite padrão.
-          if (erroModelo.status !== 404) throw erroModelo;
-        }
-        const respostaConteudos = await request(
-          '/conteudos/publico',
-          {},
-          'Não foi possível carregar os conteúdos ativos.'
-        );
-        const materias = Array.isArray(respostaConteudos.materias)
-          ? respostaConteudos.materias
-          : [];
-        const topicos = materias.flatMap((materia) =>
-          (Array.isArray(materia.topicos) ? materia.topicos : [])
-            .filter((topico) => Number(topico.ativo) === 1)
-            .map((topico, indice) => ({
-              id: topico.id,
-              topico_id: topico.id,
-              topico: topico.nome,
-              topico_descricao: topico.descricao || '',
-              materia: materia.nome,
-              materia_id: materia.id,
-              prioridade: Number(topico.prioridade || 2),
-              frequencia_provas: Number(topico.frequencia_provas || 0),
-              tempo_estimado_minutos: Number(topico.tempo_estimado_minutos || 45),
-              justificativa_prioridade: topico.justificativa_prioridade || '',
-              fonte_frequencia: topico.fonte_frequencia || '',
-              ordem: Number(topico.ordem ?? indice),
-            }))
-        );
-        if (!topicos.length) {
-          throw new Error('Ainda não existem tópicos ativos no catálogo. Peça ao administrador para cadastrar os conteúdos do Vestibulinho.');
-        }
-        const limiteMeses = Math.max(
-          1,
-          Math.min(12, Number(modeloAdmin?.meses || 12))
-        );
-        setMaxMonths(limiteMeses);
-        if (!planoAnterior?.plan) {
-          setMonths((atual) => Math.min(Math.max(1, atual), limiteMeses));
-        }
-        setCronogramaModelo({
-          ...(modeloAdmin || {}),
-          nome: modeloAdmin?.nome || 'Plano priorizado para o Vestibulinho ETEC',
-          modeloAdministradorConfigurado: Boolean(modeloAdmin),
-          meses: limiteMeses,
-          sessoes: topicos,
-          sessoes_preenchidas: topicos.length,
-        });
-        if (!modeloAdmin) {
-          setModeloError('O administrador ainda não configurou um período próprio; o plano usará o limite padrão de 12 meses.');
+        const resposta = await request('/cronogramas-modelos/disponiveis', {},
+          'Não foi possível consultar os planos disponíveis.');
+        if (!ativo) return;
+        const opcoes = Array.isArray(resposta.opcoes) ? resposta.opcoes : [];
+        setVariacoesDisponiveis(opcoes);
+        if (opcoes.length) {
+          setCronogramaModelo({ nome: 'Cronogramas definidos pelo administrador', sessoes: [],
+            sessoes_preenchidas: opcoes.length });
+          const salvo = opcoes.find((c) => Number(c.id) === planoAnterior?.modeloId &&
+            Number(c.meses) === planoAnterior?.months && Number(c.dias) === planoAnterior?.days &&
+            c.atualizadoEm === planoAnterior?.modeloAtualizadoEm);
+          const padrao = salvo || opcoes[0];
+          setMonths(Number(padrao.meses));
+          setDays(Number(padrao.dias));
+          if (planoAnterior?.plan && !salvo) {
+            setPlan(null);
+          }
+        } else {
+          setCronogramaModelo(null);
+          setPlan(null);
+          setModeloError('O administrador ainda não publicou nenhum cronograma de estudos.');
         }
       } catch (error) {
-        console.error('Erro ao carregar conteúdos do plano automático:', error);
-        setCronogramaModelo(null);
-        setModeloError(
-          error.message || 'Não foi possível carregar os conteúdos para montar o plano.'
-        );
+        if (ativo) {
+          setCronogramaModelo(null);
+          setPlan(null);
+          setModeloError(error.message || 'Não foi possível carregar as programações.');
+        }
       } finally {
-        setCarregandoModelo(false);
+        if (ativo) setCarregandoModelo(false);
       }
     }
-    carregarCronogramaModelo();
+    carregarProgramacoes();
+    return () => { ativo = false; };
   }, []);
 
   async function carregarProgressoPlano() {
@@ -277,7 +218,7 @@ export default function PlanoAutomatico() {
 
     try {
       setLoadingProgress(true);
-      const resposta = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/conteudos/progresso`, {
+      const resposta = await fetch(`${API_URL}/conteudos/progresso`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -332,7 +273,7 @@ export default function PlanoAutomatico() {
 
     try {
       setSavingTopicId(topicoId);
-      const resposta = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/conteudos/progresso/${topicoId}`, {
+      const resposta = await fetch(`${API_URL}/conteudos/progresso/${topicoId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -451,12 +392,9 @@ export default function PlanoAutomatico() {
     [plan, studiedTopics]
   );
 
-  const prioritySummary = useMemo(
-    () => plan && cronogramaModelo
-      ? resumirPrioridades(plan, cronogramaModelo.sessoes)
-      : null,
-    [plan, cronogramaModelo]
-  );
+  const combinacaoDisponivel = variacoesDisponiveis.find((c) =>
+    Number(c.meses) === months && Number(c.dias) === days);
+
   function montarAtividadesDoPlano(
     p
   ) {
@@ -547,31 +485,41 @@ export default function PlanoAutomatico() {
     return atividades;
   }
   async function generate() {
-    if (!cronogramaModelo || !cronogramaModelo.sessoes?.length) {
-      setSyncError('Não há conteúdos ativos suficientes para gerar um plano.');
+    if (!combinacaoDisponivel) {
+      setSyncError('Ainda não há um cronograma disponível para essa combinação.');
       return;
     }
-    const mesesDoPlano = Math.max(1, Math.min(maxMonths, Number(months) || 1));
-    const planoGerado = gerarPlanoPrioritario(
-      mesesDoPlano,
-      days,
-      cronogramaModelo.sessoes
-    );
+    const mesesDoPlano = Number(months);
+    let programacao;
+    try {
+      setSyncingPlan(true);
+      const resposta = await request(
+        `/cronogramas-modelos/ativo?meses=${mesesDoPlano}&dias=${Number(days)}`,
+        {}, 'Este cronograma ainda não está disponível.');
+      programacao = resposta.cronograma;
+    } catch (erro) {
+      setSyncError(erro.message || 'Não foi possível carregar o plano do administrador.');
+      setSyncingPlan(false);
+      return;
+    }
+    const planoGerado = gerarPlanoProgramado(programacao);
     if (!planoGerado.length) {
-      setSyncError('Não foi possível montar o plano. Confira se existem tópicos ativos no catálogo.');
+      setSyncError('A programação escolhida não possui conteúdos válidos.');
+      setSyncingPlan(false);
       return;
     }
+    setCronogramaModelo(programacao);
     setSyncError('');
     setMonths(mesesDoPlano);
     setPlan(planoGerado);
     setSelected(1);
     setOpenWeeks(new Set(['1-1']));
-    savePlan(planoGerado, mesesDoPlano, days);
+    savePlan(planoGerado, mesesDoPlano, days, programacao.id, programacao.atualizado_em);
     setEditandoPlano(false);
     const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
-    if (!usuarioId) return;
+    if (!usuarioId) { setSyncingPlan(false); return; }
     const atividades = montarAtividadesDoPlano(planoGerado);
-    if (!atividades.length) return;
+    if (!atividades.length) { setSyncingPlan(false); return; }
     try {
       setSyncingPlan(true);
       await request(
@@ -748,164 +696,95 @@ export default function PlanoAutomatico() {
   const focoTopico =
     focoItem?.topico;
   function mudarMeses(quantidade) {
-    setMesesAlterados(true);
     setMonths(quantidade);
+    setSyncError('');
   }
   const mostrandoConfig = !plan || editandoPlano;
-  // Durações após a prova continuam disponíveis, mas não ocupam a primeira tela.
-  const limiteMesesIniciais = Math.min(maxMonths, Math.max(
-    months,
-    prazoRecomendado !== null && prazoRecomendado > 0 ? prazoRecomendado : dataVestibulinho ? 2 : 6,
-    2
-  ));
-  const duracoesExpandidas = mostrarDuracoesExtras;
-  const quantidadeMesesVisiveis = duracoesExpandidas ? maxMonths : limiteMesesIniciais;
+  const mesesDisponiveis = Array.from({ length: 12 }, (_, index) => 12 - index);
+  const diasDisponiveis = Array.from({ length: 7 }, (_, index) => index + 1);
+  const existeProgramacao = Boolean(combinacaoDisponivel);
+
+
   return (
     <div className="tenna-auto-plan page-shell">
       {mostrandoConfig && (
         <>
-          <section className="tenna-auto-intro tenna-auto-intro-new">
+          <section className="tenna-auto-intro tenna-auto-intro-new tenna-auto-simple-banner">
             <div className="tenna-auto-intro-copy">
-              <span className="tenna-auto-kicker">PLANEJAMENTO INTELIGENTE</span>
-              <h2>Um plano feito para <span>seu tempo</span></h2>
-              <p>Escolha até quando você quer estudar e quantos dias terá disponíveis. O Tenna organiza os assuntos e as revisões.</p>
-            </div>
-            <div className="tenna-auto-deadline" aria-live="polite">
-              <Icon name="calendar" size={21} color="#fff" />
-              <div>
-                <small>PRÓXIMO VESTIBULINHO</small>
-                <strong>{dataFormatadaPtBr(dataVestibulinho) || (consultandoVestibulinho ? 'Consultando data...' : 'Data não cadastrada')}</strong>
-              </div>
+              <span className="tenna-auto-kicker">MEU PLANO DE ESTUDOS</span>
+              <h2>Seu cronograma de estudos</h2>
+              <p>Escolha o tempo e os dias disponíveis para estudar.</p>
             </div>
           </section>
-          <section className="tenna-auto-config tenna-auto-config-new">
-            <div className="tenna-auto-config-simple-head">
-              <div>
-                <span className="tenna-auto-config-kicker">PERSONALIZE SEUS ESTUDOS</span>
-                <h3>Monte seu cronograma</h3>
-                <p>Escolha sua duração em blocos de quatro semanas e os dias de estudo. Você poderá ajustar tudo depois.</p>
-              </div>
-              <span className="tenna-auto-config-simple-icon" aria-hidden="true">
-                <Icon name="target" size={24} color="var(--accent-dark)" />
-              </span>
+
+          <section className="tenna-auto-config tenna-auto-config-new tenna-auto-simple-form">
+            <div className="tenna-auto-simple-heading">
+              <h3>Monte seu cronograma</h3>
             </div>
-            <div className="tenna-auto-choices">
-              <div className="tenna-auto-choice-block">
-                <div className="tenna-auto-choice-heading">
-                  <div>
-                    <span className="tenna-auto-config-kicker">01 / DURAÇÃO</span>
-                    <h4>Quantos meses você quer estudar?</h4>
-                  </div>
-                  {prazoRecomendado !== null && (
-                    <span className="tenna-auto-recommended">
-                      {prazoRecomendado === 0 ? 'Prova em menos de 1 mês' : `Até ${prazoRecomendado} ${prazoRecomendado === 1 ? 'mês' : 'meses'} antes da prova`}
-                    </span>
-                  )}
-                </div>
-                <div className="tenna-auto-months-grid" role="group" aria-label="Duração do plano em meses">
-                  {Array.from({ length: quantidadeMesesVisiveis }, (_, indice) => indice + 1).map((quantidade) => {
-                    const ultrapassa = avaliarPrazo(quantidade, dataVestibulinho).ultrapassa;
-                    return (
-                      <button
-                        type="button"
-                        key={quantidade}
-                        className={`tenna-auto-month-choice${months === quantidade ? ' selected' : ''}${ultrapassa ? ' beyond-exam' : ''}`}
-                        onClick={() => mudarMeses(quantidade)}
-                        aria-pressed={months === quantidade}
-                        aria-label={`${quantidade} ${quantidade === 1 ? 'mês' : 'meses'}${ultrapassa ? ', termina depois do Vestibulinho' : ''}`}
-                        disabled={carregandoModelo || !cronogramaModelo || syncingPlan}
-                      >
-                        <strong>{quantidade}</strong>
-                        <span>{quantidade === 1 ? 'mês' : 'meses'}</span>
-                        {ultrapassa && <small>Após a prova</small>}
-                      </button>
-                    );
-                  })}
-                </div>
-                {maxMonths > limiteMesesIniciais && (
-                  <button
-                    type="button"
-                    className="studyplan-more-months"
-                    onClick={() => setMostrarDuracoesExtras((atual) => !atual)}
-                    aria-expanded={duracoesExpandidas}
-                    disabled={syncingPlan}
-                  >
-                    {duracoesExpandidas ? 'Mostrar menos opções' : `Ver todas as ${maxMonths} opções de duração`}
-                    <Icon name="chevron" size={15} />
-                  </button>
-                )}
-                {dataVestibulinho && (
-                  <div className="tenna-auto-month-legend">
-                    <span className="tenna-auto-legend-dot" aria-hidden="true" />
-                    <span>Cada mês representa quatro semanas. As opções em cinza terminam depois da prova.</span>
-                  </div>
-                )}
-                {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
-                  <div className="tenna-auto-date-warning" role="status">
-                    <Icon name="calendar" size={18} />
-                    <span>Esse período ultrapassa a data do Vestibulinho. Você pode gerar o plano mesmo assim, mas parte dos estudos ficará para depois da prova.</span>
-                  </div>
-                )}
-                {!consultandoVestibulinho && !dataVestibulinho && (
-                  <p className="tenna-auto-date-unknown">A data da prova não está disponível. Todas as durações continuam liberadas.</p>
-                )}
-              </div>
-              <div className="tenna-auto-choice-block">
-                <div className="tenna-auto-choice-heading">
-                  <div>
-                    <span className="tenna-auto-config-kicker">02 / FREQUÊNCIA</span>
-                    <h4>Quantos dias por semana?</h4>
-                  </div>
-                </div>
-                <div className="tenna-auto-days-grid" role="group" aria-label="Dias de estudo por semana">
-                  {[1, 2, 3, 4, 5, 6, 7].map((quantidade) => (
+
+            <div className="tenna-auto-simple-fields tenna-auto-choice-fields">
+              <div className="tenna-auto-simple-field" role="group" aria-label="Quantos meses você quer estudar?">
+                <span>Quantos meses você quer estudar?</span>
+                <div className="tenna-auto-choice-grid tenna-auto-month-choices">
+                  {mesesDisponiveis.map((quantidade) => (
                     <button
                       type="button"
                       key={quantidade}
-                      className={`tenna-auto-day-choice${days === quantidade ? ' selected' : ''}`}
-                      onClick={() => setDays(quantidade)}
-                      aria-pressed={days === quantidade}
+                      className={`tenna-auto-choice ${months === quantidade ? 'is-selected' : ''} ${avaliarPrazo(quantidade, dataVestibulinho).ultrapassa ? 'is-after-exam' : ''}`}
+                      aria-pressed={months === quantidade}
+                      aria-label={`${quantidade} ${quantidade === 1 ? 'mês' : 'meses'}`}
+                      title={avaliarPrazo(quantidade, dataVestibulinho).ultrapassa ? 'Este período ultrapassa a data do Vestibulinho, mas pode ser selecionado.' : undefined}
+                      onClick={() => mudarMeses(quantidade)}
                       disabled={syncingPlan}
                     >
-                      <strong>{quantidade}x</strong>
-                      <span>semana</span>
+                      <strong>{quantidade}</strong>
+                      <small>{quantidade === 1 ? 'mês' : 'meses'}</small>
                     </button>
                   ))}
                 </div>
-                <p className="tenna-auto-choice-help">O planejamento distribui os conteúdos pelos dias que você escolher.</p>
+              </div>
+
+              <div className="tenna-auto-simple-field" role="group" aria-label="Quantos dias por semana?">
+                <span>Quantos dias por semana?</span>
+                <div className="tenna-auto-choice-grid tenna-auto-day-choices">
+                  {diasDisponiveis.map((quantidade) => (
+                    <button
+                      type="button"
+                      key={quantidade}
+                      className={`tenna-auto-choice ${days === quantidade ? 'is-selected' : ''}`}
+                      aria-pressed={days === quantidade}
+                      aria-label={`${quantidade} ${quantidade === 1 ? 'dia' : 'dias'} por semana`}
+                      onClick={() => { setDays(quantidade); setSyncError(''); }}
+                      disabled={syncingPlan}
+                    >
+                      <strong>{quantidade}</strong>
+                      <small>{quantidade === 1 ? 'dia' : 'dias'}</small>
+                    </button>
+                  ))}
+                </div>
+
               </div>
             </div>
-            <div className="tenna-auto-config-action">
-              <div className="tenna-auto-choice-summary">
-                <strong>Seu plano</strong>
-                <span>{months} {months === 1 ? 'mês' : 'meses'} de preparação · {days} {days === 1 ? 'dia' : 'dias'} por semana</span>
-                <small>
-                  {carregandoModelo
-                    ? 'Carregando conteúdos disponíveis...'
-                    : cronogramaModelo
-                      ? `${cronogramaModelo.sessoes_preenchidas} tópicos disponíveis para organizar`
-                      : modeloError || 'Catálogo indisponível'}
-                </small>
-              </div>
-              <div className="tenna-auto-config-buttons">
-                {plan && editandoPlano && (
-                  <button type="button" className="tenna-auto-secondary-button" onClick={() => setEditandoPlano(false)}>
-                    Voltar ao plano
+
+            <div className="tenna-auto-simple-footer">
+                  {plan && editandoPlano && (
+                    <button type="button" className="tenna-auto-secondary-button" onClick={() => setEditandoPlano(false)}>
+                      Voltar ao plano
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="mural-btn primary tenna-auto-simple-submit"
+                    onClick={generate}
+                    disabled={syncingPlan}
+                  >
+                    {syncingPlan ? 'Salvando...' : plan ? 'Atualizar cronograma' : 'Gerar meu cronograma'}
                   </button>
-                )}
-                <button
-                  type="button"
-                  className="mural-btn primary"
-                  onClick={generate}
-                  disabled={syncingPlan || carregandoModelo || !cronogramaModelo}
-                >
-                  {syncingPlan ? 'Salvando...' : plan ? 'Atualizar meu plano' : 'Gerar meu plano'}
-                  {!syncingPlan && <Icon name="arrowRight" size={16} />}
-                </button>
-              </div>
-            </div>
-            {modeloError && cronogramaModelo && <details className="studyplan-config-info"><summary>Informações sobre o planejamento</summary><p>{modeloError}</p></details>}
-            {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
+                </div>
+
+            {syncError ? (
+              <p className="tenna-auto-simple-error" role="alert">{syncError}</p>
+            ) : null}
           </section>
         </>
       )}
@@ -1086,7 +965,7 @@ export default function PlanoAutomatico() {
                                         <span className="studyplan-lesson-subject"><SubjectIcon materia={item.materia || 'Outro'} size={14} /> {item.materia || 'Atividade'}</span>
                                         <h4>{item.topico}</h4>
                                         <span className="studyplan-lesson-meta">
-                                          {item.tipo === 'pratica' ? (item.key?.startsWith('revisao:') ? 'Revisão · questões anteriores' : 'Prática e revisão') : `${item.tempoEstimado || 45} min · ${item.prioridadeLabel || 'Conteúdo importante'}`}
+                                          {item.tipo === 'pratica' ? (item.key?.startsWith('revisao:') ? 'Revisão · questões anteriores' : 'Prática e revisão') : `${item.tempoEstimado || 45} min · Conteúdo programado`}
                                         </span>
                                       </div>
                                       <div className="studyplan-lesson-actions">
@@ -1115,16 +994,7 @@ export default function PlanoAutomatico() {
             </div>
           </section>
 
-          {prioritySummary && (
-            <details className="studyplan-method">
-              <summary><Icon name="bulb" size={17} /> Como os conteúdos foram organizados <Icon name="chevron" size={16} /></summary>
-              <div>
-                <p>Selecionamos {prioritySummary.totalSelecionados} de {prioritySummary.totalDisponiveis} tópicos disponíveis, distribuídos entre {prioritySummary.materiasDisponiveis} matérias.</p>
-                {prioritySummary.foraDoPlano > 0 && <p>{prioritySummary.foraDoPlano} tópico(s) ficaram fora da duração escolhida.</p>}
-                {prioritySummary.materiasFaltantes.length > 0 && <p>Matérias não contempladas: {prioritySummary.materiasFaltantes.join(', ')}.</p>}
-              </div>
-            </details>
-          )}
+          <p className="tenna-auto-admin-note">Esta programação foi definida pelo administrador para {months} {months === 1 ? 'mês' : 'meses'} e {days} {days === 1 ? 'dia' : 'dias'} por semana.</p>
         </main>
       )}
     </div>

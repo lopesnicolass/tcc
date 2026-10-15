@@ -1,9 +1,6 @@
 import { createPortal } from 'react-dom';
 
-// Tela de resultado final (em tela cheia, via portal) mostrada
-// depois que o aluno termina um simulado.
-// Extraído de Simulados.jsx (era o bloco "RESULTADO FINAL").
-
+// Resultado e correção mantêm os dados oficiais retornados pelo backend.
 export function TelaResultado({
   simuladoSelecionado,
   resultadoFinal,
@@ -14,434 +11,84 @@ export function TelaResultado({
   voltarParaSimulados,
   formatarTempo
 }) {
+  const aproveitamento = Number(resultadoFinal.porcentagem || 0);
+  const detalhes = Array.isArray(resultadoFinal.detalhes) ? resultadoFinal.detalhes : [];
+
   return createPortal(
-    <div className="simulado-fullscreen">
+    <main className="simulado-fullscreen simulado-resultado-screen">
+      <div className="simulado-resultado-container">
+        <header className="simulado-resultado-cabecalho">
+          <span className="simulado-resultado-kicker">Seu desempenho</span>
+          <h1>Resultado do simulado</h1>
+          <p>{simuladoSelecionado.titulo}</p>
+        </header>
 
-      <div className="page-header">
-        <div>
-          <h1>
-            Resultado do simulado
-          </h1>
-
-          <p>
-            {simuladoSelecionado.titulo}
-          </p>
-        </div>
-      </div>
-
-      <div
-        className="stat-card simulado-resultado-cartao"
-        style={{
-          textAlign: 'center',
-          marginTop: '30px',
-          padding: '40px'
-        }}
-      >
-        <h2
-          style={{
-            fontSize: '28px',
-            marginBottom: '10px'
-          }}
-        >
-          Simulado finalizado!
-        </h2>
-
-        <p
-          style={{
-            fontSize: '18px',
-            marginBottom: '35px'
-          }}
-        >
-          Confira seu desempenho:
-        </p>
-
-        <div
-          className="stats-row simulado-resultado-indicadores"
-          style={{
-            marginBottom: '30px'
-          }}
-        >
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{
-                color: '#16a34a'
-              }}
-            >
-              {resultadoFinal.acertos}
+        <section className="simulado-resultado-resumo" aria-label="Resumo do resultado">
+          <div className="simulado-resultado-principal">
+            <span className="simulado-resultado-sobretitulo">Simulado finalizado</span>
+            <strong className="simulado-resultado-nota">{aproveitamento.toFixed(1)}%</strong>
+            <span className="simulado-resultado-nota-legenda">de aproveitamento</span>
+            <div className="simulado-resultado-barra" role="progressbar" aria-label="Aproveitamento" aria-valuemin={0} aria-valuemax={100} aria-valuenow={aproveitamento}>
+              <span style={{ width: `${Math.min(100, Math.max(0, aproveitamento))}%` }} />
             </div>
-
-            <div className="stat-label">
-              Acertos
-            </div>
+            <p>Você acertou <strong>{resultadoFinal.acertos}</strong> de <strong>{resultadoFinal.totalQuestoes}</strong> questões.</p>
           </div>
-
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{
-                color: '#dc2626'
-              }}
-            >
-              {resultadoFinal.erros}
-            </div>
-
-            <div className="stat-label">
-              Erros
-            </div>
+          <div className="simulado-resultado-numeros">
+            <div className="simulado-resultado-numero acertos"><strong>{resultadoFinal.acertos}</strong><span>Acertos</span></div>
+            <div className="simulado-resultado-numero erros"><strong>{resultadoFinal.erros}</strong><span>Erros</span></div>
+            <div className="simulado-resultado-numero tempo"><strong>{formatarTempo(tempoGasto)}</strong><span>Tempo gasto</span></div>
           </div>
-
-          <div className="stat-card">
-            <div className="stat-value">
-              {Number(
-                resultadoFinal.porcentagem
-              ).toFixed(2)}
-              %
-            </div>
-
-            <div className="stat-label">
-              Aproveitamento
-            </div>
+          <div className="simulado-resultado-acoes">
+            <button type="button" className="simulado-resultado-botao principal" aria-expanded={mostrarErros} onClick={() => setMostrarErros(!mostrarErros)}>{mostrarErros ? 'Ocultar correção' : 'Ver correção'}</button>
+            <button type="button" className="simulado-resultado-botao secundario" onClick={refazerSimulado}>Refazer simulado</button>
+            <button type="button" className="simulado-resultado-botao discreto" onClick={voltarParaSimulados}>Voltar aos simulados</button>
           </div>
+        </section>
 
-          <div className="stat-card">
-            <div
-              className="stat-value"
-              style={{
-                color: '#0D47A1',
-                fontVariantNumeric: 'tabular-nums'
-              }}
-            >
-              ⏱ {formatarTempo(tempoGasto)}
+        {mostrarErros && (
+          <section className="simulado-resultado-correcao" aria-labelledby="simulado-correcao-titulo">
+            <div className="simulado-resultado-correcao-heading">
+              <h2 id="simulado-correcao-titulo">Correção das questões</h2>
+              <p>Confira suas respostas e as alternativas corretas.</p>
             </div>
-
-            <div className="stat-label">
-              Tempo gasto
-            </div>
-          </div>
-        </div>
-
-        <p
-          style={{
-            fontSize: '16px',
-            marginBottom: '30px'
-          }}
-        >
-          Você acertou{' '}
-          <strong>
-            {resultadoFinal.acertos}
-          </strong>{' '}
-          de{' '}
-          <strong>
-            {resultadoFinal.totalQuestoes}
-          </strong>{' '}
-          questões.
-        </p>
-
-        <div
-          className="simulado-resultado-acoes"
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '15px',
-            flexWrap: 'wrap'
-          }}
-        >
-          <button
-            className="simulado-btn"
-            aria-expanded={mostrarErros}
-            onClick={() =>
-              setMostrarErros(
-                !mostrarErros
-              )
-            }
-          >
-            {mostrarErros
-              ? 'Ocultar questões'
-              : 'Ver questões'}
-          </button>
-
-          <button
-            className="simulado-btn"
-            onClick={
-              refazerSimulado
-            }
-          >
-            Refazer simulado
-          </button>
-
-          <button
-            className="simulado-btn"
-            onClick={
-              voltarParaSimulados
-            }
-          >
-            Voltar para simulados
-          </button>
-        </div>
-      </div>
-
-      {mostrarErros && (
-        <div
-          style={{
-            marginTop: '30px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-            marginBottom: '50px'
-          }}
-        >
-          <div className="stat-card">
-            <h2>
-              Correção das questões
-            </h2>
-
-            <p>
-              Confira quais questões
-              você acertou e quais
-              errou.
-            </p>
-          </div>
-
-          {resultadoFinal.detalhes.map(
-            (item) => {
-              const {
-                questao,
-                index,
-                respostaUsuario,
-                respostaCorreta,
-                acertou
-              } = item;
-
-              return (
-                <div
-                  key={questao.id}
-                  className="simulado-card"
-                  style={{
-                    padding: '25px',
-                    border:
-                      acertou
-                        ? '2px solid #16a34a'
-                        : '2px solid #dc2626'
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '15px',
-                      marginBottom: '20px',
-                      flexWrap: 'wrap'
-                    }}
-                  >
-                    <span className="simulado-subject">
-                      Questão {index + 1}
-                    </span>
-
-                    <span
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: '20px',
-                        fontWeight: '700',
-                        color: acertou
-                          ? '#166534'
-                          : '#991b1b',
-                        background: acertou
-                          ? '#dcfce7'
-                          : '#fee2e2'
-                      }}
-                    >
-                      {acertou
-                        ? '✓ Acertou'
-                        : '✕ Errou'}
-                    </span>
+            <div className="simulado-resultado-questoes">
+              {detalhes.map(({ questao, index, respostaUsuario, respostaCorreta, acertou }) => (
+                <article key={questao.id} className={`simulado-resultado-questao ${acertou ? 'acertou' : 'errou'}`}>
+                  <div className="simulado-resultado-questao-topo">
+                    <span>Questão {index + 1}</span>
+                    <span className={`simulado-resultado-estado ${acertou ? 'certo' : 'incorreto'}`}>{acertou ? 'Correta' : respostaUsuario ? 'Incorreta' : 'Não respondida'}</span>
                   </div>
-
-                  <h2
-                    style={{
-                      marginBottom: '25px'
-                    }}
-                  >
-                    {questao.pergunta}
-                  </h2>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px'
-                    }}
-                  >
+                  <h3>{questao.pergunta}</h3>
+                  <div className="simulado-resultado-alternativas">
                     {[
                       ['A', questao.alternativa_a],
                       ['B', questao.alternativa_b],
                       ['C', questao.alternativa_c],
                       ['D', questao.alternativa_d],
                       ['E', questao.alternativa_e]
-                    ].map(
-                      ([letra, texto]) => {
-                        const ehCorreta =
-                          letra ===
-                          respostaCorreta;
-
-                        const foiSelecionada =
-                          letra ===
-                          respostaUsuario;
-
-                        let background =
-                          '#ffffff';
-
-                        let border =
-                          '1px solid #d1d5db';
-
-                        if (ehCorreta) {
-                          background =
-                            '#dcfce7';
-
-                          border =
-                            '2px solid #16a34a';
-                        }
-
-                        if (
-                          foiSelecionada &&
-                          !ehCorreta
-                        ) {
-                          background =
-                            '#fee2e2';
-
-                          border =
-                            '2px solid #dc2626';
-                        }
-
-                        return (
-                          <div
-                            key={letra}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '12px',
-                              padding: '14px 16px',
-                              borderRadius: '10px',
-                              border,
-                              background
-                            }}
-                          >
-                            <strong
-                              style={{
-                                minWidth: '32px',
-                                height: '32px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '50%',
-                                background:
-                                  ehCorreta
-                                    ? '#16a34a'
-                                    : foiSelecionada
-                                    ? '#dc2626'
-                                    : '#e5e7eb',
-                                color:
-                                  ehCorreta ||
-                                  foiSelecionada
-                                    ? '#ffffff'
-                                    : '#111827'
-                              }}
-                            >
-                              {letra}
-                            </strong>
-
-                            <span
-                              style={{
-                                flex: 1
-                              }}
-                            >
-                              {texto}
-                            </span>
-
-                            {ehCorreta && (
-                              <strong
-                                style={{
-                                  color: '#166534'
-                                }}
-                              >
-                                ✓ Correta
-                              </strong>
-                            )}
-
-                            {foiSelecionada &&
-                              !ehCorreta && (
-                                <strong
-                                  style={{
-                                    color: '#991b1b'
-                                  }}
-                                >
-                                  Sua resposta
-                                </strong>
-                              )}
-                          </div>
-                        );
-                      }
-                    )}
+                    ].filter(([, texto]) => texto != null && String(texto).trim() !== '').map(([letra, texto]) => {
+                      const ehCorreta = letra === respostaCorreta;
+                      const foiSelecionada = letra === respostaUsuario;
+                      return (
+                        <div key={letra} className={`simulado-resultado-alternativa ${ehCorreta ? 'correta' : ''} ${foiSelecionada && !ehCorreta ? 'errada' : ''}`}>
+                          <span className="simulado-resultado-letra">{letra}</span>
+                          <span className="simulado-resultado-alternativa-texto">{texto}</span>
+                          {ehCorreta && <strong className="simulado-resultado-indicador-certo">Correta</strong>}
+                          {foiSelecionada && !ehCorreta && <strong className="simulado-resultado-indicador-errado">Sua resposta</strong>}
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  <div
-                    style={{
-                      marginTop: '20px',
-                      padding: '15px',
-                      borderRadius: '10px',
-                      background:
-                        acertou
-                          ? '#f0fdf4'
-                          : '#fef2f2'
-                    }}
-                  >
-                    {acertou ? (
-                      <p
-                        style={{
-                          margin: 0,
-                          color: '#166534'
-                        }}
-                      >
-                        <strong>
-                          Você acertou!
-                        </strong>{' '}
-                        A alternativa{' '}
-                        <strong>
-                          {respostaCorreta}
-                        </strong>{' '}
-                        é a correta.
-                      </p>
-                    ) : (
-                      <p
-                        style={{
-                          margin: 0,
-                          color: '#991b1b'
-                        }}
-                      >
-                        <strong>
-                          Você errou.
-                        </strong>{' '}
-                        Sua resposta:{' '}
-                        <strong>
-                          {respostaUsuario ||
-                            'Não respondida'}
-                        </strong>
-                        {' | '}
-                        Resposta correta:{' '}
-                        <strong>
-                          {respostaCorreta}
-                        </strong>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-      )}
-    </div>,
+                  <p className="simulado-resultado-explicacao">
+                    {acertou ? 'Você acertou esta questão.' : respostaUsuario ? `Você marcou ${respostaUsuario}. A resposta correta é ${respostaCorreta}.` : `Questão não respondida. A resposta correta é ${respostaCorreta}.`}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </main>,
     document.body
   );
 }

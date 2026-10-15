@@ -4,8 +4,10 @@ const db = require('./db');
 // CRONOGRAMA BASE DO PLANO AUTOMÁTICO
 // =====================================================
 
-// O projeto usa um único cronograma-base definido pelo administrador.
-// Mantemos frequencia_dias = 0 para compatibilidade com versões anteriores.
+// As programações novas usam a chave (meses * 10 + dias) na coluna
+// frequencia_dias, mantendo o índice UNIQUE do banco já existente.
+// A antiga programação tinha frequencia_dias=0. Ela é migrada sem
+// apagar sessões para uma versão de sete dias por semana.
 const CRONOGRAMA_BASE = 0;
 
 
@@ -53,6 +55,33 @@ db.serialize(() => {
         erro.message
       );
     }
+  });
+
+  // MIGRAÇÃO NÃO DESTRUTIVA DO MODELO ANTIGO (frequencia_dias = 0)
+  // A versão original tinha o período em outra tabela e dias de estudo 1..7.
+  // Com sete dias, nenhuma sessão é excluída nem reorganizada.
+  db.run(`
+    UPDATE cronogramas_programados
+    SET frequencia_dias = (
+      SELECT COALESCE(cfg.meses, 12) * 10 + 7
+      FROM cronogramas_programados_config cfg
+      WHERE cfg.programacao_id = cronogramas_programados.id
+    ), atualizado_em = CURRENT_TIMESTAMP
+    WHERE frequencia_dias = 0
+      AND EXISTS (
+        SELECT 1 FROM cronogramas_programados_config cfg
+        WHERE cfg.programacao_id = cronogramas_programados.id
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM cronogramas_programados outro
+        WHERE outro.frequencia_dias = (
+          SELECT COALESCE(cfg.meses, 12) * 10 + 7
+          FROM cronogramas_programados_config cfg
+          WHERE cfg.programacao_id = cronogramas_programados.id
+        )
+      )
+  `, (erro) => {
+    if (erro) console.error('Não foi possível migrar o cronograma antigo:', erro.message);
   });
 
   // ===================================================

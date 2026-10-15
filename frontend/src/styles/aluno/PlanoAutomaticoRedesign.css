@@ -416,3 +416,458 @@ html[data-theme='dark'] .tenna-auto-plan .tenna-auto-choice-block {background:#1
 .tenna-auto-plan .studyplan-config-info p {font-size:11px;margin:7px 0 0;}
 html[data-theme='dark'] .tenna-auto-plan .studyplan-more-months,
 html[data-theme='dark'] .tenna-auto-plan .studyplan-config-info summary {color:#9fd1ff;}
+
+/* Mesmo acabamento das páginas de Conteúdos e Calendário. */
+.tenna-auto-plan .studyplan-result { gap: 16px; }
+.tenna-auto-plan .studyplan-hero {
+  min-height: 186px; padding: 27px 32px; border-radius: 21px;
+  background: linear-gradient(108deg,#154c9c 0%,#1568c6 67%,#2497ee 100%);
+}
+.tenna-auto-plan .studyplan-hero h1 { font-size: clamp(27px,2.7vw,38px); margin-top: 10px; }
+.tenna-auto-plan .studyplan-hero-info { margin-top: 15px; }
+.tenna-auto-plan .studyplan-hero-progress { border-radius: 12px; }
+.tenna-auto-plan .studyplan-next { padding: 23px 26px; border-radius: 18px; }
+.tenna-auto-plan .studyplan-next::before { top: 17px; height: calc(100% - 34px); }
+.tenna-auto-plan .studyplan-stats { border-radius: 16px; }
+.tenna-auto-plan .studyplan-journey { border-radius: 20px; }
+.tenna-auto-plan .studyplan-week-toggle { background: #f5f9ff; }
+.tenna-auto-plan .studyplan-lesson { background: #fff; border-radius: 11px; }
+.tenna-auto-plan .tenna-auto-intro-new {
+  border-radius: 21px;
+  background: linear-gradient(112deg,#174a96 0%,#176bc5 67%,#2396ec 100%);
+}
+.tenna-auto-plan .tenna-auto-choice-block { background: #fff; border-color: #dce8f7; }
+.tenna-auto-plan .tenna-auto-month-choice:disabled,
+.tenna-auto-plan .tenna-auto-day-choice:disabled { opacity: .32; cursor: not-allowed; filter: grayscale(.5); }
+.tenna-auto-plan .tenna-auto-admin-note {
+  margin: 0; padding: 13px 17px; font-size: 12px;
+  color: #32639c; background: #eff6ff; border: 1px solid #d9e8fa;
+  border-radius: 12px;
+}
+@media (max-width: 600px) {
+ .tenna-auto-plan .studyplan-hero { padding: 23px 19px; }
+ .tenna-auto-plan .studyplan-next { padding: 19px 16px; }
+}
+
+/* Tela de criação do cronograma: mesma linguagem simples de Calendário/Conteúdos. */
+.tenna-auto-plan .tenna-auto-simple-banner {
+  min-height: 154px;
+  padding: 28px 32px;
+  border-radius: 21px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(108deg,#154c9c 0%,#1568c6 67%,#2497ee 100%);
+}
+.tenna-auto-plan .tenna-auto-simple-banner .tenna-auto-intro-copy {max-width: 100%;}
+.tenna-auto-plan .tenna-auto-simple-banner h2 {
+  margin: 8px 0 9px;
+  color: #fff;
+  font-size: clamp(27px,2.6vw,37px);
+  line-height: 1.12;
+}
+.tenna-auto-plan .tenna-auto-simple-banner p {
+  margin: 0;
+  max-width: 650px;
+  font-size: 13px;
+  color: #d9eaff;
+}
+.tenna-auto-plan .tenna-auto-simple-form {
+  display: flex;
+  flex-direction: column;
+  gap: 23px;
+  padding: 29px 32px;
+  border: 1px solid #deebfa;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 9px 22px -23px rgba(15,57,117,.45);
+}
+.tenna-auto-plan .tenna-auto-simple-heading h3 {
+  margin: 0;
+  font-size: clamp(21px,2vw,27px);
+  font-weight: 750;
+  color: #113b75;
+}
+.tenna-auto-plan .tenna-auto-simple-fields {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 20px;
+}
+.tenna-auto-plan .tenna-auto-simple-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #174e98;
+  font-size: 13px;
+  font-weight: 700;
+}
+.tenna-auto-plan .tenna-auto-simple-field select {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid #cedff4;
+  border-radius: 11px;
+  background: #fff;
+  color: #123e78;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tenna-auto-plan .tenna-auto-simple-field select:hover:not(:disabled) {border-color: #90b9ed;}
+.tenna-auto-plan .tenna-auto-simple-field select:focus-visible {
+  outline: 3px solid rgba(39,144,239,.22);
+  outline-offset: 1px;
+  border-color: #2988e9;
+}
+.tenna-auto-plan .tenna-auto-simple-field select:disabled {opacity:.7;cursor:not-allowed;}
+.tenna-auto-plan .tenna-auto-simple-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 4px;
+}
+.tenna-auto-plan .tenna-auto-simple-submit {
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: 10px;
+  background: #125abe;
+  color: #fff;
+  font-weight: 700;
+}
+.tenna-auto-plan .tenna-auto-simple-submit:not(:disabled):hover {background: #0b4a9f;}
+.tenna-auto-plan .tenna-auto-simple-error {
+  margin: 0;
+  padding: 11px 13px;
+  color: #a03434;
+  background: #fff2f2;
+  border: 1px solid #f0c7c7;
+  border-radius: 9px;
+  font-size: 12px;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-form {background: #142b46;border-color:#35516e;}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-heading h3,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-field {color: #e3f0ff;}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-field select {
+  background: #1a3856;
+  border-color: #3e648c;
+  color: #e3f0ff;
+}
+@media (max-width: 700px) {
+  .tenna-auto-plan .tenna-auto-simple-banner {padding: 24px 20px;min-height: 130px;}
+  .tenna-auto-plan .tenna-auto-simple-form {padding: 23px 20px;gap: 20px;}
+  .tenna-auto-plan .tenna-auto-simple-fields {grid-template-columns: 1fr;gap: 17px;}
+  .tenna-auto-plan .tenna-auto-simple-submit {width: 100%;justify-content: center;}
+}
+
+
+/* Cronograma: banner limpo, sem formas circulares decorativas. */
+.tenna-auto-plan .tenna-auto-simple-banner {
+  background: linear-gradient(108deg, #154c9c 0%, #1568c6 67%, #2497ee 100%);
+  overflow: hidden;
+}
+.tenna-auto-plan .tenna-auto-simple-banner::before,
+.tenna-auto-plan .tenna-auto-simple-banner::after,
+.tenna-auto-plan .tenna-auto-simple-banner .tenna-auto-intro-copy::before,
+.tenna-auto-plan .tenna-auto-simple-banner .tenna-auto-intro-copy::after {
+  content: none !important;
+  display: none !important;
+}
+.tenna-auto-plan .tenna-auto-simple-banner .tenna-auto-kicker {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+.tenna-auto-plan .tenna-auto-simple-banner p {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+@media (max-width: 700px) {
+  .tenna-auto-plan .tenna-auto-simple-banner .tenna-auto-kicker { font-size: 12px; }
+  .tenna-auto-plan .tenna-auto-simple-banner p { font-size: 15px; }
+}
+
+/* Montagem do plano — formulário compacto, no padrão das demais telas Tenna. */
+.tenna-auto-plan .tenna-auto-simple-form {
+  gap: 21px;
+  padding: 27px 30px 25px;
+  border-color: #dce8f6;
+  box-shadow: 0 8px 24px rgba(20, 66, 124, .035);
+}
+.tenna-auto-plan .tenna-auto-simple-heading h3 {
+  font-size: 25px;
+  line-height: 1.3;
+  font-weight: 750;
+}
+.tenna-auto-plan .tenna-auto-simple-fields {
+  gap: 20px;
+}
+.tenna-auto-plan .tenna-auto-simple-field {
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+.tenna-auto-plan .tenna-auto-simple-field select {
+  height: 51px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  border-color: #d4e3f4;
+  color: #18477f;
+  background-color: #fff;
+}
+.tenna-auto-plan .tenna-auto-simple-footer {
+  padding-top: 0;
+  gap: 10px;
+}
+.tenna-auto-plan .tenna-auto-simple-submit {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  font-size: 14px;
+  line-height: 1;
+  border: 0;
+  border-radius: 10px;
+}
+.tenna-auto-plan .tenna-auto-simple-submit svg { flex: 0 0 auto; }
+.tenna-auto-plan .tenna-auto-simple-notice {
+  margin: -4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #58749a;
+}
+.tenna-auto-plan .tenna-auto-simple-error {
+  font-size: 13px;
+  line-height: 1.5;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-notice { color: #afc8e6; }
+@media (max-width: 700px) {
+  .tenna-auto-plan .tenna-auto-simple-form { padding: 23px 20px; gap: 20px; }
+  .tenna-auto-plan .tenna-auto-simple-heading h3 { font-size: 22px; }
+  .tenna-auto-plan .tenna-auto-simple-fields { gap: 17px; }
+}
+
+/* Seletor visual de duração e frequência — sem menus nativos. */
+.tenna-auto-plan .tenna-auto-choice-fields {
+  align-items: start;
+  gap: 28px;
+}
+.tenna-auto-plan .tenna-auto-choice-fields .tenna-auto-simple-field {
+  min-width: 0;
+  gap: 13px;
+}
+.tenna-auto-plan .tenna-auto-choice-grid {
+  display: grid;
+  gap: 9px;
+}
+.tenna-auto-plan .tenna-auto-month-choices { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tenna-auto-plan .tenna-auto-day-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tenna-auto-plan .tenna-auto-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 59px;
+  padding: 9px 4px;
+  border: 1px solid #dce8f6;
+  border-radius: 11px;
+  background: #f9fbff;
+  color: #315e96;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease;
+}
+.tenna-auto-plan .tenna-auto-choice strong {
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 750;
+}
+.tenna-auto-plan .tenna-auto-choice small {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.tenna-auto-plan .tenna-auto-choice:hover:not(:disabled):not(.is-selected) {
+  border-color: #9dc3ef;
+  background: #eff6ff;
+}
+.tenna-auto-plan .tenna-auto-choice.is-selected {
+  border-color: #1557b3;
+  background: #1557b3;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(21, 87, 179, .16);
+}
+.tenna-auto-plan .tenna-auto-choice:focus-visible {
+  outline: 3px solid #79baff;
+  outline-offset: 2px;
+}
+.tenna-auto-plan .tenna-auto-choice:disabled { opacity: .6; cursor: wait; }
+.tenna-auto-plan .tenna-auto-simple-footer { margin-top: 2px; }
+.tenna-auto-plan .tenna-auto-simple-submit {
+  min-width: 214px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 11px;
+  background: #1456b0;
+  box-shadow: 0 5px 12px rgba(20, 86, 176, .14);
+  font-size: 15px;
+  font-weight: 700;
+}
+.tenna-auto-plan .tenna-auto-simple-submit:hover:not(:disabled) {
+  background: #0d448f;
+  box-shadow: 0 7px 16px rgba(20, 86, 176, .22);
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-choice {
+  background: #1b3653;
+  border-color: #365a7d;
+  color: #d9eaff;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-choice.is-selected {
+  background: #2279df;
+  border-color: #63aeff;
+  color: #fff;
+}
+@media (max-width: 1100px) {
+  .tenna-auto-plan .tenna-auto-choice-fields { grid-template-columns: 1fr; gap: 22px; }
+  .tenna-auto-plan .tenna-auto-day-choices { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .tenna-auto-plan .tenna-auto-month-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tenna-auto-plan .tenna-auto-day-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tenna-auto-plan .tenna-auto-choice { min-height: 55px; }
+  .tenna-auto-plan .tenna-auto-simple-submit { width: 100%; }
+}
+
+
+/* Organização do seletor: 4 colunas por grupo, com ação alinhada ao fim. */
+.tenna-auto-plan .tenna-auto-choice-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  align-items: stretch;
+}
+.tenna-auto-plan .tenna-auto-month-choices,
+.tenna-auto-plan .tenna-auto-day-choices {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.tenna-auto-plan .tenna-auto-choice-fields .tenna-auto-simple-field {
+  gap: 12px;
+}
+.tenna-auto-plan .tenna-auto-choice {
+  min-height: 60px;
+}
+.tenna-auto-plan .tenna-auto-choice-fields .tenna-auto-simple-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  justify-content: stretch;
+  flex-wrap: nowrap;
+}
+.tenna-auto-plan .tenna-auto-choice-fields .tenna-auto-simple-submit {
+  flex: 1;
+  width: 100%;
+  min-height: 54px;
+}
+.tenna-auto-plan .tenna-auto-simple-notice {
+  margin: -6px 0 0;
+}
+@media (max-width: 1100px) {
+  .tenna-auto-plan .tenna-auto-choice-fields {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .tenna-auto-plan .tenna-auto-choice-fields .tenna-auto-simple-footer {
+    margin-top: 6px;
+  }
+}
+@media (max-width: 520px) {
+  .tenna-auto-plan .tenna-auto-choice-fields {
+    gap: 20px;
+  }
+  .tenna-auto-plan .tenna-auto-choice-grid {
+    gap: 8px;
+  }
+  .tenna-auto-plan .tenna-auto-choice {
+    min-height: 55px;
+  }
+}
+
+/* Diferenciação visual: duração em retângulos, frequência em círculos. */
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice {
+  border-radius: 11px;
+  width: 100%;
+}
+.tenna-auto-plan .tenna-auto-day-choices {
+  justify-items: center;
+  align-items: center;
+  row-gap: 14px;
+}
+.tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice {
+  width: min(100%, 82px);
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  padding: 8px;
+  border-radius: 50%;
+  gap: 3px;
+}
+.tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice strong {
+  line-height: 1.05;
+}
+.tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice small {
+  line-height: 1.1;
+}
+@media (max-width: 520px) {
+  .tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice {
+    width: min(100%, 70px);
+  }
+}
+
+/* Seleção compacta e botão centralizado abaixo das duas colunas. */
+.tenna-auto-plan .tenna-auto-choice-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; align-items: start; }
+.tenna-auto-plan .tenna-auto-month-choices { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice { min-height: 49px; padding: 6px 4px; border-radius: 9px; }
+.tenna-auto-plan .tenna-auto-day-choices { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; justify-items: center; align-items: start; }
+.tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice { width: 100%; max-width: 72px; aspect-ratio: 1; padding: 4px 2px; border-radius: 50%; }
+.tenna-auto-plan .tenna-auto-choice-fields + .tenna-auto-simple-footer { width: 100%; margin: 0; padding-top: 0; justify-content: flex-end; }
+.tenna-auto-plan .tenna-auto-choice-fields + .tenna-auto-simple-footer .tenna-auto-simple-submit { flex: 0 1 auto; width: auto; min-width: 245px; min-height: 46px; }
+.tenna-auto-plan .tenna-auto-simple-notice { text-align: center; margin: -8px 0 0; }
+@media (max-width: 1150px) { .tenna-auto-plan .tenna-auto-choice-fields { grid-template-columns: 1fr; gap: 22px; } .tenna-auto-plan .tenna-auto-day-choices { max-width: 570px; } }
+@media (max-width: 520px) { .tenna-auto-plan .tenna-auto-day-choices { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; } .tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice { max-width: 52px; } .tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice strong { font-size: 15px; } .tenna-auto-plan .tenna-auto-day-choices .tenna-auto-choice small { font-size: 9px; } .tenna-auto-plan .tenna-auto-choice-fields + .tenna-auto-simple-footer .tenna-auto-simple-submit { width: 100%; min-width: 0; } }
+
+/* Prazo do Vestibulinho: períodos que ultrapassam a prova ficam acinzentados,
+   mas continuam selecionáveis. A seleção ativa sempre permanece destacada. */
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) {
+  background: #e9edf2;
+  border-color: #d8dfe8;
+  color: #8492a6;
+  box-shadow: none;
+  cursor: pointer;
+}
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) strong,
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) small {
+  color: #8492a6;
+}
+.tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected):hover {
+  background: #e0e7ef;
+  border-color: #bac9d9;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) {
+  background: #273b50;
+  border-color: #3a4d62;
+  color: #9caec0;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) strong,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-month-choices .tenna-auto-choice.is-after-exam:not(.is-selected) small { color: #9caec0; }

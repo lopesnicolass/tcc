@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { useState } from 'react';
 
 // Tela de prova: preserva todas as questões e o salvamento automático de respostas.
 export function TelaSimulado({
@@ -11,8 +12,10 @@ export function TelaSimulado({
   formatarTempo,
   selecionarResposta,
   proximaQuestao,
-  finalizarSimulado
+  finalizarSimulado,
+  erro
 }) {
+  const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
   const respondidas = questoes.filter((item) => Boolean(respostas[item.id])).length;
   const pendentes = questoes.length - respondidas;
   const progresso = questoes.length ? Math.round(100 * respondidas / questoes.length) : 0;
@@ -26,22 +29,15 @@ export function TelaSimulado({
   return createPortal(
     <main className="simulado-fullscreen simulado-prova">
       <div className="simulado-prova-inicio">
-        <button type="button" className="simulado-prova-voltar" onClick={voltarParaSimulados} disabled={salvandoResultado}>
-          ← Voltar para simulados
-        </button>
         <div className="simulado-prova-cabecalho">
-          <div>
+          <div className="simulado-prova-cabecalho-texto">
+            <button type="button" className="simulado-prova-voltar" onClick={voltarParaSimulados} disabled={salvandoResultado}>
+              ‹ Simulados
+            </button>
             <span className="simulado-prova-kicker">Simulado em andamento</span>
             <h1>{simuladoSelecionado.titulo}</h1>
             {simuladoSelecionado.descricao && <p>{simuladoSelecionado.descricao}</p>}
             <p className="simulado-prova-ajuda">Suas respostas são salvas automaticamente neste navegador.</p>
-          </div>
-          <div className={`simulado-prova-relogio${tempoCritico ? ' critico' : ''}`} aria-label="Tempo restante">
-            <span aria-hidden="true">⏱</span>
-            <div>
-              <small>Tempo restante</small>
-              <strong>{formatarTempo(tempoRestante)}</strong>
-            </div>
           </div>
         </div>
       </div>
@@ -53,6 +49,11 @@ export function TelaSimulado({
         </section>
       ) : (
         <>
+          <aside className="simulado-prova-lateral" aria-label="Tempo e andamento do simulado">
+            <div className={`simulado-prova-relogio${tempoCritico ? ' critico' : ''}`} aria-label="Tempo restante">
+              <small>Tempo restante</small>
+              <strong>{formatarTempo(tempoRestante)}</strong>
+            </div>
           <section className="simulado-prova-painel" aria-label="Acompanhamento da prova">
             <div className="simulado-prova-progresso-titulos">
               <div>
@@ -77,17 +78,15 @@ export function TelaSimulado({
                 </button>
               ))}
             </nav>
-            <div className="simulado-prova-legenda">
-              <span><i className="simulado-legenda-marcador respondida" /> Respondida</span>
-              <span><i className="simulado-legenda-marcador pendente" /> Pendente</span>
-            </div>
+
           </section>
+          </aside>
 
           <div className="simulado-prova-questoes">
             {questoes.map((questao, index) => (
               <section className="simulado-prova-questao" id={`questao-${index}`} key={questao.id} aria-labelledby={`titulo-questao-${questao.id}`}>
                 <div className="simulado-prova-questao-topo">
-                  <span>Questão {index + 1} de {questoes.length}</span>
+                  <span>Questão {index + 1}</span>
                   <span className={respostas[questao.id] ? 'respondida' : 'pendente'}>
                     {respostas[questao.id] ? '✓ Respondida' : 'Não respondida'}
                   </span>
@@ -115,15 +114,11 @@ export function TelaSimulado({
                 </div>
                 <div className="simulado-prova-questao-rodape">
                   <small>{respostas[questao.id] ? 'Você pode alterar esta resposta antes de finalizar.' : 'Selecione uma alternativa para responder.'}</small>
-                  {index < questoes.length - 1 && (
-                    <button type="button" className="simulado-prova-proxima" onClick={() => proximaQuestao(index)}>
-                      Próxima questão →
-                    </button>
-                  )}
                 </div>
               </section>
             ))}
           </div>
+          {erro && <p className="simulado-prova-erro" role="alert">{erro}</p>}
           <div className="simulado-prova-finalizacao">
             <div>
               <strong>{pendentes === 0 ? 'Tudo pronto para finalizar?' : 'Confira as questões pendentes'}</strong>
@@ -131,10 +126,25 @@ export function TelaSimulado({
                 ? 'Revise suas alternativas e finalize quando estiver pronto.'
                 : `Você ainda tem ${pendentes} ${pendentes === 1 ? 'questão sem resposta' : 'questões sem resposta'}. Pode finalizar, mas elas contarão como erros.`}</p>
             </div>
-            <button type="button" className="simulado-prova-finalizar" onClick={() => finalizarSimulado(false)} disabled={salvandoResultado}>
-              {salvandoResultado ? 'Salvando resultado...' : 'Finalizar simulado →'}
+            <button type="button" className="simulado-prova-finalizar" onClick={() => setConfirmacaoAberta(true)} disabled={salvandoResultado}>
+              {salvandoResultado ? 'Salvando resultado...' : 'Finalizar simulado'}
             </button>
           </div>
+          {confirmacaoAberta && (
+            <div className="simulado-confirmacao-overlay" role="presentation" onClick={() => !salvandoResultado && setConfirmacaoAberta(false)}>
+              <section className="simulado-confirmacao-modal" role="dialog" aria-modal="true" aria-labelledby="simulado-confirmacao-titulo" onClick={(evento) => evento.stopPropagation()}>
+                <h2 id="simulado-confirmacao-titulo">Finalizar simulado?</h2>
+                <p>Você respondeu <strong>{respondidas} de {questoes.length}</strong> questões.</p>
+                {pendentes > 0 && (
+                  <p className="simulado-confirmacao-aviso">As {pendentes} {pendentes === 1 ? 'questão pendente será considerada incorreta' : 'questões pendentes serão consideradas incorretas'}.</p>
+                )}
+                <div className="simulado-confirmacao-acoes">
+                  <button type="button" className="simulado-confirmacao-cancelar" onClick={() => setConfirmacaoAberta(false)} disabled={salvandoResultado}>Continuar respondendo</button>
+                  <button type="button" className="simulado-prova-finalizar" onClick={() => { setConfirmacaoAberta(false); finalizarSimulado(false); }} disabled={salvandoResultado}>{salvandoResultado ? 'Finalizando...' : 'Finalizar simulado'}</button>
+                </div>
+              </section>
+            </div>
+          )}
         </>
       )}
     </main>,

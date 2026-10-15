@@ -1,6 +1,16 @@
 const db = require('../config/db');
 
-const CRONOGRAMA_BASE = 0;
+// A coluna frequencia_dias é UNIQUE no banco antigo. Para preservar as tabelas
+// e não tocar nos planos existentes, codificamos a variação como meses * 10 + dias.
+// Ex.: 2 meses / 3 dias => 23; 4 meses / 3 dias => 43.
+// O cronograma legado (frequencia_dias=0) permanece preservado, mas não é usado.
+function chaveVariacao(meses, dias) {
+  return Number(meses) * 10 + Number(dias);
+}
+function diasDaChave(chave) {
+  return Number(chave) % 10;
+}
+
 const CONFIG_TABLE = 'cronogramas_programados_config';
 
 function ensureConfigTable(callback) {
@@ -21,7 +31,7 @@ function mapearModelo(linha) {
 
   return {
     id: linha.id,
-    frequencia_dias: null,
+    frequencia_dias: diasDaChave(linha.frequencia_dias),
     meses,
     nome: linha.nome,
     descricao: linha.descricao || '',
@@ -98,43 +108,42 @@ function selectModelo(baseWhere, params, callback) {
   );
 }
 
-function buscarModeloBase(callback) {
-  ensureConfigTable((erroTabela) => {
-    if (erroTabela) return callback(erroTabela);
-
-    selectModelo(
-      'cp.frequencia_dias = ? AND cp.ativo = 1',
-      [CRONOGRAMA_BASE],
-      callback
-    );
+function buscarModeloPorCombinacao(meses, dias, callback) {
+  ensureConfigTable((erro) => {
+    if (erro) return callback(erro);
+    selectModelo('cp.frequencia_dias = ? AND cp.ativo = 1',
+      [chaveVariacao(meses, dias)], callback);
   });
 }
 
 function listarModelos(callback) {
-  ensureConfigTable((erroTabela) => {
-    if (erroTabela) return callback(erroTabela);
-
-    selectModelo('cp.frequencia_dias = ?', [CRONOGRAMA_BASE], (erro, modelo) => {
-      if (erro) return callback(erro);
-      callback(null, modelo ? [modelo] : []);
+  ensureConfigTable((erro) => {
+    if (erro) return callback(erro);
+    db.all(`SELECT cp.id, cp.frequencia_dias, cp.nome, cp.descricao, cp.ativo,
+      cp.criado_em, cp.atualizado_em, COALESCE(cfg.meses, 12) AS meses
+      FROM cronogramas_programados cp
+      LEFT JOIN ${CONFIG_TABLE} cfg ON cfg.programacao_id = cp.id
+      WHERE cp.frequencia_dias BETWEEN 11 AND 127
+        AND (cp.frequencia_dias % 10) BETWEEN 1 AND 7
+        AND (cp.frequencia_dias / 10) = COALESCE(cfg.meses, 12)
+      ORDER BY cfg.meses, (cp.frequencia_dias % 10)`, [], (erroLista, linhas) => {
+      if (erroLista) return callback(erroLista);
+      Promise.all((linhas || []).map((linha) => new Promise((resolve, reject) => {
+        anexarItens(mapearModelo(linha), (e, modelo) => e ? reject(e) : resolve(modelo));
+      }))).then((modelos) => callback(null, modelos)).catch(callback);
     });
   });
 }
 
 function buscarModeloPorId(id, callback) {
-  ensureConfigTable((erroTabela) => {
-    if (erroTabela) return callback(erroTabela);
-
-    selectModelo(
-      'cp.id = ? AND cp.frequencia_dias = ?',
-      [id, CRONOGRAMA_BASE],
-      callback
-    );
+  ensureConfigTable((erro) => {
+    if (erro) return callback(erro);
+    selectModelo('cp.id = ? AND cp.frequencia_dias BETWEEN 11 AND 127', [id], callback);
   });
 }
 
-function buscarModeloPorFrequencia(_frequencia, callback) {
-  buscarModeloBase(callback);
+function buscarModeloPorFrequencia(dias, meses, callback) {
+  buscarModeloPorCombinacao(meses, dias, callback);
 }
 
 function validarMeses(meses) {
@@ -142,7 +151,7 @@ function validarMeses(meses) {
   return Number.isInteger(valor) && valor >= 1 && valor <= 12 ? valor : null;
 }
 
-function validarItens(sessoes, meses, callback) {
+function validarItens(sessoes, meses, dias, callback) {
   if (!Array.isArray(sessoes)) {
     return callback(new Error('A configuração do cronograma é inválida.'));
   }
@@ -171,8 +180,8 @@ function validarItens(sessoes, meses, callback) {
       return callback(new Error('A ordem do conteúdo precisa ser maior que zero.'));
     }
 
-    if (item.diaEstudo < 1 || item.diaEstudo > 7) {
-      return callback(new Error('O dia de estudo precisa estar entre 1 e 7.'));
+    if (item.diaEstudo < 1 || item.diaEstudo > dias) {
+      return callback(new Error(`O dia de estudo precisa estar entre 1 e ${dias} para esta versão.`));
     }
 
     if (!item.materiaId || !item.topicoId) {
@@ -256,7 +265,9 @@ function criarModelo(dados, callback) {
     const meses = validarMeses(dados.meses);
     if (!meses) return callback(new Error('A quantidade de meses precisa estar entre 1 e 12.'));
 
-    validarItens(dados.sessoes, meses, (erroValidacao, sessoes) => {
+    const dias = Number(dados.frequenciaDias);
+    if (!Number.isInteger(dias) || dias < 1 || dias > 7) return callback(new Error('Selecione entre 1 e 7 dias por semana.'));
+    validarItens(dados.sessoes, meses, dias, (erroValidacao, sessoes) => {
       if (erroValidacao) return callback(erroValidacao);
 
       db.serialize(() => {
@@ -264,14 +275,14 @@ function criarModelo(dados, callback) {
 
         db.get(
           `SELECT id FROM cronogramas_programados WHERE frequencia_dias = ?`,
-          [CRONOGRAMA_BASE],
+          [chaveVariacao(meses, dias)],
           (erroExistente, existente) => {
             if (erroExistente) {
               return db.run('ROLLBACK', () => callback(erroExistente));
             }
 
             if (existente) {
-              return db.run('ROLLBACK', () => callback(new Error('Já existe um cronograma configurado. Edite o cronograma atual.')));
+              return db.run('ROLLBACK', () => callback(new Error('Já existe um cronograma para esta combinação de meses e dias. Edite-o.')));
             }
 
             db.run(
@@ -280,7 +291,7 @@ function criarModelo(dados, callback) {
                   (frequencia_dias, nome, descricao, ativo, atualizado_em)
                 VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)
               `,
-              [CRONOGRAMA_BASE, dados.nome, dados.descricao || ''],
+              [chaveVariacao(meses, dias), dados.nome, dados.descricao || ''],
               function (erroInsercao) {
                 if (erroInsercao) {
                   return db.run('ROLLBACK', () => callback(erroInsercao));
@@ -328,7 +339,9 @@ function atualizarModelo(id, dados, callback) {
     const meses = validarMeses(dados.meses);
     if (!meses) return callback(new Error('A quantidade de meses precisa estar entre 1 e 12.'));
 
-    validarItens(dados.sessoes, meses, (erroValidacao, sessoes) => {
+    const dias = Number(dados.frequenciaDias);
+    if (!Number.isInteger(dias) || dias < 1 || dias > 7) return callback(new Error('Selecione entre 1 e 7 dias por semana.'));
+    validarItens(dados.sessoes, meses, dias, (erroValidacao, sessoes) => {
       if (erroValidacao) return callback(erroValidacao);
 
       db.serialize(() => {
@@ -344,7 +357,7 @@ function atualizarModelo(id, dados, callback) {
             WHERE id = ?
               AND frequencia_dias = ?
           `,
-          [dados.nome, dados.descricao || '', id, CRONOGRAMA_BASE],
+          [dados.nome, dados.descricao || '', id, chaveVariacao(meses, dias)],
           function (erroAtualizacao) {
             if (erroAtualizacao || this.changes === 0) {
               return db.run('ROLLBACK', () => callback(erroAtualizacao || new Error('Cronograma não encontrado.')));
@@ -396,8 +409,8 @@ function excluirModelo(id, callback) {
     if (erroTabela) return callback(erroTabela);
 
     db.run(
-      `DELETE FROM cronogramas_programados WHERE id = ? AND frequencia_dias = ?`,
-      [id, CRONOGRAMA_BASE],
+      `DELETE FROM cronogramas_programados WHERE id = ? AND frequencia_dias BETWEEN 11 AND 127`,
+      [id],
       function (erro) {
         if (erro) return callback(erro, null);
 
@@ -416,8 +429,8 @@ function excluirModelo(id, callback) {
 
 function ativarModelo(id, callback) {
   db.run(
-    `UPDATE cronogramas_programados SET ativo = 1, atualizado_em = CURRENT_TIMESTAMP WHERE id = ? AND frequencia_dias = ?`,
-    [id, CRONOGRAMA_BASE],
+    `UPDATE cronogramas_programados SET ativo = 1, atualizado_em = CURRENT_TIMESTAMP WHERE id = ? AND frequencia_dias BETWEEN 11 AND 127`,
+    [id],
     function (erro) {
       if (erro) return callback(erro);
       if (this.changes === 0) return callback(new Error('Cronograma não encontrado.'));
@@ -430,6 +443,7 @@ module.exports = {
   listarModelos,
   buscarModeloPorId,
   buscarModeloPorFrequencia,
+  buscarModeloPorCombinacao,
   criarModelo,
   atualizarModelo,
   excluirModelo,

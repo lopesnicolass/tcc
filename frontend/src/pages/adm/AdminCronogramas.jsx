@@ -90,8 +90,9 @@ function contarSemanasPreenchidas(grade) {
 }
 
 export default function AdminCronogramas() {
-  const [cronograma, setCronograma] =
-    useState(null);
+  const [cronograma, setCronograma] = useState(null);
+  const [modelos, setModelos] = useState([]);
+  const [frequenciaSelecionada, setFrequenciaSelecionada] = useState(0);
 
   const [materias, setMaterias] =
     useState([]);
@@ -231,51 +232,12 @@ export default function AdminCronogramas() {
         );
       }
 
-      const modelo =
-        Array.isArray(
-          dadosCronograma.cronogramas
-        )
-          ? dadosCronograma
-              .cronogramas[0]
-          : null;
-
-      setCronograma(
-        modelo || null
-      );
-
-      setMesesSelecionados(
-        Number(
-          modelo?.meses || 0
-        )
-      );
-
-      setMaterias(
-        Array.isArray(
-          dadosMaterias.materias
-        )
-          ? dadosMaterias.materias
-          : []
-      );
-
-      setEditandoId(
-        modelo?.id || null
-      );
-
-      setGrade(
-        preencherGrade(modelo)
-      );
-
-      setMesSelecionado(1);
-
-      setFormulario({
-        nome:
-          modelo?.nome ||
-          'Cronograma de estudos',
-
-        descricao:
-          modelo?.descricao ||
-          'Conteúdos organizados pelo administrador em meses e semanas.'
-      });
+      const todos = Array.isArray(dadosCronograma.cronogramas)
+        ? dadosCronograma.cronogramas : [];
+      setModelos(todos);
+      const inicial = todos[0] || null;
+      abrirVariacao(Number(inicial?.meses || 2), Number(inicial?.frequencia_dias || 3), todos, true);
+      setMaterias(Array.isArray(dadosMaterias.materias) ? dadosMaterias.materias : []);
     } catch (error) {
       setErro(
         error.message ||
@@ -584,85 +546,31 @@ export default function AdminCronogramas() {
     );
   }
 
-  function alterarQuantidadeMeses(
-    valor
-  ) {
-    const quantidade =
-      Number(valor);
-
-    if (
-      !quantidade ||
-      quantidade < 1 ||
-      quantidade >
-        TOTAL_MESES
-    ) {
-      setMesesSelecionados(
-        0
-      );
-
-      setGrade(
-        criarGradeVazia()
-      );
-
-      setMesSelecionado(1);
-
-      return;
+  // Cada combinação meses + dias guarda seus próprios conteúdos.
+  function abrirVariacao(meses, dias, lista = modelos, carregamentoInicial = false) {
+    const quantidade = Number(meses) || 0;
+    const frequencia = Number(dias) || 0;
+    if (!carregamentoInicial && (quantidade !== mesesSelecionados || frequencia !== frequenciaSelecionada)) {
+      const original = cronograma ? preencherGrade(cronograma) : criarGradeVazia(mesesSelecionados);
+      const alterouGrade = JSON.stringify(grade) !== JSON.stringify(original);
+      const alterouDados = formulario.nome !== (cronograma?.nome || `Cronograma · ${mesesSelecionados} ${mesesSelecionados === 1 ? 'mês' : 'meses'} · ${frequenciaSelecionada} ${frequenciaSelecionada === 1 ? 'dia' : 'dias'}`) ||
+        formulario.descricao !== (cronograma?.descricao || 'Conteúdos definidos pelo administrador para esta combinação.');
+      if ((alterouGrade || alterouDados) && !window.confirm('Existem alterações não salvas nesta programação. Deseja trocar de combinação e descartá-las?')) return;
     }
-
-    setMesesSelecionados(
-      quantidade
-    );
-
-    setGrade((atual) => {
-      const novaGrade =
-        criarGradeVazia(
-          quantidade
-        );
-
-      novaGrade.forEach(
-        (mes) => {
-
-          const anterior =
-            atual[
-              mes.mes - 1
-            ];
-
-          if (!anterior) {
-            return;
-          }
-
-          mes.semanas =
-            mes.semanas.map(
-              (semana) => {
-
-                const semanaAnterior =
-                  anterior.semanas[
-                    semana.semana - 1
-                  ];
-
-                return semanaAnterior
-                  ? {
-                      ...semana,
-
-                      itens:
-                        semanaAnterior.itens
-                    }
-                  : semana;
-              }
-            );
-        }
-      );
-
-      return novaGrade;
+    const encontrado = lista.find((m) => Number(m.meses) === quantidade &&
+      Number(m.frequencia_dias) === frequencia) || null;
+    setMesesSelecionados(quantidade);
+    setFrequenciaSelecionada(frequencia);
+    setCronograma(encontrado);
+    setEditandoId(encontrado?.id || null);
+    setGrade(encontrado ? preencherGrade(encontrado) : criarGradeVazia(quantidade));
+    setMesSelecionado(1);
+    setFormulario({
+      nome: encontrado?.nome || `Cronograma · ${quantidade} ${quantidade === 1 ? 'mês' : 'meses'} · ${frequencia} ${frequencia === 1 ? 'dia' : 'dias'}`,
+      descricao: encontrado?.descricao || 'Conteúdos definidos pelo administrador para esta combinação.'
     });
-
-    setMesSelecionado(
-      (atual) =>
-        Math.min(
-          atual,
-          quantidade
-        )
-    );
+    setErro('');
+    setMensagem('');
   }
 
   async function salvarCronograma(
@@ -683,9 +591,9 @@ export default function AdminCronogramas() {
       return;
     }
 
-    if (!mesesSelecionados) {
+    if (!mesesSelecionados || !frequenciaSelecionada) {
       setErro(
-        'Selecione quantos meses faltam para o Vestibulinho.'
+        'Selecione a quantidade de meses e de dias por semana.'
       );
 
       return;
@@ -782,7 +690,7 @@ export default function AdminCronogramas() {
           : '';
 
       setErro(
-        `Antes de salvar, configure pelo menos um conteúdo em cada semana. Faltam ${exibicao}${restante}.`
+        `Esta versão precisa de pelo menos um conteúdo por semana. Faltam ${exibicao}${restante}.`
       );
 
       return;
@@ -824,6 +732,8 @@ export default function AdminCronogramas() {
                 meses:
                   mesesSelecionados,
 
+                frequenciaDias: frequenciaSelecionada,
+
                 sessoes
               })
           }
@@ -839,9 +749,9 @@ export default function AdminCronogramas() {
         );
       }
 
-      setCronograma(
-        dados.cronograma
-      );
+      setCronograma(dados.cronograma);
+      setModelos((atuais) => [...atuais.filter((m) => m.id !== dados.cronograma.id), dados.cronograma]
+        .sort((a, b) => (a.meses - b.meses) || (a.frequencia_dias - b.frequencia_dias)));
 
       setEditandoId(
         dados.cronograma.id
@@ -914,13 +824,12 @@ export default function AdminCronogramas() {
       }
 
       setCronograma(null);
+      setModelos((atuais) => atuais.filter((m) => m.id !== editandoId));
       setEditandoId(null);
 
-      setGrade(
-        criarGradeVazia()
-      );
+      setGrade(criarGradeVazia(mesesSelecionados));
 
-      setMesesSelecionados(0);
+      // Mantém a combinação escolhida para facilitar a criação de outra versão.
       setMesSelecionado(1);
 
       setMensagem(
@@ -961,7 +870,7 @@ export default function AdminCronogramas() {
         <div>
 
           <span className="admin-cronogramas-eyebrow">
-            PLANO AUTOMÁTICO
+            ÁREA ADMINISTRATIVA
           </span>
 
           <h1>
@@ -969,9 +878,7 @@ export default function AdminCronogramas() {
           </h1>
 
           <p>
-            Primeiro, organize os conteúdos em meses e semanas.
-            A divisão desses conteúdos pelos dias de estudo acontece depois,
-            de acordo com a escolha de cada estudante.
+            Defina os conteúdos de cada combinação de meses e dias de estudo.
           </p>
 
         </div>
@@ -1008,17 +915,15 @@ export default function AdminCronogramas() {
             <div>
 
               <span className="cronograma-section-kicker">
-                CONFIGURAÇÃO
+                ETAPA 01 · CONFIGURAÇÃO
               </span>
 
               <h2>
-                {editandoId
-                  ? 'Editar cronograma'
-                  : 'Criar cronograma'}
+                {editandoId ? 'Editar programação' : 'Criar programação'}
               </h2>
 
               <p>
-                O cronograma é único e serve de base para qualquer frequência semanal escolhida pelo estudante.
+                Escolha a duração e a frequência para configurar o plano.
               </p>
 
             </div>
@@ -1031,9 +936,22 @@ export default function AdminCronogramas() {
 
           </div>
 
+          <div className={`tenna-variacoes-existentes ${modelos.length ? 'tem-modelos' : 'sem-modelos'}`}>
+            <strong>Programações cadastradas</strong>
+            <div className="tenna-variacoes-pills">
+              {modelos.length ? modelos.map((m) => (
+                <button key={m.id} type="button"
+                  className={editandoId === m.id ? 'ativo' : ''}
+                  onClick={() => abrirVariacao(m.meses, m.frequencia_dias)}>
+                  {m.meses} {m.meses === 1 ? 'mês' : 'meses'} · {m.frequencia_dias} {m.frequencia_dias === 1 ? 'dia' : 'dias'}
+                </button>
+              )) : <span>Nenhuma programação cadastrada ainda.</span>}
+            </div>
+          </div>
+
           <div className="cronograma-resumo-grid">
 
-            <label className="cronograma-form-group">
+            <label className="cronograma-form-group cronograma-campo-nome">
 
               <span>
                 Nome do cronograma
@@ -1063,7 +981,7 @@ export default function AdminCronogramas() {
             <label className="cronograma-form-group">
 
               <span>
-                Quantos meses faltam para o Vestibulinho?
+                Duração do plano (meses)
               </span>
 
               <select
@@ -1073,9 +991,7 @@ export default function AdminCronogramas() {
                 }
                 onChange={
                   (event) =>
-                    alterarQuantidadeMeses(
-                      event.target.value
-                    )
+                    abrirVariacao(event.target.value, frequenciaSelecionada)
                 }
               >
 
@@ -1110,6 +1026,17 @@ export default function AdminCronogramas() {
             </label>
 
             <label className="cronograma-form-group">
+              <span>Dias de estudo por semana</span>
+              <select value={frequenciaSelecionada || ''}
+                onChange={(event) => abrirVariacao(mesesSelecionados, event.target.value)}>
+                <option value="">Selecione</option>
+                {DIAS_ESTUDO.map((dia) => <option key={dia} value={dia}>
+                  {dia} {dia === 1 ? 'dia' : 'dias'} por semana
+                </option>)}
+              </select>
+            </label>
+
+            <label className="cronograma-form-group cronograma-campo-descricao">
 
               <span>
                 Descrição
@@ -1131,8 +1058,8 @@ export default function AdminCronogramas() {
                       })
                     )
                 }
-                placeholder="Explique como o cronograma foi organizado."
-                rows={3}
+                placeholder="Descrição opcional da programação"
+                rows={2}
                 maxLength={300}
               />
 
@@ -1140,48 +1067,11 @@ export default function AdminCronogramas() {
 
           </div>
 
-          <div className="cronograma-estatisticas">
-
-            <div>
-
-              <strong>
-                {mesesSelecionados ||
-                  0}
-              </strong>
-
-              <span>
-                {mesesSelecionados ===
-                1
-                  ? 'mês definido'
-                  : 'meses definidos'}
-              </span>
-
-            </div>
-
-            <div>
-
-              <strong>
-                {totalSemanas}
-              </strong>
-
-              <span>
-                semanas disponíveis
-              </span>
-
-            </div>
-
-            <div>
-
-              <strong>
-                {totalItens}
-              </strong>
-
-              <span>
-                conteúdos cadastrados
-              </span>
-
-            </div>
-
+          <div className="tenna-variacao-resumo" role="status">
+            <span className="tenna-variacao-status-dot" />
+            {editandoId ? 'Programação cadastrada' : 'Programação ainda não cadastrada'}
+            <strong>{totalItens} {totalItens === 1 ? 'conteúdo' : 'conteúdos'}</strong>
+            <span>{semanasPreenchidas} de {totalSemanas} semanas preenchidas</span>
           </div>
 
         </section>
@@ -1195,23 +1085,19 @@ export default function AdminCronogramas() {
             <div>
 
               <span className="cronograma-section-kicker">
-                PERÍODO
+                ETAPA 02 · MESES
               </span>
 
               <h2>
-                {mesesSelecionados
-                  ? 'Meses do cronograma'
-                  : 'Defina o período do cronograma'}
+                {mesesSelecionados && frequenciaSelecionada
+                  ? `${mesesSelecionados} ${mesesSelecionados === 1 ? 'mês' : 'meses'} · ${frequenciaSelecionada} ${frequenciaSelecionada === 1 ? 'dia' : 'dias'}/semana`
+                  : 'Selecione a duração e a frequência'}
               </h2>
 
               <p>
                 {mesesSelecionados
-                  ? `Foram criados ${mesesSelecionados} ${
-                      mesesSelecionados === 1
-                        ? 'mês'
-                        : 'meses'
-                    }, cada um com 4 semanas. Agora você adiciona os conteúdos de cada semana.`
-                  : 'Selecione acima quantos meses faltam para o Vestibulinho. Depois disso, os meses e as semanas aparecerão aqui.'}
+                  ? 'Selecione o mês que deseja organizar.'
+                  : 'Escolha a duração e os dias na etapa anterior.'}
               </p>
 
             </div>
@@ -1296,7 +1182,7 @@ export default function AdminCronogramas() {
               </strong>
 
               <span>
-                Selecione a quantidade de meses acima para criar a estrutura do cronograma.
+                Selecione a quantidade de meses e dias acima para criar a estrutura.
               </span>
 
             </div>
@@ -1314,7 +1200,7 @@ export default function AdminCronogramas() {
             <div>
 
               <span className="cronograma-section-kicker">
-                MÊS {mesSelecionado}
+                ETAPA 03 · MÊS {mesSelecionado}
               </span>
 
               <h2>
@@ -1322,7 +1208,7 @@ export default function AdminCronogramas() {
               </h2>
 
               <p>
-                Adicione os conteúdos da semana e escolha para cada um o dia de estudo (Dia 1, Dia 2... até Dia 7). O estudante depois escolhe a quantidade de dias, e essas posições são vinculadas aos dias disponíveis.
+                Adicione os conteúdos de cada semana e escolha o dia de estudo.
               </p>
 
             </div>
@@ -1453,7 +1339,7 @@ export default function AdminCronogramas() {
                                   aria-label={`Dia de estudo do conteúdo ${item.ordem}`}
                                 >
 
-                                  {DIAS_ESTUDO.map(
+                                  {DIAS_ESTUDO.filter((dia) => dia <= frequenciaSelecionada).map(
                                     (dia) => (
                                       <option
                                         key={
@@ -1587,7 +1473,7 @@ export default function AdminCronogramas() {
             <div className="cronograma-semana-vazia">
 
               <strong>
-                Selecione a quantidade de meses.
+                Selecione meses e dias por semana.
               </strong>
 
               <span>
@@ -1607,7 +1493,7 @@ export default function AdminCronogramas() {
             type="submit"
             disabled={
               salvando ||
-              !mesesSelecionados
+              !mesesSelecionados || !frequenciaSelecionada
             }
           >
             {salvando
