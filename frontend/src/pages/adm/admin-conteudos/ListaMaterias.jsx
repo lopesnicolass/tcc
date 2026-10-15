@@ -52,8 +52,7 @@ export function ListaMaterias({
         </strong>
 
         <span>
-          Tente alterar sua busca ou
-          cadastre uma nova matéria.
+          Tente alterar sua busca. As cinco matérias são fixas no Tenna.
         </span>
       </div>
     );
@@ -252,47 +251,11 @@ export function ListaMaterias({
                   <button
                     type="button"
                     className="mural-btn secondary"
-                    onClick={() =>
-                      abrirEditarMateria(
-                        materia
-                      )
-                    }
+                    onClick={() => abrirEditarMateria(materia)}
+                    aria-label={`Editar descrição de ${materia.nome}`}
                   >
-                    <Icon
-                      name="edit"
-                      size={15}
-                    />
-
-                    Editar
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mural-btn secondary"
-                    onClick={() =>
-                      alternarMateria(
-                        materia
-                      )
-                    }
-                  >
-                    {materia.ativa
-                      ? 'Desativar'
-                      : 'Ativar'}
-                  </button>
-
-                  <button
-                    type="button"
-                    className="mural-btn danger"
-                    onClick={() =>
-                      excluirMateria(
-                        materia
-                      )
-                    }
-                  >
-                    <Icon
-                      name="trash"
-                      size={15}
-                    />
+                    <Icon name="edit" size={15} />
+                    Editar descrição
                   </button>
                 </div>
 
@@ -513,7 +476,8 @@ export function ListaMaterias({
                                 className="mural-btn admin-topic-build"
                                 onClick={() =>
                                   abrirConstrutor(
-                                    topico
+                                    topico,
+                                    materia
                                   )
                                 }
                               >

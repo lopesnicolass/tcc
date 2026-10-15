@@ -7,9 +7,11 @@ export const TEMAS_CONTEUDO = [
 
 export const APARENCIA_PADRAO = {
   tema: 'azul', formato: 'trilha',
-  rotulo: 'TRILHA DE APRENDIZAGEM',
+  rotulo: 'MATERIAL DE ESTUDO',
   mensagem: 'Um passo de cada vez. Você consegue!',
   minutos: 8, mostrarIndice: true,
+  cabecalho: 'compacto', tamanhoTexto: 'normal', larguraLeitura: 'confortavel',
+  mostrarEtapas: false, mostrarMensagem: false, mostrarDetalhes: false,
 };
 
 export function normalizarAparencia(entrada) {
@@ -26,9 +28,30 @@ export function normalizarAparencia(entrada) {
     minutos: Number.isInteger(Number(dados.minutos)) && Number(dados.minutos) >= 1 && Number(dados.minutos) <= 180
       ? Number(dados.minutos) : APARENCIA_PADRAO.minutos,
     mostrarIndice: typeof dados.mostrarIndice === 'boolean' ? dados.mostrarIndice : APARENCIA_PADRAO.mostrarIndice,
+    cabecalho: ['compacto', 'amplo'].includes(dados.cabecalho) ? dados.cabecalho : APARENCIA_PADRAO.cabecalho,
+    tamanhoTexto: ['normal', 'grande'].includes(dados.tamanhoTexto) ? dados.tamanhoTexto : APARENCIA_PADRAO.tamanhoTexto,
+    larguraLeitura: ['confortavel', 'ampla'].includes(dados.larguraLeitura) ? dados.larguraLeitura : APARENCIA_PADRAO.larguraLeitura,
+    mostrarEtapas: typeof dados.mostrarEtapas === 'boolean' ? dados.mostrarEtapas : APARENCIA_PADRAO.mostrarEtapas,
+    mostrarMensagem: typeof dados.mostrarMensagem === 'boolean' ? dados.mostrarMensagem : APARENCIA_PADRAO.mostrarMensagem,
+    mostrarDetalhes: typeof dados.mostrarDetalhes === 'boolean' ? dados.mostrarDetalhes : APARENCIA_PADRAO.mostrarDetalhes,
   };
 }
 
 export function obterPaleta(aparencia) {
   return TEMAS_CONTEUDO.find((item) => item.id === aparencia.tema) || TEMAS_CONTEUDO[0];
+}
+
+// Identidade visual única para toda a matéria, inclusive em aulas antigas.
+// A configuração `tema` salva nas páginas antigas não muda mais a cor.
+export const PALETAS_MATERIAS = Object.freeze({
+  'portugues': { id: 'portugues', nome: 'Português', cor: '#51A9E5', escura: '#1455A6', clara: '#E8F5FE' },
+  'matematica': { id: 'matematica', nome: 'Matemática', cor: '#E8565B', escura: '#A93443', clara: '#FFF0F1' },
+  'historia': { id: 'historia', nome: 'História', cor: '#AA7541', escura: '#86522E', clara: '#FDF4EA' },
+  'geografia': { id: 'geografia', nome: 'Geografia', cor: '#55A75B', escura: '#297340', clara: '#EDF9EF' },
+  'ciencias': { id: 'ciencias', nome: 'Ciências', cor: '#8C5AD0', escura: '#613B9A', clara: '#F4EEFF' },
+});
+
+export function obterPaletaMateria(nome = '') {
+  const chave = String(nome).normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  return PALETAS_MATERIAS[chave] || PALETAS_MATERIAS.portugues;
 }

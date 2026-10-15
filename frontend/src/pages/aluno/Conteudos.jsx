@@ -10,13 +10,13 @@ const imagensMaterias = import.meta.glob(
 );
 
 const ALIAS_IMAGEM_MATERIA = {
-  portugues: 'iconeportugues',
-  'lingua-portuguesa': 'iconeportugues',
-  matematica: 'iconematematica',
-  historia: 'iconehistoria',
-  geografia: 'iconegeografia',
-  ciencias: 'iconeciencias',
-  'ciencias-da-natureza': 'iconeciencias',
+  portugues: 'tenna_portugues_novo',
+  'lingua-portuguesa': 'tenna_portugues_novo',
+  matematica: 'tenna_matematica_novo',
+  historia: 'tenna_historia_novo',
+  geografia: 'tenna_geografia_novo',
+  ciencias: 'tenna_ciencias_novo',
+  'ciencias-da-natureza': 'tenna_ciencias_novo',
   biologia: 'biologia',
   quimica: 'quimica',
   fisica: 'fisica',
@@ -251,13 +251,14 @@ export default function Conteudos() {
   const navigate = useNavigate();
 
   const [busca, setBusca] = useState('');
-  const [filtro, setFiltro] = useState('Todas');
   const [materiasData, setMateriasData] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [abertos, setAbertos] = useState(new Set());
   const [estudados, setEstudados] = useState({});
   const [salvandoTopico, setSalvandoTopico] = useState(null);
+  const [confirmarLimpeza, setConfirmarLimpeza] = useState(false);
+  const [limpandoProgresso, setLimpandoProgresso] = useState(false);
 
   async function carregarProgresso(tokenAtual = obterToken()) {
     if (!tokenAtual) {
@@ -404,12 +405,7 @@ export default function Conteudos() {
         )
       : 0;
 
-  const materias =
-    filtro === 'Todas'
-      ? materiasData.map(
-          (materia) => materia.nome
-        )
-      : [filtro];
+  const materias = materiasData.map((materia) => materia.nome);
 
   const conteudosFiltrados =
     useMemo(() => {
@@ -451,7 +447,7 @@ export default function Conteudos() {
         },
         {}
       );
-    }, [busca, filtro, materiasData]);
+    }, [busca, materiasData]);
 
   const totalResultados = useMemo(
     () =>
@@ -462,12 +458,10 @@ export default function Conteudos() {
     [conteudosFiltrados]
   );
 
-  const filtrosAtivos =
-    Boolean(busca.trim()) || filtro !== 'Todas';
+  const filtrosAtivos = Boolean(busca.trim());
 
   function limparFiltros() {
     setBusca('');
-    setFiltro('Todas');
   }
 
   function toggleMateria(materia) {
@@ -492,10 +486,7 @@ export default function Conteudos() {
       return;
     }
 
-    if (filtro !== 'Todas' && nomesComResultado.includes(filtro)) {
-      setAbertos((prev) => new Set(prev).add(filtro));
-    }
-  }, [busca, filtro, conteudosFiltrados]);
+  }, [busca, conteudosFiltrados]);
 
   function limparBusca() {
     setBusca('');
@@ -588,16 +579,8 @@ export default function Conteudos() {
       return;
     }
 
-    const confirmar =
-      window.confirm(
-        'Deseja realmente limpar todo o seu progresso dos conteúdos?'
-      );
-
-    if (!confirmar) {
-      return;
-    }
-
     setErro('');
+    setLimpandoProgresso(true);
 
     try {
       const resposta =
@@ -627,6 +610,7 @@ export default function Conteudos() {
       }
 
       setEstudados({});
+      setConfirmarLimpeza(false);
 
     } catch (error) {
       console.error(
@@ -638,8 +622,21 @@ export default function Conteudos() {
         error.message ||
         'Não foi possível limpar o progresso.'
       );
+      setConfirmarLimpeza(false);
+    } finally {
+      setLimpandoProgresso(false);
     }
   }
+
+
+  useEffect(() => {
+    if (!confirmarLimpeza || limpandoProgresso) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setConfirmarLimpeza(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [confirmarLimpeza, limpandoProgresso]);
 
   return (
     <div className="conteudos-page page-shell">
@@ -664,19 +661,6 @@ export default function Conteudos() {
 
         </div>
 
-        <div className="tenna-auto-intro-badge">
-
-          <Icon
-            name="book"
-            size={26}
-            color="#fff"
-          />
-
-          <small>
-            Conteúdos
-          </small>
-
-        </div>
 
       </section>
 
@@ -763,38 +747,12 @@ export default function Conteudos() {
 
         </div>
 
-        <select
-          value={filtro}
-          onChange={(e) =>
-            setFiltro(e.target.value)
-          }
-        >
 
-          <option>
-            Todas
-          </option>
-
-          {materiasData.map(
-            (materia) => (
-              <option
-                key={
-                  materia.id ||
-                  materia.nome
-                }
-                value={materia.nome}
-              >
-                {materia.nome}
-              </option>
-            )
-          )}
-
-        </select>
 
         <button
           className="content-reset-btn ui-btn ui-btn--ghost"
-          onClick={
-            marcarTodosComoNaoEstudados
-          }
+          type="button"
+          onClick={() => setConfirmarLimpeza(true)}
         >
           Limpar progresso
         </button>
@@ -817,11 +775,7 @@ export default function Conteudos() {
               </span>
             )}
 
-            {filtro !== 'Todas' && (
-              <span className="content-filter-chip">
-                Matéria: <strong>{filtro}</strong>
-              </span>
-            )}
+
           </div>
 
           <button
@@ -873,9 +827,9 @@ export default function Conteudos() {
               <div className="content-search-empty-icon" aria-hidden="true"><Icon name="search" size={26} /></div>
               <strong>Nenhum conteúdo encontrado</strong>
               <span>
-                Não encontramos nenhum tópico para <b>"{busca || filtro}"</b>.
+                Não encontramos nenhum tópico para <b>"{busca}"</b>.
               </span>
-              {(busca || filtro !== 'Todas') && (
+              {Boolean(busca.trim()) && (
                 <button
                   type="button"
                   onClick={limparFiltros}
@@ -1035,7 +989,7 @@ export default function Conteudos() {
                       >
 
                         {topics.map(
-                          (topic, index) => {
+                          (topic) => {
 
                             const done =
                               Boolean(
@@ -1117,20 +1071,6 @@ export default function Conteudos() {
                                   }
                                 >
                                   <span className="content-topic-meta">
-                                    <span
-                                      className="content-topic-number"
-                                      style={{
-                                        background: style.bg,
-                                        color: style.color
-                                      }}
-                                    >
-                                      {String(
-                                        index + 1
-                                      ).padStart(
-                                        2,
-                                        '0'
-                                      )}
-                                    </span>
 
                                     <span
                                       className="content-topic-materia"
@@ -1195,6 +1135,51 @@ export default function Conteudos() {
 
           </div>
           ))}
+
+      {confirmarLimpeza && (
+        <div
+          className="content-confirm-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !limpandoProgresso) {
+              setConfirmarLimpeza(false);
+            }
+          }}
+        >
+          <div
+            className="content-confirm-dialog"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="content-confirm-title"
+            aria-describedby="content-confirm-description"
+          >
+            <h2 id="content-confirm-title">Limpar todo o progresso?</h2>
+            <p id="content-confirm-description">
+              Todos os conteúdos marcados como estudados voltarão para
+              “Não iniciado”. Essa ação não pode ser desfeita.
+            </p>
+            <div className="content-confirm-actions">
+              <button
+                type="button"
+                className="content-confirm-cancel"
+                disabled={limpandoProgresso}
+                onClick={() => setConfirmarLimpeza(false)}
+                autoFocus
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="content-confirm-danger"
+                disabled={limpandoProgresso}
+                onClick={marcarTodosComoNaoEstudados}
+              >
+                {limpandoProgresso ? 'Limpando...' : 'Limpar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

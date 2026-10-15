@@ -35,7 +35,7 @@
 .app{
   width:100%;
   max-width:1100px;
-  min-height:600px;
+  min-height:0;
   background:var(--card);
   border-radius:var(--radius-2xl);
   box-shadow:0 40px 80px -20px rgba(0,0,0,0.35);
@@ -295,7 +295,7 @@
 .toast .dot{width:7px;height:7px;border-radius:50%;background:var(--sunshine); flex-shrink:0;}
 
 @media(min-width:760px){
-.app{ flex-direction:row; min-height:680px; }.panel-visual{ flex:1; }.panel-form{ flex:1; }
+.app{ flex-direction:row; min-height:0; }.panel-visual{ flex:1; }.panel-form{ flex:1; }
 }
 
 @media(max-width:380px){
@@ -342,7 +342,7 @@
 .view-current { opacity:1; }
 .form-viewport { transition:height .4s cubic-bezier(.22,.75,.2,1); }
 @media(min-width:760px) {
-  .app { flex-direction:row; min-height:min(680px, calc(100svh - 48px)); }
+  .app { flex-direction:row; min-height:0; }
   .panel-visual,.panel-form { flex:1 1 50%; }
 }
 @media(max-width:759px) {
@@ -365,4 +365,71 @@
 }
 @media(prefers-reduced-motion:reduce) {
   .tab-indicator,.form-track,.form-viewport,.view { transition:none !important; }
+}
+
+
+/* TENNA — Login responsivo para notebooks e apresentações.
+   O cartão não tem mais altura mínima fixa de 680px.
+   Em telas baixas, reduzimos apenas os espaços, sem cortar o formulário.
+   Se a tela for pequena demais (ex.: cadastro), a página rola normalmente. */
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+}
+.app {
+  min-height: 0;
+}
+@media (min-width: 760px) {
+  .page {
+    padding: clamp(12px, 2.5vh, 24px) 24px;
+  }
+  .app {
+    min-height: 0;
+  }
+  .panel-form {
+    padding: clamp(24px, 4vh, 48px) clamp(28px, 4vw, 60px);
+  }
+  .tab-switch {
+    margin-bottom: clamp(16px, 2.7vh, 30px);
+  }
+  .form-head {
+    margin-bottom: clamp(16px, 2.7vh, 26px);
+  }
+}
+@media (min-width: 760px) and (max-height: 760px) {
+  .page {
+    padding-block: 12px;
+  }
+  .panel-form {
+    padding-block: 18px;
+  }
+  .tab-switch {
+    margin-bottom: 12px;
+  }
+  .form-head {
+    margin-bottom: 14px;
+  }
+  .form-head .eyebrow {
+    margin-bottom: 4px;
+  }
+  .form-head h2 {
+    margin-bottom: 4px;
+  }
+  .view form {
+    gap: 12px;
+  }
+  .field {
+    gap: 5px;
+  }
+  .field input {
+    padding-block: 11px;
+  }
+  .btn-primary {
+    padding-block: 12px;
+  }
+  .switch-line {
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
 }

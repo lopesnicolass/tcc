@@ -1,5 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const { MATERIAS_FIXAS } = require("../utils/materiasFixas");
 
 const caminhoBanco = path.join(
     __dirname,
@@ -197,6 +198,38 @@ db.serialize(() => {
         )
     `);
 
+
+    // As matérias do currículo já existem para o administrador.
+    // Este seed roda em cada inicialização, sem apagar as matérias,
+    // os tópicos ou as páginas existentes (mantém todos os IDs).
+    for (const materia of MATERIAS_FIXAS) {
+        db.run(`
+            INSERT INTO materias (nome, slug, icone, cor, ativa, ordem)
+            SELECT ?, ?, ?, ?, 1, ?
+            WHERE NOT EXISTS (
+                SELECT 1 FROM materias
+                WHERE slug = ? OR slug = ? OR nome = ? COLLATE NOCASE
+                   OR nome = ? COLLATE NOCASE
+            )
+        `, [materia.nome, materia.slug, materia.icone, materia.cor,
+            materia.ordem, materia.slug,
+            materia.slug === 'portugues' ? 'lingua-portuguesa' :
+                materia.slug === 'ciencias' ? 'ciencias-da-natureza' : materia.slug,
+            materia.nome,
+            materia.slug === 'portugues' ? 'Portugues' : materia.nome]);
+
+        db.run(`
+            UPDATE materias
+            SET nome = ?, icone = ?, cor = ?, ativa = 1, ordem = ?
+            WHERE slug = ? OR slug = ? OR nome = ? COLLATE NOCASE
+               OR nome = ? COLLATE NOCASE
+        `, [materia.nome, materia.icone, materia.cor,
+            materia.ordem, materia.slug,
+            materia.slug === 'portugues' ? 'lingua-portuguesa' :
+                materia.slug === 'ciencias' ? 'ciencias-da-natureza' : materia.slug,
+            materia.nome,
+            materia.slug === 'portugues' ? 'Portugues' : materia.nome]);
+    }
 
     // =====================================================
     // TÓPICOS

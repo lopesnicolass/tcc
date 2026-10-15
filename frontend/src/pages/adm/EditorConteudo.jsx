@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import '../../styles/adm/EditorConteudo.css';
 
 import { request } from './editor-conteudo/api.js';
@@ -13,15 +13,31 @@ import {
 } from './editor-conteudo/blocoHelpers.js';
 
 import { BlocoFormulario } from './editor-conteudo/BlocoFormulario.jsx';
+import { pendenciaDoBloco } from './editor-conteudo/validarBloco.js';
 import { previewBloco } from './editor-conteudo/BlocoPreview.jsx';
-import { APARENCIA_PADRAO, TEMAS_CONTEUDO, normalizarAparencia, obterPaleta } from '../../utils/aparenciaConteudo.js';
+import { APARENCIA_PADRAO, normalizarAparencia } from '../../utils/aparenciaConteudo.js';
 import '../../styles/adm/EditorConteudoVisual.css';
+import '../../styles/adm/EditorConteudoRefinado.css';
+import '../../styles/adm/EditorConteudoDidatico.css';
+
+// Estrutura única para aulas NOVAS. Os blocos são editáveis e podem ser removidos.
+// Aulas já existentes não são alteradas.
+const ESTRUTURA_PADRAO = [
+  { tipo: 'texto', dados: { titulo: 'Introdução', texto: '' } },
+  { tipo: 'texto', dados: { titulo: 'Explicação', texto: '' } },
+  { tipo: 'video', dados: { titulo: 'Videoaula', url: '', descricao: '' } },
+  { tipo: 'questoes', dados: { titulo: 'Hora de praticar', questaoIds: [], descricao: '' } },
+  { tipo: 'lista', dados: { titulo: 'Resumo', itens: [''] } },
+  { tipo: 'flashcards', dados: { titulo: 'Flashcards para revisar', flashcardIds: [], descricao: '' } },
+];
 
 export default function EditorConteudo({
   topicoId,
   topicoNome,
+  materiaNome,
   aoVoltar,
 }) {
+  const inicializacaoEmAndamento = useRef(null);
   const [pagina, setPagina] = useState(null);
   const [blocos, setBlocos] = useState([]);
 
@@ -47,11 +63,12 @@ export default function EditorConteudo({
     useState('');
 
   const [aparencia, setAparencia] = useState({ ...APARENCIA_PADRAO });
-  const atualizarAparencia = (chave, valor) => setAparencia((anterior) => ({ ...anterior, [chave]: valor }));
-  const paleta = obterPaleta(aparencia);
 
   const [publicado, setPublicado] =
     useState(false);
+
+  const [mostrarPreviaAula, setMostrarPreviaAula] = useState(false);
+  const [arrastandoBlocoId, setArrastandoBlocoId] = useState(null);
 
   const [tipoNovoBloco, setTipoNovoBloco] =
     useState('texto');
@@ -92,12 +109,61 @@ export default function EditorConteudo({
       );
 
       if (!dados?.pagina) {
-        setPagina(null);
-        setTitulo(topicoNome || '');
-        setDescricao('');
-        setAparencia({ ...APARENCIA_PADRAO });
-        setPublicado(false);
-        setBlocos([]);
+        // Só cria a estrutura quando o tópico ainda não possui página.
+        // O bloqueio evita duplicações no StrictMode do React.
+        if (inicializacaoEmAndamento.current === String(topicoId)) return;
+        inicializacaoEmAndamento.current = String(topicoId);
+        try {
+          const resposta = await request('/paginas-conteudo', {
+            method: 'POST',
+            body: JSON.stringify({
+              topicoId: Number(topicoId),
+              titulo: topicoNome || 'Conteúdo',
+              descricao: '',
+              aparencia: { ...APARENCIA_PADRAO },
+              publicado: 0,
+            }),
+          });
+          const criada = resposta.pagina || resposta.data || resposta;
+          if (!criada?.id) throw new Error('A página criada não retornou um identificador.');
+          const criados = [];
+          for (const [indice, etapa] of ESTRUTURA_PADRAO.entries()) {
+            const blocoResposta = await request(`/paginas-conteudo/${criada.id}/blocos`, {
+              method: 'POST',
+              body: JSON.stringify({
+                paginaId: criada.id,
+                tipo: etapa.tipo,
+                ordem: indice + 1,
+                dados: { ...dadosIniciais(etapa.tipo), ...etapa.dados },
+              }),
+            });
+            criados.push(normalizarBloco(
+              blocoResposta.bloco || blocoResposta.data || blocoResposta,
+              indice + 1
+            ));
+          }
+          setPagina(criada);
+          setTitulo(criada.titulo || topicoNome || 'Conteúdo');
+          setDescricao('');
+          setAparencia({ ...APARENCIA_PADRAO });
+          setPublicado(false);
+          setBlocos(criados);
+        } catch (erroCriacao) {
+          // Se a criação foi interrompida, recarrega o que já foi salvo,
+          // evitando tentar criar a mesma página ou blocos novamente.
+          try {
+            const recuperado = await request(`/paginas-conteudo/topico/${topicoId}`);
+            if (recuperado?.pagina) {
+              setPagina(recuperado.pagina);
+              setTitulo(recuperado.pagina.titulo || topicoNome || 'Conteúdo');
+              setDescricao(recuperado.pagina.descricao || '');
+              setAparencia(normalizarAparencia(recuperado.pagina.aparencia));
+              setPublicado(Number(recuperado.pagina.publicado) === 1 || recuperado.pagina.publicado === true);
+              setBlocos((recuperado.blocos || []).map((b, i) => normalizarBloco(b, i + 1)));
+            }
+          } catch { /* Erro original será exibido abaixo. */ }
+          throw erroCriacao;
+        }
         return;
       }
 
@@ -318,6 +384,33 @@ export default function EditorConteudo({
     return criada;
   }
 
+  async function soltarBloco(origemId, destinoId) {
+    setArrastandoBlocoId(null);
+    if (!pagina?.id || !origemId || !destinoId || origemId === destinoId) return;
+    const lista = [...blocosOrdenados];
+    const indiceOrigem = lista.findIndex(b => String(b.id) === String(origemId));
+    const indiceDestino = lista.findIndex(b => String(b.id) === String(destinoId));
+    if (indiceOrigem < 0 || indiceDestino < 0) return;
+    const [movido] = lista.splice(indiceOrigem, 1);
+    lista.splice(indiceDestino, 0, movido);
+    const ordenada = lista.map((b, i) => ({ ...b, ordem: i + 1 }));
+    try {
+      setErro('');
+      for (const bloco of ordenada) {
+        await request(`/paginas-conteudo/blocos/${bloco.id}`, {
+          method: 'PUT', body: JSON.stringify({
+            paginaId: pagina.id, tipo: bloco.tipo, ordem: bloco.ordem, dados: bloco.dados || {}
+          })
+        });
+      }
+      setBlocos(ordenada);
+      mostrarSucesso('Ordem dos blocos atualizada.');
+    } catch (error) {
+      setErro(error.message || 'Não foi possível reordenar os blocos.');
+      await carregarPagina();
+    }
+  }
+
   function abrirNovoBloco() {
     setBuscaRelacionados('');
 
@@ -346,6 +439,19 @@ export default function EditorConteudo({
       },
     });
 
+    setModalAberto(true);
+    setErro('');
+  }
+
+  function duplicarBloco(bloco) {
+    // Duplica apenas dados e tipo; o ID original nunca é reutilizado.
+    setBuscaRelacionados('');
+    setBlocoEditando({
+      novo: true,
+      tipo: bloco.tipo,
+      ordem: blocosOrdenados.length + 1,
+      dados: JSON.parse(JSON.stringify(bloco.dados || {})),
+    });
     setModalAberto(true);
     setErro('');
   }
@@ -487,6 +593,8 @@ export default function EditorConteudo({
       setSalvandoBloco(true);
       setErro('');
 
+      const pendencia = pendenciaDoBloco(blocoEditando);
+      if (pendencia) { setErro(pendencia); return; }
       const paginaAtual =
         await garantirPagina();
 
@@ -569,7 +677,8 @@ export default function EditorConteudo({
         );
       }
 
-      fecharModal();
+      setModalAberto(false);
+      setBlocoEditando(null);
     } catch (error) {
       console.error(error);
 
@@ -781,6 +890,17 @@ export default function EditorConteudo({
             }
             onClick={async () => {
               const proximoStatus = !publicado;
+              if (proximoStatus && blocosOrdenados.length === 0) {
+                setErro('Adicione pelo menos um bloco antes de publicar a aula.');
+                return;
+              }
+              if (proximoStatus) {
+                const incompleto = blocosOrdenados.find(bloco => pendenciaDoBloco(bloco));
+                if (incompleto) {
+                  setErro(`Revise o bloco "${nomeTipo(incompleto.tipo)}" antes de publicar: ${pendenciaDoBloco(incompleto)}.`);
+                  return;
+                }
+              }
               setPublicado(proximoStatus);
 
               try {
@@ -929,78 +1049,6 @@ export default function EditorConteudo({
             </div>
           </section>
 
-          <section className="panel-card editor-panel editor-visual-panel">
-            <div className="editor-panel-title">
-              <span className="editor-panel-kicker">IDENTIDADE VISUAL</span>
-              <h2>Personalização da aula</h2>
-              <p>Escolha a aparência que os alunos verão nesta página. As opções são salvas com o conteúdo.</p>
-            </div>
-
-            <label className="editor-field-label" id="editor-paleta-label">Paleta da aula</label>
-            <div className="editor-tema-grid" role="group" aria-labelledby="editor-paleta-label">
-              {TEMAS_CONTEUDO.map((tema) => (
-                <button
-                  type="button"
-                  key={tema.id}
-                  className={`editor-tema-opcao ${aparencia.tema === tema.id ? 'is-active' : ''}`}
-                  aria-pressed={aparencia.tema === tema.id}
-                  onClick={() => atualizarAparencia('tema', tema.id)}
-                >
-                  <span className="editor-tema-bolinha" style={{ background: tema.cor }} />
-                  <span>{tema.nome}</span>
-                  {aparencia.tema === tema.id && <Icon name="check" size={16} />}
-                </button>
-              ))}
-            </div>
-
-            <div className="editor-visual-fields">
-              <label className="editor-field">
-                <span className="editor-field-label">Estilo de leitura</span>
-                <select value={aparencia.formato} onChange={(e) => atualizarAparencia('formato', e.target.value)}>
-                  <option value="trilha">Trilha com etapas e linha do tempo</option>
-                  <option value="cartoes">Cartões independentes</option>
-                </select>
-              </label>
-              <label className="editor-field">
-                <span className="editor-field-label">Tempo estimado (minutos)</span>
-                <input type="number" min="1" max="180" value={aparencia.minutos}
-                  onChange={(e) => atualizarAparencia('minutos', e.target.value === '' ? '' : Number(e.target.value))} />
-              </label>
-              <label className="editor-field editor-visual-full">
-                <span className="editor-field-label">Etiqueta do cabeçalho</span>
-                <input maxLength={48} value={aparencia.rotulo}
-                  onChange={(e) => atualizarAparencia('rotulo', e.target.value)}
-                  placeholder="Ex.: EXPLORE E APRENDA" />
-              </label>
-              <label className="editor-field editor-visual-full">
-                <span className="editor-field-label">Mensagem motivadora</span>
-                <textarea rows={2} maxLength={180} value={aparencia.mensagem}
-                  onChange={(e) => atualizarAparencia('mensagem', e.target.value)}
-                  placeholder="Uma mensagem que acompanha o estudante..." />
-              </label>
-            </div>
-
-            <label className="editor-indice-toggle">
-              <input type="checkbox" checked={aparencia.mostrarIndice}
-                onChange={(e) => atualizarAparencia('mostrarIndice', e.target.checked)} />
-              <span>Mostrar índice de navegação para os alunos</span>
-            </label>
-
-            <div className="editor-visual-preview" style={{ '--visual-cor': paleta.cor, '--visual-escura': paleta.escura, '--visual-clara': paleta.clara }}>
-              <div className="editor-visual-minihero">
-                <small>PRÉVIA DA AULA · {aparencia.rotulo || 'MATERIAL DE ESTUDO'}</small>
-                <strong>{titulo || topicoNome || 'Título da aula'}</strong>
-                <span>{aparencia.minutos || 8} min de leitura · {blocos.length} etapas</span>
-                <b aria-hidden="true">✦</b>
-              </div>
-              <div className="editor-visual-minibody">
-                <span>01</span>
-                <div><strong>{blocosOrdenados[0]?.dados?.titulo || 'Primeira etapa do estudo'}</strong><small>Assim o início da aula será apresentado ao aluno.</small></div>
-              </div>
-            </div>
-            <span className="editor-visual-help">Prévia simplificada. Clique em “Salvar página” para aplicar as alterações.</span>
-          </section>
-
           <section className="panel-card editor-panel">
 
             <div className="editor-panel-title blocks-title">
@@ -1010,13 +1058,16 @@ export default function EditorConteudo({
                 </span>
 
                 <h2>
-                  Blocos da página
+                  Etapas da aula
                 </h2>
               </div>
 
-              <span className="editor-count">
-                {blocos.length}
-              </span>
+              <div className="tenna-estrutura-acoes">
+                <button type="button" className="editor-secondary-button" onClick={() => setMostrarPreviaAula(v => !v)}>
+                  {mostrarPreviaAula ? 'Fechar prévia' : 'Prévia da aula'}
+                </button>
+                <span className="editor-count">{blocos.length}</span>
+              </div>
             </div>
 
             {blocosOrdenados.length === 0 ? (
@@ -1034,9 +1085,7 @@ export default function EditorConteudo({
                 </strong>
 
                 <span>
-                  Escolha um elemento ao lado
-                  para começar a montar o
-                  conteúdo.
+                  Adicione um bloco para começar a montar a aula.
                 </span>
 
                 <button
@@ -1063,6 +1112,12 @@ export default function EditorConteudo({
                     (bloco, index) => (
                       <article
                         className="editor-block"
+                        draggable={Boolean(bloco.id)}
+                        onDragStart={e => { setArrastandoBlocoId(bloco.id); e.dataTransfer.effectAllowed = 'move'; }}
+                        onDragOver={e => { if (arrastandoBlocoId) e.preventDefault(); }}
+                        onDrop={e => { e.preventDefault(); soltarBloco(arrastandoBlocoId, bloco.id); }}
+                        onDragEnd={() => setArrastandoBlocoId(null)}
+                        title="Arraste para reorganizar. Os botões de setas também funcionam."
                         key={
                           bloco.id ||
                           `${bloco.tipo}-${index}`
@@ -1170,6 +1225,16 @@ export default function EditorConteudo({
 
                             <button
                               type="button"
+                              className="editor-icon-button"
+                              title="Duplicar bloco"
+                              aria-label={`Duplicar bloco ${index + 1}`}
+                              onClick={() => duplicarBloco(bloco)}
+                            >
+                              <Icon name="plus" size={15} />
+                            </button>
+
+                            <button
+                              type="button"
                               className="editor-icon-button danger"
                               onClick={() =>
                                 excluirBloco(
@@ -1218,6 +1283,14 @@ export default function EditorConteudo({
 
           </section>
 
+          {mostrarPreviaAula && <section className="panel-card editor-panel tenna-previa-completa">
+            <span className="editor-panel-kicker">VISÃO DE ESTUDANTE · PRÉVIA</span>
+            <h2>{titulo || topicoNome || 'Título da aula'}</h2>
+            <p>Prévia dos blocos da aula. Vídeos, atividades relacionadas e progresso ficam completos após a publicação.</p>
+            <div className="tenna-previa-lista">{blocosOrdenados.map((bloco, i) => <div className="tenna-previa-item" key={bloco.id || i}>
+              {previewBloco(bloco)}
+            </div>)}</div>
+          </section>}
         </main>
 
         <aside className="editor-sidebar">
@@ -1233,52 +1306,15 @@ export default function EditorConteudo({
             </h2>
 
             <p className="editor-sidebar-description">
-              Selecione um tipo de elemento
-              para adicionar à página.
+              Escolha o que deseja adicionar à aula.
             </p>
 
-            <div className="editor-types">
-
-              {TIPOS_BLOCO.map(
-                (item) => (
-                  <button
-                    type="button"
-                    key={item.tipo}
-                    className={`editor-type ${
-                      tipoNovoBloco ===
-                      item.tipo
-                        ? 'selected'
-                        : ''
-                    }`}
-                    onClick={() =>
-                      setTipoNovoBloco(
-                        item.tipo
-                      )
-                    }
-                  >
-                    <span>
-                      <Icon
-                        name={
-                          item.icone
-                        }
-                        size={16}
-                      />
-                    </span>
-
-                    <div>
-                      <strong>
-                        {item.nome}
-                      </strong>
-
-                      <small>
-                        {item.descricao}
-                      </small>
-                    </div>
-                  </button>
-                )
-              )}
-
+            <div className="tenna-blocos-simples">
+              {TIPOS_BLOCO.filter(item => ['texto','destaque','lista','imagem','video','formula','exemplo','pergunta','flashcards'].includes(item.tipo)).map(item => <button type="button" key={item.tipo} className={`tenna-bloco-opcao ${tipoNovoBloco === item.tipo ? 'selected' : ''}`} onClick={() => setTipoNovoBloco(item.tipo)}><Icon name={item.icone} size={17}/><span>{item.nome}</span></button>)}
             </div>
+            <details className="tenna-blocos-extras"><summary>Mais tipos de bloco <span aria-hidden="true">⌄</span></summary><div className="tenna-blocos-simples">
+              {TIPOS_BLOCO.filter(item => !['texto','destaque','lista','imagem','video','formula','exemplo','pergunta','flashcards'].includes(item.tipo)).map(item => <button type="button" key={item.tipo} className={`tenna-bloco-opcao ${tipoNovoBloco === item.tipo ? 'selected' : ''}`} onClick={() => setTipoNovoBloco(item.tipo)}><Icon name={item.icone} size={17}/><span>{item.nome}</span></button>)}
+            </div></details>
 
             <button
               type="button"
@@ -1389,6 +1425,12 @@ export default function EditorConteudo({
                   setBuscaRelacionados={setBuscaRelacionados}
                 />
 
+                {['texto', 'destaque', 'lista', 'checklist'].includes(blocoEditando.tipo) && (
+                  <div className="editor-live-preview">
+                    <span className="editor-panel-kicker">PRÉVIA DO BLOCO</span>
+                    <div className="editor-live-preview-body">{previewBloco(blocoEditando)}</div>
+                  </div>
+                )}
               </div>
 
               <div className="editor-modal-footer">

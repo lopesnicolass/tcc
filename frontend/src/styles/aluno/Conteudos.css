@@ -1903,3 +1903,528 @@ html[data-theme="dark"] .conteudos-page .content-topic-number {
     padding: 12px;
   }
 }
+
+
+/* =========================================================
+   TENNA — Conteúdos: leitura e densidade para notebook / TV
+   Ajustes somente visuais, sem alterar a lógica da página.
+   ========================================================= */
+.conteudos-page .content-subject-list {
+  gap: 12px;
+}
+
+/* A linha da matéria fica mais compacta sem apertar o clique. */
+.conteudos-page .content-subject-header {
+  min-height: 78px;
+  padding: 13px 20px;
+  gap: 14px;
+}
+.conteudos-page .content-subject-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+}
+.conteudos-page .content-subject-title {
+  gap: 13px;
+}
+.conteudos-page .content-subject-title h2 {
+  font-size: 19px;
+  line-height: 1.25;
+}
+.conteudos-page .content-subject-title > div > span {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.conteudos-page .content-subject-track {
+  height: 6px;
+  margin: 0 20px 12px;
+}
+
+/* Dois conteúdos por linha em telas largas; espaçamento consistente. */
+.conteudos-page .content-topic-list {
+  gap: 11px;
+  padding: 14px 16px 16px;
+}
+.conteudos-page .content-topic {
+  min-height: 112px;
+  border-radius: 16px;
+}
+.conteudos-page .content-topic-open {
+  min-height: 112px;
+  gap: 8px;
+  padding: 13px 48px 12px 16px;
+}
+.conteudos-page .content-topic-meta {
+  gap: 7px;
+}
+.conteudos-page .content-topic-number {
+  width: 30px;
+  height: 25px;
+}
+.conteudos-page .content-topic-materia {
+  padding: 6px 9px;
+  font-size: 10.5px;
+}
+.conteudos-page .content-topic-name {
+  font-size: 16px;
+  line-height: 1.38;
+}
+.conteudos-page .content-topic-footer {
+  flex-wrap: wrap;
+  row-gap: 7px;
+}
+.conteudos-page .content-topic-status {
+  padding: 6px 9px;
+  font-size: 11px;
+}
+.conteudos-page .content-topic-action {
+  font-size: 12px;
+}
+.conteudos-page .content-topic-check {
+  top: 12px;
+  right: 12px;
+  width: 29px;
+  height: 29px;
+}
+
+/* Textos auxiliares legíveis à distância, sem alterar as cores das matérias. */
+html:not([data-theme="dark"]) .conteudos-page .content-progress-main p,
+html:not([data-theme="dark"]) .conteudos-page .content-subject-title > div > span {
+  color: #526e95;
+}
+html:not([data-theme="dark"]) .conteudos-page .content-search-wrap input::placeholder {
+  color: #637fa4;
+  opacity: 1;
+}
+html[data-theme="dark"] .conteudos-page .content-progress-main p,
+html[data-theme="dark"] .conteudos-page .content-subject-title > div > span {
+  color: #b8cbe5;
+}
+
+/* Menos espaço desperdiçado sem diminuir o tamanho dos controles. */
+.conteudos-page .content-progress-card {
+  padding: 18px 22px 16px;
+  margin-bottom: 18px;
+}
+.conteudos-page .content-toolbar {
+  margin-top: 18px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1100px) {
+  .conteudos-page .content-topic-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .conteudos-page .content-topic-list {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .conteudos-page .content-subject-header {
+    min-height: 76px;
+    padding: 13px 15px;
+  }
+  .conteudos-page .content-subject-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .conteudos-page .content-subject-title h2 {
+    font-size: 17px;
+  }
+  .conteudos-page .content-subject-title > div > span {
+    font-size: 12px;
+  }
+  .conteudos-page .content-subject-track {
+    margin: 0 15px 12px;
+  }
+  .conteudos-page .content-topic-list {
+    padding: 12px;
+  }
+  .conteudos-page .content-topic,
+  .conteudos-page .content-topic-open {
+    min-height: 112px;
+  }
+  .conteudos-page .content-topic-open {
+    padding: 13px 47px 12px 14px;
+  }
+  .conteudos-page .content-progress-card {
+    padding: 16px;
+  }
+}
+@media (max-width: 420px) {
+  .conteudos-page .content-topic-footer {
+    align-items: flex-start;
+  }
+  .conteudos-page .content-topic-name {
+    font-size: 15px;
+  }
+}
+
+/* =========================================================
+   TENNA — Conteúdos | refinamento equilibrado
+   Inspirado nos cabeçalhos limpos das demais telas.
+   ========================================================= */
+
+/* Banner: sem círculo decorativo e sem selo lateral. */
+.conteudos-page .tenna-auto-intro {
+  min-height: 132px;
+  padding: 27px 30px;
+  gap: 0;
+  background: linear-gradient(115deg, #10377e 0%, #1351a4 56%, #238ce9 100%);
+}
+.conteudos-page .tenna-auto-intro::after {
+  content: none;
+}
+.conteudos-page .tenna-auto-intro-copy {
+  max-width: 100%;
+}
+.conteudos-page .tenna-auto-intro h2 {
+  font-size: clamp(27px, 2.7vw, 35px);
+  line-height: 1.17;
+}
+.conteudos-page .tenna-auto-intro p {
+  font-size: 14.5px;
+}
+
+/* Matérias: equilíbrio entre a versão original e a compacta. */
+.conteudos-page .content-subject-list {
+  gap: 14px;
+}
+.conteudos-page .content-subject-header {
+  min-height: 88px;
+  padding: 16px 21px;
+  gap: 16px;
+}
+.conteudos-page .content-subject-icon {
+  flex: 0 0 51px;
+  width: 51px;
+  height: 51px;
+  border-radius: 15px;
+}
+.conteudos-page .content-subject-title {
+  gap: 14px;
+}
+.conteudos-page .content-subject-title h2 {
+  font-size: 19.5px;
+}
+.conteudos-page .content-subject-title > div > span {
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.conteudos-page .content-subject-progress > span:first-child {
+  font-size: 15px;
+}
+.conteudos-page .content-subject-track {
+  height: 6px;
+  margin: 0 21px 14px;
+}
+
+/* Conteúdos: melhor aproveitamento do card e leitura à distância. */
+.conteudos-page .content-topic-list {
+  gap: 13px;
+  padding: 16px 18px 18px;
+}
+.conteudos-page .content-topic,
+.conteudos-page .content-topic-open {
+  min-height: 116px;
+}
+.conteudos-page .content-topic {
+  border-radius: 16px;
+}
+.conteudos-page .content-topic-open {
+  gap: 7px;
+  padding: 14px 53px 13px 17px;
+}
+.conteudos-page .content-topic-meta {
+  gap: 8px;
+}
+.conteudos-page .content-topic-name {
+  font-size: 16px;
+  line-height: 1.38;
+}
+.conteudos-page .content-topic-footer {
+  gap: 8px;
+}
+.conteudos-page .content-topic-status {
+  font-size: 11px;
+  padding: 6px 10px;
+}
+.conteudos-page .content-topic-action {
+  font-size: 12.5px;
+}
+.conteudos-page .content-topic-check {
+  top: 13px;
+  right: 13px;
+}
+
+/* Contraste de leitura, mantendo as cores de cada matéria. */
+html:not([data-theme="dark"]) .conteudos-page .content-eyebrow,
+html:not([data-theme="dark"]) .conteudos-page .content-subject-title > div > span {
+  color: #486a96;
+}
+html:not([data-theme="dark"]) .conteudos-page .content-topic.studied .content-topic-name {
+  color: #6582a7;
+}
+html[data-theme="dark"] .conteudos-page .content-topic.studied .content-topic-name {
+  color: #a8bfdc;
+}
+
+@media (max-width: 700px) {
+  .conteudos-page .tenna-auto-intro {
+    min-height: 0;
+    padding: 24px 21px;
+  }
+  .conteudos-page .tenna-auto-intro h2 {
+    font-size: clamp(25px, 6vw, 31px);
+  }
+  .conteudos-page .content-subject-header {
+    min-height: 82px;
+    padding: 15px 16px;
+  }
+  .conteudos-page .content-subject-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+  }
+  .conteudos-page .content-subject-title h2 {
+    font-size: 17px;
+  }
+  .conteudos-page .content-subject-title > div > span {
+    font-size: 12.5px;
+  }
+  .conteudos-page .content-subject-track {
+    margin: 0 16px 13px;
+  }
+  .conteudos-page .content-topic-list {
+    padding: 12px;
+  }
+  .conteudos-page .content-topic-open {
+    padding: 13px 49px 12px 14px;
+  }
+}
+
+/* ===========================================================
+   TENNA — Conteúdos: cards internos mais leves e organizados
+   Mantém integralmente os ícones e o cabeçalho das matérias.
+   =========================================================== */
+.conteudos-page .content-topic-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 16px 17px;
+  background: #f8fbff;
+  border-top: 1px solid #e6eff8;
+}
+.conteudos-page .content-topic {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #dfe8f1 !important;
+  border-left: 3px solid var(--topic-color, #5dade2) !important;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(17, 67, 125, .035);
+  overflow: hidden;
+  transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.conteudos-page .content-topic:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 17px rgba(17, 67, 125, .09);
+}
+.conteudos-page .content-topic-open {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  min-height: 105px;
+  padding: 13px 52px 12px 15px;
+  border-radius: inherit;
+}
+.conteudos-page .content-topic-open:hover {
+  background: color-mix(in srgb, var(--topic-bg, #f4f9ff) 40%, #fff);
+}
+.conteudos-page .content-topic-meta {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.conteudos-page .content-topic-number {
+  width: 25px;
+  height: 21px;
+  border-radius: 6px;
+  font-size: 10px;
+}
+.conteudos-page .content-topic-materia {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+}
+.conteudos-page .content-topic-name {
+  display: block;
+  color: #123d7e;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.3;
+  letter-spacing: -.01em;
+}
+.conteudos-page .content-topic.studied .content-topic-name {
+  color: #6a81a1;
+  text-decoration: line-through;
+  text-decoration-color: #a7b8ce;
+}
+.conteudos-page .content-topic-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px 12px;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 12px;
+}
+.conteudos-page .content-topic-status {
+  max-width: 100%;
+  padding: 5px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 7px;
+}
+.conteudos-page .content-topic-action {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 800;
+  gap: 3px;
+}
+.conteudos-page .content-topic-arrow {
+  width: 12px;
+  height: 15px;
+  font-size: 18px;
+}
+.conteudos-page .content-topic-check {
+  top: 12px;
+  right: 13px;
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  box-shadow: 0 2px 5px rgba(12, 58, 110, .08);
+}
+@media (max-width: 900px) {
+  .conteudos-page .content-topic-list {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .conteudos-page .content-topic-list {
+    padding: 11px;
+    gap: 10px;
+  }
+  .conteudos-page .content-topic-open {
+    min-height: 102px;
+    padding: 12px 48px 11px 13px;
+  }
+  .conteudos-page .content-topic-name { font-size: 14.5px; }
+  .conteudos-page .content-topic-footer { padding-top: 10px; }
+}
+/* Dark mode follows the existing Tenna theme without bright white cards. */
+html[data-theme="dark"] .conteudos-page .content-topic-list {
+  background: #12223b;
+  border-top-color: #2c4162;
+}
+html[data-theme="dark"] .conteudos-page .content-topic {
+  background: #1b2d49;
+  border-color: #33496a !important;
+  border-left-color: var(--topic-color, #5dade2) !important;
+}
+html[data-theme="dark"] .conteudos-page .content-topic-open:hover {
+  background: #243a58;
+}
+html[data-theme="dark"] .conteudos-page .content-topic-name {
+  color: #e1edff;
+}
+html[data-theme="dark"] .conteudos-page .content-topic.studied .content-topic-name {
+  color: #a8bfdc;
+}
+
+/* Tenna: busca sem filtro de matéria e confirmação de limpeza. */
+.conteudos-page .content-toolbar {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 12px;
+}
+.conteudos-page .content-reset-btn { min-width: 142px; }
+.content-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 29, 64, .53);
+  backdrop-filter: blur(4px);
+}
+.content-confirm-dialog {
+  width: min(100%, 440px);
+  padding: 30px;
+  border: 1px solid #e2eaf4;
+  border-radius: 22px;
+  background: #fff;
+  color: #163c75;
+  box-shadow: 0 24px 75px rgba(6, 27, 63, .24);
+  text-align: center;
+}
+.content-confirm-symbol {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 15px;
+  border-radius: 17px;
+  background: #fff0ee;
+  color: #d4514b;
+}
+.content-confirm-dialog h2 {
+  margin: 0 0 10px;
+  color: #123d7e;
+  font-size: 23px;
+  line-height: 1.25;
+}
+.content-confirm-dialog p {
+  margin: 0 0 25px;
+  color: #59718f;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.content-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+.content-confirm-actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: filter .2s, transform .2s;
+}
+.content-confirm-actions button:hover:not(:disabled) { filter: brightness(.95); transform: translateY(-1px); }
+.content-confirm-actions button:disabled { opacity: .65; cursor: wait; }
+.content-confirm-cancel { background: #eef5ff; color: #184e98; border: 1px solid #cddff6; }
+.content-confirm-danger { background: #cf4949; color: #fff; border: 1px solid #cf4949; }
+html[data-theme="dark"] .content-confirm-dialog { background: #1b2d49; border-color: #344969; }
+html[data-theme="dark"] .content-confirm-dialog h2 { color: #e5f0ff; }
+html[data-theme="dark"] .content-confirm-dialog p { color: #b8cce7; }
+@media (max-width: 600px) {
+  .conteudos-page .content-toolbar { grid-template-columns: 1fr; }
+  .conteudos-page .content-reset-btn { width: 100%; }
+  .content-confirm-dialog { padding: 24px 18px; }
+  .content-confirm-actions { flex-direction: column; }
+}

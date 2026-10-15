@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import '../../styles/aluno/Cronograma.css';
 import { useGamification } from '../../context/GamificationContext.jsx';
 import { getSubjectStyle } from '../../utils/subjects.js';
@@ -60,6 +59,29 @@ function getPostItMateriaStyle(materia = '') {
   return found
     ? POSTIT_MATERIA_STYLES[found]
     : { bg: '#EAF0F6', color: '#52616B' };
+}
+
+// Cores mais vivas para os marcadores, sem alterar a paleta dos conteúdos.
+const CALENDAR_DOT_COLORS = {
+  'Português': '#1595E6',
+  'Língua Portuguesa': '#1595E6',
+  'Matemática': '#F05260',
+  'História': '#CF8731',
+  'Geografia': '#48AF58',
+  'Ciências': '#9960D9',
+  'Ciências da Natureza': '#9960D9',
+  'Simulado': '#1479D4',
+  'Prova Anterior': '#64748B',
+  'Outro': '#64748B',
+};
+
+function getCalendarDotColor(materia) {
+  if (CALENDAR_DOT_COLORS[materia]) return CALENDAR_DOT_COLORS[materia];
+  const normalized = String(materia || '').trim().toLowerCase();
+  const found = Object.keys(CALENDAR_DOT_COLORS).find((key) =>
+    normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)
+  );
+  return found ? CALENDAR_DOT_COLORS[found] : '#64748B';
 }
 
 const pad = (n) =>
@@ -171,6 +193,28 @@ export default function Cronograma() {
 
   const [form, setForm] =
     useState(emptyForm);
+  const [subjectPickerOpen, setSubjectPickerOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [pickerMonth, setPickerMonth] = useState(() => new Date());
+
+  const pickerDays = useMemo(() => {
+    const first = new Date(pickerMonth.getFullYear(), pickerMonth.getMonth(), 1);
+    const start = new Date(first);
+    start.setDate(1 - first.getDay());
+    return Array.from({ length: 42 }, (_, i) => {
+      const day = new Date(start);
+      day.setDate(start.getDate() + i);
+      return day;
+    });
+  }, [pickerMonth]);
+
+  function openPickerForDate(value) {
+    const d = new Date(`${value || todayKey}T12:00:00`);
+    setPickerMonth(Number.isNaN(d.getTime()) ? new Date() : new Date(d.getFullYear(), d.getMonth(), 1));
+    setDatePickerOpen((previous) => !previous);
+    setSubjectPickerOpen(false);
+  }
+
 
   async function carregarCronograma() {
     if (!usuarioId) {
@@ -370,9 +414,6 @@ export default function Cronograma() {
 
   const resumoMes = resumirMes(activities, monthPrefix);
   const resumoDia = resumirDia(selectedActivities);
-  const progressoMes = resumoMes.atividades > 0
-    ? Math.round((resumoMes.concluidas / resumoMes.atividades) * 100)
-    : 0;
   const selectedDateObject = new Date(`${selectedDate}T12:00:00`);
   const numeroDiaSelecionado = selectedDateObject.getDate();
   const mesDiaSelecionado = selectedDateObject.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
@@ -414,6 +455,8 @@ export default function Cronograma() {
       data: date
     });
 
+    setSubjectPickerOpen(false);
+    setDatePickerOpen(false);
     setShowCreate(true);
   }
 
@@ -434,6 +477,8 @@ export default function Cronograma() {
         '08:00'
     });
 
+    setSubjectPickerOpen(false);
+    setDatePickerOpen(false);
     setShowCreate(true);
   }
 
@@ -746,28 +791,13 @@ export default function Cronograma() {
     return (
       <div className="calendar-page">
 
-        <section className="tenna-auto-intro">
-
-          <div className="tenna-auto-intro-copy">
-
-            <span className="tenna-auto-kicker">
-              MINHA ROTINA
-            </span>
-
-            <h2>
-              Seu{' '}
-              <span>
-                calendário de estudos
-              </span>
-            </h2>
-
-            <p>
-              Carregando seu cronograma...
-            </p>
-
+        <header className="calendar-simple-header">
+          <div>
+            <span className="calendar-simple-eyebrow">MINHA ROTINA</span>
+            <h1>Meu calendário</h1>
+            <p>Carregando suas atividades...</p>
           </div>
-
-        </section>
+        </header>
 
       </div>
     );
@@ -776,55 +806,12 @@ export default function Cronograma() {
   return (
     <div className="calendar-page">
 
-      <section className="tenna-auto-intro">
-
+      <section className="tenna-auto-intro calendar-restored-banner">
         <div className="tenna-auto-intro-copy">
-
-          <span className="tenna-auto-kicker">
-            MINHA ROTINA
-          </span>
-
-          <h2>
-            Seu calendário, <span>seu ritmo.</span>
-          </h2>
-
-          <p>
-            Visualize seus compromissos, celebre cada tarefa concluída e siga firme até o Vestibulinho.
-          </p>
-
+          <span className="tenna-auto-kicker">MINHA ROTINA</span>
+          <h2>Seu calendário, <span>seu ritmo.</span></h2>
+          <p>Visualize seus compromissos, celebre cada tarefa concluída e siga firme até o Vestibulinho.</p>
         </div>
-
-        <div className="calendar-hero-actions">
-
-          <Link
-            className="calendar-hero-link"
-            to="/plano-automatico"
-            title="Abrir plano automático"
-          >
-            <Icon
-              name="calendar"
-              size={21}
-              color="#fff"
-            />
-            <span>
-              <small>
-                Sua rotina
-              </small>
-              <strong>
-                Ajustar plano
-              </strong>
-            </span>
-          </Link>
-
-          <button
-            className="calendar-hero-new"
-            onClick={() => openCreate()}
-          >
-            + Nova atividade
-          </button>
-
-        </div>
-
       </section>
 
       <div className="calendar-layout">
@@ -834,7 +821,7 @@ export default function Cronograma() {
           <div className="calendar-toolbar">
 
             <div className="calendar-toolbar-left">
-              <span className="calendar-month-eyebrow"><Icon name="calendar" size={14} /> VISÃO MENSAL</span>
+              
               <div className="calendar-month-nav">
 
                 <button
@@ -861,17 +848,7 @@ export default function Cronograma() {
 
               </div>
 
-              <div className="calendar-toolbar-stats">
-                <span>
-                  <strong>{resumoMes.atividades}</strong> {resumoMes.atividades === 1 ? 'atividade' : 'atividades'}
-                </span>
-                <span>
-                  <strong>{resumoMes.concluidas}</strong> {resumoMes.concluidas === 1 ? 'concluída' : 'concluídas'}
-                </span>
-                <span>
-                  <strong>{resumoMes.diasPlanejados}</strong> {resumoMes.diasPlanejados === 1 ? 'dia planejado' : 'dias planejados'}
-                </span>
-              </div>
+
             </div>
 
             <div className="calendar-toolbar-actions">
@@ -898,22 +875,6 @@ export default function Cronograma() {
               </button>
             </div>
 
-          </div>
-
-          <div className="calendar-month-insight">
-            <div className="calendar-month-insight-copy">
-              <span className="calendar-month-insight-icon"><Icon name="checkSquare" size={16} /></span>
-              <div>
-                <strong>Seu progresso neste mês</strong>
-                <span>{resumoMes.atividades > 0 ? `${resumoMes.concluidas} de ${resumoMes.atividades} atividades concluídas` : 'Seu mês está pronto para ser planejado'}</span>
-              </div>
-            </div>
-            <div className="calendar-month-insight-indicator">
-              <strong>{progressoMes}%</strong>
-              <div className="calendar-month-insight-track" role="progressbar" aria-label="Progresso de atividades do mês" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressoMes}>
-                <span style={{ width: `${progressoMes}%` }} />
-              </div>
-            </div>
           </div>
 
           <p className="calendar-mobile-help">Selecione um dia para ver ou editar suas atividades.</p>
@@ -954,7 +915,9 @@ export default function Cronograma() {
                       key
                   );
 
-                const eventosDia = eventosVisiveisDia(dayActivities, dayImportantDates, 2);
+                const materiasDoDia = [...new Set(dayActivities.map((activity) => activity.materia || 'Outro'))];
+                const quantidadeEventos = dayActivities.length + dayImportantDates.length;
+                const temDatasImportantes = dayImportantDates.length > 0;
 
                 const inMonth =
                   day.getMonth() ===
@@ -967,7 +930,7 @@ export default function Cronograma() {
                 const isToday =
                   key ===
                   todayKey;
-                const hasEvents = eventosDia.total > 0;
+                const hasEvents = quantidadeEventos > 0;
                 const allDone = dayActivities.length > 0 && dayActivities.every((activity) => activity.done);
 
                 return (
@@ -991,7 +954,7 @@ export default function Cronograma() {
                     }
                     type="button"
                     aria-pressed={selected}
-                    aria-label={`${day.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}: ${eventosDia.total} ${eventosDia.total === 1 ? 'evento' : 'eventos'}`}
+                    aria-label={`${day.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}: ${quantidadeEventos} ${quantidadeEventos === 1 ? 'evento' : 'eventos'}`}
                     onClick={() => {
                       setSelectedDate(key);
                       if (!inMonth) {
@@ -1003,46 +966,24 @@ export default function Cronograma() {
                     <span className="calendar-day-topline">
                       <span className="calendar-day-number">{day.getDate()}</span>
                       {isToday && <span className="calendar-today-label">HOJE</span>}
-                      {!isToday && hasEvents && <span className="calendar-event-count" aria-hidden="true">{eventosDia.total}</span>}
+
                     </span>
 
-                    {eventosDia.visiveis.map(({ tipo, item }) => {
-                      if (tipo === 'importante') {
-                        return (
+                    {hasEvents && (
+                      <span className="calendar-subject-dots" aria-hidden="true">
+                        {materiasDoDia.map((materia) => (
                           <span
-                            key={`important-${item.id}`}
-                            className="calendar-event calendar-important-event"
-                            title={item.titulo}
-                          >
-                            <span className="calendar-event-icon" aria-hidden="true">📌</span>
-                            <span className="calendar-event-text">{item.titulo}</span>
-                          </span>
-                        );
-                      }
-
-                      const cor = getPostItMateriaStyle(item.materia);
-                      return (
-                        <span
-                          key={`activity-${item.id}`}
-                          className={`calendar-event ${item.done ? 'done' : ''}`}
-                          title={`${item.horario || ''} · ${item.nome}`}
-                          style={{
-                            background: cor.bg,
-                            borderLeftColor: cor.color,
-                            color: cor.color,
-                          }}
-                        >
-                          <span className="calendar-event-icon" aria-hidden="true">
-                            <SubjectIcon materia={item.materia} size={11} />
-                          </span>
-                          <span className="calendar-event-text">{item.nome}</span>
-                        </span>
-                      );
-                    })}
-                    {eventosDia.restantes > 0 && (
-                      <span className="calendar-more">+{eventosDia.restantes} mais</span>
+                            key={materia}
+                            className="calendar-subject-dot"
+                            style={{ backgroundColor: getCalendarDotColor(materia), borderColor: getCalendarDotColor(materia) }}
+                            title={materia}
+                          />
+                        ))}
+                        {temDatasImportantes && (
+                          <span className="calendar-subject-dot calendar-important-dot" title="Data importante" />
+                        )}
+                      </span>
                     )}
-                    {hasEvents && <span className="calendar-day-mobile-dot" aria-hidden="true" />}
 
                   </button>
 
@@ -1054,23 +995,17 @@ export default function Cronograma() {
 
         </section>
 
+        <div className="calendar-bottom-cards">
         <aside className="calendar-sidebar-card">
 
           <div className="calendar-selected-head">
-            <div className="calendar-date-badge" aria-hidden="true">
-              <strong>{numeroDiaSelecionado}</strong>
-              <span>{mesDiaSelecionado}</span>
-            </div>
             <div className="calendar-selected-copy">
-              <span>SUA AGENDA DO DIA</span>
-              <h2>
+              <span className="calendar-selected-date">
                 {selectedDateObject.toLocaleDateString('pt-BR', {
-                  weekday: 'long',
-                  day: 'numeric',
-                  month: 'long'
+                  weekday: 'long', day: 'numeric', month: 'long'
                 })}
-              </h2>
-              <p>{resumoDia.total > 0 ? `${resumoDia.total} ${resumoDia.total === 1 ? 'atividade planejada' : 'atividades planejadas'}` : 'Um novo dia para organizar seus estudos'}</p>
+              </span>
+              <h2>Atividades do dia</h2>
             </div>
             <button
               type="button"
@@ -1079,7 +1014,7 @@ export default function Cronograma() {
               className="calendar-add-small"
               onClick={() => openCreate()}
             >
-              +
+              <Icon name="plus" size={19} />
             </button>
           </div>
 
@@ -1105,58 +1040,15 @@ export default function Cronograma() {
             </div>
           )}
 
-          {resumoDia.total > 0 && (
-            <div className="calendar-day-progress" aria-label={`${resumoDia.concluidas} de ${resumoDia.total} atividades concluídas`}>
-              <div className="calendar-day-progress-text">
-                <strong>Progresso do dia</strong>
-                <span>{resumoDia.concluidas} de {resumoDia.total} concluídas</span>
-              </div>
-              <div className="calendar-day-progress-track" role="progressbar" aria-valuenow={resumoDia.concluidas} aria-valuemin={0} aria-valuemax={resumoDia.total}>
-                <span style={{ width: `${Math.round((resumoDia.concluidas / resumoDia.total) * 100)}%` }} />
-              </div>
-            </div>
-          )}
-
           <div className="calendar-task-list">
 
             {selectedActivities.length ===
             0 ? (
 
               <div className="calendar-empty-day">
-
-                <span
-                  style={{
-                    color:
-                      'var(--muted)',
-                    display:
-                      'flex',
-                    justifyContent:
-                      'center'
-                  }}
-                >
-                  <Icon
-                    name="calendar"
-                    size={30}
-                  />
-                </span>
-
-                <strong>
-                  Nada planejado ainda
-                </strong>
-
-                <p>
-                  Adicione uma atividade
-                  para organizar este dia.
-                </p>
-
-                <button
-                  onClick={() =>
-                    openCreate()
-                  }
-                >
-                  Adicionar atividade
-                </button>
-
+                <span className="calendar-empty-day-icon" aria-hidden="true"><Icon name="calendar" size={23} /></span>
+                <strong>Nenhuma atividade neste dia</strong>
+                <p>Use o botão + para planejar seus estudos.</p>
               </div>
 
             ) : (
@@ -1197,6 +1089,26 @@ export default function Cronograma() {
                       }}
                     >
 
+                      <span
+                        className="calendar-task-subject-dot"
+                        style={{ backgroundColor: getCalendarDotColor(activity.materia) }}
+                        aria-hidden="true"
+                      />
+
+                      <div className="calendar-task-info">
+
+                        <span>
+                          {activity.horario}
+                          {' · '}
+                          {activity.materia}
+                        </span>
+
+                        <strong>
+                          {activity.nome}
+                        </strong>
+
+                      </div>
+
                       <button
                         className="calendar-check"
                         type="button"
@@ -1215,38 +1127,6 @@ export default function Cronograma() {
                           : ''}
                       </button>
 
-                      <span
-                        className="calendar-task-subject-icon"
-                        style={{
-                          background:
-                            getPostItMateriaStyle(activity.materia).bg,
-                          color:
-                            getPostItMateriaStyle(activity.materia).color
-                        }}
-                      >
-                        <SubjectIcon
-                          materia={
-                            activity.materia
-                          }
-                          size={15}
-                        />
-                      </span>
-
-                      <div className="calendar-task-info">
-
-                        <span>
-                          {activity.horario}
-                          {' · '}
-                          {activity.materia}
-                        </span>
-
-                        <strong>
-                          {activity.nome}
-                        </strong>
-
-                      </div>
-
-                      <span className="calendar-task-arrow" aria-hidden="true"><Icon name="chevron" size={18} /></span>
 
                     </article>
 
@@ -1258,13 +1138,9 @@ export default function Cronograma() {
 
           </div>
 
-          {selectedActivities.length > 0 && (
-            <button className="calendar-full-add" onClick={() => openCreate()}>
-              + Adicionar outra atividade
-            </button>
-          )}
-
         </aside>
+
+        </div>
 
       </div>
 
@@ -1284,180 +1160,112 @@ export default function Cronograma() {
           }}
         >
 
-          <form
-            className="modal-card calendar-modal"
-            onSubmit={saveActivity}
-          >
-
-            <div className="modal-header">
-
-              <h2>
-                {editing
-                  ? 'Editar atividade'
-                  : 'Nova atividade'}
-              </h2>
-
-              <p>
-                Defina quando e o que
-                você pretende estudar.
-              </p>
-
+          <form className="modal-card calendar-modal tenna-activity-modal" onSubmit={saveActivity}>
+            <div className="tenna-activity-header">
+              <div>
+                <h2>{editing ? 'Editar atividade' : 'Adicionar atividade'}</h2>
+              </div>
+              <button type="button" className="tenna-activity-close" aria-label="Fechar" disabled={saving}
+                onClick={() => { setShowCreate(false); setEditing(null); }}>×</button>
             </div>
 
-            <div className="modal-input-group">
-
-              <label>
-                Atividade
+            <div className="tenna-activity-body">
+              <label className="tenna-activity-field">
+                <span>Nome da atividade</span>
+                <input autoFocus required maxLength={160} value={form.nome}
+                  onChange={(e) => setForm({ ...form, nome: e.target.value })}
+                  placeholder="Ex.: Revisar equações do 2º grau" disabled={saving} />
               </label>
 
-              <input
-                autoFocus
-                value={form.nome}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    nome:
-                      e.target.value
-                  })
-                }
-                placeholder="Ex.: Equação do 2º grau"
-                disabled={saving}
-              />
-
-            </div>
-
-            <div className="modal-two-col">
-
-              <div className="modal-input-group">
-
-                <label>
-                  Matéria
-                </label>
-
-                <select
-                  value={form.materia}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      materia:
-                        e.target.value
-                    })
-                  }
-                  disabled={saving}
-                >
-
-                  {MATERIAS.map(
-                    (m) => (
-                      <option
-                        key={m}
-                        value={m}
-                      >
-                        {m}
-                      </option>
-                    )
+              <div className="tenna-activity-two-col">
+                <div className="tenna-activity-field tenna-picker-wrap">
+                  <label id="tenna-subject-label">Matéria</label>
+                  <button type="button" className="tenna-activity-control tenna-subject-trigger"
+                    aria-labelledby="tenna-subject-label" aria-expanded={subjectPickerOpen}
+                    disabled={saving} onClick={() => { setSubjectPickerOpen(!subjectPickerOpen); setDatePickerOpen(false); }}>
+                    <span className="tenna-subject-dot" style={{ backgroundColor: getCalendarDotColor(form.materia) }} />
+                    <span>{form.materia}</span><Icon name="chevronDown" size={16} />
+                  </button>
+                  {subjectPickerOpen && (
+                    <div className="tenna-picker-popover tenna-subject-options" role="listbox" aria-label="Selecionar matéria">
+                      {MATERIAS.map((materia) => (
+                        <button key={materia} type="button" role="option" aria-selected={form.materia === materia}
+                          className={form.materia === materia ? 'active' : ''}
+                          onClick={() => { setForm({ ...form, materia }); setSubjectPickerOpen(false); }}>
+                          <span className="tenna-subject-dot" style={{ backgroundColor: getCalendarDotColor(materia) }} />
+                          {materia}
+                          {form.materia === materia && <span className="tenna-option-check">✓</span>}
+                        </button>
+                      ))}
+                    </div>
                   )}
-
-                </select>
-
+                </div>
+                <div className="tenna-activity-field tenna-picker-wrap">
+                  <label id="tenna-date-label">Data</label>
+                  <button type="button" className="tenna-activity-control tenna-date-trigger"
+                    aria-labelledby="tenna-date-label" aria-expanded={datePickerOpen}
+                    disabled={saving} onClick={() => openPickerForDate(form.data)}>
+                    <Icon name="calendar" size={17} />
+                    <span>{new Date(`${form.data}T12:00:00`).toLocaleDateString('pt-BR')}</span>
+                    <Icon name="chevronDown" size={16} />
+                  </button>
+                  {datePickerOpen && (
+                    <div className="tenna-picker-popover tenna-date-popover">
+                      <div className="tenna-date-nav">
+                        <strong>{pickerMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</strong>
+                        <div>
+                          <button type="button" aria-label="Mês anterior" onClick={() => setPickerMonth(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() - 1, 1))}>‹</button>
+                          <button type="button" aria-label="Próximo mês" onClick={() => setPickerMonth(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() + 1, 1))}>›</button>
+                        </div>
+                      </div>
+                      <div className="tenna-date-grid">
+                        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => <span key={i} className="tenna-date-weekday">{d}</span>)}
+                        {pickerDays.map((day) => {
+                          const key = dateKey(day);
+                          return (
+                            <button key={key} type="button"
+                              className={[day.getMonth() !== pickerMonth.getMonth() ? 'outside' : '', key === form.data ? 'selected' : '', key === todayKey ? 'today' : ''].join(' ')}
+                              aria-label={day.toLocaleDateString('pt-BR', { dateStyle: 'full' })}
+                              aria-pressed={key === form.data}
+                              onClick={() => { setForm({ ...form, data: key }); setDatePickerOpen(false); }}>
+                              {day.getDate()}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <button type="button" className="tenna-date-today" onClick={() => { setForm({ ...form, data: todayKey }); setDatePickerOpen(false); }}>Selecionar hoje</button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="modal-input-group">
-
-                <label>
-                  Data
-                </label>
-
-                <input
-                  type="date"
-                  value={form.data}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      data:
-                        e.target.value
-                    })
-                  }
-                  disabled={saving}
-                />
-
+              <div className="tenna-activity-field">
+                <label htmlFor="tenna-activity-hour">Horário</label>
+                <div className="tenna-time-control">
+                  <Icon name="clock" size={18} />
+                  <input id="tenna-activity-hour" type="text" inputMode="numeric" maxLength={2} aria-label="Hora"
+                    value={(form.horario || '08:00').split(':')[0]}
+                    onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0,2); setForm({ ...form, horario: `${v}:${(form.horario || '08:00').split(':')[1] || '00'}` }); }}
+                    onBlur={() => { const [h,m] = (form.horario || '08:00').split(':'); setForm((old) => ({ ...old, horario: `${pad(Math.min(23, Number(h) || 0))}:${pad(Math.min(59, Number(m) || 0))}` })); }} />
+                  <span className="tenna-time-separator">:</span>
+                  <input type="text" inputMode="numeric" maxLength={2} aria-label="Minutos"
+                    value={(form.horario || '08:00').split(':')[1] ?? '00'}
+                    onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0,2); setForm({ ...form, horario: `${(form.horario || '08:00').split(':')[0] || '08'}:${v}` }); }}
+                    onBlur={() => { const [h,m] = (form.horario || '08:00').split(':'); setForm((old) => ({ ...old, horario: `${pad(Math.min(23, Number(h) || 0))}:${pad(Math.min(59, Number(m) || 0))}` })); }} />
+                  <span className="tenna-time-hint">24h</span>
+                </div>
               </div>
-
             </div>
 
-            <div className="modal-input-group">
-
-              <label>
-                Horário
-              </label>
-
-              <input
-                type="time"
-                value={form.horario}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    horario:
-                      e.target.value
-                  })
-                }
-                disabled={saving}
-              />
-
-            </div>
-
-            <div className="modal-actions">
-
-              {editing && (
-
-                <button
-                  type="button"
-                  className="modal-delete"
-                  onClick={
-                    deleteActivity
-                  }
-                  disabled={saving}
-                >
-                  Excluir
-                </button>
-
-              )}
-
-              <button
-                type="button"
-                className="mural-btn secondary"
-                onClick={() => {
-                  if (
-                    !saving
-                  ) {
-                    setShowCreate(
-                      false
-                    );
-                    setEditing(
-                      null
-                    );
-                  }
-                }}
-                disabled={saving}
-              >
-                Cancelar
+            <div className="tenna-activity-footer">
+              {editing && <button type="button" className="tenna-activity-delete" onClick={deleteActivity} disabled={saving}>Excluir atividade</button>}
+              <button type="button" className="tenna-activity-cancel" disabled={saving}
+                onClick={() => { setShowCreate(false); setEditing(null); }}>Cancelar</button>
+              <button type="submit" className="tenna-activity-submit" disabled={saving || !form.nome.trim() || !/^([01]\d|2[0-3]):[0-5]\d$/.test(form.horario)}>
+                {saving ? 'Salvando...' : editing ? 'Salvar alterações' : 'Adicionar atividade'}
               </button>
-
-              <button
-                className="mural-btn primary"
-                type="submit"
-                disabled={saving}
-              >
-                {saving
-                  ? 'Salvando...'
-                  : editing
-                    ? 'Salvar alterações'
-                    : 'Adicionar'}
-              </button>
-
             </div>
-
           </form>
-
         </div>
 
       )}

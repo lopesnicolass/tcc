@@ -1,16 +1,51 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
-import { normalizarAparencia, obterPaleta } from '../../utils/aparenciaConteudo.js';
+import { normalizarAparencia, obterPaletaMateria } from '../../utils/aparenciaConteudo.js';
 import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
+import { TextoFormatado } from '../../components/conteudos/TextoFormatado.jsx';
+import { BlocoDidatico } from '../../components/conteudos/BlocosDidaticos.jsx';
 
 import BlocoQuestoes from './conteudos/BlocoQuestoes.jsx';
 import BlocoChecklist from './conteudos/BlocoChecklist.jsx';
 
 import '../../styles/aluno/PaginaConteudo.css';
 import '../../styles/aluno/PaginaConteudoExtra.css';
+import '../../styles/aluno/PaginaConteudoRefinado.css';
 import { API_URL, obterToken } from '../../services/api.js';
+
+function GradeFlashcards({ flashcards }) {
+  const [virados, setVirados] = useState({});
+
+  return (
+    <div className="pagina-flashcards-grade" aria-label="Flashcards para revisar">
+      {flashcards.map((card, indice) => {
+        const chave = String(card.id ?? indice);
+        const virado = Boolean(virados[chave]);
+        return (
+          <button
+            key={chave}
+            type="button"
+            className={`pagina-flashcard-grade-item${virado ? ' is-flipped' : ''}`}
+            onClick={() => setVirados((atual) => ({ ...atual, [chave]: !atual[chave] }))}
+            aria-pressed={virado}
+            aria-label={`${virado ? 'Resposta' : 'Pergunta'}: ${virado ? card.resposta : card.pergunta}. Clique para ${virado ? 'ver a pergunta' : 'ver a resposta'}.`}
+          >
+            <span className="pagina-flashcard-grade-inner">
+              <span className="pagina-flashcard-grade-face pagina-flashcard-grade-front" aria-hidden={virado}>
+                {card.pergunta}
+              </span>
+              <span className="pagina-flashcard-grade-face pagina-flashcard-grade-back" aria-hidden={!virado}>
+                {card.resposta}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function normalizarDados(bloco) {
   let dados = bloco?.dados;
@@ -124,8 +159,6 @@ export default function PaginaConteudo() {
 
   const [blocos, setBlocos] =
     useState([]);
-
-  const [modoFoco, setModoFoco] = useState(false);
 
   const [carregando, setCarregando] =
     useState(true);
@@ -667,7 +700,7 @@ export default function PaginaConteudo() {
     () => normalizarAparencia(pagina?.aparencia),
     [pagina?.aparencia]
   );
-  const paleta = obterPaleta(aparencia);
+  const paleta = obterPaletaMateria(pagina?.materia);
   const progressoPercentual = estudado ? 100 : 0;
   const tituloBloco = (bloco, indice) => {
     const dados = normalizarDados(bloco);
@@ -677,6 +710,8 @@ export default function PaginaConteudo() {
       pdf: 'Material complementar', lista: 'Resumo em tópicos',
       flashcards: 'Revisão ativa', questoes: 'Pratique',
       simulado: 'Simulado', checklist: 'Checklist',
+      formula: 'Fórmula matemática', exemplo: 'Exemplo resolvido', exemplos: 'Certo ou errado', tabela: 'Tabela', pergunta: 'Questão',
+      linha_tempo: 'Linha do tempo', glossario: 'Glossário', expansivel: 'Saiba mais',
     };
     return dados.titulo || `${nomes[bloco.tipo] || 'Atividade'} ${indice + 1}`;
   };
@@ -693,6 +728,9 @@ export default function PaginaConteudo() {
         bloco
       );
 
+    if (['formula', 'exemplo', 'exemplos', 'tabela', 'pergunta', 'linha_tempo', 'glossario', 'expansivel'].includes(bloco.tipo)) {
+      return <BlocoDidatico key={bloco.id} tipo={bloco.tipo} dados={dados} />;
+    }
     switch (
       bloco.tipo
     ) {
@@ -701,6 +739,9 @@ export default function PaginaConteudo() {
           <section
             className="pagina-content-block pagina-text-block"
             data-estilo={['padrao', 'destaque', 'resumo'].includes(dados.estilo) ? dados.estilo : 'padrao'}
+            data-tamanho={['maior', 'menor'].includes(dados.tamanho) ? dados.tamanho : 'padrao'}
+            data-alinhamento={dados.alinhamento === 'centro' ? 'centro' : 'esquerda'}
+            data-espacamento={['compacto', 'amplo'].includes(dados.espacamento) ? dados.espacamento : 'confortavel'}
             key={bloco.id}
           >
             {dados.titulo && (
@@ -710,9 +751,7 @@ export default function PaginaConteudo() {
             )}
 
             {dados.texto && (
-              <div className="pagina-rich-text">
-                {dados.texto}
-              </div>
+              <TextoFormatado className="pagina-rich-text" texto={dados.texto} />
             )}
           </section>
         );
@@ -739,10 +778,7 @@ export default function PaginaConteudo() {
                   'Destaque'}
               </strong>
 
-              <span>
-                {dados.texto ||
-                  'Confira esta informação importante.'}
-              </span>
+              <TextoFormatado className="pagina-highlight-message" texto={dados.texto || 'Confira esta informação importante.'} />
             </div>
           </section>
         );
@@ -756,6 +792,7 @@ export default function PaginaConteudo() {
         return (
           <section
             className="pagina-content-block"
+            data-largura={['compacta', 'total'].includes(dados.largura) ? dados.largura : 'padrao'}
             key={bloco.id}
           >
             {dados.titulo && (
@@ -795,6 +832,7 @@ export default function PaginaConteudo() {
         return (
           <section
             className="pagina-content-block"
+            data-largura={['compacta', 'total'].includes(dados.largura) ? dados.largura : 'padrao'}
             key={bloco.id}
           >
             {dados.titulo && (
@@ -923,7 +961,7 @@ export default function PaginaConteudo() {
                         </span>
 
                         <span>
-                          {item}
+                          <TextoFormatado texto={item} />
                         </span>
                       </li>
                     )
@@ -939,23 +977,12 @@ export default function PaginaConteudo() {
             className="pagina-content-block pagina-resource-block pagina-flashcards-block"
             key={bloco.id}
           >
-            <div className="pagina-resource-block-icon">
-              <Icon
-                name="layers"
-                size={23}
-              />
-            </div>
-
             <div className="pagina-resource-block-copy">
               <h2>
                 {dados.titulo ||
                   'Flashcards para revisar'}
               </h2>
 
-              <p>
-                {dados.descricao ||
-                  'Revise este assunto com flashcards interativos.'}
-              </p>
             </div>
 
             {carregandoFlashcards ? (
@@ -968,82 +995,7 @@ export default function PaginaConteudo() {
                 Nenhum flashcard relacionado foi encontrado.
               </div>
             ) : (
-              <div className="pagina-flashcards-player">
-                <div className="pagina-flashcards-counter">
-                  CARD{' '}
-                  {flashcardAtual +
-                    1}{' '}
-                  DE{' '}
-                  {flashcards.length}
-                </div>
-
-                <div
-                  className={`pagina-flashcard ${
-                    mostrarResposta
-                      ? 'show-answer'
-                      : ''
-                  }`}
-                >
-                  <span className="pagina-flashcard-label">
-                    {mostrarResposta
-                      ? 'RESPOSTA'
-                      : 'PERGUNTA'}
-                  </span>
-
-                  <div className="pagina-flashcard-content">
-                    <strong>
-                      {mostrarResposta
-                        ? cardAtual?.resposta
-                        : cardAtual?.pergunta}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="pagina-flashcard-actions">
-                  <button
-                    type="button"
-                    className="pagina-secondary-button"
-                    onClick={
-                      alternarResposta
-                    }
-                  >
-                    {mostrarResposta
-                      ? 'Esconder resposta'
-                      : 'Mostrar resposta'}
-                  </button>
-
-                  <div className="pagina-flashcard-navigation">
-                    <button
-                      type="button"
-                      className="pagina-secondary-button"
-                      onClick={
-                        anteriorFlashcard
-                      }
-                      disabled={
-                        flashcardAtual ===
-                        0
-                      }
-                    >
-                      ← Anterior
-                    </button>
-
-                    <button
-                      type="button"
-                      className="pagina-secondary-button"
-                      onClick={
-                        proximoFlashcard
-                      }
-                      disabled={
-                        flashcardAtual ===
-                        flashcards.length -
-                          1
-                      }
-                    >
-                      Próximo →
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <GradeFlashcards flashcards={flashcards} />
             )}
           </section>
         );
@@ -1184,22 +1136,6 @@ export default function PaginaConteudo() {
   if (erro) {
     return (
       <div className="pagina-conteudo-page page-shell">
-        <button
-          type="button"
-          className="pagina-back-button"
-          onClick={() =>
-            navigate(
-              '/conteudos'
-            )
-          }
-        >
-          <Icon
-            name="arrowLeft"
-            size={17}
-          />
-
-          Voltar aos conteúdos
-        </button>
 
         <div className="pagina-state-card error">
           <div className="pagina-state-icon">
@@ -1228,22 +1164,6 @@ export default function PaginaConteudo() {
   if (!pagina) {
     return (
       <div className="pagina-conteudo-page page-shell">
-        <button
-          type="button"
-          className="pagina-back-button"
-          onClick={() =>
-            navigate(
-              '/conteudos'
-            )
-          }
-        >
-          <Icon
-            name="arrowLeft"
-            size={17}
-          />
-
-          Voltar aos conteúdos
-        </button>
 
         <div className="pagina-state-card">
           <div className="pagina-state-icon">
@@ -1272,30 +1192,17 @@ export default function PaginaConteudo() {
 
   return (
     <div
-      className={`pagina-conteudo-page page-shell pagina-experiencia pagina-formato-${aparencia.formato}`}
-      data-modo-foco={modoFoco ? 'ativo' : 'inativo'}
+      className={`pagina-conteudo-page page-shell pagina-experiencia pagina-leitura-refinada pagina-formato-${aparencia.formato}`}
+      data-cabecalho={aparencia.cabecalho}
+      data-tamanho-texto={aparencia.tamanhoTexto}
+      data-largura-leitura={aparencia.larguraLeitura}
+      data-mostrar-etapas={aparencia.mostrarEtapas ? 'sim' : 'nao'}
       style={{
         '--pagina-tema': paleta.cor,
         '--pagina-tema-escuro': paleta.escura,
         '--pagina-tema-claro': paleta.clara,
       }}
     >
-      <button
-        type="button"
-        className="pagina-back-button"
-        onClick={() =>
-          navigate(
-            '/conteudos'
-          )
-        }
-      >
-        <Icon
-          name="arrowLeft"
-          size={17}
-        />
-
-        Voltar aos conteúdos
-      </button>
 
       <header
         className="pagina-hero"
@@ -1307,64 +1214,13 @@ export default function PaginaConteudo() {
             materiaStyle.bg,
         }}
       >
-        <div className="pagina-hero-top">
-          <div className="pagina-breadcrumb">
-            <span>
-              Conteúdos
-            </span>
 
-            <span>
-              ›
-            </span>
-
-            <span>
-              {pagina.materia}
-            </span>
-
-            <span>
-              ›
-            </span>
-
-            <span>
-              {mostrarTopico}
-            </span>
-          </div>
-
-          <div
-            className="pagina-materia-badge"
-            style={{
-              background:
-                materiaStyle.bg,
-
-              color:
-                materiaStyle.color,
-            }}
-          >
-            <SubjectIcon
-              materia={
-                pagina.materia
-              }
-              size={17}
-            />
-
-            {pagina.materia}
-          </div>
-        </div>
 
         <div className="pagina-hero-content">
-          <div className="pagina-hero-icon">
-            <SubjectIcon
-              materia={
-                pagina.materia
-              }
-              size={28}
-              color="#fff"
-            />
-          </div>
 
           <div>
             <span className="pagina-kicker">
-              {aparencia.rotulo || 'MATERIAL DE ESTUDO'}
+              {pagina.materia ? `${pagina.materia.toUpperCase()} · MATERIAL DE ESTUDO` : 'MATERIAL DE ESTUDO'}
             </span>
 
             <h1>
@@ -1376,41 +1232,14 @@ export default function PaginaConteudo() {
                 {pagina.descricao}
               </p>
             )}
-            <div className="pagina-hero-chips">
-              <span><Icon name="book" size={15} /> {blocos.length} etapas</span>
-              <span><Icon name="clock" size={15} /> {aparencia.minutos} min de leitura</span>
-              <span><Icon name="check" size={15} /> {estudado ? 'Concluído' : 'No seu ritmo'}</span>
-            </div>
+
           </div>
-          <div className="pagina-hero-art" aria-hidden="true">
-            <span className="pagina-art-halo" />
-            <span className="pagina-art-symbol"><SubjectIcon materia={pagina.materia} size={54} color="#fff" /></span>
-            <span className="pagina-art-star pagina-art-star-a">✦</span>
-            <span className="pagina-art-star pagina-art-star-b">✳</span>
-            <span className="pagina-art-star pagina-art-star-c">✦</span>
-          </div>
+
         </div>
-        <button
-          type="button"
-          className="pagina-foco-toggle"
-          aria-pressed={modoFoco}
-          onClick={() => setModoFoco((atual) => !atual)}
-        >
-          {modoFoco ? 'Sair do modo foco' : 'Ativar modo foco'}
-        </button>
       </header>
 
       <div className="pagina-layout">
         <main className="pagina-main" id="inicio-do-estudo">
-          <div className="pagina-study-intro">
-            <div className="pagina-study-intro-symbol"><Icon name="book" size={22} /></div>
-            <div>
-              <span>PREPARE SEU CADERNO</span>
-              <h2>Sua jornada de estudo</h2>
-              <p>Acompanhe cada etapa e avance no seu próprio ritmo.</p>
-            </div>
-            <span className="pagina-study-count">{blocos.length} etapas</span>
-          </div>
           {blocos.length > 0 ? (
             blocos.map((bloco, indice) => (
               <div className="pagina-etapa" id={`etapa-${bloco.id}`} key={bloco.id}>
@@ -1419,8 +1248,7 @@ export default function PaginaConteudo() {
                 </div>
                 <div className="pagina-etapa-content">
                   <div className="pagina-etapa-eyebrow">
-                    <span>ETAPA {String(indice + 1).padStart(2, '0')}</span>
-                    <span className="pagina-etapa-sparkle" aria-hidden="true">✦</span>
+                    <span>SEÇÃO {String(indice + 1).padStart(2, '0')}</span>
                   </div>
                   {renderBloco(bloco)}
                 </div>
@@ -1451,88 +1279,51 @@ export default function PaginaConteudo() {
             <nav className="pagina-indice-card" aria-label="Etapas desta página">
               <div className="pagina-indice-header">
                 <span className="pagina-indice-symbol"><Icon name="book" size={17} /></span>
-                <div><small>NAVEGUE PELO CONTEÚDO</small><strong>Nesta aula</strong></div>
+                <div><strong>Tópicos da aula</strong></div>
               </div>
               <div className="pagina-indice-items">
                 {blocos.map((bloco, indice) => (
                   <a key={bloco.id} href={`#etapa-${bloco.id}`}>
-                    <span>{String(indice + 1).padStart(2, '0')}</span>
                     <strong>{tituloBloco(bloco, indice)}</strong>
                   </a>
                 ))}
               </div>
             </nav>
           )}
-          <div className="pagina-progress-card">
-            <div className="pagina-progress-heading">
-              <span className="pagina-aside-label">
-                SEU PROGRESSO
-              </span>
+        <button
+          type="button"
+          className={`pagina-study-button ${
+            estudado
+              ? 'completed'
+              : ''
+          }`}
+          onClick={
+            alternarEstudado
+          }
+          disabled={
+            salvandoEstudo
+          }
+        >
+          <Icon
+            name="check"
+            size={17}
+          />
 
-              <span
-                className={`pagina-progress-status ${
-                  estudado ? 'completed' : ''
-                }`}
-              >
-                <span className="pagina-progress-status-dot" />
-                {estudado ? 'Concluído' : 'Em andamento'}
-              </span>
-            </div>
+          {salvandoEstudo
+            ? 'Salvando...'
+            : estudado
+              ? 'Marcar como não estudado'
+              : 'Marcar como estudado'}
+        </button>
 
-            <strong>
-              {estudado
-                ? 'Tópico concluído'
-                : 'Continue seu estudo'}
-            </strong>
-
-            <p>
-              {estudado
-                ? 'Você já marcou este tópico como estudado.'
-                : 'Quando terminar de revisar, marque este tópico como estudado.'}
-            </p>
-
-            <div className="pagina-progress-numeros">
-              <span>Progresso do tópico</span><strong>{progressoPercentual}%</strong>
-            </div>
-            <div className="pagina-progress-track" aria-hidden="true">
-              <span style={{ width: `${progressoPercentual}%` }} />
-            </div>
-
-            <button
-              type="button"
-              className={`pagina-study-button ${
-                estudado
-                  ? 'completed'
-                  : ''
-              }`}
-              onClick={
-                alternarEstudado
-              }
-              disabled={
-                salvandoEstudo
-              }
-            >
-              <Icon
-                name="check"
-                size={17}
-              />
-
-              {salvandoEstudo
-                ? 'Salvando...'
-                : estudado
-                  ? 'Marcar como não estudado'
-                  : 'Marcar como estudado'}
-            </button>
-          </div>
-
-          {aparencia.mensagem && (
+          {aparencia.mostrarMensagem && aparencia.mensagem && (
             <div className="pagina-mensagem-card">
               <span aria-hidden="true">✦</span>
               <strong>Um incentivo pra você</strong>
               <p>{aparencia.mensagem}</p>
             </div>
           )}
-          <div className="pagina-aside-card">
+          {aparencia.mostrarDetalhes && <div className="pagina-aside-card">
             <span className="pagina-aside-label">
               SOBRE ESTE TÓPICO
             </span>
@@ -1566,7 +1357,7 @@ export default function PaginaConteudo() {
                 {blocos.length}
               </strong>
             </div>
-          </div>
+          </div>}
         </aside>
       </div>
     </div>

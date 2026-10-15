@@ -1,0 +1,73 @@
+/* Blocos de estudo: tipografia legível, superfícies sólidas, sem efeitos exagerados. */
+.tenna-didatico { color: #1f2937; }
+.tenna-didatico h2 { color: #111827 !important; font-size: clamp(19px, 1.4vw, 23px); line-height: 1.4; margin-bottom: 18px; }
+.tenna-didatico p, .tenna-didatico li, .tenna-didatico dd { color: #242b38; font-size: 16px; line-height: 1.75; }
+.tenna-didatico button { font-family: inherit; cursor: pointer; }
+.tenna-didatico .tenna-texto-formatado p { margin: 0 0 12px; }
+.tenna-didatico-legenda { text-align: center; color: #63748b !important; font-size: 13px !important; }
+.tenna-formula-visor { max-width: 100%; margin: 12px 0; border: 1px solid #dfebf8; background: #f8fbff; border-radius: 12px; padding: 22px 16px; }
+.tenna-math { max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-align: middle; }
+.tenna-math-block { display: block; margin: 15px auto; text-align: center; font-size: clamp(22px, 2vw, 32px); }
+.tenna-math-inline { display: inline-flex; font-size: 1.08em; margin: 0 3px; }
+.tenna-math math { max-width: 100%; }
+.tenna-math-preview { border: 1px solid #d3e3f4; padding: 24px 12px; border-radius: 12px; background: #f8fbff; min-height: 80px; }
+.tenna-math-editor { display: grid; gap: 11px; min-width: 0; }
+.tenna-math-editor textarea { width: 100%; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; border: 1px solid #ccdcf0; padding: 12px; border-radius: 10px; color: #1f2937; background: white; box-sizing: border-box; }
+.tenna-math-toolbar { display: flex; flex-wrap: wrap; gap: 7px; }
+.tenna-math-toolbar button { border: 1px solid #c7dbee; background: white; color: #1552a4; border-radius: 9px; padding: 7px 11px; font-size: 13px; font-weight: 600; }
+.tenna-math-toolbar button:hover { background: #eaf3ff; border-color: #4698e7; }
+.tenna-passos { display: grid; gap: 16px; margin: 18px 0; }
+.tenna-passo { display: grid; grid-template-columns: 32px minmax(0,1fr); align-items: start; gap: 14px; }
+.tenna-passo-numero { border-radius: 10px; background: #eaf3fc; color: #1552a4; width: 32px; height: 32px; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+.tenna-passo > div { border-bottom: 1px solid #e9eef5; padding: 2px 0 15px; min-width: 0; }
+.tenna-didatico-enunciado { border-left: 3px solid #4ca3e7; padding: 12px 17px; background: #f8fbff; border-radius: 0 10px 10px 0; }
+.tenna-resultado { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 18px; border-radius: 10px; border: 1px solid #c8e9d6; background: #f1fbf5; color: #1d5c3c; }
+.tenna-resultado .tenna-texto-formatado p { margin: 0; color: #1d5c3c; }
+.tenna-tabela-scroll { overflow-x: auto; max-width: 100%; border: 1px solid #dee8f2; border-radius: 11px; }
+.tenna-tabela { width: 100%; border-collapse: collapse; min-width: 320px; font-size: 15px; }
+.tenna-tabela th { background: #eef5ff; color: #174b8f; font-weight: 700; text-align: left; padding: 13px 15px; }
+.tenna-tabela td { border-top: 1px solid #e5edf5; color: #242b38; padding: 12px 15px; }
+.tenna-tabela tr:nth-child(even) td { background: #fbfcfe; }
+.tenna-pergunta-enunciado { font-weight: 600; }
+.tenna-alternativas { display: grid; gap: 10px; margin: 18px 0; }
+.tenna-alternativa { display: flex; align-items: center; gap: 12px; width: 100%; border: 1px solid #d7e3f1; background: white; border-radius: 10px; text-align: left; color: #1f2937; padding: 12px 15px; font-size: 15px; }
+.tenna-alternativa span { flex: none; border-radius: 8px; background: #eaf3fc; color: #1754a0; width: 29px; height: 29px; display: grid; place-items: center; font-weight: 700; }
+.tenna-alternativa:hover, .tenna-alternativa.selecionada { border-color: #2b86dd; background: #f3f9ff; }
+.tenna-alternativa.correta { border-color: #58b981; background: #f1fbf5; }
+.tenna-feedback { border: 1px solid #f0d6a1; border-radius: 11px; background: #fffcf4; padding: 14px; font-size: 14px; }
+.tenna-feedback.acerto { border-color: #bce6cf; background: #f4fcf7; }
+.tenna-feedback strong { display: block; margin-bottom: 8px; }
+.tenna-feedback button { border: 0; background: transparent; font-weight: 700; color: #1454a9; padding: 3px 0; }
+.tenna-linha-tempo { list-style: none; margin: 18px 0 0; padding: 0 0 0 18px; border-left: 2px solid #c6def5; }
+.tenna-linha-tempo li { position: relative; padding: 0 0 24px 22px; }
+.tenna-linha-tempo li::before { content: ''; width: 11px; height: 11px; background: #2478cc; border: 3px solid white; box-shadow: 0 0 0 1px #bad9f3; border-radius: 50%; position: absolute; left: -26px; top: 9px; }
+.tenna-data { display: inline-block; font-size: 13px; font-weight: 700; color: #225a98; margin-bottom: 5px; }
+.tenna-linha-tempo strong { display: block; font-size: 17px; }
+.tenna-glossario { display: grid; gap: 0; margin: 0; }
+.tenna-glossario > div { border-bottom: 1px solid #e6edf4; padding: 11px 0; }
+.tenna-glossario dt { font-size: 16px; font-weight: 700; color: #183f78; }
+.tenna-glossario dd { margin: 3px 0 0; }
+.tenna-expansivel { border: 1px solid #dbe8f6; border-radius: 11px; overflow: hidden; }
+.tenna-expansivel-botao { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 15px 18px; color: #1551a0; background: #f5f9fe; border: 0; font-size: 16px; text-align: left; }
+.tenna-expansivel-botao span { font-size: 24px; line-height: 1; }
+.tenna-expansivel-corpo { padding: 19px; }
+@media (max-width: 640px) {
+  .tenna-didatico h2 { font-size: 19px; }
+  .tenna-didatico p, .tenna-didatico li, .tenna-didatico dd { font-size: 15px; }
+  .tenna-math-block { font-size: 23px; }
+}
+.tenna-math-compositor { background: #f8fbff; border: 1px solid #d9e7f5; border-radius: 10px; padding: 14px; }
+.tenna-math-compositor > label { display: grid; gap: 7px; }
+.tenna-math-compositor select, .tenna-math-compositor input { border: 1px solid #c9dbee; border-radius: 8px; background: white; padding: 10px; color: #27364b; box-sizing: border-box; width: 100%; }
+.tenna-math-compositor-campos { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-top: 10px; }
+.tenna-math-compositor-campos label { font-size: 12px; color: #315b8b; font-weight: 650; display: grid; gap: 5px; }
+@media(max-width: 560px) { .tenna-math-compositor-campos { grid-template-columns: 1fr; } }
+
+.tenna-exemplos-comparacao { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.tenna-exemplos-comparacao > div { border: 1px solid #d8e8e0; background: #f9fdfa; padding: 16px; border-radius: 11px; min-width: 0; }
+.tenna-exemplos-comparacao .tenna-exemplo-errado { background: #fffafa; border-color: #f0d7d7; }
+.tenna-exemplo-certo > strong { color: #216448; }
+.tenna-exemplo-errado > strong { color: #a84545; }
+.tenna-exemplos-explicacao { margin-top: 14px; border-top: 1px solid #e2eaf2; padding-top: 14px; }
+.tenna-exemplos-explicacao > strong { display: block; margin-bottom: 9px; color: #194f91; }
+@media(max-width: 650px) { .tenna-exemplos-comparacao { grid-template-columns: 1fr; } }

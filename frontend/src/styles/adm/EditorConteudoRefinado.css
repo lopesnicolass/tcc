@@ -1,0 +1,112 @@
+/* Tenna CMS · Recursos de edição e prévia de leitura */
+.editor-reading-settings {
+  padding: 19px;
+  margin: 4px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+}
+.editor-reading-settings .editor-panel-title { margin-bottom: 15px; }
+.editor-reading-settings .editor-panel-title h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 800;
+}
+.editor-reading-settings .editor-panel-title p { margin: 5px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.editor-reading-settings .editor-visual-fields { gap: 12px; margin-bottom: 15px; }
+.editor-reading-toggles {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+.editor-reading-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+.editor-reading-toggle input { margin: 2px 0 0; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); }
+.editor-reading-toggle span { display: flex; flex-direction: column; gap: 4px; }
+.editor-reading-toggle strong { font-size: 12px; line-height: 1.4; }
+.editor-reading-toggle small { font-size: 11px; line-height: 1.45; color: var(--muted); }
+.editor-visual-minihero {
+  padding: 18px 21px;
+  border-radius: 14px;
+  box-shadow: none;
+  background: linear-gradient(115deg,var(--visual-escura),var(--visual-cor));
+}
+.editor-visual-minihero b { display: none; }
+.editor-visual-minihero strong { max-width: 100%; font-size: 21px; }
+.editor-preview-cabecalho-amplo .editor-visual-minihero { padding: 28px 24px; }
+.editor-preview-cabecalho-amplo .editor-visual-minihero strong { font-size: 25px; }
+.editor-visual-minibody { padding: 14px 8px 4px; }
+.editor-visual-minibody > span { width: 28px; height: 28px; flex-basis: 28px; border-radius: 8px; }
+.editor-live-preview {
+  margin-top: 20px;
+  padding: 15px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+}
+.editor-live-preview-body {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.editor-live-preview-body h3 { margin: 0 0 8px; font-size: 16px; }
+.editor-live-preview-body p { white-space: pre-wrap; margin: 0; }
+.editor-block-actions .editor-icon-button { position: relative; }
+.editor-block-actions .editor-icon-button:focus-visible,
+.editor-reading-toggle:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 700px) {
+  .editor-reading-settings { padding: 14px; }
+  .editor-reading-toggles { grid-template-columns: 1fr; }
+}
+
+/* Barra simples de formatação, reutilizável em texto e destaque. */
+.editor-formatted-field { display: grid; gap: 9px; margin-top: 10px; min-width: 0; }
+.editor-formatted-field .editor-field-label { display: block; }
+.editor-format-toolbar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.editor-format-toolbar button {
+  height: 33px; min-width: 37px; padding: 0 11px; border: 1px solid var(--line, #d1dff0);
+  border-radius: 8px; background: var(--card, white); color: var(--ink, #174682);
+  cursor: pointer; font-size: 13px; font-weight: 700;
+}
+.editor-format-toolbar button:hover { background: var(--paper, #eaf4ff); border-color: var(--accent, #288feb); }
+.editor-format-toolbar button:focus-visible { outline: 2px solid var(--accent, #288feb); outline-offset: 2px; }
+.editor-marker-demo { background: #fff0a9; padding: 2px 3px; border-radius: 3px; }
+.editor-formatted-field textarea { width: 100%; min-height: 140px; resize: vertical; font: inherit; line-height: 1.65; }
+.editor-formatted-field .editor-field-help { color: var(--muted, #6682a8); font-size: 11px; }
+.editor-formatted-preview { border: 1px solid var(--line, #d1dff0); border-radius: 11px; padding: 12px 14px; background: var(--card, white); }
+.editor-formatted-preview > .editor-field-label { font-size: 10px; margin-bottom: 8px; letter-spacing: .06em; }
+.editor-formatted-preview .tenna-texto-formatado { color: var(--ink, #163e7d); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+.editor-formatted-preview .tenna-texto-formatado p { margin: 0 0 12px; }
+.editor-formatted-preview .tenna-texto-formatado p:last-child { margin-bottom: 0; }
+.editor-formatted-preview .tenna-texto-formatado ul { padding-left: 24px; margin: 0 0 12px; list-style: disc; }
+.editor-formatted-preview .tenna-texto-formatado mark,
+.editor-live-preview .tenna-texto-formatado mark { background: #fff0a9; padding: 0 2px; border-radius: 3px; color: inherit; }
+.editor-live-preview .tenna-texto-formatado p { white-space: normal; margin: 0 0 10px; }
+.editor-live-preview .tenna-texto-formatado p:last-child { margin: 0; }
+.editor-live-preview .tenna-texto-formatado ul { margin: 7px 0; padding-left: 23px; list-style: disc; }
+.editor-block-highlight .tenna-texto-formatado p { margin: 0; }
+
+/* Paleta automática da matéria no construtor de aulas. */
+.editor-subject-palette-notice {
+  display: flex; align-items: center; gap: 12px; padding: 13px 15px;
+  border: 1px solid var(--line, #d5e4f2); border-radius: 12px;
+  background: var(--card, #fff); margin-bottom: 18px;
+}
+.editor-subject-palette-notice .editor-tema-bolinha { display: inline-block; flex: 0 0 22px; width: 22px; height: 22px; border-radius: 100%; }
+.editor-subject-palette-notice strong { display: block; color: var(--ink, #12458d); font-size: 13px; }
+.editor-subject-palette-notice small { display: block; margin-top: 4px; color: var(--muted, #738ca9); font-size: 12px; }

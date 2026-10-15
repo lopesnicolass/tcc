@@ -1,5 +1,6 @@
 const conteudoModel =
     require("../models/conteudoModel");
+const { MATERIAS_FIXAS } = require("../utils/materiasFixas");
 
 // =====================================================
 // GERAR SLUG
@@ -125,209 +126,43 @@ function buscarMateria(req, res) {
 // =====================================================
 
 function criarMateria(req, res) {
-    const {
-        nome,
-        slug,
-        icone,
-        cor,
-        descricao,
-        ativa,
-        ordem
-    } = req.body || {};
-
-    if (
-        !nome ||
-        !String(nome).trim()
-    ) {
-        return res.status(400).json({
-            erro:
-                "O nome da matéria é obrigatório."
-        });
-    }
-
-    const nomeFinal =
-        String(nome).trim();
-
-    const slugFinal =
-        slug &&
-        String(slug).trim()
-            ? gerarSlug(slug)
-            : gerarSlug(nomeFinal);
-
-    if (!slugFinal) {
-        return res.status(400).json({
-            erro:
-                "Não foi possível gerar um slug válido para a matéria."
-        });
-    }
-
-    conteudoModel.criarMateria(
-        {
-            nome:
-                nomeFinal,
-            slug:
-                slugFinal,
-            icone,
-            cor,
-            descricao,
-            ativa:
-                ativa === undefined
-                    ? 1
-                    : ativa,
-            ordem
-        },
-        (erro, materia) => {
-            if (erro) {
-                return erroBanco(
-                    res,
-                    erro,
-                    "Erro ao criar matéria."
-                );
-            }
-
-            return res.status(201).json({
-                mensagem:
-                    "Matéria criada com sucesso.",
-                materia
-            });
-        }
-    );
+    return res.status(403).json({
+        erro: "As cinco matérias do Tenna já vêm cadastradas. Adicione tópicos a elas."
+    });
 }
 
 // =====================================================
 // ATUALIZAR MATÉRIA
 // =====================================================
 
-function atualizarMateria(
-    req,
-    res
-) {
-    const id =
-        Number(
-            req.params.id
-        );
-
-    if (
-        !Number.isInteger(id) ||
-        id <= 0
-    ) {
-        return res.status(400).json({
-            erro:
-                "ID da matéria inválido."
+function atualizarMateria(req, res) {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ erro: "ID da matéria inválido." });
+    }
+    conteudoModel.buscarMateriaPorId(id, (erro, atual) => {
+        if (erro) return erroBanco(res, erro, "Erro ao buscar matéria.");
+        if (!atual) return res.status(404).json({ erro: "Matéria não encontrada." });
+        if (!MATERIAS_FIXAS.some((item) => item.slug === atual.slug || item.nome === atual.nome)) {
+            return res.status(403).json({ erro: "Esta matéria não pertence ao currículo fixo do Tenna." });
+        }
+        // O administrador só pode alterar a descrição, nunca a identidade da matéria.
+        const descricao = String(req.body?.descricao ?? atual.descricao ?? '').trim().slice(0, 500);
+        conteudoModel.atualizarMateria(id, { descricao }, (erroUpdate, materia) => {
+            if (erroUpdate) return erroBanco(res, erroUpdate, "Erro ao atualizar descrição da matéria.");
+            return res.json({ mensagem: "Descrição atualizada.", materia });
         });
-    }
-
-    const dados = {
-        ...(req.body || {})
-    };
-
-    if (
-        dados.nome !== undefined
-    ) {
-        dados.nome =
-            String(
-                dados.nome
-            ).trim();
-
-        if (!dados.nome) {
-            return res.status(400).json({
-                erro:
-                    "O nome da matéria é obrigatório."
-            });
-        }
-    }
-
-    if (
-        dados.slug !== undefined
-    ) {
-        dados.slug =
-            gerarSlug(
-                dados.slug
-            );
-    } else if (
-        dados.nome !== undefined
-    ) {
-        dados.slug =
-            gerarSlug(
-                dados.nome
-            );
-    }
-
-    conteudoModel.atualizarMateria(
-        id,
-        dados,
-        (erro, materia) => {
-            if (erro) {
-                return erroBanco(
-                    res,
-                    erro,
-                    "Erro ao atualizar matéria."
-                );
-            }
-
-            if (!materia) {
-                return res.status(404).json({
-                    erro:
-                        "Matéria não encontrada."
-                });
-            }
-
-            return res.json({
-                mensagem:
-                    "Matéria atualizada com sucesso.",
-                materia
-            });
-        }
-    );
+    });
 }
 
 // =====================================================
 // EXCLUIR MATÉRIA
 // =====================================================
 
-function excluirMateria(
-    req,
-    res
-) {
-    const id =
-        Number(
-            req.params.id
-        );
-
-    if (
-        !Number.isInteger(id) ||
-        id <= 0
-    ) {
-        return res.status(400).json({
-            erro:
-                "ID da matéria inválido."
-        });
-    }
-
-    conteudoModel.excluirMateria(
-        id,
-        (erro, excluida) => {
-            if (erro) {
-                return erroBanco(
-                    res,
-                    erro,
-                    "Erro ao excluir matéria."
-                );
-            }
-
-            if (!excluida) {
-                return res.status(404).json({
-                    erro:
-                        "Matéria não encontrada."
-                });
-            }
-
-            return res.json({
-                mensagem:
-                    "Matéria excluída com sucesso."
-            });
-        }
-    );
+function excluirMateria(req, res) {
+    return res.status(403).json({
+        erro: "As matérias são fixas e não podem ser excluídas. Gerencie os tópicos dentro delas."
+    });
 }
 
 // =====================================================

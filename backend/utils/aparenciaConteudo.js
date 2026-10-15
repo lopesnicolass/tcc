@@ -4,10 +4,12 @@ const FORMATOS = ["trilha", "cartoes"];
 const PADRAO = Object.freeze({
     tema: "azul",
     formato: "trilha",
-    rotulo: "TRILHA DE APRENDIZAGEM",
+    rotulo: "MATERIAL DE ESTUDO",
     mensagem: "Um passo de cada vez. Você consegue!",
     minutos: 8,
-    mostrarIndice: true
+    mostrarIndice: true,
+    cabecalho: "compacto", tamanhoTexto: "normal", larguraLeitura: "confortavel",
+    mostrarEtapas: false, mostrarMensagem: false, mostrarDetalhes: false
 });
 
 function normalizarAparencia(entrada) {
@@ -34,12 +36,34 @@ function normalizarAparencia(entrada) {
     if (entrada.mostrarIndice !== undefined && typeof entrada.mostrarIndice !== "boolean") {
         throw new TypeError("A opção de índice deve ser verdadeira ou falsa.");
     }
+    // As novas escolhas também são validadas antes da gravação.
+    const selecoes = {
+        cabecalho: ["compacto", "amplo"],
+        tamanhoTexto: ["normal", "grande"],
+        larguraLeitura: ["confortavel", "ampla"]
+    };
+    for (const [chave, valores] of Object.entries(selecoes)) {
+        if (entrada[chave] !== undefined && !valores.includes(entrada[chave])) {
+            throw new TypeError(`Configuração visual inválida: ${chave}.`);
+        }
+    }
+    for (const chave of ["mostrarEtapas", "mostrarMensagem", "mostrarDetalhes"]) {
+        if (entrada[chave] !== undefined && typeof entrada[chave] !== "boolean") {
+            throw new TypeError(`Configuração visual inválida: ${chave}.`);
+        }
+    }
     return {
         tema, formato,
         rotulo,
         mensagem,
         minutos: entrada.minutos === undefined ? PADRAO.minutos : Number(entrada.minutos),
-        mostrarIndice: entrada.mostrarIndice ?? PADRAO.mostrarIndice
+        mostrarIndice: entrada.mostrarIndice ?? PADRAO.mostrarIndice,
+        cabecalho: entrada.cabecalho ?? PADRAO.cabecalho,
+        tamanhoTexto: entrada.tamanhoTexto ?? PADRAO.tamanhoTexto,
+        larguraLeitura: entrada.larguraLeitura ?? PADRAO.larguraLeitura,
+        mostrarEtapas: entrada.mostrarEtapas ?? PADRAO.mostrarEtapas,
+        mostrarMensagem: entrada.mostrarMensagem ?? PADRAO.mostrarMensagem,
+        mostrarDetalhes: entrada.mostrarDetalhes ?? PADRAO.mostrarDetalhes
     };
 }
 module.exports = { normalizarAparencia, PADRAO };

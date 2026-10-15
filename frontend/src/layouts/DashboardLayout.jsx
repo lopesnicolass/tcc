@@ -26,8 +26,6 @@ export default function DashboardLayout() {
     };
   }, [mobileMenuOpen]);
 
-  const ocultarSidebar = /^\/conteudos\/\d+\/?$/.test(location.pathname);
-
   const voltarParaAdministracao = () => {
     sessionStorage.removeItem('etecamp_admin_preview');
     setIsAdminPreview(false);
@@ -36,17 +34,13 @@ export default function DashboardLayout() {
 
   return (
     <div
-      className={`dashboard student-area ${
-        ocultarSidebar ? 'dashboard-sem-sidebar' : ''
-      }`}
+      className="dashboard student-area"
     >
-      {!ocultarSidebar && (
-        <>
+      <>
           <MobileNavigationBar label="Estudante" menuId="tenna-student-nav" expanded={mobileMenuOpen} onOpen={() => setMobileMenuOpen(true)} />
           {mobileMenuOpen && <button type="button" className="tenna-mobile-scrim" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />}
           <Sidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
         </>
-      )}
 
       {isAdminPreview && (
         <div className="admin-preview-banner" role="status">

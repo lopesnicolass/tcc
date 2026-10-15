@@ -1,0 +1,64 @@
+/* Modelos e recursos de autoria: alinhados aos cartões existentes do painel. */
+.tenna-modelos-painel .editor-panel-title p { margin: 7px 0 0; font-size: 13px; color: #6c86a7; }
+.tenna-modelos-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tenna-modelo { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; border: 1px solid #d8e6f6; border-radius: 12px; background: #fbfdff; min-width: 0; }
+.tenna-modelo strong { color: #144887; font-size: 15px; }
+.tenna-modelo p { color: #526c8a; font-size: 12px; line-height: 1.5; margin: 0; }
+.tenna-modelo small { font-size: 11px; color: #6e87a7; line-height: 1.55; flex: 1; }
+.tenna-modelo button { margin-top: 8px; font-size: 12px; }
+.tenna-modelos-hint { color: #6683a4; font-size: 12px; margin: 12px 0 0; }
+.tenna-editor-tipos-grupo { display: grid; gap: 8px; margin-bottom: 18px; }
+.tenna-editor-tipos-grupo h3 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 1px; color: #52759c; }
+.editor-block[draggable=true] { cursor: grab; }
+.editor-block[draggable=true]:active { cursor: grabbing; }
+.tenna-didatico-form { display: grid; gap: 17px; }
+.tenna-didatico-form .editor-field { margin: 0; }
+.tenna-didatico-preview { margin-top: 4px; }
+.tenna-didatico-preview > .pagina-content-block { padding: 18px; margin: 10px 0; border: 1px solid #e1eaf4; border-radius: 12px; }
+.tenna-itens-editor { display: grid; gap: 12px; }
+.tenna-itens-cabecalho, .tenna-item-editor-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tenna-itens-cabecalho strong, .tenna-item-editor-top strong { color: #184b88; font-size: 13px; }
+.tenna-item-editor { border: 1px solid #dce8f4; border-radius: 11px; padding: 13px; display: grid; gap: 12px; background: #fdfefe; }
+.tenna-item-acoes { display: flex; gap: 5px; }
+.tenna-item-acoes button { border-radius: 7px; padding: 6px 8px; border: 1px solid #d3e3f3; background: white; font-size: 12px; color: #21558e; cursor: pointer; }
+.tenna-item-acoes button:disabled { opacity: .35; }
+.tenna-table-editor-head, .tenna-table-editor-cells { display: flex; gap: 7px; min-width: 0; }
+.tenna-table-editor-head > div { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.tenna-table-editor-row { display: grid; gap: 6px; }
+.tenna-table-editor-head input, .tenna-table-editor-cells input { box-sizing: border-box; min-width: 0; width: 100%; padding: 9px 10px; border: 1px solid #ccdfed; border-radius: 8px; }
+.tenna-table-editor-cells input { flex: 1; }
+.tenna-table-editor-head button, .tenna-table-editor-row > button { width: fit-content; background: transparent; color: #315f93; border: 0; padding: 3px; cursor: pointer; font-size: 11px; }
+.tenna-choice-editor { display: flex; gap: 7px; align-items: center; }
+.tenna-choice-editor > span { white-space: nowrap; }
+.tenna-choice-editor input[type=radio] { width: auto; vertical-align: middle; }
+.tenna-choice-editor > input { min-width: 0; flex: 1; }
+.tenna-choice-editor > button { flex: none; }
+@media(max-width: 800px) { .tenna-modelos-grid { grid-template-columns: 1fr; } .tenna-choice-editor { flex-wrap: wrap; } }
+.tenna-estrutura-acoes { display: flex; align-items: center; gap: 10px; }
+.tenna-estrutura-acoes button { font-size: 12px; }
+.tenna-previa-completa > h2 { margin: 10px 0; font-size: 22px; color: #174b90; }
+.tenna-previa-completa > p { color: #5d7797; font-size: 13px; margin: 0 0 16px; }
+.tenna-previa-lista { display: grid; gap: 12px; }
+.tenna-previa-item { border: 1px solid #dce7f2; background: white; border-radius: 12px; padding: 20px; min-width: 0; }
+.tenna-previa-item h3 { font-size: 18px; color: #202d43; margin: 0 0 12px; }
+@media(max-width: 700px) { .tenna-estrutura-acoes { flex-wrap: wrap; } }
+
+/* Construtor simplificado: foco no conteúdo, ajustes e extras recolhidos. */
+.tenna-ajustes-opcionais { padding: 0 !important; overflow: hidden; }
+.tenna-ajustes-opcionais > summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 19px 22px; cursor: pointer; list-style: none; color: #164d9c; }
+.tenna-ajustes-opcionais > summary::-webkit-details-marker, .tenna-blocos-extras > summary::-webkit-details-marker { display: none; }
+.tenna-ajustes-opcionais > summary strong { display: block; font-size: 15px; }
+.tenna-ajustes-opcionais > summary small { display: block; font-size: 12px; color: #7892b3; margin-top: 4px; font-weight: 400; }
+.tenna-ajustes-opcionais[open] > summary { border-bottom: 1px solid #e5edf6; }
+.tenna-ajustes-opcionais > .editor-visual-fields, .tenna-ajustes-opcionais > .tenna-ajustes-checks { margin: 15px 22px 22px; }
+.tenna-ajustes-cor { display: flex; align-items: center; gap: 10px; margin: 17px 22px 0; font-size: 12px; color: #59769a; }
+.tenna-ajustes-checks { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.tenna-ajustes-checks label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #2e537f; }
+.tenna-blocos-simples { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 16px 0; }
+.tenna-bloco-opcao { min-height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; border: 1px solid #e0e9f5; background: #fff; border-radius: 10px; color: #2b5c99; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+.tenna-bloco-opcao:hover { border-color: #7cb7f8; background: #f4f9ff; }
+.tenna-bloco-opcao.selected { border-color: #3099fa; background: #eaf5ff; color: #1256ac; }
+.tenna-blocos-extras { margin: 6px 0 16px; border-top: 1px solid #e6eef7; }
+.tenna-blocos-extras > summary { cursor: pointer; display: flex; justify-content: space-between; padding: 14px 2px 4px; font-size: 12px; font-weight: 700; color: #577da8; list-style: none; }
+.tenna-blocos-extras[open] > summary { color: #1655a4; }
+@media(max-width: 520px) { .tenna-ajustes-checks { grid-template-columns: 1fr; } }

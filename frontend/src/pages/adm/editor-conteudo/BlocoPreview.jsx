@@ -1,5 +1,7 @@
 import { Icon } from './icons.jsx';
 import { youtubeEmbed } from './blocoHelpers.js';
+import { TextoFormatado } from '../../../components/conteudos/TextoFormatado.jsx';
+import { BlocoDidatico } from '../../../components/conteudos/BlocosDidaticos.jsx';
 
 // Pré-visualização de um bloco já salvo, mostrada na lista de
 // blocos da página. É uma função pura: só depende do `bloco`
@@ -10,6 +12,9 @@ export function previewBloco(bloco) {
   const dados =
     bloco.dados || {};
 
+  if (['formula', 'exemplo', 'exemplos', 'tabela', 'pergunta', 'linha_tempo', 'glossario', 'expansivel'].includes(bloco.tipo)) {
+    return <BlocoDidatico tipo={bloco.tipo} dados={dados} />;
+  }
   switch (bloco.tipo) {
     case 'texto':
       return (
@@ -21,10 +26,7 @@ export function previewBloco(bloco) {
             <h3>{dados.titulo}</h3>
           )}
 
-          <p>
-            {dados.texto ||
-              'Este bloco ainda está vazio.'}
-          </p>
+          <TextoFormatado texto={dados.texto || 'Este bloco ainda está vazio.'} />
         </>
       );
 
@@ -41,10 +43,7 @@ export function previewBloco(bloco) {
               'Destaque'}
           </strong>
 
-          <span>
-            {dados.texto ||
-              'Adicione uma mensagem.'}
-          </span>
+          <TextoFormatado texto={dados.texto || 'Adicione uma mensagem.'} />
         </div>
       );
 
@@ -165,7 +164,7 @@ export function previewBloco(bloco) {
               .map(
                 (item, index) => (
                   <li key={index}>
-                    {item}
+                    <TextoFormatado texto={item} />
                   </li>
                 )
               )}

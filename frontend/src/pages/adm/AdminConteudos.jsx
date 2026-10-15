@@ -88,10 +88,10 @@ export default function AdminConteudos() {
     carregarMaterias();
   }, []);
 
-  function abrirConstrutor(topico) {
+  function abrirConstrutor(topico, materia) {
     setErro('');
     setSucesso('');
-    setTopicoSelecionado(topico);
+    setTopicoSelecionado({ ...topico, materiaNome: materia?.nome || '' });
   }
 
   function voltarDaConstrucao() {
@@ -198,83 +198,19 @@ export default function AdminConteudos() {
   }
 
   async function salvarMateria() {
-    if (
-      !formMateria.nome.trim()
-    ) {
-      setErro(
-        'Informe o nome da matéria.'
-      );
-      return;
-    }
-
+    if (!modalMateria?.id) return;
     try {
       setSalvando(true);
       setErro('');
-
-      const payload = {
-        ...formMateria,
-
-        nome:
-          formMateria.nome.trim(),
-
-        slug:
-          formMateria.slug
-            ? gerarSlug(
-                formMateria.slug
-              )
-            : gerarSlug(
-                formMateria.nome
-              ),
-
-        ordem:
-          Number(
-            formMateria.ordem
-          ) || 0,
-      };
-
-      if (
-        modalMateria.modo ===
-        'criar'
-      ) {
-        await request(
-          '/conteudos/materias',
-          {
-            method: 'POST',
-            body: JSON.stringify(
-              payload
-            ),
-          }
-        );
-
-        mostrarSucesso(
-          'Matéria criada com sucesso.'
-        );
-      } else {
-        await request(
-          `/conteudos/materias/${modalMateria.id}`,
-          {
-            method: 'PUT',
-            body: JSON.stringify(
-              payload
-            ),
-          }
-        );
-
-        mostrarSucesso(
-          'Matéria atualizada com sucesso.'
-        );
-      }
-
+      await request(`/conteudos/materias/${modalMateria.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ descricao: formMateria.descricao.trim() }),
+      });
       setModalMateria(null);
-
+      mostrarSucesso('Descrição da matéria atualizada.');
       await carregarMaterias();
     } catch (error) {
-      console.error(error);
-
-      setErro(
-        error.message ||
-          'Não foi possível salvar a matéria.'
-      );
+      setErro(error.message || 'Não foi possível salvar a descrição.');
     } finally {
       setSalvando(false);
     }
@@ -603,6 +539,7 @@ export default function AdminConteudos() {
       <EditorConteudo
         topicoId={topicoSelecionado.id}
         topicoNome={topicoSelecionado.nome}
+        materiaNome={topicoSelecionado.materiaNome}
         aoVoltar={voltarDaConstrucao}
       />
     );
@@ -624,8 +561,7 @@ export default function AdminConteudos() {
           </h1>
 
           <p>
-            Gerencie as matérias e os tópicos
-            disponíveis para os alunos.
+            As cinco matérias já vêm cadastradas. Personalize suas descrições e crie tópicos e aulas para os alunos.
           </p>
         </div>
 
@@ -648,20 +584,7 @@ export default function AdminConteudos() {
             Atualizar
           </button>
 
-          <button
-            type="button"
-            className="mural-btn"
-            onClick={
-              abrirNovaMateria
-            }
-          >
-            <Icon
-              name="plus"
-              size={17}
-            />
 
-            Nova matéria
-          </button>
         </div>
       </header>
 

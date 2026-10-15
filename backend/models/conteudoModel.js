@@ -18,6 +18,8 @@ function listarMaterias(callback) {
             created_at,
             updated_at
         FROM materias
+        WHERE slug IN ('portugues', 'lingua-portuguesa', 'matematica', 'historia', 'geografia', 'ciencias', 'ciencias-da-natureza')
+           OR nome IN ('Português', 'Matemática', 'História', 'Geografia', 'Ciências')
         ORDER BY
             ordem ASC,
             nome ASC

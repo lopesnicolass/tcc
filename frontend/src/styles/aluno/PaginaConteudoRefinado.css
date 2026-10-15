@@ -1,0 +1,937 @@
+/* TENNA · Leitura que prioriza o conteúdo. Carregado após os estilos originais. */
+.pagina-experiencia.pagina-leitura-refinada {
+  width: 100%;
+  max-width: 1220px;
+  padding-bottom: 60px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-back-button {
+  color: var(--accent-dark, #1251a4);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+/* Cabeçalho coerente com os banners das demais áreas do aluno. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero {
+  min-height: 0;
+  isolation: auto;
+  padding: 25px 30px 23px;
+  margin-bottom: 24px;
+  border-radius: 21px;
+  border: 0;
+  background: linear-gradient(115deg, var(--pagina-tema-escuro), var(--pagina-tema));
+  box-shadow: 0 12px 26px -22px rgba(8, 48, 103, .38);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero::before,
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero::after { content: none; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-top {
+  margin-bottom: 17px;
+  gap: 14px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255,255,255,.8);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-materia-badge {
+  padding: 6px 10px;
+  background: rgba(255,255,255,.93) !important;
+  border-radius: 10px;
+  box-shadow: none;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-content {
+  display: block;
+  min-height: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-kicker {
+  margin-bottom: 8px;
+  color: #cfe6ff;
+  font-size: 10px;
+  letter-spacing: .11em;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero h1 {
+  font-size: clamp(26px, 2.45vw, 35px);
+  line-height: 1.2;
+  max-width: 940px;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero p {
+  max-width: 780px;
+  font-size: 14px;
+  margin-top: 8px;
+  line-height: 1.55;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips {
+  gap: 14px;
+  margin-top: 15px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips span {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #e2f0ff;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-foco-toggle {
+  margin-top: 18px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.33);
+  background: rgba(255,255,255,.95);
+  color: var(--pagina-tema-escuro);
+  box-shadow: none;
+  font-size: 11px;
+}
+/* A opção de cabeçalho amplo preserva destaque, sem as ilustrações decorativas. */
+.pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero {
+  padding: 36px 38px;
+}
+.pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero h1 {
+  font-size: clamp(30px, 3vw, 42px);
+}
+/* Conteúdo principal e navegação: menos competição visual. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-layout {
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: 22px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro {
+  margin: 0 0 18px;
+  padding: 0 2px;
+  align-items: center;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro h2 {
+  margin: 0 0 4px;
+  font-size: 21px;
+  color: var(--ink);
+  letter-spacing: -.025em;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-count {
+  padding: 7px 11px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa {
+  display: block;
+  padding: 0 0 17px;
+  scroll-margin-top: 22px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa::before { content: none; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa-content { padding: 0; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa-marker,
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa-eyebrow { display: none; }
+.pagina-experiencia.pagina-leitura-refinada[data-mostrar-etapas='sim'].pagina-formato-trilha .pagina-etapa {
+  display: grid;
+  grid-template-columns: 33px minmax(0,1fr);
+  align-items: start;
+  gap: 10px;
+}
+.pagina-experiencia.pagina-leitura-refinada[data-mostrar-etapas='sim'].pagina-formato-trilha .pagina-etapa-marker {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--pagina-tema) 20%, var(--line));
+  background: var(--pagina-tema-claro);
+  color: var(--pagina-tema-escuro);
+  box-shadow: none;
+  font-size: 11px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block {
+  padding: 25px 29px;
+  border-radius: 17px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: 0 7px 20px -20px rgba(10, 49, 101, .28);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block h2 {
+  margin-bottom: 16px;
+  font-size: 21px;
+  line-height: 1.32;
+  letter-spacing: -.025em;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-rich-text {
+  max-width: 69ch;
+  font-size: 16px;
+  line-height: 1.82;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-list li {
+  font-size: 15px;
+  line-height: 1.72;
+}
+.pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-rich-text {
+  font-size: 18px;
+  line-height: 1.85;
+}
+.pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-content-block h2 { font-size: 24px; }
+.pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-list li { font-size: 17px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-text-block[data-tamanho='maior'] .pagina-rich-text { font-size: 19px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-text-block[data-tamanho='menor'] .pagina-rich-text { font-size: 14px; }
+.pagina-experiencia.pagina-leitura-refinada[data-largura-leitura='ampla'] .pagina-rich-text { max-width: 100%; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-video,
+.pagina-experiencia.pagina-leitura-refinada .pagina-image { max-width: 740px; margin-inline: auto; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block[data-largura='compacta'] .pagina-video,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block[data-largura='compacta'] .pagina-image { max-width: 520px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block[data-largura='total'] .pagina-video,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block[data-largura='total'] .pagina-image { max-width: 100%; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-image img,
+.pagina-experiencia.pagina-leitura-refinada .pagina-video { border-radius: 12px; }
+/* Destaques conservam semântica e cor, sem excesso de efeitos. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-highlight {
+  border-radius: 14px;
+  border-left: 3px solid var(--pagina-tema);
+}
+/* Coluna lateral mais objetiva, sem precisar remover recursos. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside { gap: 13px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-mensagem-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px -20px rgba(13,71,161,.22);
+  background: var(--card);
+  padding: 17px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header { margin-bottom: 10px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header .pagina-indice-symbol { width: 34px; height: 34px; border-radius: 10px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header strong { font-size: 15px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a { padding: 7px 4px; border-radius: 8px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a span { width: 25px; height: 25px; flex-basis: 25px; border-radius: 8px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a:hover { transform: none; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card::before { display: none; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card > strong { font-size: 15px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card p { font-size: 12px; line-height: 1.6; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-button { border-radius: 10px; padding: 11px 10px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-mensagem-card > span { display: none; }
+.pagina-experiencia.pagina-leitura-refinada[data-modo-foco='ativo'] .pagina-layout {
+  display: block;
+  max-width: 880px;
+  margin-inline: auto;
+}
+.pagina-experiencia.pagina-leitura-refinada[data-modo-foco='ativo'] .pagina-aside { display: none; }
+/* Adaptação ao notebook e telas pequenas */
+@media (max-width: 1060px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-layout {
+    grid-template-columns: minmax(0, 1fr) 235px;
+    gap: 16px;
+  }
+}
+@media (max-width: 850px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-layout { grid-template-columns: 1fr; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-aside {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-indice-card { grid-column: 1/-1; }
+}
+@media (max-width: 620px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero {
+    padding: 22px 20px;
+    border-radius: 17px;
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero-top { align-items: flex-start; gap: 10px; margin-bottom: 15px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-materia-badge { padding: 6px 8px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero h1 { font-size: 27px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-study-intro { flex-wrap: wrap; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-content-block { padding: 20px 18px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-content-block h2 { font-size: 19px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-rich-text { font-size: 15px; line-height: 1.75; }
+  .pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-rich-text { font-size: 17px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-aside { grid-template-columns: 1fr; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-indice-card { grid-column: auto; }
+  .pagina-experiencia.pagina-leitura-refinada[data-mostrar-etapas='sim'].pagina-formato-trilha .pagina-etapa { grid-template-columns: 28px minmax(0,1fr); gap: 7px; }
+  .pagina-experiencia.pagina-leitura-refinada[data-mostrar-etapas='sim'].pagina-formato-trilha .pagina-etapa-marker { width: 26px; height: 26px; }
+}
+
+/* Em cartões independentes, a opção de numeração continua funcional. */
+.pagina-experiencia.pagina-leitura-refinada[data-mostrar-etapas='sim'].pagina-formato-cartoes .pagina-etapa-eyebrow {
+  display: flex;
+  margin: 0 0 9px 4px;
+  color: var(--pagina-tema);
+  font-weight: 800;
+  font-size: 10px;
+}
+.pagina-experiencia.pagina-leitura-refinada.pagina-formato-cartoes .pagina-etapa { padding-bottom: 20px; }
+
+/* Ação de voltar reduzida a um único ícone discreto. */
+.pagina-conteudo-page .pagina-back-button.pagina-back-icon {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #c6daf4;
+  color: #1251a4;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(11,61,125,.06);
+  margin: 0 0 12px;
+  transition: background .18s ease, transform .18s ease;
+}
+.pagina-conteudo-page .pagina-back-button.pagina-back-icon:hover { background: #edf5ff; transform: translateX(-2px); }
+.pagina-conteudo-page .pagina-back-button.pagina-back-icon:focus-visible { outline: 3px solid #278bea; outline-offset: 3px; }
+/* Formatação segura dos textos criados pelo administrador. */
+.pagina-experiencia .tenna-texto-formatado { white-space: normal; overflow-wrap: anywhere; }
+.pagina-experiencia .tenna-texto-formatado p { margin: 0 0 1.15em; white-space: normal; }
+.pagina-experiencia .tenna-texto-formatado p:last-child,
+.pagina-experiencia .tenna-texto-formatado ul:last-child { margin-bottom: 0; }
+.pagina-experiencia .tenna-texto-formatado ul { list-style: disc; padding-left: 1.45em; margin: 0 0 1.15em; }
+.pagina-experiencia .tenna-texto-formatado li { margin: .28em 0; padding-left: .16em; }
+.pagina-experiencia .tenna-texto-formatado strong { color: var(--ink, #123e7d); font-weight: 800; }
+.pagina-experiencia .tenna-texto-formatado em { font-style: italic; }
+.pagina-experiencia .tenna-texto-formatado mark.tenna-text-mark {
+  color: inherit; background: #fff0a9; border-radius: 3px; padding: 0 .13em; box-decoration-break: clone;
+}
+.pagina-experiencia .pagina-text-block[data-alinhamento='centro'] .pagina-rich-text { text-align: center; margin-inline: auto; }
+.pagina-experiencia .pagina-text-block[data-espacamento='compacto'] .pagina-rich-text { line-height: 1.5; }
+.pagina-experiencia .pagina-text-block[data-espacamento='amplo'] .pagina-rich-text { line-height: 2.05; }
+.pagina-experiencia .pagina-text-block[data-espacamento='compacto'] .pagina-rich-text p { margin-bottom: .75em; }
+.pagina-experiencia .pagina-text-block[data-espacamento='amplo'] .pagina-rich-text p { margin-bottom: 1.5em; }
+.pagina-experiencia .pagina-highlight-message { line-height: 1.6; }
+.pagina-experiencia .pagina-list .tenna-texto-formatado p { margin: 0; }
+
+
+/* ===========================================================
+   TENNA — Estudo integrado à sidebar / versão de leitura 2026
+   Sem modo foco. Ajustes limitados à página de estudo.
+   =========================================================== */
+
+/* Ocupa a mesma coluna de trabalho das outras telas do aluno. */
+.dashboard.student-area .pagina-conteudo-page.pagina-experiencia.pagina-leitura-refinada {
+  max-width: none;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 64px;
+}
+
+/* Card inicial: alinhado ao banner limpo da listagem de conteúdos. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero {
+  min-height: 0;
+  width: 100%;
+  margin: 0 0 26px;
+  padding: 25px 30px 27px;
+  border-radius: 21px;
+  background: linear-gradient(115deg, var(--pagina-tema-escuro) 0%, var(--pagina-tema) 100%);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 12px 25px -22px rgba(7,52,112,.50);
+}
+.pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero {
+  padding: 30px 34px 32px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 20px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  color: rgba(255,255,255,.84);
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb-link {
+  appearance: none;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  padding: 1px 0;
+  cursor: pointer;
+  font: inherit;
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb-link:hover { color: #c9e9ff; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-materia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 31px;
+  padding: 6px 11px;
+  border-radius: 10px;
+  font-size: 12px;
+  box-shadow: none;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-content {
+  display: block;
+  min-height: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-kicker {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: #c9e4ff;
+  letter-spacing: .11em;
+  line-height: 1.5;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero h1,
+.pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero h1 {
+  font-size: clamp(29px, 2.6vw, 37px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -.03em;
+  max-width: none;
+  margin: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero p {
+  max-width: 80ch;
+  margin-top: 10px;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #e0f1ff;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 18px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips span {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  gap: 7px;
+  color: #e3f0ff;
+}
+
+/* Grade responsiva: aproveita a largura que sobrou da sidebar fixa. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 274px;
+  gap: 22px;
+  width: 100%;
+  align-items: start;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-main {
+  min-width: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro {
+  display: flex;
+  align-items: center;
+  margin: 1px 0 19px;
+  padding: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro h2 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-intro p {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-etapa {
+  padding-bottom: 16px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block {
+  min-width: 0;
+  padding: 27px 30px;
+  border-radius: 17px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 7px 18px -20px rgba(6,56,119,.25);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block h2 {
+  font-size: 23px;
+  line-height: 1.3;
+  margin-bottom: 19px;
+  font-weight: 800;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-rich-text {
+  max-width: 75ch;
+  font-size: 17.5px;
+  line-height: 1.78;
+  letter-spacing: .004em;
+  color: var(--ink);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-rich-text p {
+  line-height: inherit;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-list li,
+.pagina-experiencia.pagina-leitura-refinada .pagina-list li .tenna-texto-formatado {
+  font-size: 17px;
+  line-height: 1.72;
+}
+/* Mantém as preferências de tamanho do administrador, sem comprometer leitura. */
+.pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-rich-text { font-size: 19px; }
+.pagina-experiencia.pagina-leitura-refinada[data-tamanho-texto='grande'] .pagina-list li { font-size: 18px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-text-block[data-tamanho='maior'] .pagina-rich-text { font-size: 19.5px; }
+.pagina-experiencia.pagina-leitura-refinada .pagina-text-block[data-tamanho='menor'] .pagina-rich-text { font-size: 16px; }
+.pagina-experiencia.pagina-leitura-refinada[data-largura-leitura='confortavel'] .pagina-rich-text { max-width: 75ch; }
+.pagina-experiencia.pagina-leitura-refinada[data-largura-leitura='ampla'] .pagina-rich-text { max-width: 100%; }
+
+/* Índice e progresso ganham legibilidade sem chamar mais atenção do que o texto. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside {
+  min-width: 0;
+  gap: 14px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-mensagem-card {
+  padding: 18px;
+  border-radius: 17px;
+  box-shadow: none;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header small {
+  font-size: 10px;
+  letter-spacing: .075em;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header strong {
+  font-size: 17px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a {
+  gap: 10px;
+  padding: 9px 6px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a strong {
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card > strong {
+  font-size: 17px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card p,
+.pagina-experiencia.pagina-leitura-refinada .pagina-mensagem-card p {
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside-label {
+  font-size: 10.5px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-study-button {
+  min-height: 42px;
+  font-size: 13px;
+}
+
+/* Quando sidebar + lateral deixam pouco espaço para estudar,
+   o índice desce para depois da leitura. */
+@media (max-width: 1250px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-layout {
+    grid-template-columns: minmax(0,1fr) 252px;
+    gap: 16px;
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-content-block { padding: 25px; }
+}
+@media (max-width: 1050px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-layout { grid-template-columns: minmax(0,1fr); }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-aside {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    position: static;
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-indice-card { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero {
+    padding: 23px 21px;
+    border-radius: 17px;
+  }
+  .pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero { padding: 25px 22px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-breadcrumb { font-size: 12px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero-top { margin-bottom: 17px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero h1,
+  .pagina-experiencia.pagina-leitura-refinada[data-cabecalho='amplo'] .pagina-hero h1 { font-size: 29px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips { gap: 8px 15px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-hero-chips span { font-size: 12.5px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-study-intro h2 { font-size: 22px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-content-block { padding: 23px 20px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-content-block h2 { font-size: 21px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-rich-text { font-size: 16.5px; line-height: 1.74; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-list li { font-size: 16.5px; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-aside { grid-template-columns: 1fr; }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-indice-card { grid-column: auto; }
+}
+
+
+/* ============================================================
+   TENNA | MARGENS DA AULA IGUAIS ÀS DO MURAL
+   Centraliza o conjunto em 1400px, com laterais mais discretas.
+   Em telas menores ocupa toda a largura disponível.
+   ============================================================ */
+.student-area .dashboard-content > .pagina-conteudo-page.page-shell.pagina-experiencia.pagina-leitura-refinada {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1400px;
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: 0;
+}
+
+/* A largura disponível é usada pelo banner e pela grade toda. */
+.student-area .pagina-conteudo-page.pagina-leitura-refinada .pagina-hero,
+.student-area .pagina-conteudo-page.pagina-leitura-refinada .pagina-layout {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin-inline: 0;
+}
+
+/* ============================================================
+   TENNA | FLASHCARDS DENTRO DA AULA
+   Mesma linguagem visual de FlashCards.jsx / FlashCards.css:
+   cartão de duas faces, frente clara, verso azul e giro 3D.
+   ============================================================ */
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-player {
+  width: 100%;
+  max-width: 100%;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  height: clamp(220px, 24vw, 285px);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 18px;
+  box-shadow: none;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: center;
+  cursor: pointer;
+  perspective: 1100px;
+  transform: none;
+  transition: none;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard:hover,
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard.show-answer {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard:focus-visible {
+  outline: 3px solid var(--accent, #2196f3);
+  outline-offset: 4px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-inner {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .5s cubic-bezier(.2,.75,.25,1);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard.show-answer .pagina-flashcard-inner {
+  transform: rotateY(180deg);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 26px 34px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(13,71,161,.06);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.front {
+  background: var(--card);
+  color: var(--ink);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.back {
+  background: linear-gradient(135deg, #164b9f, #08306b);
+  color: #fff;
+  border-color: rgba(255,255,255,.13);
+  transform: rotateY(180deg);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face-label {
+  display: block;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: var(--accent-dark, #0d47a1);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.back .pagina-flashcard-face-label {
+  color: #c8e4ff;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face-text {
+  display: block;
+  max-width: 66ch;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(19px, 2.2vw, 26px);
+  font-weight: 700;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  max-height: 67%;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face-hint {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.back .pagina-flashcard-face-hint {
+  color: #c6dfff;
+}
+@media (max-width: 760px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard {
+    height: 230px;
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face {
+    padding: 20px;
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face-text {
+    font-size: 19px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-inner {
+    transition-duration: 0.01ms;
+  }
+}
+
+
+/* TENNA — Botão de estudo com a mesma largura do card lateral. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside > .pagina-study-button {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 12px 14px;
+  text-align: center;
+  align-self: center;
+  justify-self: center;
+}
+@media (max-width: 1050px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-aside > .pagina-study-button {
+    width: 100%;
+  }
+}
+
+/* ================================================================
+   CORES FIXAS DA MATÉRIA | A leitura não usa degradês nos cartões.
+   ================================================================ */
+.pagina-experiencia.pagina-leitura-refinada .pagina-hero {
+  background: var(--pagina-tema-escuro) !important;
+  background-image: none !important;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block,
+.pagina-experiencia.pagina-leitura-refinada .pagina-question-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-resource-block,
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.front,
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside-card {
+  background: var(--card) !important;
+  background-image: none !important;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face.back {
+  background: var(--pagina-tema-escuro) !important;
+  background-image: none !important;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-highlight,
+.pagina-experiencia.pagina-leitura-refinada .pagina-mensagem-card,
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-card {
+  background-image: none !important;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-progress-track > span {
+  background: var(--pagina-tema) !important;
+}
+
+/* Textos dos cards de estudo em preto, independentemente da cor da matéria. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) h2,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-rich-text,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-rich-text *,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-list,
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-list * {
+  color: #111111;
+}
+
+
+/* Flashcards em grade: cada cartão vira de forma independente. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  grid-column: 1 / -1;
+  margin-top: 14px;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-item {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 230px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  perspective: 900px;
+  text-align: center;
+  font: inherit;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-inner {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.45s ease;
+  transform-style: preserve-3d;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-item.is-flipped .pagina-flashcard-grade-inner {
+  transform: rotateY(180deg);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: 12px;
+  color: #123f83;
+  background: #ffffff;
+  border: 1px solid #d8e5f4;
+  font-size: clamp(14px, 1.15vw, 17px);
+  font-weight: 650;
+  line-height: 1.5;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 4px 12px rgba(61, 20, 104, 0.09);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-back {
+  background: #124b9c;
+  color: #ffffff;
+  border-color: #124b9c;
+  transform: rotateY(180deg);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-item:focus-visible {
+  outline: 3px solid #2179e7;
+  outline-offset: 4px;
+}
+@media (max-width: 1200px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-item {
+    height: 210px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-inner {
+    transition: none;
+  }
+}
+
+/* Título dos flashcards alinhado aos demais títulos de conteúdo. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-resource-block-copy {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-resource-block-copy h2 {
+  color: #111111;
+  text-align: left;
+  margin: 0 0 19px;
+  padding: 0;
+}
+
+/* Ajuste final: título dos flashcards usa o mesmo recuo dos demais blocos. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-content-block.pagina-flashcards-block {
+  display: block;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-resource-block-copy {
+  display: block;
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-resource-block-copy h2 {
+  margin: 0;
+  padding: 0;
+  color: #161616;
+  text-align: left;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-flashcards-grade {
+  margin-top: 0;
+}
+
+/* Índice lateral com mais definição, sem fugir do visual Tenna. */
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-card {
+  border: 1px solid #b9d4f4;
+  background: #fff !important;
+  box-shadow: 0 5px 18px rgba(15, 66, 139, .08);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-header {
+  padding-bottom: 13px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #e5effb;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a {
+  border-radius: 9px;
+  transition: background-color .15s ease;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a:hover,
+.pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a:focus-visible {
+  background: #eaf4ff;
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside > .pagina-study-button {
+  min-height: 47px;
+  background: #135ac9;
+  color: #fff;
+  border: 1px solid #0c4cae;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 5px 13px rgba(17, 78, 169, .20);
+}
+.pagina-experiencia.pagina-leitura-refinada .pagina-aside > .pagina-study-button:hover:not(:disabled) {
+  background: #0b469f;
+  box-shadow: 0 7px 16px rgba(17, 78, 169, .25);
+}

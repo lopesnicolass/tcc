@@ -12,7 +12,8 @@ const TIPOS_BLOCO_VALIDOS = [
     "flashcards",
     "questoes",
     "simulado",
-    "checklist"
+    "checklist",
+    "formula", "exemplo", "exemplos", "tabela", "pergunta", "linha_tempo", "glossario", "expansivel"
 ];
 
 

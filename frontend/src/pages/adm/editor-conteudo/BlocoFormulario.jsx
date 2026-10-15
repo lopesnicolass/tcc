@@ -1,6 +1,8 @@
 import { Icon } from './icons.jsx';
 import { campo } from './Campo.jsx';
 import { youtubeEmbed } from './blocoHelpers.js';
+import { EditorTextoFormatavel } from './EditorTextoFormatavel.jsx';
+import { BlocosDidaticosFormulario } from './BlocosDidaticosFormulario.jsx';
 
 // Formulário de edição do bloco que está aberto no modal.
 // Extraído de EditorConteudo.jsx (era a função formularioBloco()).
@@ -47,6 +49,9 @@ export function BlocoFormulario({
     );
   }
 
+  if (['formula', 'exemplo', 'exemplos', 'tabela', 'pergunta', 'linha_tempo', 'glossario', 'expansivel'].includes(blocoEditando.tipo)) {
+    return <BlocosDidaticosFormulario tipo={blocoEditando.tipo} dados={dados} atualizarDado={atualizarDado} />;
+  }
   switch (
     blocoEditando.tipo
   ) {
@@ -59,6 +64,14 @@ export function BlocoFormulario({
               <option value="padrao">Padrão · leitura tranquila</option>
               <option value="destaque">Destaque · foco no conceito</option>
               <option value="resumo">Resumo · bloco colorido</option>
+            </select>
+          </label>
+          <label className="editor-field">
+            <span className="editor-field-label">Tamanho do texto neste bloco</span>
+            <select value={dados.tamanho || 'padrao'} onChange={(event) => atualizarDado('tamanho', event.target.value)}>
+              <option value="padrao">Usar padrão da aula</option>
+              <option value="maior">Maior · dar ênfase ao texto</option>
+              <option value="menor">Menor · leitura complementar</option>
             </select>
           </label>
           {campo(
@@ -75,21 +88,28 @@ export function BlocoFormulario({
             }
           )}
 
-          {campo(
-            'Conteúdo',
-            dados.texto,
-            (valor) =>
-              atualizarDado(
-                'texto',
-                valor
-              ),
-            {
-              multiline: true,
-              rows: 9,
-              placeholder:
-                'Escreva a explicação...',
-            }
-          )}
+          <label className="editor-field">
+            <span className="editor-field-label">Alinhamento do texto</span>
+            <select value={dados.alinhamento || 'esquerda'} onChange={(e) => atualizarDado('alinhamento', e.target.value)}>
+              <option value="esquerda">À esquerda · recomendado para leitura</option>
+              <option value="centro">Centralizado · para frases curtas</option>
+            </select>
+          </label>
+          <label className="editor-field">
+            <span className="editor-field-label">Espaçamento entre linhas</span>
+            <select value={dados.espacamento || 'confortavel'} onChange={(e) => atualizarDado('espacamento', e.target.value)}>
+              <option value="confortavel">Confortável · recomendado</option>
+              <option value="compacto">Compacto</option>
+              <option value="amplo">Amplo · leitura arejada</option>
+            </select>
+          </label>
+          <EditorTextoFormatavel
+            titulo="Conteúdo"
+            valor={dados.texto}
+            onChange={(valor) => atualizarDado('texto', valor)}
+            linhas={9}
+            placeholder="Escreva a explicação..."
+          />
         </>
       );
 
@@ -142,27 +162,27 @@ export function BlocoFormulario({
             </select>
           </label>
 
-          {campo(
-            'Mensagem',
-            dados.texto,
-            (valor) =>
-              atualizarDado(
-                'texto',
-                valor
-              ),
-            {
-              multiline: true,
-              rows: 6,
-              placeholder:
-                'Escreva a informação...',
-            }
-          )}
+          <EditorTextoFormatavel
+            titulo="Mensagem"
+            valor={dados.texto}
+            onChange={(valor) => atualizarDado('texto', valor)}
+            linhas={6}
+            placeholder="Escreva a informação..."
+          />
         </>
       );
 
     case 'video':
       return (
         <>
+          <label className="editor-field">
+            <span className="editor-field-label">Largura do elemento</span>
+            <select value={dados.largura || 'padrao'} onChange={(event) => atualizarDado('largura', event.target.value)}>
+              <option value="padrao">Padrão · destaque equilibrado</option>
+              <option value="compacta">Compacta · imagem/vídeo menor</option>
+              <option value="total">Largura total do card</option>
+            </select>
+          </label>
           {campo(
             'Título',
             dados.titulo,
@@ -225,6 +245,14 @@ export function BlocoFormulario({
     case 'imagem':
       return (
         <>
+          <label className="editor-field">
+            <span className="editor-field-label">Largura do elemento</span>
+            <select value={dados.largura || 'padrao'} onChange={(event) => atualizarDado('largura', event.target.value)}>
+              <option value="padrao">Padrão · destaque equilibrado</option>
+              <option value="compacta">Compacta · imagem/vídeo menor</option>
+              <option value="total">Largura total do card</option>
+            </select>
+          </label>
           {campo(
             'Título',
             dados.titulo,
