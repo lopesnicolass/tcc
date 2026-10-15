@@ -1,87 +1,20 @@
-import { CardLabel, CardValue, CardDescription, cardStyle } from './UI.jsx';
-
-// Os 4 cards de resumo logo abaixo do hero.
-// Extraído de Desempenho.jsx.
-
-export function CardsResumo({
-  totalSimulados,
-  totalQuestoes,
-  totalAcertos,
-  totalErros,
-  percentualAcertos,
-  percentualErros
-}) {
+export function CardsResumo({ totalSimulados, totalQuestoes, totalAcertos, totalErros, percentualAcertos, percentualErros }) {
+  const itens = [
+    { titulo: 'Tentativas', valor: totalSimulados, descricao: 'Simulados finalizados', variante: 'azul' },
+    { titulo: 'Questões', valor: totalQuestoes, descricao: 'Questões avaliadas', variante: 'azul' },
+    { titulo: 'Acertos', valor: totalAcertos, descricao: `${Math.round(percentualAcertos)}% das questões`, variante: 'verde' },
+    { titulo: 'Erros', valor: totalErros, descricao: `${Math.round(percentualErros)}% das questões`, variante: 'vermelho' }
+  ];
   return (
-    <div
-      className="desempenho-cards-grid"
-    >
-      <div style={cardStyle}>
-        <CardLabel>
-          Simulados realizados
-        </CardLabel>
-
-        <CardValue>
-          {totalSimulados}
-        </CardValue>
-
-        <CardDescription>
-          Tentativas registradas
-        </CardDescription>
-      </div>
-
-      <div style={cardStyle}>
-        <CardLabel>
-          Questões respondidas
-        </CardLabel>
-
-        <CardValue>
-          {totalQuestoes}
-        </CardValue>
-
-        <CardDescription>
-          Total de questões
-        </CardDescription>
-      </div>
-
-      <div style={cardStyle}>
-        <CardLabel>
-          Acertos
-        </CardLabel>
-
-        <CardValue
-          style={{
-            color: '#18834b'
-          }}
-        >
-          {totalAcertos}
-        </CardValue>
-
-        <CardDescription>
-          {Math.round(
-            percentualAcertos
-          )}% das questões
-        </CardDescription>
-      </div>
-
-      <div style={cardStyle}>
-        <CardLabel>
-          Erros
-        </CardLabel>
-
-        <CardValue
-          style={{
-            color: '#d45151'
-          }}
-        >
-          {totalErros}
-        </CardValue>
-
-        <CardDescription>
-          {Math.round(
-            percentualErros
-          )}% das questões
-        </CardDescription>
-      </div>
-    </div>
+    <section className="desempenho-cards-grid" aria-label="Indicadores dos simulados">
+      {itens.map((item) => (
+        <div className={`desempenho-kpi desempenho-kpi--${item.variante}`}>
+          <span className="desempenho-kpi-rotulo">{item.titulo}</span>
+          <strong className="desempenho-kpi-numero">{item.valor}</strong>
+          <span className="desempenho-kpi-descricao">{item.descricao}</span>
+        </div>
+        
+      ))}
+    </section>
   );
 }

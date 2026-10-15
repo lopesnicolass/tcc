@@ -833,7 +833,7 @@
   display:block;
   overflow:hidden;
   color:var(--ink);
-  font-family:"Space Grotesk",sans-serif;
+  font-family:"Inter",sans-serif;
   font-size:17px;
   font-weight:800;
   line-height:1.3;
@@ -1422,7 +1422,7 @@ html[data-theme='dark'] .simulados-resumo-materia { color:#adc3dd; }
 .simulados-conteudo-heading-main h3 {
   margin: 0;
   color: var(--ink);
-  font-family: "Space Grotesk",sans-serif;
+  font-family: "Inter",sans-serif;
   font-size: 22px;
   line-height: 1.3;
   font-weight: 800;
@@ -2073,3 +2073,112 @@ html[data-theme='dark'] .simulado-resultado-nota { color:#92c7ff; }
   .simulado-prova-lateral .simulado-prova-navegacao { grid-template-columns: repeat(auto-fit, minmax(37px, 1fr)); }
 }
 html[data-theme='dark'] .simulado-prova-lateral .simulado-prova-relogio { background: #16477e; border-color: #4c78aa; }
+
+
+/* Prova dentro do layout do aluno, como a página de Conteúdos. */
+.simulado-fullscreen.simulado-prova {
+  position: relative; inset: auto; z-index: auto; overflow: visible;
+  min-height: 0; max-width: 1440px; width: 100%; margin: 0 auto;
+  padding: 0 0 48px; background: transparent;
+  display: grid; grid-template-columns: minmax(0, 1fr) 255px;
+  gap: 18px 20px; align-items: start;
+}
+.simulado-prova .simulado-prova-inicio {
+  grid-column: 1 / -1; grid-row: 1; max-width: none; width: 100%; margin: 0;
+}
+.simulado-prova .simulado-prova-cabecalho { margin: 0; }
+.simulado-prova .simulado-prova-lateral {
+  grid-column: 2; grid-row: 2 / span 4; position: sticky; top: 20px;
+  width: 100%; max-height: calc(100vh - 40px); overflow-y: auto;
+  margin: 0; display: flex; flex-direction: column; gap: 12px; align-self: start;
+}
+.simulado-prova .simulado-prova-questoes {
+  grid-column: 1; grid-row: 2; max-width: none; width: 100%; min-width: 0; margin: 0;
+}
+.simulado-prova .simulado-prova-finalizacao {
+  grid-column: 1; grid-row: 3; width: 100%; max-width: none; margin: 0;
+}
+.simulado-prova .simulado-prova-erro { grid-column: 1; max-width: none; }
+.simulado-prova .simulado-prova-vazio { grid-column: 1 / -1; }
+.simulado-prova .simulado-prova-lateral .simulado-prova-painel { width: 100%; margin: 0; }
+.simulado-prova .simulado-prova-questao { scroll-margin-top: 22px; }
+@media (max-width: 1020px) {
+  .simulado-fullscreen.simulado-prova { grid-template-columns: minmax(0, 1fr); }
+  .simulado-prova .simulado-prova-inicio,
+  .simulado-prova .simulado-prova-lateral,
+  .simulado-prova .simulado-prova-questoes,
+  .simulado-prova .simulado-prova-finalizacao,
+  .simulado-prova .simulado-prova-erro { grid-column: 1; grid-row: auto; }
+  .simulado-prova .simulado-prova-lateral {
+    position: static; max-height: none; overflow: visible;
+    flex-direction: row; align-items: stretch;
+  }
+  .simulado-prova .simulado-prova-lateral .simulado-prova-relogio { width: 190px; flex-shrink: 0; }
+  .simulado-prova .simulado-prova-lateral .simulado-prova-painel { flex: 1; min-width: 0; }
+}
+@media (max-width: 650px) {
+  .simulado-prova .simulado-prova-lateral { flex-direction: column; }
+  .simulado-prova .simulado-prova-lateral .simulado-prova-relogio { width: 100%; }
+}
+
+/* Refinamento da leitura das questões e retorno aos simulados. */
+.simulado-prova .simulado-prova-questao-topo > span:first-child {
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  color: #1855a0;
+}
+.simulado-prova .simulado-prova-questao h2 { margin-top: 20px; }
+.simulado-prova .simulado-prova-voltar {
+  font-size: 17px; font-weight: 750; gap: 8px;
+  padding: 7px 0; margin-bottom: 15px;
+  text-decoration: none;
+}
+.simulado-prova .simulado-prova-voltar-seta {
+  font-size: 29px; line-height: 0.65; font-weight: 500;
+}
+.simulado-prova .simulado-prova-voltar:hover { text-decoration: none; color: #fff; opacity: .85; }
+
+/* Ajustes de alinhamento e alternativas escolhidas no painel da prova. */
+.simulado-prova .simulado-prova-inicio,
+.simulado-prova .simulado-prova-cabecalho,
+.simulado-prova .simulado-prova-lateral { box-sizing: border-box; }
+.simulado-prova .simulado-prova-inicio { min-width: 0; }
+.simulado-prova .simulado-prova-cabecalho { width: 100%; }
+.simulado-prova .simulado-prova-lateral { padding: 0; }
+.simulado-prova .simulado-prova-lateral .simulado-prova-relogio,
+.simulado-prova .simulado-prova-lateral .simulado-prova-painel { box-sizing: border-box; width: 100%; }
+.simulado-prova .simulado-prova-lateral .simulado-prova-progresso-titulos { align-items: center; justify-content: space-between; }
+.simulado-prova .simulado-prova-lateral .simulado-prova-progresso-titulos > div { flex: 1; }
+.simulado-prova .simulado-prova-lateral .simulado-prova-numero {
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  min-height: 38px; padding: 5px 2px; white-space: nowrap; line-height: 1;
+}
+.simulado-prova-numero-indice { font-weight: 750; }
+.simulado-prova-numero-alternativa { font-size: 12px; font-weight: 800; }
+.simulado-prova-numero-alternativa::before { content: '·'; margin-right: 3px; opacity: .8; }
+
+/* Alinha a seta de voltar ao centro vertical do texto, sem depender da fonte do glifo. */
+.simulado-prova .simulado-prova-voltar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  line-height: 1.3;
+}
+.simulado-prova .simulado-prova-voltar-seta {
+  display: inline-block;
+  position: relative;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  box-sizing: border-box;
+  border-left: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+}

@@ -333,6 +333,9 @@ export default function Home() {
   );
 
   const ultimoResultado = resultados[0] || null;
+  const percentualUltimoResultado = ultimoResultado
+    ? Math.min(100, Math.max(0, Number(ultimoResultado.porcentagem) || 0))
+    : 0;
   const resumoIndisponivel = carregandoResumo || Boolean(erroResumo);
   const conteudosPendentes = Math.max(totalConteudos - totalEstudados, 0);
   const descricaoProgresso = totalConteudos > 0
@@ -728,7 +731,10 @@ export default function Home() {
               ) : proximoTopico ? (
                 <>
                   <h3>{proximoTopico.nome}</h3>
-                  <p>{proximoTopico.materia} · Conteúdo pendente</p>
+                  <div className="home-next-meta">
+                    <span>{proximoTopico.materia}</span>
+                    <span className="home-next-pending">Pendente</span>
+                  </div>
 
                   <button
                     type="button"
@@ -791,17 +797,32 @@ export default function Home() {
                       'Simulado realizado'}
                   </h3>
 
-                  <p>
-                    <strong className="home-result-percentage">
-                      {Number(ultimoResultado.porcentagem || 0).toFixed(0)}% de acertos
-                    </strong>
-                    {' · '}
-                    {ultimoResultado.acertos} de{' '}
-                    {ultimoResultado.total_questoes} questões
-                    {formatarDataResultado(ultimoResultado.data_realizacao)
-                      ? ` · ${formatarDataResultado(ultimoResultado.data_realizacao)}`
-                      : ''}
-                  </p>
+                  <div className="home-result-summary">
+                    <div className="home-result-summary-top">
+                      <strong className="home-result-percentage">
+                        {Math.round(percentualUltimoResultado)}%
+                        <span> de acertos</span>
+                      </strong>
+                      <span className="home-result-questions">
+                        {ultimoResultado.acertos} de {ultimoResultado.total_questoes} questões
+                      </span>
+                    </div>
+                    <div
+                      className="home-result-progress"
+                      role="progressbar"
+                      aria-label="Acertos no último simulado"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round(percentualUltimoResultado)}
+                    >
+                      <span style={{ width: `${percentualUltimoResultado}%` }} />
+                    </div>
+                    {formatarDataResultado(ultimoResultado.data_realizacao) && (
+                      <span className="home-result-date">
+                        Realizado em {formatarDataResultado(ultimoResultado.data_realizacao)}
+                      </span>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>

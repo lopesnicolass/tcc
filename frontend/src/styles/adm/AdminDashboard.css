@@ -5,7 +5,7 @@
 .admin-overview-hero{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:8px;padding:25px 28px;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--ink) 0%,#1976d2 72%,var(--accent) 100%);color:#fff;box-shadow:0 12px 28px rgba(13,71,161,.12);}
 .admin-hero-copy{min-width:0;}
 .admin-overview-hero .admin-eyebrow{color:rgba(255,255,255,.72);}
-.admin-overview-header h1{margin:6px 0 7px;font-family:"Space Grotesk",sans-serif;font-size:clamp(30px,3vw,40px);line-height:1.05;color:#fff;letter-spacing:-.03em;}
+.admin-overview-header h1{margin:6px 0 7px;font-family:"Inter",sans-serif;font-size:clamp(30px,3vw,40px);line-height:1.05;color:#fff;letter-spacing:-.03em;}
 .admin-overview-header p{margin:0;max-width:720px;color:rgba(255,255,255,.82);font-size:14px;line-height:1.5;}
 .admin-hero-actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .admin-connection-badge{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid rgba(255,255,255,.16);border-radius:var(--radius-sm);background:rgba(255,255,255,.10);}
@@ -13,7 +13,7 @@
 .admin-connection-badge strong{font-size:11.5px;color:#fff;}
 .admin-connection-badge small{font-size:9.5px;color:rgba(255,255,255,.66);}
 .admin-status-dot{width:8px;height:8px;border-radius:50%;background:#55d67a;box-shadow:0 0 0 4px rgba(85,214,122,.14);flex-shrink:0;}
-.admin-refresh-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border:0;border-radius:var(--radius-sm);background:var(--card);color:var(--ink);font:700 12px "IBM Plex Sans",sans-serif;cursor:pointer;box-shadow:0 7px 18px rgba(0,0,0,.10);white-space:nowrap;}
+.admin-refresh-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 14px;border:0;border-radius:var(--radius-sm);background:var(--card);color:var(--ink);font:700 12px "Inter",sans-serif;cursor:pointer;box-shadow:0 7px 18px rgba(0,0,0,.10);white-space:nowrap;}
 .admin-refresh-btn:hover:not(:disabled){transform:translateY(-1px);}
 .admin-refresh-btn:disabled{opacity:.7;cursor:wait;}
 .admin-refresh-btn:disabled svg{animation:spin 1s linear infinite;}
@@ -26,7 +26,7 @@
 .admin-primary-card{padding:23px 24px;margin-bottom:18px;border-color:rgba(33,150,243,.14);box-shadow:0 10px 28px rgba(13,71,161,.06);}
 .admin-section-heading{margin-bottom:17px;}
 .admin-section-heading-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.admin-section-heading h2{margin:3px 0 5px;color:var(--ink);font:700 20px/1.15 "Space Grotesk",sans-serif;letter-spacing:-.02em;}
+.admin-section-heading h2{margin:3px 0 5px;color:var(--ink);font:700 20px/1.15 "Inter",sans-serif;letter-spacing:-.02em;}
 .admin-section-heading p{margin:0;color:var(--muted);font-size:12px;line-height:1.45;}
 .admin-section-kicker{display:block;color:var(--accent-dark);font-size:9.5px;font-weight:800;letter-spacing:.13em;}
 .admin-section-hint{margin-top:3px;padding:6px 9px;border-radius:var(--radius-pill);background:var(--paper);color:var(--accent-dark);font-size:10px;font-weight:700;white-space:nowrap;}
@@ -43,7 +43,7 @@
 
 .admin-overview-stats{margin-bottom:18px;}
 .admin-stats-heading{display:flex;align-items:end;justify-content:space-between;margin:0 2px 10px;}
-.admin-stats-heading h2{margin:3px 0 0;color:var(--ink);font:700 18px/1.15 "Space Grotesk",sans-serif;}
+.admin-stats-heading h2{margin:3px 0 0;color:var(--ink);font:700 18px/1.15 "Inter",sans-serif;}
 .admin-stats-heading>span{color:var(--muted);font-size:10px;}
 .admin-stats-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
 .admin-overview-stat{min-width:0;padding:17px 18px 16px;border:1px solid rgba(13,71,161,.08);border-radius:var(--radius-lg);background:var(--card);box-shadow:0 7px 20px rgba(13,71,161,.04);transition:transform .2s var(--bouncy),box-shadow .2s ease,border-color .2s ease;}
@@ -51,7 +51,7 @@
 .admin-overview-stat-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .admin-overview-stat-icon{width:38px;height:38px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;background:var(--paper);color:var(--accent-dark);}
 .admin-stat-detail{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:9.5px;font-weight:600;text-align:right;}
-.admin-overview-stat-value{min-height:38px;margin-top:12px;display:flex;align-items:center;color:var(--ink);font:700 28px/1 "Space Grotesk",sans-serif;letter-spacing:-.03em;}
+.admin-overview-stat-value{min-height:38px;margin-top:12px;display:flex;align-items:center;color:var(--ink);font:700 28px/1 "Inter",sans-serif;letter-spacing:-.03em;}
 .admin-overview-stat-label{margin-top:5px;color:var(--muted);font-size:11.5px;font-weight:600;}
 .admin-skeleton{display:block;border-radius:var(--radius-sm);background:linear-gradient(90deg,#eef5f9,#f8fbfd,#eef5f9);background-size:200% 100%;animation:adminSkeleton 1.3s ease infinite;}
 .admin-skeleton-number{width:48px;height:28px;}

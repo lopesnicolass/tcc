@@ -86,7 +86,7 @@
   position: relative; z-index: 2; display: inline-flex; align-items: center;
   margin: 20px 0 0; padding: 9px 14px; border-radius: 99px;
   background: #fff; border: 1px solid rgba(255,255,255,.5);
-  color: var(--pagina-tema-escuro); font: 800 12px 'IBM Plex Sans',sans-serif;
+  color: var(--pagina-tema-escuro); font: 800 12px 'Inter',sans-serif;
   cursor: pointer; box-shadow: 0 7px 18px rgba(3,26,62,.12);
 }
 .pagina-foco-toggle:focus-visible, .pagina-indice-items a:focus-visible, .pagina-experiencia button:focus-visible {
@@ -97,15 +97,15 @@
 .pagina-experiencia .pagina-main { gap: 0; }
 .pagina-study-intro { display: flex; align-items: center; gap: 14px; margin: 0 0 23px; padding: 0 4px; }
 .pagina-study-intro-symbol { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 19px; background: var(--pagina-tema-claro); color: var(--pagina-tema); }
-.pagina-study-intro span:not(.pagina-study-count) { display: block; color: var(--pagina-tema); font: 800 10px 'IBM Plex Sans',sans-serif; letter-spacing: .14em; }
-.pagina-study-intro h2 { margin: 3px 0; color: var(--ink); font: 800 clamp(21px,2.5vw,27px) 'Space Grotesk',sans-serif; letter-spacing: -.035em; }
+.pagina-study-intro span:not(.pagina-study-count) { display: block; color: var(--pagina-tema); font: 800 10px 'Inter',sans-serif; letter-spacing: .14em; }
+.pagina-study-intro h2 { margin: 3px 0; color: var(--ink); font: 800 clamp(21px,2.5vw,27px) 'Inter',sans-serif; letter-spacing: -.035em; }
 .pagina-study-intro p { margin: 0; color: var(--muted); font-size: 13px; }
 .pagina-study-count { flex-shrink: 0; margin-left: auto; background: var(--card); border: 1px solid var(--line); border-radius: 40px; padding: 8px 12px; color: var(--pagina-tema); font-size: 12px; font-weight: 800; }
 .pagina-etapa { position: relative; display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 14px; scroll-margin-top: 24px; padding-bottom: 18px; }
 .pagina-etapa:not(:last-of-type)::before { content: ''; position: absolute; top: 52px; bottom: -5px; left: 23px; width: 2px; background: linear-gradient(var(--pagina-tema), transparent); opacity: .27; }
-.pagina-etapa-marker { position: relative; z-index: 1; width: 47px; height: 47px; display: grid; place-items: center; border-radius: 17px; border: 4px solid var(--color-background, #edf6ff); background: var(--pagina-tema); color: #fff; font: 800 13px 'Space Grotesk',sans-serif; box-shadow: 0 6px 15px color-mix(in srgb,var(--pagina-tema) 25%,transparent); }
+.pagina-etapa-marker { position: relative; z-index: 1; width: 47px; height: 47px; display: grid; place-items: center; border-radius: 17px; border: 4px solid var(--color-background, #edf6ff); background: var(--pagina-tema); color: #fff; font: 800 13px 'Inter',sans-serif; box-shadow: 0 6px 15px color-mix(in srgb,var(--pagina-tema) 25%,transparent); }
 .pagina-etapa-content { min-width: 0; padding-top: 5px; }
-.pagina-etapa-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px 3px; color: var(--pagina-tema); font: 800 10px 'IBM Plex Sans',sans-serif; letter-spacing: .16em; }
+.pagina-etapa-eyebrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 10px 3px; color: var(--pagina-tema); font: 800 10px 'Inter',sans-serif; letter-spacing: .16em; }
 .pagina-etapa-sparkle { color: var(--pagina-tema); font-size: 18px; opacity: .55; }
 .pagina-experiencia .pagina-content-block { padding: clamp(23px,3vw,34px); border: 1px solid color-mix(in srgb, var(--pagina-tema) 12%, var(--line)); border-radius: 25px 25px 25px 11px; background: var(--card); box-shadow: 0 16px 38px -31px rgba(10,48,100,.48); }
 .pagina-experiencia .pagina-content-block::before { display: none; }

@@ -16,11 +16,7 @@ const NAV_ITEMS = [
   { to: '/provas', label: 'Provas', icon: 'file' },
   { to: '/desempenho', label: 'Desempenho', icon: 'chart' },
   { to: '/flashcards', label: 'FlashCards', icon: 'layers' },
-//   {
-//   to: '/terrario',
-//   label: 'Terrário',
-//   icon: 'terrarium'
-// },
+  { to: '/terrario', label: 'Terrário', icon: 'terrarium' },
   { to: '/perfil', label: 'Perfil', icon: 'user' },
 ];
 
@@ -44,7 +40,15 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const { streak, lastActiveDate } = useGamification();
   const fecharRef = useRef(null);
   useEffect(() => { if (mobileOpen) fecharRef.current?.focus(); }, [mobileOpen]);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('tenna_sidebar_collapsed') === 'true'; }
+    catch { return false; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('tenna_sidebar_collapsed', String(collapsed)); }
+    catch { /* A preferência funciona durante a sessão. */ }
+  }, [collapsed]);
   const [streakOpen, setStreakOpen] = useState(false);
 
   useEffect(() => {
@@ -83,13 +87,18 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
         </button>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" aria-label="Navegação principal">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-            onClick={onClose}
+            onClick={() => {
+              if (item.to === '/simulados') window.dispatchEvent(new Event('tenna:simulados-inicio'));
+              onClose();
+            }}
+            title={collapsed ? item.label : undefined}
+            aria-label={collapsed ? item.label : undefined}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               {ICONS[item.icon]}

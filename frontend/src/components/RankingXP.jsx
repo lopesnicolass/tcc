@@ -107,7 +107,7 @@ export default function RankingXP({ xp, usuarioId }) {
           <div className="home-ranking-my-position" aria-label="Sua posição no ranking">
             <span>SUA COLOCAÇÃO</span>
             <strong>{minhaPosicao ? `${minhaPosicao}º lugar` : 'Fora do top 3'}</strong>
-            <small>{minhaPosicao ? `de ${alunos.length} estudantes` : 'Continue acumulando XP'}</small>
+            <small>{minhaPosicao ? 'Você está no Top 3' : 'Continue acumulando XP'}</small>
             <span className="home-ranking-position-icon" aria-hidden="true"><Icon name="trophy" size={20} /></span>
           </div>
         )}

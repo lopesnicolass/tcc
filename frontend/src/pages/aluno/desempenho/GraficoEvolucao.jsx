@@ -1,487 +1,102 @@
+import { CartaoAmpliavel } from './CartaoAmpliavel.jsx';
+import { useEffect, useRef, useState } from 'react';
 import { META } from './constants.js';
 
-// Gráfico de linha com a evolução dos simulados ao longo do tempo.
-// Extraído de Desempenho.jsx (era a seção "GRÁFICO PRINCIPAL").
+const ALTURA = 242;
+const TOPO = 26;
+const BASE = 198;
+const ESQUERDA = 44;
+const DIREITA = 24;
 
-export function GraficoEvolucao({
-  resultadosCronologicos,
-  pontosGrafico,
-  obterNomeSimulado,
-  formatarData
-}) {
+function obterTempo(resultado) {
+  const tempo = new Date(resultado?.data_realizacao ?? '').getTime();
+  return Number.isFinite(tempo) ? tempo : 0;
+}
+
+export function GraficoEvolucao({ resultadosCronologicos, obterNomeSimulado, formatarData }) {
+  const [intervalo, setIntervalo] = useState('8');
+  const [selecionado, setSelecionado] = useState(null);
+  const graficoRef = useRef(null);
+  const [larguraVisivel, setLarguraVisivel] = useState(680);
+  useEffect(() => {
+    const elemento = graficoRef.current;
+    if (!elemento || typeof ResizeObserver === 'undefined') return;
+    const observador = new ResizeObserver(([entrada]) => {
+      setLarguraVisivel(Math.floor(entrada.contentRect.width));
+    });
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, []);
+  const lista = intervalo === 'todos' ? resultadosCronologicos : resultadosCronologicos.slice(-8);
+  const largura = Math.max(680, larguraVisivel, lista.length * 76);
+  const areaUtil = largura - ESQUERDA - DIREITA;
+  const posX = (index) => lista.length === 1 ? ESQUERDA + areaUtil / 2 : ESQUERDA + index * (areaUtil / (lista.length - 1));
+  const posY = (valor) => BASE - Math.max(0, Math.min(100, Number(valor) || 0)) * ((BASE - TOPO) / 100);
+  const pontos = lista.map((resultado, index) => ({
+    ...resultado,
+    x: posX(index),
+    y: posY(resultado.porcentagem),
+    valor: Math.round(Math.max(0, Math.min(100, Number(resultado.porcentagem) || 0))),
+    etiqueta: obterNomeSimulado(resultado, resultadosCronologicos.indexOf(resultado)),
+    data: formatarData(resultado.data_realizacao)
+  }));
+  const linha = pontos.map((p) => `${p.x},${p.y}`).join(' ');
+  const pontoAtivo = selecionado != null ? pontos[selecionado] : null;
+
   return (
-    <div
-      style={{
-        background: '#ffffff',
-        borderRadius: '26px',
-        padding: '30px',
-        boxShadow:
-          '0 10px 32px rgba(21,72,125,0.08)',
-        marginBottom: '22px'
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent:
-            'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '25px'
-        }}
-      >
+    <CartaoAmpliavel titulo="Evolução dos simulados" tamanho="extra">
+    <section className="desempenho-painel desempenho-grafico" aria-labelledby="desempenho-grafico-titulo">
+      <div className="desempenho-painel-cabecalho">
         <div>
-          <h3
-            style={{
-              margin: 0,
-              color: '#173f70',
-              fontSize: '19px'
-            }}
-          >
-            Evolução dos simulados
-          </h3>
-
-          <p
-            style={{
-              margin:
-                '5px 0 0',
-              fontSize: '13px',
-              color: '#8191a6'
-            }}
-          >
-            Acompanhe cada tentativa e veja a evolução das suas notas
-          </p>
+          <h2 id="desempenho-grafico-titulo">Evolução dos simulados</h2>
+          <p>Compare as notas de cada tentativa, da mais antiga à mais recente.</p>
         </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <span
-            style={{
-              width: '9px',
-              height: '9px',
-              borderRadius: '50%',
-              background: '#2689f5'
-            }}
-          />
-
-          <span
-            style={{
-              fontSize: '12px',
-              color: '#8191a6'
-            }}
-          >
-            Resultado
-          </span>
-        </div>
+        {resultadosCronologicos.length > 8 && (
+          <div className="desempenho-opcoes" role="group" aria-label="Quantidade de tentativas no gráfico">
+            <button type="button" className={intervalo === '8' ? 'ativo' : ''} onClick={() => { setIntervalo('8'); setSelecionado(null); }} aria-pressed={intervalo === '8'}>Últimas 8</button>
+            <button type="button" className={intervalo === 'todos' ? 'ativo' : ''} onClick={() => { setIntervalo('todos'); setSelecionado(null); }} aria-pressed={intervalo === 'todos'}>Todas</button>
+          </div>
+        )}
       </div>
 
-      {resultadosCronologicos.length === 0 ? (
-        <div
-          style={{
-            height: '300px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              'center',
-            color: '#8191a6',
-            textAlign: 'center'
-          }}
-        >
-          Realize um simulado para começar a acompanhar sua evolução.
-        </div>
+      {!lista.length ? (
+        <p className="desempenho-vazio">Quando você finalizar um simulado, sua evolução aparecerá aqui.</p>
       ) : (
-        <div
-          style={{
-            position: 'relative',
-            height: '350px',
-            marginTop: '5px'
-          }}
-        >
-          {/* ÁREA DO GRÁFICO */}
-
-          <div
-            style={{
-              position: 'absolute',
-              left: '55px',
-              right: '20px',
-              top: '15px',
-              bottom: '70px'
-            }}
-          >
-            {/* GRADE */}
-
-            {[0, 25, 50, 75, 100].map(
-              (valor) => {
-                const bottom =
-                  `${valor}%`;
-
-                return (
-                  <div
-                    key={valor}
-                    style={{
-                      position:
-                        'absolute',
-                      left: 0,
-                      right: 0,
-                      bottom,
-                      borderTop:
-                        '1px dashed #dfe8f2'
-                    }}
-                  />
-                );
-              }
-            )}
-
-            {/* META */}
-
-            <div
-              style={{
-                position:
-                  'absolute',
-                left: 0,
-                right: 0,
-                bottom:
-                  `${META}%`,
-                borderTop:
-                  '2px dashed #d6a51c'
-              }}
-            />
-
-            {/* CAMADA SVG SOMENTE PARA A LINHA */}
-
-            <svg
-              viewBox="0 0 1000 100"
-              preserveAspectRatio="none"
-              style={{
-                position:
-                  'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                overflow:
-                  'visible'
-              }}
-            >
-              {pontosGrafico.length >
-                1 && (
-                <polygon
-                  points={
-                    pontosGrafico
-                      .map(
-                        (ponto, index) => {
-                          const x =
-                            pontosGrafico.length ===
-                            1
-                              ? 500
-                              : (index /
-                                  (pontosGrafico.length -
-                                    1)) *
-                                1000;
-
-                          const y =
-                            100 -
-                            ponto.valor;
-
-                          return `${x},${y}`;
-                        }
-                      )
-                      .join(' ') +
-                    ` 1000,100 0,100`
-                  }
-                  fill="#2689f5"
-                  opacity="0.08"
-                />
-              )}
-
-              {pontosGrafico.length >
-                1 && (
-                <polyline
-                  points={pontosGrafico
-                    .map(
-                      (
-                        ponto,
-                        index
-                      ) => {
-                        const x =
-                          pontosGrafico.length ===
-                          1
-                            ? 500
-                            : (index /
-                                (pontosGrafico.length -
-                                  1)) *
-                              1000;
-
-                        const y =
-                          100 -
-                          ponto.valor;
-
-                        return `${x},${y}`;
-                      }
-                    )
-                    .join(' ')}
-                  fill="none"
-                  stroke="#2689f5"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                />
-              )}
+        <>
+          <div className="desempenho-grafico-legenda"><span className="desempenho-legenda-ponto"/> Resultado <span className="desempenho-legenda-meta"/> Meta {META}%</div>
+          <div ref={graficoRef} className="desempenho-grafico-rolagem" role="region" tabIndex="0" aria-label="Gráfico de evolução. Role horizontalmente se necessário">
+            <svg viewBox={`0 0 ${largura} ${ALTURA}`} width={largura} height={ALTURA} role="img" aria-label={`Notas de ${lista.length} tentativas, de 0 a 100 por cento`}>
+              {[0,25,50,75,100].map((valor) => {
+                const y = posY(valor);
+                return <g key={valor}>
+                  <line x1={ESQUERDA} y1={y} x2={largura-DIREITA} y2={y} stroke="#e1e9f3" strokeDasharray="4 5" />
+                  <text x={ESQUERDA-12} y={y+4} textAnchor="end" className="desempenho-svg-eixo">{valor}%</text>
+                </g>;
+              })}
+              <line x1={ESQUERDA} y1={posY(META)} x2={largura-DIREITA} y2={posY(META)} stroke="#cf9d1c" strokeDasharray="6 5" strokeWidth="1.5" />
+              {pontos.length > 1 && <>
+                <polygon points={`${linha} ${pontos.at(-1).x},${BASE} ${pontos[0].x},${BASE}`} fill="#2887ed" fillOpacity=".075" />
+                <polyline points={linha} fill="none" stroke="#2082ea" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+              </>}
+              {pontos.map((ponto, indice) => {
+                return <g key={ponto.id ?? `${ponto.data}-${indice}`}>
+                  <circle cx={ponto.x} cy={ponto.y} r="12" fill="transparent" />
+                  <circle cx={ponto.x} cy={ponto.y} r="5.5" fill="#fff" stroke="#2082ea" strokeWidth="3" />
+                  <text x={ponto.x} y={ponto.y-14} className="desempenho-svg-valor" textAnchor="middle">{ponto.valor}%</text>
+                  <text x={ponto.x} y={BASE+23} className="desempenho-svg-eixo" textAnchor="middle">{lista.length > 1 ? `#${resultadosCronologicos.indexOf(lista[indice])+1}` : 'Tentativa 1'}</text>
+                  <title>{`${ponto.etiqueta} · ${ponto.data} · ${ponto.valor}%`}</title>
+                  <circle cx={ponto.x} cy={ponto.y} r="13" fill="transparent" role="button" tabIndex="0" aria-label={`Ver ${ponto.etiqueta}: ${ponto.valor}% em ${ponto.data}`} onClick={() => setSelecionado(indice)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelecionado(indice); } }} />
+                </g>;
+              })}
             </svg>
-
-            {/* PONTOS */}
-
-            {pontosGrafico.map(
-              (ponto, index) => {
-                const esquerda =
-                  pontosGrafico.length ===
-                  1
-                    ? 50
-                    : (index /
-                        (pontosGrafico.length -
-                          1)) *
-                      100;
-
-                const baixo =
-                  ponto.valor;
-
-                return (
-                  <div
-                    key={
-                      ponto.resultado
-                        ?.id ||
-                      index
-                    }
-                    style={{
-                      position:
-                        'absolute',
-                      left: `${esquerda}%`,
-                      bottom: `${baixo}%`,
-                      transform:
-                        'translate(-50%, 50%)'
-                    }}
-                  >
-                    {/* PORCENTAGEM */}
-
-                    <div
-                      style={{
-                        position:
-                          'absolute',
-                        left: '50%',
-                        bottom:
-                          '25px',
-                        transform:
-                          'translateX(-50%)',
-                        background:
-                          '#0d52b8',
-                        color: '#ffffff',
-                        fontSize:
-                          '11px',
-                        fontWeight:
-                          '800',
-                        padding:
-                          '5px 8px',
-                        borderRadius:
-                          '7px',
-                        whiteSpace:
-                          'nowrap',
-                        boxShadow:
-                          '0 4px 12px rgba(13,82,184,0.18)',
-                        zIndex: 4
-                      }}
-                    >
-                      {Math.round(
-                        ponto.valor
-                      )}%
-                    </div>
-
-                    {/* PONTO */}
-
-                    <div
-                      style={{
-                        width: '15px',
-                        height: '15px',
-                        borderRadius:
-                          '50%',
-                        background:
-                          '#ffffff',
-                        border:
-                          '4px solid #2689f5',
-                        boxShadow:
-                          '0 3px 10px rgba(38,137,245,0.22)',
-                        position:
-                          'relative',
-                        zIndex: 5
-                      }}
-                    />
-                  </div>
-                );
-              }
-            )}
-
-            {/* EIXO Y */}
-
-            <div
-              style={{
-                position:
-                  'absolute',
-                left: '-38px',
-                top: 0,
-                bottom: 0,
-                width: '30px'
-              }}
-            >
-              {[0, 25, 50, 75, 100].map(
-                (valor) => (
-                  <div
-                    key={valor}
-                    style={{
-                      position:
-                        'absolute',
-                      left: 0,
-                      bottom:
-                        `${valor}%`,
-                      transform:
-                        'translateY(50%)',
-                      fontSize: '11px',
-                      color:
-                        '#8191a6',
-                      fontWeight:
-                        '500'
-                    }}
-                  >
-                    {valor}%
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* TEXTO DA META */}
-
-            <div
-              style={{
-                position:
-                  'absolute',
-                right: '-3px',
-                bottom:
-                  `${META}%`,
-                transform:
-                  'translateY(-8px)',
-                color: '#aa8114',
-                fontSize: '10px',
-                fontWeight: '800',
-                background:
-                  '#fffdf3',
-                padding:
-                  '3px 6px',
-                borderRadius:
-                  '5px'
-              }}
-            >
-              META {META}%
-            </div>
           </div>
-
-          {/* NOMES DOS SIMULADOS */}
-
-          <div
-            style={{
-              position:
-                'absolute',
-              left: '55px',
-              right: '20px',
-              bottom: 0,
-              height: '65px'
-            }}
-          >
-            {pontosGrafico.map(
-              (ponto, index) => {
-                const esquerda =
-                  pontosGrafico.length ===
-                  1
-                    ? 50
-                    : (index /
-                        (pontosGrafico.length -
-                          1)) *
-                      100;
-
-                const nome =
-                  obterNomeSimulado(
-                    ponto.resultado,
-                    index
-                  );
-
-                return (
-                  <div
-                    key={
-                      ponto.resultado
-                        ?.id ||
-                      index
-                    }
-                    style={{
-                      position:
-                        'absolute',
-                      left: `${esquerda}%`,
-                      top: 0,
-                      transform:
-                        'translateX(-50%)',
-                      textAlign:
-                        'center',
-                      minWidth:
-                        '80px'
-                    }}
-                  >
-                    <strong
-                      style={{
-                        display:
-                          'block',
-                        fontSize:
-                          '11px',
-                        color:
-                          '#173f70',
-                        whiteSpace:
-                          'nowrap'
-                      }}
-                    >
-                      {nome.length > 16
-                        ? `${nome.slice(
-                            0,
-                            16
-                          )}...`
-                        : nome}
-                    </strong>
-
-                    <span
-                      style={{
-                        display:
-                          'block',
-                        marginTop:
-                          '4px',
-                        fontSize:
-                          '10px',
-                        color:
-                          '#8191a6',
-                        whiteSpace:
-                          'nowrap'
-                      }}
-                    >
-                      {formatarData(
-                        ponto
-                          .resultado
-                          ?.data_realizacao
-                      )}
-                    </span>
-                  </div>
-                );
-              }
-            )}
+          <div className="desempenho-grafico-rodape">
+            {pontoAtivo ? <span><strong>{pontoAtivo.etiqueta}</strong> · {pontoAtivo.data} · {pontoAtivo.valor}%</span> : <span>Selecione um ponto para ver o nome e a data do simulado.</span>}
+            <span>{obterTempo(lista[0]) && obterTempo(lista.at(-1)) ? `${formatarData(lista[0].data_realizacao)} a ${formatarData(lista.at(-1).data_realizacao)}` : `${lista.length} tentativas exibidas`}</span>
           </div>
-        </div>
+        </>
       )}
-    </div>
+    </section>
+    </CartaoAmpliavel>
   );
 }

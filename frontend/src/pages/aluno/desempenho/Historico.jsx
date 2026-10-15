@@ -1,197 +1,33 @@
-// Lista com o histórico completo de resultados registrados.
-// Extraído de Desempenho.jsx (era a seção "HISTÓRICO").
+import { CartaoAmpliavel } from './CartaoAmpliavel.jsx';
+import { useMemo, useState } from 'react';
 
-export function Historico({
-  resultados,
-  mediaGeral,
-  limitar,
-  obterNomeSimulado,
-  formatarData,
-  porcentagem
-}) {
-  return (
-    <div
-      style={{
-        background: '#fff',
-        borderRadius: '26px',
-        padding: '30px',
-        boxShadow:
-          '0 10px 32px rgba(21,72,125,0.08)'
-      }}
-    >
-      <div
-        style={{
-          marginBottom:
-            '20px'
-        }}
-      >
-        <h3
-          style={{
-            margin: 0,
-            color:
-              '#173f70',
-            fontSize:
-              '19px'
-          }}
-        >
-          Histórico de desempenho
-        </h3>
-
-        <p
-          style={{
-            margin:
-              '5px 0 0',
-            fontSize:
-              '13px',
-            color:
-              '#8191a6'
-          }}
-        >
-          Confira todos os resultados registrados
-        </p>
+export function Historico({ resultados, mediaGeral, limitar, obterNomeSimulado, formatarData, porcentagem }) {
+  const [mostrarTodos, setMostrarTodos] = useState(false);
+  const ordenados = useMemo(() => [...resultados].sort((a, b) => {
+    const dataA = new Date(a.data_realizacao || 0).getTime();
+    const dataB = new Date(b.data_realizacao || 0).getTime();
+    if (Number.isFinite(dataA) && Number.isFinite(dataB) && dataA !== dataB) return dataB - dataA;
+    return Number(b.id || 0) - Number(a.id || 0);
+  }), [resultados]);
+  const visiveis = mostrarTodos ? ordenados : ordenados.slice(0, 6);
+  return <CartaoAmpliavel titulo="Histórico de simulados" tamanho="extra"><section className="desempenho-painel desempenho-historico" aria-labelledby="desempenho-historico-titulo">
+    <div className="desempenho-painel-cabecalho"><div><h2 id="desempenho-historico-titulo">Histórico de simulados</h2><p>Resultados organizados do mais recente para o mais antigo.</p></div><span className="desempenho-contador">{resultados.length} {resultados.length === 1 ? 'tentativa' : 'tentativas'}</span></div>
+    {!visiveis.length ? <p className="desempenho-vazio">Seu histórico aparecerá após finalizar o primeiro simulado.</p> : <>
+      <div className="desempenho-historico-lista">
+        {visiveis.map((resultado, index) => {
+          const valor = limitar(resultado.porcentagem);
+          const acimaDaMedia = valor >= mediaGeral;
+          return <div className="desempenho-historico-row" key={resultado.id ?? `${resultado.data_realizacao}-${index}`}>
+            <div className="desempenho-historico-identificacao">
+              <strong title={obterNomeSimulado(resultado, ordenados.length - index - 1)}>{obterNomeSimulado(resultado, ordenados.length - index - 1)}</strong>
+              <span>{formatarData(resultado.data_realizacao) || 'Data indisponível'}</span>
+            </div>
+            <div className="desempenho-barra desempenho-historico-barra" role="progressbar" aria-label="Aproveitamento da tentativa" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(valor)}><span className={acimaDaMedia ? '' : 'abaixo'} style={{ width: `${valor}%` }}/></div>
+            <strong className="desempenho-historico-porcentagem">{porcentagem(valor)}</strong>
+          </div>;
+        })}
       </div>
-
-      {resultados.length ===
-      0 ? (
-        <div
-          style={{
-            padding:
-              '35px 0',
-            textAlign:
-              'center',
-            color:
-              '#8191a6'
-          }}
-        >
-          Nenhum resultado registrado ainda.
-        </div>
-      ) : (
-        <div
-          style={{
-            display:
-              'grid',
-            gap: '12px'
-          }}
-        >
-          {resultados.map(
-            (
-              resultado,
-              index
-            ) => {
-              const valor =
-                limitar(
-                  resultado.porcentagem
-                );
-
-              const acimaDaMedia =
-                valor >=
-                mediaGeral;
-
-              return (
-                <div
-                  key={
-                    resultado.id ||
-                    index
-                  }
-                  className="desempenho-historico-row"
-                  style={{
-                    padding:
-                      '15px 0',
-                    borderBottom:
-                      index ===
-                      resultados.length -
-                        1
-                        ? 'none'
-                        : '1px solid #edf1f6'
-                  }}
-                >
-                  <div>
-                    <strong
-                      style={{
-                        display:
-                          'block',
-                        fontSize:
-                          '13px',
-                        color:
-                          '#304966'
-                      }}
-                    >
-                      {obterNomeSimulado(
-                        resultado,
-                        resultados.length -
-                          index -
-                          1
-                      )}
-                    </strong>
-
-                    <span
-                      style={{
-                        fontSize:
-                          '11px',
-                        color:
-                          '#93a0b1'
-                      }}
-                    >
-                      {formatarData(
-                        resultado.data_realizacao
-                      )}
-                    </span>
-                  </div>
-
-                  <div
-                    style={{
-                      height:
-                        '10px',
-                      background:
-                        '#e8eef5',
-                      borderRadius:
-                        '999px',
-                      overflow:
-                        'hidden'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${valor}%`,
-                        height:
-                          '100%',
-                        background:
-                          acimaDaMedia
-                            ? '#2689f5'
-                            : '#9aa9bb',
-                        borderRadius:
-                          '999px'
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      textAlign:
-                        'right'
-                    }}
-                  >
-                    <strong
-                      style={{
-                        color:
-                          acimaDaMedia
-                            ? '#0d52b8'
-                            : '#62748b',
-                        fontSize:
-                          '15px'
-                      }}
-                    >
-                      {porcentagem(
-                        valor
-                      )}
-                    </strong>
-                  </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-      )}
-    </div>
-  );
+      {resultados.length > 6 && <div className="desempenho-historico-rodape"><button type="button" className="desempenho-botao-secundario" onClick={() => setMostrarTodos(!mostrarTodos)}>{mostrarTodos ? 'Mostrar apenas recentes' : `Ver todas as ${resultados.length} tentativas`}</button></div>}
+    </>}
+  </section></CartaoAmpliavel>;
 }

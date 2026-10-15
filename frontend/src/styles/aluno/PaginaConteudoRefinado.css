@@ -690,7 +690,7 @@
 .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-face-text {
   display: block;
   max-width: 66ch;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(19px, 2.2vw, 26px);
   font-weight: 700;
   line-height: 1.42;

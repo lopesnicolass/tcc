@@ -1,4 +1,3 @@
-import { createPortal } from 'react-dom';
 import { useState } from 'react';
 
 // Tela de prova: preserva todas as questões e o salvamento automático de respostas.
@@ -26,13 +25,13 @@ export function TelaSimulado({
     destino?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  return createPortal(
+  return (
     <main className="simulado-fullscreen simulado-prova">
       <div className="simulado-prova-inicio">
         <div className="simulado-prova-cabecalho">
           <div className="simulado-prova-cabecalho-texto">
             <button type="button" className="simulado-prova-voltar" onClick={voltarParaSimulados} disabled={salvandoResultado}>
-              ‹ Simulados
+              <span className="simulado-prova-voltar-seta" aria-hidden="true">‹</span> Simulados
             </button>
             <span className="simulado-prova-kicker">Simulado em andamento</span>
             <h1>{simuladoSelecionado.titulo}</h1>
@@ -58,7 +57,6 @@ export function TelaSimulado({
             <div className="simulado-prova-progresso-titulos">
               <div>
                 <strong>{respondidas} de {questoes.length} questões respondidas</strong>
-                <span>{pendentes === 0 ? 'Todas respondidas. Revise antes de finalizar.' : `${pendentes} ${pendentes === 1 ? 'questão pendente' : 'questões pendentes'}`}</span>
               </div>
               <strong className="simulado-prova-porcentagem">{progresso}%</strong>
             </div>
@@ -72,9 +70,10 @@ export function TelaSimulado({
                   type="button"
                   className={`simulado-prova-numero ${respostas[questao.id] ? 'respondida' : 'pendente'}`}
                   onClick={() => irParaQuestao(index)}
-                  aria-label={`Ir para questão ${index + 1}, ${respostas[questao.id] ? 'respondida' : 'não respondida'}`}
+                  aria-label={`Ir para questão ${index + 1}${respostas[questao.id] ? `, alternativa ${respostas[questao.id]} selecionada` : ', não respondida'}`}
                 >
-                  {index + 1}
+                  <span className="simulado-prova-numero-indice">{index + 1}</span>
+                  {respostas[questao.id] && <span className="simulado-prova-numero-alternativa">{respostas[questao.id]}</span>}
                 </button>
               ))}
             </nav>
@@ -91,7 +90,6 @@ export function TelaSimulado({
                     {respostas[questao.id] ? '✓ Respondida' : 'Não respondida'}
                   </span>
                 </div>
-                {questao.materia && <span className="simulado-prova-materia">{questao.materia}</span>}
                 <h2 id={`titulo-questao-${questao.id}`}>{questao.pergunta}</h2>
                 <div className="simulado-prova-opcoes" role="group" aria-label={`Alternativas da questão ${index + 1}`}>
                   {[
@@ -111,9 +109,6 @@ export function TelaSimulado({
                       <span>{texto}</span>
                     </button>
                   ))}
-                </div>
-                <div className="simulado-prova-questao-rodape">
-                  <small>{respostas[questao.id] ? 'Você pode alterar esta resposta antes de finalizar.' : 'Selecione uma alternativa para responder.'}</small>
                 </div>
               </section>
             ))}
@@ -147,7 +142,6 @@ export function TelaSimulado({
           )}
         </>
       )}
-    </main>,
-    document.body
+    </main>
   );
 }

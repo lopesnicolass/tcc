@@ -74,7 +74,7 @@
 .provas-page .provas-header-copy h1 {
   margin: 0 0 8px;
   color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(25px, 3vw, 34px);
   line-height: 1.08;
 }
@@ -195,14 +195,14 @@
 .provas-page .prova-card-copy h2 span {
   font-size: 18px;
   font-weight: 700;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .provas-page .prova-card-copy h2 strong {
   color: var(--accent);
   font-size: clamp(34px, 4vw, 44px);
   font-weight: 800;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .provas-page .prova-card-visual {
@@ -243,7 +243,7 @@
   display: block;
   margin-bottom: 12px;
   color: var(--accent);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 23px;
   line-height: 1;
 }
@@ -406,3 +406,83 @@ html[data-theme='dark'] .provas-page .prova-sheet-marks b {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Tela de provas anteriores — visual simplificado */
+.provas-page { padding-bottom: 56px; }
+.provas-page .provas-header-card { padding: 30px 32px; margin-bottom: 24px; gap: 0; background: #1755a6; border-radius: 22px; box-shadow: none; }
+.provas-page .provas-header-card::before, .provas-page .provas-header-card::after { display: none; }
+.provas-page .provas-header-copy { max-width: none; }
+.provas-page .provas-eyebrow { font-size: 11px; margin-bottom: 9px; }
+.provas-page .provas-header-copy h1 { font-size: clamp(27px, 3vw, 35px); margin-bottom: 10px; }
+.provas-page .provas-header-copy p { font-size: 15px; line-height: 1.5; }
+.provas-page .provas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.provas-page .prova-card { min-height: 225px; padding: 26px; gap: 28px; border-radius: 20px; box-shadow: none; justify-content: space-between; }
+.provas-page .prova-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -22px rgba(13,71,161,.4); }
+.provas-page .prova-card-main { align-items: flex-start; }
+.provas-page .prova-card-copy { gap: 9px; }
+.provas-page .prova-card-kicker { font-size: 11px; letter-spacing: .09em; }
+.provas-page .prova-card-copy h2 { display: block; font-family: 'Inter', sans-serif; font-size: clamp(38px, 4vw, 50px); line-height: 1.05; font-weight: 800; color: var(--ink); }
+.provas-page .prova-card-description { margin: 0; font-size: 14px; color: var(--muted); }
+.provas-page .prova-links { gap: 12px; }
+.provas-page .prova-links a { height: 46px; font-size: 14px; border-radius: 12px; }
+@media (max-width: 850px) { .provas-page .provas-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .provas-page .provas-header-card { padding: 24px; } .provas-page .prova-card { min-height: 0; padding: 22px; } }
+@media (max-width: 460px) { .provas-page .prova-links { grid-template-columns: 1fr; } }
+
+.provas-page .provas-header-card, .provas-page .provas-header-card h1, .provas-page .provas-header-card p, .provas-page .provas-eyebrow { color: #fff; }
+.provas-page .prova-card { background: var(--card, #fff); border: 1px solid var(--line, #d7e4f3); }
+.provas-page .prova-card-copy h2 { color: #1755a6; }
+.provas-page .prova-card-description { color: #5b7597; }
+.provas-page .prova-links a { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+/* Cards compactos de arquivos PDF: tres colunas em telas largas */
+.provas-page .provas-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.provas-page .prova-card {
+  min-width: 0;
+  min-height: 196px;
+  padding: 20px;
+  gap: 16px;
+  border-radius: 18px;
+}
+.provas-page .prova-card-main {
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 12px;
+}
+.provas-page .prova-card-copy { flex: 1; gap: 6px; }
+.provas-page .prova-card-copy h2 { font-size: clamp(32px, 3vw, 42px); }
+.provas-page .prova-card-description { font-size: 12px; }
+.provas-page .prova-pdf-icon {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 62px;
+  border-radius: 12px;
+  background: #eaf3ff;
+  color: #1755a6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+}
+.provas-page .prova-pdf-icon svg { width: 25px; height: 25px; }
+.provas-page .prova-links { gap: 8px; }
+.provas-page .prova-links a { height: 40px; font-size: 12px; padding: 0 8px; }
+@media (max-width: 1100px) {
+  .provas-page .provas-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .provas-page .provas-grid { grid-template-columns: 1fr; }
+  .provas-page .prova-card-main { flex-direction: row-reverse; }
+}
+@media (max-width: 460px) {
+  .provas-page .prova-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+html[data-theme='dark'] .provas-page .prova-pdf-icon { background: #1c416e; color: #b9d9ff; }

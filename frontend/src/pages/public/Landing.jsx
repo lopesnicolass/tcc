@@ -1,5 +1,5 @@
 import '../../styles/public/Landing.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tennaLogo from '../../assets/tenna_logo.webp';
 import { API_URL } from '../../services/api.js';
@@ -192,57 +192,6 @@ const STEPS = [
 export default function Landing() {
   const navigate = useNavigate();
 
-  const mascotRef = useRef(null);
-  const dragRef = useRef(null);
-  const [mascotPosition, setMascotPosition] = useState(null);
-  const [mascotDragging, setMascotDragging] = useState(false);
-
-  const handleMascotPointerDown = (event) => {
-    if (event.button !== 0 && event.pointerType === 'mouse') return;
-    const bounds = mascotRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    dragRef.current = {
-      pointerId: event.pointerId,
-      offsetX: event.clientX - bounds.left,
-      offsetY: event.clientY - bounds.top,
-    };
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setMascotDragging(true);
-  };
-
-  const handleMascotPointerMove = (event) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-    const bounds = mascotRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    const x = Math.max(0, Math.min(window.innerWidth - bounds.width, event.clientX - drag.offsetX));
-    const y = Math.max(0, Math.min(window.innerHeight - bounds.height, event.clientY - drag.offsetY));
-    setMascotPosition({ x, y });
-  };
-
-  const handleMascotPointerEnd = (event) => {
-    if (dragRef.current?.pointerId !== event.pointerId) return;
-    dragRef.current = null;
-    setMascotDragging(false);
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
-
-  useEffect(() => {
-    if (!mascotPosition) return;
-    const keepMascotOnScreen = () => {
-      const bounds = mascotRef.current?.getBoundingClientRect();
-      if (!bounds) return;
-      setMascotPosition((pos) => pos && ({
-        x: Math.max(0, Math.min(window.innerWidth - bounds.width, pos.x)),
-        y: Math.max(0, Math.min(window.innerHeight - bounds.height, pos.y)),
-      }));
-    };
-    window.addEventListener('resize', keepMascotOnScreen);
-    return () => window.removeEventListener('resize', keepMascotOnScreen);
-  }, [mascotPosition !== null]);
-
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
   const [subjects, setSubjects] = useState(SUBJECTS);
@@ -385,10 +334,7 @@ export default function Landing() {
               Entrar
             </button>
             <button type="button" className="landing-nav-btn" onClick={goToCadastro}>
-              Começar 
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              Começar
             </button>
             <button
               type="button"
@@ -411,7 +357,7 @@ export default function Landing() {
             <a href="#recursos" onClick={() => handleNavLink('recursos')} className={activeSection === 'recursos' ? 'is-active' : ''}>Recursos</a>
             <a href="#como-funciona" onClick={() => handleNavLink('como-funciona')} className={activeSection === 'como-funciona' ? 'is-active' : ''}>Como funciona</a>
             <button type="button" className="landing-mobile-register" onClick={goToCadastro}>
-              Criar conta  <span aria-hidden="true">→</span>
+              Criar conta
             </button>
           </nav>
         )}
@@ -473,9 +419,6 @@ export default function Landing() {
                 onClick={goToCadastro}
               >
                 <span className="btn-label">Criar conta</span>
-                <svg className="landing-cta-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
               </button>
 
 
@@ -721,9 +664,6 @@ export default function Landing() {
             <span className="btn-label">
               Criar conta 
 </span>
-            <svg className="landing-cta-arrow" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 12h14m-6-6 6 6-6 6" />
-            </svg>
           </button>
 
         </div>
@@ -735,25 +675,10 @@ export default function Landing() {
           FOOTER
       ===================================================== */}
 
-      <div
-        ref={mascotRef}
-        className={`landing-floating-mascot${mascotDragging ? ' is-dragging' : ''}`}
-        style={mascotPosition ? { left: mascotPosition.x, top: mascotPosition.y, bottom: 'auto' } : undefined}
-        onPointerDown={handleMascotPointerDown}
-        onPointerMove={handleMascotPointerMove}
-        onPointerUp={handleMascotPointerEnd}
-        onPointerCancel={handleMascotPointerEnd}
-        role="img"
-        aria-label="Mascote Tenna. Arraste para mudar de posição."
-        title="Arraste a Tenna para onde quiser"
-      >
-        <img src={`${import.meta.env.BASE_URL}tenna-formiga-estudando.png`} alt="" draggable="false" />
-      </div>
-
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           
-          <span>© {new Date().getFullYear()} Tenna. Todos os direitos reservados.</span>
+          <span>© {new Date().getFullYear()} Tenna.</span>
         </div>
       </footer>
 

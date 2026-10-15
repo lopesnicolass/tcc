@@ -2,14 +2,6 @@ import '../../styles/aluno/Provas.css';
 import { useEffect, useState } from 'react';
 import { API_URL, request } from '../../services/api.js';
 
-function obterResumoPassos() {
-  return [
-    { numero: '01', titulo: 'Abra a prova' },
-    { numero: '02', titulo: 'Resolva com calma' },
-    { numero: '03', titulo: 'Confira o gabarito' },
-  ];
-}
-
 export default function Provas() {
   const [provas, setProvas] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -37,8 +29,6 @@ export default function Provas() {
     };
   }, []);
 
-  const passos = obterResumoPassos();
-
   return (
     <div className="provas-page page-shell">
       <section className="provas-header-card" aria-labelledby="provas-titulo">
@@ -48,14 +38,6 @@ export default function Provas() {
           <p>Treine com edições anteriores e confira o gabarito quando terminar.</p>
         </div>
 
-        <div className="provas-header-steps" aria-label="Como usar as provas">
-          {passos.map((passo) => (
-            <div className="provas-step-pill" key={passo.numero}>
-              <span>{passo.numero}</span>
-              <strong>{passo.titulo}</strong>
-            </div>
-          ))}
-        </div>
       </section>
 
       {carregando && <p className="provas-feedback">Carregando provas...</p>}
@@ -68,34 +50,23 @@ export default function Provas() {
 
       {!carregando && !erro && provas.length > 0 && (
         <section className="provas-grid" aria-label="Lista de provas anteriores">
-          {provas.map((prova, indice) => (
+          {provas.map((prova) => (
             <article className="prova-card" key={prova.id}>
               <div className="prova-card-main">
+                <span className="prova-pdf-icon" aria-label="Arquivo PDF" title="Arquivo PDF">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M7 2.5h7l5 5V21H7a2 2 0 0 1-2-2V4.5a2 2 0 0 1 2-2Z"/>
+                    <path d="M14 2.5V8h5"/>
+                    <path d="M8 13h8M8 16h8"/>
+                  </svg>
+                  <span>PDF</span>
+                </span>
                 <div className="prova-card-copy">
-                  <span className="prova-card-kicker">Vestibulinho ETEC</span>
-                  <h2>
-                    <span>Prova</span>
-                    <strong>{prova.ano}</strong>
-                  </h2>
+                  <span className="prova-card-kicker">Prova anterior · ETEC</span>
+                  <h2>{prova.ano}</h2>
+                  <p className="prova-card-description">Questões oficiais do Vestibulinho</p>
                 </div>
 
-                <div className={`prova-card-visual prova-card-visual-${indice % 3}`} aria-hidden="true">
-                  <div className="prova-sheet prova-sheet-back" />
-                  <div className="prova-sheet prova-sheet-front">
-                    <span className="prova-sheet-brand">ETEC</span>
-                    <strong className="prova-sheet-year">{prova.ano}</strong>
-                    <div className="prova-sheet-lines">
-                      <i />
-                      <i />
-                      <i />
-                    </div>
-                    <div className="prova-sheet-marks">
-                      <b />
-                      <b />
-                      <b />
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <div className="prova-links">

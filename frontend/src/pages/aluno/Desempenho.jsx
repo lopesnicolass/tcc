@@ -302,16 +302,6 @@ export default function Desempenho() {
         );
 
 
-    const progressoMeta =
-        Math.min(
-            100,
-            (
-                mediaGeral /
-                META
-            ) * 100
-        );
-
-
     const resultadosCronologicos =
         useMemo(
             () =>
@@ -556,40 +546,6 @@ export default function Desempenho() {
         ]);
 
 
-    const pontosGrafico =
-        useMemo(() => {
-
-            if (
-                !resultadosCronologicos.length
-            ) {
-                return [];
-            }
-
-
-            return resultadosCronologicos.map(
-                (
-                    resultado,
-                    index
-                ) => {
-
-                    const valor =
-                        limitar(
-                            resultado.porcentagem
-                        );
-
-
-                    return {
-                        valor,
-                        index,
-                        resultado
-                    };
-
-                }
-            );
-
-        }, [resultadosCronologicos]);
-
-
     const materiasAnalisadas = useMemo(() => analisarResultadosPorMateria(resultados), [resultados]);
     const sugestoesRevisao = useMemo(() => sugerirRevisoes(resultados), [resultados]);
     const evolucaoComparativa = useMemo(() => resumirEvolucao(resultadosCronologicos), [resultadosCronologicos]);
@@ -693,13 +649,11 @@ export default function Desempenho() {
                     tendencia
                 }
 
-                progressoMeta={
-                    progressoMeta
-                }
-
                 melhorResultado={
                     melhorResultado
                 }
+
+                possuiResultados={resultados.length > 0}
 
                 porcentagem={
                     porcentagem
@@ -744,10 +698,6 @@ export default function Desempenho() {
             <GraficoEvolucao
                 resultadosCronologicos={
                     resultadosCronologicos
-                }
-
-                pontosGrafico={
-                    pontosGrafico
                 }
 
                 obterNomeSimulado={
@@ -800,10 +750,6 @@ export default function Desempenho() {
                     mediaGeral
                 }
 
-                progressoMeta={
-                    progressoMeta
-                }
-
                 faltamParaMeta={
                     faltamParaMeta
                 }
@@ -819,6 +765,9 @@ export default function Desempenho() {
                 mensagemConsistencia={
                     mensagemConsistencia
                 }
+
+                possuiResultados={resultados.length > 0}
+                totalResultados={resultados.length}
             />
 
 

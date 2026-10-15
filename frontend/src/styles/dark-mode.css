@@ -92,7 +92,7 @@ html[data-theme='dark'] .dashboard-content {
   box-shadow: 0 12px 30px rgba(13, 71, 161, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font: 700 12px/1 "IBM Plex Sans", sans-serif;
+  font: 700 12px/1 "Inter", sans-serif;
   cursor: pointer;
   transition: transform .18s var(--bouncy), background .18s ease, border-color .18s ease, box-shadow .18s ease;
 }

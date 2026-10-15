@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar.jsx';
 import MobileNavigationBar from '../components/MobileNavigationBar.jsx';
 import '../styles/dashboard.css';
 import '../styles/mobile-responsive.css';
+import '../styles/student-sidebar-refined.css';
 
 export default function DashboardLayout() {
   const location = useLocation();

@@ -5,7 +5,7 @@
 .mural-btn{
   display:flex; align-items:center; gap:9px;
   border:none; border-radius:var(--radius-md); padding:12px 18px;
-  font-family:"IBM Plex Sans"; font-size:15px; font-weight:600;
+  font-family:"Inter"; font-size:15px; font-weight:600;
   cursor:pointer; transition:background .15s ease, transform .18s var(--bouncy), box-shadow .18s ease;
 }
 
@@ -29,7 +29,7 @@
   border:1.5px solid var(--line);
   border-radius:var(--radius-md);
   padding:12px 16px;
-  font-family:"IBM Plex Sans";
+  font-family:"Inter";
   font-size:15px;
   color:var(--ink);
   background:var(--card);
@@ -153,7 +153,7 @@
   display:block;
   margin-bottom:7px;
   color:rgba(255,255,255,.72);
-  font-family:"IBM Plex Sans", sans-serif;
+  font-family:"Inter", sans-serif;
   font-size:12px;
   font-weight:700;
   letter-spacing:.12em;

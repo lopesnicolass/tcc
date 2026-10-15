@@ -14,6 +14,14 @@ export default function Simulados() {
   const [simulados, setSimulados] = useState([]);
   const [filtro, setFiltro] = useState('Todas');
 
+  // Permite retornar às categorias ao clicar em Simulados na sidebar,
+  // mesmo quando a rota atual já é /simulados.
+  useEffect(() => {
+    const voltarAoInicio = () => setFiltro('Todas');
+    window.addEventListener('tenna:simulados-inicio', voltarAoInicio);
+    return () => window.removeEventListener('tenna:simulados-inicio', voltarAoInicio);
+  }, []);
+
   const [simuladoSelecionado, setSimuladoSelecionado] =
     useState(null);
 

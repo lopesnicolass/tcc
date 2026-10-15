@@ -1,0 +1,647 @@
+/* ============================================================
+   TENNA — SIDEBAR DO ESTUDANTE
+   Refinamento visual isolado. Não altera a sidebar do admin.
+   Importar após dashboard.css e mobile-responsive.css.
+   ============================================================ */
+
+.student-area .student-sidebar {
+  gap: 0;
+  padding-bottom: 18px;
+  background: linear-gradient(175deg, #174d9f 0%, #154996 54%, #10418c 100%);
+  border-right: 1px solid rgba(10, 44, 94, .15);
+  box-shadow: 8px 0 28px -22px rgba(7, 38, 89, .38);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 226, 255, .35) transparent;
+}
+
+/* Cabeçalho compacto e logo original sem filtros. */
+.student-area .student-sidebar .student-sidebar-brand {
+  min-height: 106px;
+  padding: 20px 20px;
+  background: #0a294f;
+  border-bottom-color: rgba(184, 218, 255, .13);
+}
+
+.student-area .student-sidebar .sidebar-logo-full {
+  width: min(178px, calc(100% - 44px));
+}
+
+.student-area .student-sidebar .sidebar-collapse-btn {
+  width: 32px;
+  height: 32px;
+  flex-basis: 32px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.075);
+  border-color: rgba(194,224,255,.20);
+  color: #d5e9ff;
+  transition: background .18s ease, border-color .18s ease;
+}
+.student-area .student-sidebar .sidebar-collapse-btn:hover {
+  background: rgba(255,255,255,.17);
+  border-color: rgba(220,239,255,.42);
+  transform: none;
+}
+
+/* Navegação: melhor hierarquia, alinhamento e contraste. */
+.student-area .student-sidebar .sidebar-nav {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 15px;
+  margin-bottom: 12px;
+  gap: 3px;
+  padding: 0 1px 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(195,222,255,.25) transparent;
+}
+
+.student-area .student-sidebar .sidebar-nav::before {
+  content: 'MENU';
+  display: block;
+  flex: 0 0 auto;
+  padding: 0 13px;
+  margin: 0 0 7px;
+  color: #9fc5f3;
+  font: 750 10px/1.5 Inter, system-ui, sans-serif;
+  letter-spacing: .15em;
+}
+
+.student-area .student-sidebar .sidebar-link {
+  position: relative;
+  width: 100%;
+  min-height: 43px;
+  padding: 4px 10px;
+  gap: 11px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: #c4d9f7;
+  font: 600 13px/1.25 Inter, system-ui, sans-serif;
+  letter-spacing: -.01em;
+  transform: none;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.student-area .student-sidebar .sidebar-link svg {
+  width: 18px;
+  height: 18px;
+  padding: 6px;
+  box-sizing: content-box;
+  border: 1px solid rgba(208,230,255,.08);
+  border-radius: 9px;
+  background: rgba(255,255,255,.045);
+  color: #bedaff;
+  stroke-width: 1.8;
+  transition: background .18s ease, color .18s ease;
+}
+
+.student-area .student-sidebar .sidebar-link:hover {
+  background: rgba(255,255,255,.09);
+  border-color: rgba(219,238,255,.075);
+  color: #fff;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-link:hover svg {
+  transform: none;
+  background: rgba(255,255,255,.10);
+  color: #fff;
+}
+
+.student-area .student-sidebar .sidebar-link.active,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active {
+  background: linear-gradient(100deg, rgba(255,255,255,.21), rgba(255,255,255,.12));
+  border-color: rgba(195,224,255,.25);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 5px 13px rgba(4,32,80,.10);
+}
+
+.student-area .student-sidebar .sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: #8ad7ff;
+}
+
+.student-area .student-sidebar .sidebar-link.active svg {
+  background: rgba(255,255,255,.17);
+  border-color: rgba(255,255,255,.16);
+  color: #fff;
+}
+
+.student-area .student-sidebar .sidebar-link:focus-visible,
+.student-area .student-sidebar .sidebar-streak:focus-visible,
+.student-area .student-sidebar .student-theme-toggle:focus-visible {
+  outline: 2px solid #9cddff;
+  outline-offset: 2px;
+}
+
+/* Separadores sutis para distinguir navegação, estudos e conta. */
+.student-area .student-sidebar .sidebar-link[href$='/conteudos'],
+.student-area .student-sidebar .sidebar-link[href$='/perfil'] {
+  margin-top: 12px;
+}
+.student-area .student-sidebar .sidebar-link[href$='/conteudos']::after,
+.student-area .student-sidebar .sidebar-link[href$='/perfil']::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: rgba(202,226,255,.13);
+  pointer-events: none;
+}
+
+/* Alternância de tema com o mesmo acabamento dos links. */
+.student-area .student-sidebar .student-theme-toggle-wrap {
+  width: 100%;
+  flex: 0 0 auto;
+  margin: 0 0 14px;
+}
+.student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle,
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle {
+  width: 100%;
+  min-height: 43px;
+  padding: 6px 10px;
+  gap: 11px;
+  border: 1px solid rgba(210,233,255,.14);
+  border-radius: 12px;
+  background: rgba(255,255,255,.075);
+  color: #e2efff;
+  font: 650 12.5px/1.2 Inter, system-ui, sans-serif;
+  box-shadow: none;
+  transform: none;
+}
+.student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle:hover,
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(210,233,255,.25);
+  transform: none;
+  box-shadow: none;
+}
+.student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(232,244,255,.96);
+  color: #1658b0;
+}
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle-icon {
+  background: rgba(232,244,255,.16);
+  color: #ffdc87;
+}
+
+/* Sequência: mais compacta, com informação clara e sem brilho excessivo. */
+.student-area .student-sidebar .sidebar-streak {
+  flex: 0 0 auto;
+  min-height: 82px;
+  padding: 10px;
+  gap: 9px;
+  margin-top: auto;
+  border-radius: 15px;
+  border: 1px solid rgba(179,220,255,.20);
+  background: linear-gradient(115deg, rgba(255,255,255,.13), rgba(255,255,255,.07));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+}
+.student-area .student-sidebar .sidebar-streak:hover {
+  transform: none;
+  border-color: rgba(196,230,255,.35);
+  background: linear-gradient(115deg, rgba(255,255,255,.17), rgba(255,255,255,.09));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09);
+}
+.student-area .student-sidebar .sidebar-streak::after { display: none; }
+.student-area .student-sidebar .sidebar-streak-visual {
+  width: 46px;
+  height: 50px;
+  flex-basis: 46px;
+}
+.student-area .student-sidebar .sidebar-streak-flame {
+  width: 34px;
+  height: 41px;
+  animation-duration: 3s;
+}
+.student-area .student-sidebar .sidebar-streak-heading strong {
+  font: 800 24px/1 Inter, system-ui, sans-serif;
+  letter-spacing: -.035em;
+}
+.student-area .student-sidebar .sidebar-streak-heading span {
+  font: 650 11px/1 Inter, system-ui, sans-serif;
+}
+.student-area .student-sidebar .sidebar-streak-label {
+  font-size: 10px;
+}
+.student-area .student-sidebar .sidebar-streak-progress { margin-top: 7px; height: 6px; }
+.student-area .student-sidebar .sidebar-streak-message { font-size: 9px; }
+.student-area .student-sidebar .sidebar-streak-arrow { font-size: 25px; }
+
+/* Recolhida: ícones centrados, sem rótulos nem divisórias extras. */
+.student-area .student-sidebar.sidebar-collapsed {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+  min-height: 80px;
+  padding: 16px 12px;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-nav {
+  margin-top: 16px;
+  gap: 5px;
+  padding-right: 0;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-nav::before { display: none; }
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link {
+  min-height: 46px;
+  padding: 5px 0;
+  justify-content: center;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link.active::before { left: 2px; }
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/conteudos'],
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/perfil'] { margin-top: 4px; }
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/conteudos']::after,
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/perfil']::after { display: none; }
+.student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap {
+  width: 100%;
+  margin: 0 0 12px;
+}
+.student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle {
+  width: 100%;
+  min-width: 0;
+  padding: 5px;
+  justify-content: center;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+  min-height: 54px;
+  height: 54px;
+  padding: 0;
+  justify-content: center;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-streak-visual {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+}
+
+/* A gaveta móvel mantém links e rótulos acessíveis. */
+@media (max-width: 760px) {
+  .student-area .student-sidebar,
+  .student-area .student-sidebar.sidebar-collapsed {
+    gap: 0;
+    padding: 0 16px 18px;
+  }
+  .student-area .student-sidebar .student-sidebar-brand,
+  .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+    min-height: 94px;
+    margin: 0 -16px;
+    padding: 18px 54px 18px 20px;
+  }
+  .student-area .student-sidebar .sidebar-nav,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-nav {
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
+    margin: 14px 0 16px;
+    gap: 3px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-nav::before { display: block; }
+  .student-area .student-sidebar .sidebar-link,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link {
+    justify-content: flex-start;
+    min-height: 43px;
+    padding: 4px 10px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/conteudos'],
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/perfil'] { margin-top: 12px; }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/conteudos']::after,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/perfil']::after { display: block; }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link.active::before { left: 3px; }
+  .student-area .student-sidebar .student-theme-toggle-wrap,
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap { margin: 0 0 16px; }
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 6px 10px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle-label { display: inline; }
+  .student-area .student-sidebar .sidebar-streak,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+    margin-top: auto;
+    min-height: 82px;
+    height: auto;
+    padding: 10px;
+    justify-content: flex-start;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak-visual {
+    width: 46px;
+    height: 50px;
+    flex-basis: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-area .student-sidebar .sidebar-streak-flame { animation: none; }
+  .student-area .student-sidebar .sidebar-link,
+  .student-area .student-sidebar .sidebar-link svg,
+  .student-area .student-sidebar .sidebar-collapse-btn { transition: none; }
+}
+
+/* ============================================================
+   TENNA — SIDEBAR AZUL UNIFORME (fundo mais escuro)
+   Uma única cor para toda a barra, incluindo o cabeçalho.
+   Somente a opção ativa recebe outro tom de azul.
+   Mantém os comportamentos de navegação, recolhimento e mobile.
+   ============================================================ */
+
+.student-area .student-sidebar,
+html[data-theme='dark'] .student-area .student-sidebar {
+  background: #092a53;
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  box-shadow: 8px 0 26px -22px rgba(6, 26, 60, .3);
+}
+
+/* O cabeçalho deixa de ter uma faixa com outra cor. */
+.student-area .student-sidebar .student-sidebar-brand,
+.student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand,
+html[data-theme='dark'] .student-area .student-sidebar .student-sidebar-brand,
+html[data-theme='dark'] .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+  background: #092a53;
+  border-bottom: 0;
+  border-right: 0;
+}
+
+/* Volta ao menu simples, sem título MENU e sem divisórias. */
+.student-area .student-sidebar .sidebar-nav {
+  margin-top: 16px;
+  gap: 4px;
+}
+.student-area .student-sidebar .sidebar-nav::before,
+.student-area .student-sidebar.sidebar-collapsed .sidebar-nav::before {
+  content: none;
+  display: none;
+}
+.student-area .student-sidebar .sidebar-link[href$='/conteudos'],
+.student-area .student-sidebar .sidebar-link[href$='/perfil'],
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/conteudos'],
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link[href$='/perfil'] {
+  margin-top: 0;
+}
+.student-area .student-sidebar .sidebar-link[href$='/conteudos']::after,
+.student-area .student-sidebar .sidebar-link[href$='/perfil']::after {
+  content: none;
+  display: none;
+}
+
+/* Ícone diretamente sobre o fundo, como na versão anterior. */
+.student-area .student-sidebar .sidebar-link,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link {
+  min-height: 44px;
+  padding: 0 12px;
+  gap: 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: #d1e2fc;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: none;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-link svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link svg {
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: currentColor;
+  stroke-width: 1.8;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-link:hover,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover {
+  background: #1a5098;
+  border-color: transparent;
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-link:hover svg,
+.student-area .student-sidebar .sidebar-link.active svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active svg {
+  background: transparent;
+  border: 0;
+  color: currentColor;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-link.active,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active {
+  /* Azul principal da identidade Tenna, também usado nas demais telas. */
+  background: var(--color-primary-600, #176dcc);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+}
+.student-area .student-sidebar .sidebar-link.active::before,
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link.active::before {
+  content: none;
+  display: none;
+}
+
+/* O botão de tema e o card de sequência mantêm seus recursos. */
+.student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle,
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle {
+  background: rgba(255, 255, 255, .075);
+  border-color: rgba(255, 255, 255, .14);
+}
+.student-area .student-sidebar .sidebar-streak {
+  background: rgba(255, 255, 255, .085);
+  border-color: rgba(255, 255, 255, .15);
+}
+.student-area .student-sidebar .sidebar-streak:hover {
+  background: rgba(255, 255, 255, .13);
+}
+
+/* A versão recolhida continua com ícones centralizados. */
+.student-area .student-sidebar.sidebar-collapsed .sidebar-link {
+  padding: 0;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
+  .student-area .student-sidebar .sidebar-nav,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-nav {
+    margin-top: 12px;
+    gap: 4px;
+  }
+  .student-area .student-sidebar .sidebar-link,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link {
+    min-height: 45px;
+    padding: 0 12px;
+    justify-content: flex-start;
+  }
+}
+
+
+/* ============================================================
+   TENNA — CARTÃO DE SEQUÊNCIA REFINADO
+   Fogo vetorial discreto, sem emoji ou brilho excessivo, com
+   progresso em 7 etapas. Mantém a lógica e o modal originais. Ajustes exclusivos da sidebar do aluno.
+   ============================================================ */
+.student-area .student-sidebar .sidebar-streak {
+  min-height: 94px;
+  padding: 12px 11px;
+  gap: 10px;
+  border: 1px solid rgba(180, 215, 255, .20);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .065);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+  transition: background-color .18s ease, border-color .18s ease;
+}
+.student-area .student-sidebar .sidebar-streak:hover {
+  transform: none;
+  background: rgba(255, 255, 255, .105);
+  border-color: rgba(187, 224, 255, .33);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+.student-area .student-sidebar .sidebar-streak-visual {
+  display: flex;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+/* Esconde o fogo antigo do JSX para mostrar a nova versão vetorial. */
+.student-area .student-sidebar .sidebar-streak-flame,
+.student-area .student-sidebar .sidebar-streak-glow,
+.student-area .student-sidebar .sidebar-streak-spark {
+  display: none;
+  animation: none;
+  filter: none;
+}
+.student-area .student-sidebar .sidebar-streak-visual::before {
+  content: '';
+  display: block;
+  width: 35px;
+  height: 38px;
+  flex: 0 0 35px;
+  background: transparent url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22flame%22%20x1%3D%225%22%20y1%3D%224%22%20x2%3D%2219%22%20y2%3D%2222%22%20gradientUnits%3D%22userSpaceOnUse%22%3E%3Cstop%20stop-color%3D%22%23FFC05A%22%2F%3E%3Cstop%20offset%3D%220.48%22%20stop-color%3D%22%23FF923A%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23F66B2C%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20d%3D%22M12%2022c4.4%200%208-3.6%208-8%200-3.6-1.9-6.7-5.6-9.6.1%202.8-1.1%204.4-2.5%205.2C12.4%205.8%2010.9%203.3%208.6%202c.2%203.2-1.3%205.5-3%207.8C4.5%2011.2%204%2012.8%204%2014c0%204.4%203.6%208%208%208Z%22%20fill%3D%22url%28%23flame%29%22%2F%3E%3Cpath%20d%3D%22M12%2019.6c2%200%203.6-1.6%203.6-3.6%200-1.6-.9-3-2.4-4.2.1%201.7-1%202.6-2%203.4-1%201-1.4%201.9-1.4%202.6%200%201.1.9%201.8%202.2%201.8Z%22%20fill%3D%22%23FFF0BB%22%2F%3E%3C%2Fsvg%3E") center / contain no-repeat;
+  -webkit-mask: none;
+  mask: none;
+}
+.student-area .student-sidebar .sidebar-streak-content {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.student-area .student-sidebar .sidebar-streak-heading {
+  align-items: baseline;
+  gap: 4px;
+}
+.student-area .student-sidebar .sidebar-streak-heading strong {
+  font: 800 29px/1 Inter, system-ui, sans-serif;
+  letter-spacing: -.045em;
+  color: #fff;
+}
+.student-area .student-sidebar .sidebar-streak-heading span {
+  font: 650 11px/1 Inter, system-ui, sans-serif;
+  color: #d8eaff;
+}
+.student-area .student-sidebar .sidebar-streak-label {
+  margin-top: 3px;
+  color: #c4daf5;
+  font: 500 10px/1.2 Inter, system-ui, sans-serif;
+}
+/* Sete pequenas barras, uma para cada dia. */
+.student-area .student-sidebar .sidebar-streak-progress {
+  height: 7px;
+  margin-top: 9px;
+  overflow: visible;
+  background: transparent;
+}
+.student-area .student-sidebar .sidebar-streak-progress-fill {
+  display: none;
+}
+.student-area .student-sidebar .sidebar-streak-dots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 3px;
+  padding: 0;
+}
+.student-area .student-sidebar .sidebar-streak-dots span {
+  width: 100%;
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(221, 236, 255, .22);
+  transform: none;
+  transition: background-color .18s ease;
+}
+.student-area .student-sidebar .sidebar-streak-dots span.is-complete {
+  background: #279aff;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-streak-complete .sidebar-streak-dots span.is-complete {
+  background: #279aff;
+}
+.student-area .student-sidebar .sidebar-streak-message {
+  margin-top: 6px;
+  color: #bbd2f0;
+  font: 500 9.5px/1.3 Inter, system-ui, sans-serif;
+}
+.student-area .student-sidebar .sidebar-streak-arrow {
+  margin-left: 0;
+  color: #bed6f6;
+  font-size: 24px;
+  line-height: 1;
+  transform: none;
+}
+.student-area .student-sidebar .sidebar-streak:hover .sidebar-streak-arrow {
+  color: #fff;
+  transform: none;
+}
+/* Na barra recolhida, somente o ícone centralizado fica visível. */
+.student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+  height: 56px;
+  min-height: 56px;
+  padding: 0;
+  justify-content: center;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-streak-visual {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 0;
+}
+.student-area .student-sidebar.sidebar-collapsed .sidebar-streak-visual::before {
+  width: 30px;
+  height: 33px;
+  flex-basis: 30px;
+}
+@media (max-width: 760px) {
+  .student-area .student-sidebar .sidebar-streak,
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+    height: auto;
+    min-height: 94px;
+    padding: 12px 11px;
+    justify-content: flex-start;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak-visual {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+}

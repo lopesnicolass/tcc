@@ -1,99 +1,144 @@
-/* Espaçamento lateral consistente com as demais telas do aluno. */
+/* Desempenho — identidade visual Tenna, escopo isolado da página. */
 .desempenho-page {
+  --des-azul: #1659b0;
+  --des-azul-claro: #2389ee;
+  --des-escuro: #143a68;
+  --des-texto: #273f5d;
+  --des-muted: #607995;
+  --des-borda: #d6e3f2;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding-bottom: 40px;
+  padding-bottom: 48px;
+  color: var(--des-texto);
 }
-
-/* Estilos da página Desempenho */
-
-/* Os grids abaixo ficavam só inline nos componentes (sem CSS
-   nenhum), então não tinham como colapsar em telas pequenas.
-   As classes aqui substituem só a parte de layout (display,
-   grid-template-columns, gap, margin-bottom); o resto de cada
-   componente continua com estilo inline normalmente. */
-
-.desempenho-split-hero {
-  display: grid;
-  grid-template-columns: 1.45fr 0.55fr;
-  gap: 22px;
-  margin-bottom: 22px;
+.desempenho-page *, .desempenho-page *::before, .desempenho-page *::after { box-sizing: border-box; }
+.desempenho-page button { font: inherit; cursor: pointer; }
+.desempenho-page button:focus-visible, .desempenho-page a:focus-visible,
+.desempenho-grafico-rolagem:focus-visible, .desempenho-grafico circle[role="button"]:focus-visible {
+  outline: 3px solid #64a9ef;
+  outline-offset: 3px;
 }
-
-.desempenho-split-comparacao {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 22px;
-  margin-bottom: 22px;
+.desempenho-hero { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(260px, .9fr); gap: 16px; margin-bottom: 16px; }
+.desempenho-hero-principal {
+  background: linear-gradient(110deg, #1556ac, #2286e4);
+  border-radius: 21px; color: #fff; padding: 26px 30px;
+  display: flex; flex-direction: column; justify-content: space-between; gap: 24px;
+  min-width: 0;
 }
-
-.desempenho-split-meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  margin-bottom: 22px;
+.desempenho-hero-kicker { font-weight: 800; font-size: 11px; letter-spacing: .1em; color: #c9e0ff; }
+.desempenho-hero-principal h1 { color: #fff; margin: 5px 0 8px; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.15; }
+.desempenho-hero-intro { color: #e4f0ff; font-size: 14px; line-height: 1.5; margin: 0; }
+.desempenho-hero-resumo { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+.desempenho-hero-legenda { font-size: 13px; color: #e3f0ff; display: block; margin-bottom: 2px; }
+.desempenho-hero-valor { color: #fff; font-weight: 800; font-size: clamp(42px, 4vw, 58px); line-height: 1.1; font-family: 'Inter', sans-serif; }
+.desempenho-hero-meta { border-left: 1px solid #ffffff63; padding-left: 16px; display: flex; flex-direction: column; gap: 5px; min-width: 118px; }
+.desempenho-hero-meta span { font-size: 12px; line-height: 1.3; color: #e4f0ff; }
+.desempenho-hero-meta strong { font-size: 26px; color: white; }
+.desempenho-hero-destaques { background: white; border: 1px solid var(--des-borda); border-radius: 21px; display: flex; flex-direction: column; justify-content: center; padding: 12px 24px; min-width: 0; }
+.desempenho-hero-destaque { padding: 12px 0; display: flex; flex-direction: column; gap: 5px; }
+.desempenho-hero-destaque + .desempenho-hero-destaque { border-top: 1px solid #e5edf6; }
+.desempenho-kpi-rotulo { color: #597593; font-size: 12px; font-weight: 700; }
+.desempenho-hero-destaque strong { color: var(--des-azul); font-size: 29px; line-height: 1.2; }
+.desempenho-hero-destaque strong.desempenho-tendencia-titulo { font-size: 18px; color: var(--des-escuro); display: flex; align-items: center; gap: 8px; }
+.desempenho-tendencia-titulo span { font-size: 23px; color: #148c65; }
+.desempenho-hero-destaque small { font-size: 12px; color: var(--des-muted); line-height: 1.4; }
+.desempenho-cards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
+.desempenho-kpi { min-width: 0; background: #fff; border: 1px solid var(--des-borda); border-radius: 17px; padding: 17px 20px; display: flex; flex-direction: column; gap: 6px; }
+.desempenho-kpi-numero { font-family: 'Inter', sans-serif; font-size: clamp(26px, 2.7vw, 34px); color: #123d72; font-weight: 800; line-height: 1.2; }
+.desempenho-kpi--verde .desempenho-kpi-numero { color: #17834b; }
+.desempenho-kpi--vermelho .desempenho-kpi-numero { color: #cb5151; }
+.desempenho-kpi-descricao { font-size: 12px; color: var(--des-muted); }
+.desempenho-painel { min-width: 0; border: 1px solid var(--des-borda); border-radius: 21px; padding: 25px 26px; background: #fff; }
+.desempenho-painel-cabecalho { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 23px; }
+.desempenho-painel-cabecalho h2 { font-size: 19px; line-height: 1.3; color: #123e76; font-weight: 800; margin: 0; font-family: 'Inter', sans-serif; }
+.desempenho-painel-cabecalho p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; color: var(--des-muted); }
+.desempenho-split-comparacao { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 18px; margin-bottom: 18px; }
+.desempenho-split-meta { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; margin-bottom: 18px; }
+.desempenho-barra { height: 10px; background: #e7eef6; border-radius: 999px; overflow: hidden; position: relative; }
+.desempenho-barra > span { display: block; height: 100%; background: #2584ec; border-radius: inherit; }
+.desempenho-comparacao-lista { display: grid; gap: 20px; }
+.desempenho-comparacao-titulos { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 13px; color: var(--des-texto); }
+.desempenho-comparacao-titulos strong { color: #113c76; font-size: 14px; }
+.desempenho-aproveitamento-centro { display: flex; justify-content: center; margin-bottom: 17px; }
+.desempenho-rosca { width: 170px; height: 170px; padding: 23px; border-radius: 50%; background: conic-gradient(#2584ec 0 var(--taxa), #e4eaf3 var(--taxa) 100%); display: grid; place-items: center; }
+.desempenho-rosca > div { display: flex; align-items: center; justify-content: center; flex-direction: column; background: #fff; width: 100%; height: 100%; border-radius: 50%; }
+.desempenho-rosca strong { color: #1456ab; font-size: 31px; line-height: 1; }
+.desempenho-rosca span { color: var(--des-muted); margin-top: 7px; font-size: 12px; }
+.desempenho-legendas { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.desempenho-legendas > div { display: grid; grid-template-columns: 9px 1fr; grid-template-rows: auto auto; column-gap: 10px; background: #f4f8fd; border-radius: 12px; padding: 11px 13px; }
+.desempenho-legendas-cor { width: 9px; height: 9px; border-radius: 50%; grid-row: span 2; margin-top: 5px; }
+.desempenho-legendas-cor.verde { background: #2584ec; }
+.desempenho-legendas-cor.cinza { background: #becbd9; }
+.desempenho-legendas strong { color: #174676; font-size: 18px; line-height: 1.2; }
+.desempenho-legendas span { color: var(--des-muted); font-size: 11px; }
+.desempenho-painel-numero { font-size: 25px; font-weight: 800; line-height: 1; color: var(--des-azul); white-space: nowrap; }
+.desempenho-meta-grafico { margin: 40px 0 24px; }
+.desempenho-meta-barra { height: 14px; overflow: visible; }
+.desempenho-meta-barra i { position: absolute; top: -6px; bottom: -6px; border-left: 2px dashed #c99416; }
+.desempenho-meta-eixo { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--des-muted); }
+.desempenho-meta-eixo span:nth-child(2) { color: #8a6811; font-weight: 750; }
+.desempenho-explicacao { background: #f3f7fc; padding: 15px 17px; border-radius: 13px; }
+.desempenho-explicacao strong { display: block; color: #174575; font-size: 14px; margin-bottom: 5px; line-height: 1.4; }
+.desempenho-explicacao p { margin: 0; color: var(--des-muted); font-size: 12px; line-height: 1.55; }
+.desempenho-consistencia-escala { margin: 39px 0 27px; display: grid; gap: 5px; grid-template-columns: repeat(10, 1fr); }
+.desempenho-consistencia-escala span { height: 20px; border-radius: 5px; background: #e4ebf4; }
+.desempenho-consistencia-escala span.preenchido { background: #2686ea; }
+.desempenho-vazio { text-align: center; padding: 55px 16px; color: var(--des-muted); font-size: 14px; line-height: 1.6; }
+.desempenho-grafico { margin-bottom: 18px; }
+.desempenho-grafico .desempenho-painel-cabecalho { margin-bottom: 16px; }
+.desempenho-opcoes { border-radius: 10px; padding: 3px; display: flex; align-items: center; gap: 3px; background: #edf4fc; flex-shrink: 0; }
+.desempenho-opcoes button { border: 0; border-radius: 8px; padding: 8px 11px; background: transparent; color: #41688e; font-weight: 700; font-size: 12px; white-space: nowrap; }
+.desempenho-opcoes button.ativo { color: #1254a6; background: white; box-shadow: 0 1px 4px #cddfee; }
+.desempenho-grafico-legenda { display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-size: 12px; color: #597491; }
+.desempenho-legenda-ponto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #2385ed; }
+.desempenho-legenda-meta { width: 19px; border-top: 2px dashed #c99416; display: inline-block; margin-left: 14px; }
+.desempenho-grafico-rolagem { overflow-x: auto; overflow-y: hidden; width: 100%; margin: 12px 0 0; scrollbar-color: #b3cbe7 transparent; }
+.desempenho-grafico-rolagem svg { display: block; max-width: none; }
+.desempenho-svg-eixo { fill: #68809b; font-size: 11px; }
+.desempenho-svg-valor { fill: #195cae; font-size: 12px; font-weight: 800; }
+.desempenho-grafico-rolagem circle[role="button"] { cursor: pointer; }
+.desempenho-grafico-rodape { border-top: 1px solid #edf2f7; display: flex; justify-content: space-between; gap: 12px; padding-top: 12px; color: var(--des-muted); font-size: 12px; line-height: 1.5; }
+.desempenho-grafico-rodape strong { color: #144879; }
+.desempenho-historico { margin-top: 0; }
+.desempenho-historico .desempenho-painel-cabecalho { margin-bottom: 7px; }
+.desempenho-contador { flex-shrink: 0; border-radius: 100px; background: #e9f3fd; color: #165cae; font-size: 12px; font-weight: 800; padding: 7px 11px; }
+.desempenho-historico-row { display: grid; grid-template-columns: minmax(160px, .55fr) minmax(100px, 1fr) 58px; align-items: center; gap: 18px; padding: 14px 0; border-bottom: 1px solid #eaf0f7; }
+.desempenho-historico-row:last-child { border-bottom: none; }
+.desempenho-historico-identificacao { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.desempenho-historico-identificacao strong { color: #244769; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desempenho-historico-identificacao span { color: #6c84a1; font-size: 12px; }
+.desempenho-historico-porcentagem { color: #1255ab; font-size: 15px; text-align: right; }
+.desempenho-historico-barra span.abaixo { background: #92a9c2; }
+.desempenho-historico-rodape { border-top: 1px solid #eaf0f7; text-align: center; padding-top: 18px; margin-top: 4px; }
+.desempenho-botao-secundario { background: #ecf5ff; color: #1459b0; font-weight: 800; border: 1px solid #c6def8; border-radius: 10px; padding: 10px 16px; }
+.desempenho-botao-secundario:hover { background: #dceeff; }
+@media(max-width:1120px) {
+  .desempenho-hero { grid-template-columns: minmax(0, 1.5fr) minmax(225px, .85fr); }
+  .desempenho-hero-principal { padding: 24px; }
 }
-
-.desempenho-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
+@media(max-width:900px) {
+  .desempenho-hero { grid-template-columns: 1fr; }
+  .desempenho-hero-destaques { flex-direction: row; align-items: stretch; gap: 20px; }
+  .desempenho-hero-destaque { width: 50%; }
+  .desempenho-hero-destaque + .desempenho-hero-destaque { border-top: 0; border-left: 1px solid #e5edf6; padding-left: 20px; }
+  .desempenho-split-comparacao, .desempenho-split-meta { grid-template-columns: 1fr; }
 }
-
-.desempenho-historico-row {
-  display: grid;
-  grid-template-columns: 180px 1fr 70px;
-  gap: 18px;
-  align-items: center;
+@media(max-width:670px) {
+  .desempenho-cards-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .desempenho-painel { padding: 19px 18px; border-radius: 18px; }
+  .desempenho-grafico .desempenho-painel-cabecalho { flex-wrap: wrap; }
+  .desempenho-historico-row { grid-template-columns: minmax(105px,1fr) minmax(60px,.8fr) 49px; gap: 10px; }
+  .desempenho-historico-identificacao strong { font-size: 12px; }
+  .desempenho-grafico-rodape { flex-direction: column; }
 }
-
-/* Círculos decorativos do card azul do Hero — só enfeite,
-   em telas estreitas atrapalham mais do que ajudam. */
-.desempenho-hero-circle {
-  pointer-events: none;
-}
-
-@media (max-width: 760px) {
-  .desempenho-split-hero,
-  .desempenho-split-comparacao {
-    grid-template-columns: 1fr;
-  }
-
-  .desempenho-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .desempenho-split-meta {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .desempenho-historico-row {
-    grid-template-columns: 96px 1fr 44px;
-    gap: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .desempenho-cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .desempenho-hero-circle {
-    display: none;
-  }
-}
-
-@media (max-width: 380px) {
-  .desempenho-historico-row {
-    grid-template-columns: 76px 1fr 38px;
-    gap: 8px;
-  }
+@media(max-width:400px) {
+  .desempenho-hero-principal { padding: 21px; }
+  .desempenho-hero-resumo { align-items: flex-start; flex-direction: column; }
+  .desempenho-hero-meta { flex-direction: row; align-items: center; border: 0; padding: 0; gap: 12px; }
+  .desempenho-hero-destaques { gap: 8px; padding: 10px 13px; }
+  .desempenho-hero-destaque + .desempenho-hero-destaque { padding-left: 10px; }
+  .desempenho-kpi { padding: 14px; }
 }
 
 /* === DIAGNÓSTICO POR MATÉRIA E REVISÕES (Tenna) === */
@@ -121,7 +166,7 @@
   color: var(--ink, #173f70);
   font-size: clamp(19px, 2vw, 24px);
   line-height: 1.25;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .desempenho-diagnostico-topo p {
   margin: 7px 0 0;
@@ -147,7 +192,7 @@
   font-size: 11px;
 }
 .desempenho-evolucao-painel strong {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 25px;
   line-height: 1.1;
 }
@@ -179,7 +224,7 @@
   margin: 0;
   color: var(--ink, #173f70);
   font-size: 18px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .desempenho-diagnostico-cabecalho p {
   margin: 6px 0 0;
@@ -386,3 +431,165 @@
   .desempenho-revisao-item { flex-wrap: wrap; }
   .desempenho-revisao-link { margin-left: 47px; }
 }
+
+/* Ajustes de leitura e densidade para os componentes de diagnóstico. */
+.desempenho-page .desempenho-diagnostico { margin-bottom: 18px; }
+.desempenho-diagnostico-topo { margin-bottom: 15px; }
+.desempenho-diagnostico-topo h2 { font-size: 20px; color: #123e76; }
+.desempenho-diagnostico-topo p { color: #607995; font-size: 13px; }
+.desempenho-diagnostico-grid { gap: 18px; }
+.desempenho-diagnostico-card { border-color: #d6e3f2; border-radius: 21px; box-shadow: none; padding: 24px 26px; }
+.desempenho-diagnostico-cabecalho { margin-bottom: 19px; }
+.desempenho-diagnostico-cabecalho h3 { color: #123e76; font-size: 19px; }
+.desempenho-diagnostico-cabecalho p, .desempenho-diagnostico-amostra, .desempenho-diagnostico-nota { font-size: 12px; color: #607995; }
+.desempenho-diagnostico-nome strong, .desempenho-revisao-texto strong { font-size: 14px; }
+.desempenho-diagnostico-barra span { background: #2389ee; }
+.desempenho-revisao-item { background: #f3f8fe; border: 1px solid #d6e6f7; }
+.desempenho-revisao-texto span { font-size: 11px; }
+.desempenho-revisao-texto small { font-size: 12px; }
+.desempenho-diagnostico-acao a { font-size: 13px; }
+.desempenho-evolucao-painel { box-shadow: none; border-color: #d6e3f2; }
+@media(max-width: 760px) {
+  .desempenho-diagnostico-card { padding: 19px; }
+}
+
+/* Título principal da análise de desempenho */
+.desempenho-page .desempenho-diagnostico-topo h2 { font-size: clamp(26px, 2.6vw, 34px); line-height: 1.2; }
+
+/* Respiro entre os indicadores superiores e a análise por matéria. */
+.desempenho-page .desempenho-diagnostico { margin-top: 64px; }
+@media (max-width: 760px) {
+  .desempenho-page .desempenho-diagnostico { margin-top: 42px; }
+}
+
+/* Ajustes finais do diagnóstico: cartões mais claros e detalhes sob demanda. */
+.desempenho-page .desempenho-diagnostico-card--clicavel {
+  position: relative;
+  padding-bottom: 66px;
+  cursor: zoom-in;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.desempenho-page .desempenho-diagnostico-card--clicavel:hover {
+  border-color: #a6caed;
+  box-shadow: 0 8px 26px rgba(22, 75, 145, .09);
+  transform: translateY(-2px);
+}
+.desempenho-page .desempenho-diagnostico-card--clicavel .desempenho-diagnostico-nota { display: none; }
+.desempenho-page .desempenho-diagnostico-expandir {
+  position: absolute;
+  right: 24px;
+  bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid #cde1f7;
+  border-radius: 10px;
+  color: #1359ae;
+  background: #eff6fe;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.desempenho-page .desempenho-diagnostico-expandir:hover { background: #deedfd; border-color: #a7cbed; }
+.desempenho-page .desempenho-diagnostico-acao { padding-top: 16px; }
+.desempenho-page .desempenho-diagnostico-card--clicavel .desempenho-diagnostico-acao { margin-bottom: 0; }
+.desempenho-page .desempenho-diagnostico-topo { margin-bottom: 18px; }
+.desempenho-page .desempenho-revisao-item { transition: background .16s ease; }
+.desempenho-page .desempenho-revisao-item:hover { background: #eaf4ff; }
+.desempenho-page .desempenho-revisao-link { color: #115baa; }
+
+
+/* Ampliação: renderiza o MESMO card da página, sem alterar seu conteúdo ou tipografia. */
+.desempenho-page .desempenho-card-ampliavel { cursor: zoom-in; }
+.desempenho-page .desempenho-card-ampliavel:focus-visible {
+  outline: 3px solid #56a8fb;
+  outline-offset: 3px;
+}
+.desempenho-ampliacao-overlay.desempenho-page {
+  position: fixed;
+  z-index: 99999;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  padding: 32px 24px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 26, 52, .54);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+.desempenho-ampliacao-dialog {
+  position: relative;
+  flex: none;
+  width: min(920px, 100%);
+  max-height: calc(100dvh - 64px);
+  border-radius: 21px;
+  box-shadow: 0 26px 78px rgba(4, 22, 49, .3);
+  animation: desempenho-ampliar-entrada .16s ease-out;
+}
+.desempenho-ampliacao-dialog--compacto { width: min(640px, 100%); }
+.desempenho-ampliacao-dialog--grande { width: min(1080px, 100%); }
+.desempenho-ampliacao-dialog--extra { width: min(1480px, 100%); }
+.desempenho-ampliacao-dialog > .desempenho-card-ampliavel {
+  width: 100%;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  cursor: default;
+  transform: none;
+}
+.desempenho-ampliacao-dialog > .desempenho-card-ampliavel:hover {
+  box-shadow: none;
+  transform: none;
+}
+/* O X fica sobre a borda externa, sem deslocar o conteúdo do card. */
+.desempenho-ampliacao-fechar {
+  position: absolute;
+  top: -17px;
+  right: -14px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #ccddef;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #164e94;
+  font-size: 27px !important;
+  line-height: 1;
+  box-shadow: 0 3px 12px rgba(16, 46, 84, .22);
+}
+.desempenho-ampliacao-fechar:hover { background: #edf6ff; }
+.desempenho-ampliacao-dialog .desempenho-diagnostico-expandir { display: none; }
+@keyframes desempenho-ampliar-entrada {
+  from { opacity: .75; transform: translateY(9px) scale(.986); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (max-width: 700px) {
+  .desempenho-ampliacao-overlay.desempenho-page { padding: 24px 14px; }
+  .desempenho-ampliacao-dialog, .desempenho-ampliacao-dialog > .desempenho-card-ampliavel { max-height: calc(100dvh - 48px); }
+  .desempenho-ampliacao-fechar { right: -7px; top: -17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .desempenho-ampliacao-dialog { animation: none; }
+}
+
+/* Ajustes: gráfico mantém largura e escala ao ser ampliado. */
+.desempenho-ampliacao-dialog > .desempenho-grafico { min-width: 0; }
+.desempenho-ampliacao-dialog .desempenho-grafico-rolagem { width: 100%; min-width: 0; }
+.desempenho-ampliacao-dialog .desempenho-grafico-rolagem svg { width: 100%; min-width: 680px; height: auto; }
+/* Sem botão Ampliar: o próprio card é clicável. */
+.desempenho-page .desempenho-diagnostico-expandir { display: none !important; }
+/* X centralizado, dentro do canto do modal. */
+.desempenho-ampliacao-fechar { top: 12px; right: 12px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.desempenho-ampliacao-fechar svg { display: block; flex: none; }
+.desempenho-ampliacao-dialog > .desempenho-card-ampliavel { padding-right: max(26px, 52px); }
+@media (max-width: 700px) { .desempenho-ampliacao-fechar { top: 8px; right: 8px; } }

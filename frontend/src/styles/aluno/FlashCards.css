@@ -42,7 +42,7 @@
   border-radius:var(--radius-lg); background:rgba(255,255,255,.10); color:#fff; backdrop-filter:blur(4px);
 }
 .flashcards-hero-badge span{font-size:18px; line-height:1; margin-bottom:3px;}
-.flashcards-hero-badge strong{font:800 24px "Space Grotesk",sans-serif; line-height:1;}
+.flashcards-hero-badge strong{font:800 24px "Inter",sans-serif; line-height:1;}
 .flashcards-hero-badge small{margin-top:5px; color:rgba(255,255,255,.76); font-size:10px; font-weight:700; text-align:center;}
 
 .flashcard-grid {
@@ -58,7 +58,7 @@
 
 
 .materia-section-title {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--ink);
@@ -288,7 +288,7 @@
 .flashcards-game-banner{margin-bottom:22px; padding:24px 28px; border:1px solid var(--line); border-radius:var(--radius-xl); background:var(--card); box-shadow:0 8px 28px rgba(13,71,161,.06);}
 .flashcards-game-banner-content{display:flex; align-items:center; justify-content:space-between; gap:24px;}
 .flashcards-game-eyebrow{display:inline-block; margin-bottom:7px; color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.12em;}
-.flashcards-game-banner h2{margin:0 0 6px; color:var(--ink); font:800 22px "Space Grotesk",sans-serif;}
+.flashcards-game-banner h2{margin:0 0 6px; color:var(--ink); font:800 22px "Inter",sans-serif;}
 .flashcards-game-banner p{margin:0; max-width:680px; color:var(--muted); font-size:13px; line-height:1.55;}
 .flashcards-game-start{flex-shrink:0; border:0; border-radius:var(--radius-sm); padding:12px 22px; background:var(--ink); color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:transform .18s var(--bouncy),box-shadow .18s ease,background .18s ease;}
 .flashcards-game-start:hover:not(:disabled){transform:translateY(-2px); background:var(--accent-dark); box-shadow:0 10px 18px -8px rgba(13,71,161,.45);}
@@ -726,7 +726,7 @@
     0 0 7px;
 
   font-family:
-    "Space Grotesk",
+    "Inter",
     sans-serif;
 
   font-size: 26px;
@@ -758,7 +758,7 @@
 
 .flashcards-result-score strong {
   font-family:
-    "Space Grotesk",
+    "Inter",
     sans-serif;
 
   font-size: 52px;
@@ -932,7 +932,7 @@
   padding-left:12px;
   border-left:3px solid var(--accent);
   color:var(--muted);
-  font-family:"Space Grotesk",sans-serif;
+  font-family:"Inter",sans-serif;
   font-size:14px;
   font-weight:800;
   line-height:1.4;
@@ -1336,7 +1336,7 @@ html[data-theme='dark'] .flashcards-vazio{
 .flashcards-toolbar-title{
   margin:0;
   color:var(--ink);
-  font:800 20px "Space Grotesk",sans-serif;
+  font:800 20px "Inter",sans-serif;
 }
 
 .flashcards-toolbar-subtitle{
@@ -1357,7 +1357,7 @@ html[data-theme='dark'] .flashcards-vazio{
 
 .flashcards-toolbar-total strong{
   color:var(--ink);
-  font:800 24px "Space Grotesk",sans-serif;
+  font:800 24px "Inter",sans-serif;
   line-height:1;
 }
 
@@ -1620,7 +1620,7 @@ html[data-theme='dark'] .flashcards-vazio{
   border-radius: 10px;
   padding: 10px 14px;
   min-height: 40px;
-  font: 750 12px 'IBM Plex Sans', system-ui, sans-serif;
+  font: 750 12px 'Inter', system-ui, sans-serif;
   cursor: pointer;
   transition: background .18s ease, border-color .18s ease;
 }
@@ -1973,7 +1973,7 @@ html[data-theme='dark'] .flashcards-page .flashcards-game-start {
   transform: rotate(-1deg); border-top: 4px solid var(--deck-color);
 }
 .flashcards-deck-glyph {
-  color: var(--deck-color); font: 800 37px/1 'Space Grotesk', system-ui, sans-serif;
+  color: var(--deck-color); font: 800 37px/1 'Inter', system-ui, sans-serif;
 }
 .flashcards-deck-dashes { display: flex; flex-direction: column; gap: 5px; align-items: center; }
 .flashcards-deck-dashes i {
@@ -2035,7 +2035,7 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
   color: var(--ink);
   min-height: 42px;
   padding: 9px 14px;
-  font: 700 13px 'IBM Plex Sans', system-ui, sans-serif;
+  font: 700 13px 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
 .flashcards-voltar-materias:hover { border-color: #2196f3; }
@@ -2095,7 +2095,7 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
   display: block;
   margin: 0;
   color: var(--ink);
-  font: 800 clamp(19px, 2vw, 24px)/1.2 'Space Grotesk', sans-serif;
+  font: 800 clamp(19px, 2vw, 24px)/1.2 'Inter', sans-serif;
 }
 .flashcards-page .materia-section-description {
   margin: 5px 0 0;
@@ -2155,7 +2155,7 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
   border-radius: 15px;
   background: rgba(var(--flashcards-topic-rgb), .10);
   color: var(--flashcards-topic-accent);
-  font: 800 19px/1 'Space Grotesk', sans-serif;
+  font: 800 19px/1 'Inter', sans-serif;
 }
 .flashcards-page .flashcards-content-kicker {
   display: block;
@@ -2172,7 +2172,7 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
   border-radius: 0;
   background: transparent;
   color: var(--ink);
-  font: 800 clamp(17px, 1.7vw, 20px)/1.25 'Space Grotesk', sans-serif;
+  font: 800 clamp(17px, 1.7vw, 20px)/1.25 'Inter', sans-serif;
   overflow-wrap: anywhere;
 }
 .flashcards-page .flashcards-content-count {
@@ -2232,7 +2232,7 @@ html[data-theme='dark'] .flashcards-deck-action { color: color-mix(in srgb, var(
 .flashcards-page .flashcards-materia-hero h1 {
   margin: 0;
   color: #fff;
-  font: 800 clamp(28px, 3vw, 38px)/1.12 'Space Grotesk', system-ui, sans-serif;
+  font: 800 clamp(28px, 3vw, 38px)/1.12 'Inter', system-ui, sans-serif;
 }
 /* Três folhas sutis como elemento visual, sem textos ou contadores extras. */
 .flashcards-page .flashcards-materia-hero-art {
