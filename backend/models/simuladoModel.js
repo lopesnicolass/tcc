@@ -878,6 +878,7 @@ function listarQuestoesDoSimulado(
                 q.alternativa_e,
                 q.correta,
                 q.materia,
+                q.imagem,
                 sq.ordem
 
             FROM simulado_questoes sq
@@ -926,6 +927,7 @@ function listarQuestoesDoSimuladoParaResponder(
                 q.alternativa_d,
                 q.alternativa_e,
                 q.materia,
+                q.imagem,
                 sq.ordem
 
             FROM simulado_questoes sq

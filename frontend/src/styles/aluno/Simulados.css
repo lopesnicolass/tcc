@@ -2182,3 +2182,7 @@ html[data-theme='dark'] .simulado-prova-lateral .simulado-prova-relogio { backgr
   line-height: 0;
   overflow: hidden;
 }
+
+/* Ilustrações anexadas pelo administrador, entre enunciado e alternativas. */
+.simulado-prova-figura { margin:20px 0 24px; padding:0; display:flex; justify-content:center; }
+.simulado-prova-figura img { display:block; max-width:100%; max-height:420px; width:auto; height:auto; object-fit:contain; border:1px solid rgba(66,96,85,.13); border-radius:12px; background:#fff; }

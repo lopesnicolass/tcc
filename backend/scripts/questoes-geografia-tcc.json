@@ -1,0 +1,60 @@
+{
+  "titulo": "Geografia — Cartografia e Orientação",
+  "descricao": "Exercícios sobre mapas, escalas, coordenadas geográficas e orientação espacial.",
+  "tempoLimite": 25,
+  "materia": "Geografia",
+  "dificuldade": "Média",
+  "topico": "Cartografia",
+  "questoes": [
+    {
+      "pergunta": "Em um mapa, qual elemento explica o significado das cores, linhas e símbolos utilizados?",
+      "alternativas": ["Escala", "Legenda", "Título", "Coordenadas", "Fonte dos dados"],
+      "correta": "B"
+    },
+    {
+      "pergunta": "Em uma escala de 1:100.000, uma distância de 1 cm no mapa corresponde a quantos quilômetros no terreno?",
+      "alternativas": ["0,1 km", "1 km", "10 km", "100 km", "1.000 km"],
+      "correta": "B"
+    },
+    {
+      "pergunta": "Qual linha imaginária divide a Terra em hemisférios Norte e Sul?",
+      "alternativas": ["Meridiano de Greenwich", "Trópico de Capricórnio", "Linha do Equador", "Círculo Polar Ártico", "Trópico de Câncer"],
+      "correta": "C"
+    },
+    {
+      "pergunta": "As linhas imaginárias utilizadas para medir a longitude são chamadas de:",
+      "alternativas": ["Paralelos", "Curvas de nível", "Meridianos", "Rosas dos ventos", "Isotermas"],
+      "correta": "C"
+    },
+    {
+      "pergunta": "Uma pessoa está voltada para o Norte. Para qual direção fica o Leste?",
+      "alternativas": ["À esquerda", "À direita", "Atrás", "Exatamente abaixo", "Na direção oposta ao Norte"],
+      "correta": "B"
+    },
+    {
+      "pergunta": "Em qual tipo de mapa é mais comum representar informações como densidade demográfica e distribuição da população?",
+      "alternativas": ["Mapa político sem dados", "Mapa temático", "Mapa de relevo exclusivamente", "Planta de uma residência", "Carta náutica sem informações populacionais"],
+      "correta": "B"
+    },
+    {
+      "pergunta": "A latitude de um lugar indica a distância angular em relação:",
+      "alternativas": ["Ao Meridiano de Greenwich", "À Linha Internacional de Data", "Ao nível do mar", "À Linha do Equador", "Ao Polo Norte exclusivamente"],
+      "correta": "D"
+    },
+    {
+      "pergunta": "Em um mapa físico, as curvas de nível são usadas para representar principalmente:",
+      "alternativas": ["A quantidade de habitantes", "As fronteiras políticas", "As diferenças de altitude do terreno", "As temperaturas médias", "Os idiomas falados"],
+      "correta": "C"
+    },
+    {
+      "pergunta": "O Meridiano de Greenwich é uma referência internacional para medir:",
+      "alternativas": ["A latitude", "A longitude", "A altitude", "A pluviosidade", "A profundidade dos oceanos"],
+      "correta": "B"
+    },
+    {
+      "pergunta": "Por que uma projeção cartográfica sempre apresenta alguma distorção?",
+      "alternativas": ["Porque a Terra não possui continentes", "Porque todos os mapas têm a mesma escala", "Porque a superfície curva da Terra é representada em um plano", "Porque não existe orientação pelo Sol", "Porque os meridianos não podem ser desenhados"],
+      "correta": "C"
+    }
+  ]
+}

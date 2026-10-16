@@ -664,3 +664,376 @@ html[data-theme='dark'] .perfil-achievements-filter.active { background: var(--a
 .perfil-ranking-toggle:focus-visible { outline: 3px solid var(--color-primary-500); outline-offset: 3px; }
 .perfil-ranking-error { margin: 0; color: var(--color-danger); font-size: 12px; }
 html[data-theme='dark'] .perfil-ranking-toggle.is-active { color: #c5e5ff; background: var(--dark-surface-2); }
+
+/* Refinamento da página Perfil — linguagem visual do restante do Tenna */
+.perfil-hero::after { display:none; }
+.perfil-hero { background:linear-gradient(110deg,#194b97 0%,#216fc9 100%); box-shadow:0 12px 24px -20px rgba(9,45,100,.6); }
+.perfil-grid { grid-template-columns:minmax(0,1fr) minmax(290px,330px); gap:18px; }
+.perfil-form-card { padding:24px 26px; }
+.perfil-form-heading { margin-bottom:20px; padding-bottom:16px; }
+.perfil-fields { gap:0; }
+.perfil-field { margin-bottom:13px; gap:6px; }
+.perfil-input-wrap input { height:46px; background:var(--card); }
+.perfil-avatar-card { padding:22px; }
+.perfil-ranking-card { padding:20px; gap:9px; }
+.perfil-achievements-section { padding:24px; margin-top:20px; }
+.perfil-achievements-heading { padding-bottom:14px; }
+.perfil-achievements-controls { margin:16px 0 18px; align-items:center; }
+.perfil-achievements-grid { gap:12px; }
+.perfil-badge-card { position:relative; min-height:170px; padding:17px 18px 15px; background:var(--card); border-radius:15px; transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
+.perfil-badge-card:hover { transform:translateY(-2px); box-shadow:0 8px 22px -16px rgba(15,54,110,.4); }
+.perfil-badge-unlocked { background:var(--card); border-color:rgba(37,151,104,.28); border-bottom:3px solid #35a474; }
+.perfil-badge-locked { border-bottom:3px solid #b8cce8; }
+.perfil-badge-top { margin-bottom:10px; }
+.perfil-badge-icon { width:40px; height:40px; }
+.perfil-badge-card h3 { font-size:16px; margin:5px 0; }
+.perfil-badge-card > p { min-height:0; margin-bottom:15px; }
+.perfil-badge-count { margin-bottom:6px; }
+.perfil-badge-progress { height:5px; }
+.perfil-badge-link { margin-top:10px; }
+.perfil-achievements-explainer { margin-top:16px; padding-top:12px; }
+@media(max-width:1100px) { .perfil-grid { grid-template-columns:minmax(0,1fr) 300px; } .perfil-achievements-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .perfil-grid { grid-template-columns:1fr; } .perfil-achievements-grid { grid-template-columns:1fr; } .perfil-hero { grid-template-columns:1fr; } .perfil-achievements-controls { flex-wrap:wrap; } }
+
+/* Refinamento visual Tenna — componentes consistentes com Início/Conteúdos */
+.perfil-page { padding-bottom: 28px; }
+.perfil-hero { min-height: 172px; padding: 26px 30px; border-radius: 21px; background: linear-gradient(110deg,#174991 0%,#1d61b7 68%,#258fec 100%); box-shadow: 0 12px 26px rgba(22,80,149,.12); }
+.perfil-hero::after { display:none; }
+.perfil-hero h1 { font-size: clamp(26px,2.3vw,34px); }
+.perfil-hero-dados { border-radius: 15px; background: rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.19); }
+.perfil-grid { grid-template-columns: minmax(0, 1.6fr) minmax(285px, 330px); gap: 18px; margin-top: 18px; }
+.perfil-form-card,.perfil-avatar-card,.perfil-ranking-card,.perfil-achievements-section { border:1px solid #d6e5f7; border-radius:18px; box-shadow:none; background:var(--card); }
+.perfil-form-card { padding:24px 26px; }
+.perfil-form-heading { margin-bottom:20px; padding-bottom:16px; }
+.perfil-fields { gap:0; }
+.perfil-field { margin-bottom:14px; gap:6px; }
+.perfil-input-wrap input,.perfil-input-wrap input:disabled { height:44px; background:var(--card); border:1px solid #cfdef0; border-radius:11px; color:var(--color-text); }
+.perfil-input-wrap input:focus { border-color:#258fec; box-shadow:0 0 0 3px rgba(37,143,236,.1); }
+.perfil-edit-btn { color:#1764c1; border-radius:9px; }
+.perfil-form-footer { padding-top:16px; margin-top:4px; }
+.perfil-form-footer .mural-btn.primary { background:#1768cc; border:1px solid #1768cc; color:#fff; box-shadow:none; border-radius:10px; }
+.perfil-form-footer .mural-btn.primary:hover { background:#1256ae; }
+.perfil-avatar-card { padding:20px; }
+.perfil-avatar-card > .mural-btn { border:1px solid #cbdff5; background:#eef6ff; color:#1256ae; border-radius:10px; box-shadow:none; }
+.perfil-avatar-card > .mural-btn:hover { background:#e0efff; }
+.perfil-ranking-card { padding:19px; gap:10px; }
+.perfil-ranking-toggle,.perfil-ranking-toggle.is-active { border:1px solid #c8dcf5; background:#eef6ff; color:#1456ac; border-radius:10px; box-shadow:none; }
+.perfil-ranking-toggle:hover { background:#deedff; }
+.btn-logout { border-radius:10px; }
+.perfil-achievements-section { margin-top:20px; padding:24px 26px; }
+.perfil-achievements-controls { margin:17px 0; }
+.perfil-achievements-grid { gap:12px; }
+.perfil-badge-card,.perfil-badge-unlocked,.perfil-badge-locked { min-height:175px; padding:16px; border:1px solid #d7e6f6; border-radius:14px; background:var(--card); box-shadow:none; }
+.perfil-badge-unlocked { border-bottom:3px solid #39a66b; }
+.perfil-badge-locked { border-bottom:3px solid #a9c5e8; }
+.perfil-badge-top { margin-bottom:10px; }
+.perfil-badge-icon { border-radius:11px; }
+.perfil-badge-card > p { min-height:0; margin-bottom:12px; }
+.perfil-badge-card h3 { font-size:16px; }
+.perfil-badge-progress { height:6px; }
+.perfil-badge-link { text-decoration:none; }
+.perfil-achievements-explainer { font-size:11px; }
+@media(max-width:860px){.perfil-grid{grid-template-columns:1fr}.perfil-hero{padding:23px}.perfil-achievements-section{padding:20px}}
+@media(max-width:640px){.perfil-form-card{padding:19px}.perfil-achievements-grid{grid-template-columns:1fr}.perfil-form-footer{flex-wrap:wrap}}
+
+/* Perfil — reorganização da área superior, consistente com os demais painéis Tenna */
+.perfil-grid { grid-template-columns:minmax(0,1fr) minmax(270px,310px); gap:16px; align-items:stretch; }
+.perfil-form-card { padding:24px 26px; display:flex; flex-direction:column; }
+.perfil-form-heading { padding-bottom:13px; margin-bottom:17px; }
+.perfil-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:16px; row-gap:14px; }
+.perfil-field { margin-bottom:0; min-width:0; }
+.perfil-field:last-child { grid-column:1/-1; }
+.perfil-input-wrap input,.perfil-input-wrap input:disabled { height:46px; border-radius:10px; background:#f8fbff; }
+.perfil-form-footer { margin-top:auto; padding-top:18px; border-top:0; }
+.perfil-form-footer > span { max-width:260px; }
+.perfil-form-footer .mural-btn.primary { min-height:42px; }
+.perfil-avatar-card { padding:20px; gap:10px; }
+.perfil-side-heading { padding-bottom:10px; margin-bottom:0; }
+.perfil-side-heading h3 { font-size:16px; }
+.avatar-circle { width:94px; height:94px; }
+.perfil-avatar-meta strong { font-size:16px; }
+.perfil-avatar-card > .mural-btn { min-height:38px; }
+.perfil-ranking-card { padding:17px 19px; gap:9px; }
+.perfil-ranking-top h3 { font-size:15px; }
+.perfil-ranking-description { font-size:11.5px; }
+.perfil-ranking-toggle { min-height:38px; }
+@media(max-width:1050px) { .perfil-grid { grid-template-columns:minmax(0,1fr) 275px; } .perfil-fields { grid-template-columns:1fr; } }
+@media(max-width:860px) { .perfil-grid { grid-template-columns:1fr; } .perfil-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .perfil-fields { grid-template-columns:1fr; } .perfil-form-footer { align-items:stretch; flex-direction:column; } .perfil-form-footer .mural-btn.primary { width:100%; } }
+
+/* Cabecalho compacto: o foco desta pagina e a gestao da conta. */
+.perfil-hero { min-height: 0; padding: 20px 27px; margin-bottom: 18px; grid-template-columns: minmax(0,1fr) minmax(220px,300px); gap:20px; border-radius:18px; box-shadow:none; }
+.perfil-hero-kicker { margin-bottom:5px; font-size:9px; }
+.perfil-hero h1 { font-size:clamp(23px,2vw,29px); margin-bottom:5px; }
+.perfil-hero p { font-size:12px; line-height:1.4; }
+.perfil-hero-dados { padding:0; border:0; border-radius:0; background:transparent; }
+.perfil-level-details { gap:9px; margin-bottom:8px; }
+.perfil-level-badge { width:36px; height:36px; flex-basis:36px; border-radius:10px; font-size:18px; }
+.perfil-level-label { font-size:9px; }
+.perfil-level-details strong { font-size:13px; }
+.perfil-level-track { height:5px; }
+.perfil-level-foot { font-size:10px; margin-top:5px; }
+.perfil-hero-streak { margin-top:7px; font-size:10px; }
+.perfil-hero-streak strong { font-size:11px; }
+.perfil-hero-streak svg { width:13px; height:13px; }
+@media(max-width:760px) { .perfil-hero { grid-template-columns:1fr; padding:20px; gap:14px; } .perfil-hero-dados { max-width:340px; } }
+
+/* Cabeçalho do perfil sem bloco de nível */
+.perfil-hero { display:flex; align-items:center; min-height:0; padding:24px 28px; }
+.perfil-hero-intro { width:100%; }
+@media(max-width:760px) { .perfil-hero { padding:20px; } }
+
+/* Perfil integrado: dados, foto, ranking e conquistas resumidas */
+.perfil-grid { grid-template-columns: minmax(0, 1fr) minmax(275px, 320px); gap: 18px; }
+.perfil-form-card { padding: 24px; }
+.perfil-form-heading { margin-bottom: 20px; padding-bottom: 16px; }
+.perfil-form-content { display: grid; grid-template-columns: 155px minmax(0, 1fr); gap: 24px; align-items: start; }
+.perfil-account-avatar { grid-column: 1; grid-row: 1; }
+.perfil-account-fields { grid-column: 2; grid-row: 1; min-width: 0; }
+.perfil-account-avatar .perfil-avatar-card { border: 0; box-shadow: none; background: transparent; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.perfil-account-avatar .perfil-side-heading { display: none; }
+.perfil-account-avatar .avatar-circle { margin: 0 auto; }
+.perfil-account-avatar .perfil-avatar-meta { text-align: center; overflow-wrap: anywhere; }
+.perfil-account-avatar .mural-btn { width: 100%; max-width: 150px; }
+.perfil-form-footer { margin-top: 10px; }
+.perfil-form-footer .btn-logout { width: auto; padding: 10px 16px; margin-left: auto; }
+.perfil-form-footer .mural-btn.primary { order: 2; }
+.perfil-form-footer > span { margin-right: auto; }
+.perfil-side-column { gap: 16px; }
+.perfil-ranking-position { display: flex; align-items: baseline; gap: 12px; padding: 14px 0 8px; }
+.perfil-ranking-position strong { font-size: 35px; line-height: 1; color: var(--accent-dark); font-family: var(--font-display); }
+.perfil-ranking-position span { font-size: 12px; color: var(--muted); }
+.perfil-conquistas-resumo { padding: 20px; border-radius: var(--radius-lg); }
+.perfil-resumo-heading { display: flex; justify-content: space-between; align-items: center; color: var(--accent-dark); }
+.perfil-resumo-heading h3 { margin: 0; font-size: 18px; }
+.perfil-resumo-count { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 12px; }
+.perfil-resumo-count strong { font-size: 30px; color: var(--color-text); }
+.perfil-resumo-count strong span { font-size: 17px; color: var(--muted); }
+.perfil-resumo-count small { color: var(--muted); }
+.perfil-resumo-track { height: 7px; border-radius: 10px; background: var(--color-surface-muted); overflow: hidden; }
+.perfil-resumo-track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.perfil-resumo-open { width: 100%; margin-top: 18px; padding: 11px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--color-surface-soft); color: var(--accent-dark); font-weight: 700; cursor: pointer; }
+.perfil-resumo-open:hover { background: var(--color-primary-100); }
+.perfil-modal-backdrop { position: fixed; inset: 0; z-index: 10000; display: flex; justify-content: center; align-items: center; padding: 24px; background: rgba(6, 24, 53, .58); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.perfil-modal-panel { position: relative; width: min(1080px, 100%); max-height: min(90vh, 900px); overflow-y: auto; border-radius: 20px; background: var(--card); box-shadow: 0 25px 85px rgba(0, 25, 70, .3); }
+.perfil-modal-panel .perfil-achievements-section { margin: 0; border: 0; box-shadow: none; }
+.perfil-modal-close { position: sticky; top: 16px; float: right; z-index: 2; margin: 16px 16px -54px 0; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--color-text); cursor: pointer; }
+@media (max-width: 1050px) { .perfil-grid { grid-template-columns: 1fr; } .perfil-side-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 650px) { .perfil-form-content { grid-template-columns: 1fr; } .perfil-account-avatar,.perfil-account-fields { grid-column: 1; grid-row: auto; } .perfil-side-column { display: flex; } .perfil-modal-backdrop { padding: 10px; } .perfil-form-footer { flex-wrap: wrap; } }
+
+/* Refinamento visual: perfil compacto e alinhado ao design do Tenna */
+.perfil-grid { align-items:start; gap:16px; }
+.perfil-form-card { min-height:0; height:auto; padding:22px 24px 20px; }
+.perfil-form-heading { margin-bottom:18px; padding-bottom:14px; }
+.perfil-form-content { grid-template-columns:140px minmax(0,1fr); gap:22px; align-items:center; }
+.perfil-account-avatar .perfil-avatar-card { gap:8px; }
+.perfil-account-avatar .avatar-circle { width:100px; height:100px; flex:0 0 100px; border:3px solid #fff; box-shadow:0 0 0 1px #d3e3f5; }
+.perfil-account-avatar .perfil-avatar-meta { display:flex; flex-direction:column; gap:2px; }
+.perfil-account-avatar .perfil-avatar-meta strong { font-size:15px; }
+.perfil-account-avatar .perfil-avatar-meta span { font-size:11px; }
+.perfil-account-avatar .mural-btn { min-height:36px; border-radius:9px; }
+.perfil-account-fields .perfil-fields { row-gap:13px; }
+.perfil-form-footer { margin-top:18px; padding-top:15px; border-top:1px solid #e2ecf8; gap:10px; }
+.perfil-form-footer .btn-logout,.perfil-form-footer .mural-btn.primary { min-height:38px; border-radius:9px; }
+.perfil-side-column { gap:14px; }
+.perfil-ranking-card { padding:17px 18px; gap:7px; }
+.perfil-ranking-position { padding:5px 0; gap:9px; align-items:center; }
+.perfil-ranking-position strong { font-size:29px; }
+.perfil-ranking-description { margin:0; line-height:1.4; }
+.perfil-ranking-toggle { min-height:36px; }
+.perfil-conquistas-resumo { padding:17px 18px; }
+.perfil-resumo-heading h3 { font-size:16px; }
+.perfil-resumo-count { margin:11px 0 10px; gap:7px; }
+.perfil-resumo-count strong { font-size:26px; }
+.perfil-resumo-track { height:6px; }
+.perfil-resumo-open { margin-top:12px; padding:9px; font-size:12px; transition:background .2s ease,border-color .2s ease; }
+.perfil-modal-panel { width:min(980px,100%); border:1px solid #d6e5f7; }
+@media(max-width:1050px) { .perfil-grid { grid-template-columns:1fr; } }
+@media(max-width:650px) { .perfil-form-content { grid-template-columns:1fr; } .perfil-account-avatar,.perfil-account-fields { grid-column:1; grid-row:auto; } .perfil-form-footer { margin-top:16px; } }
+
+/* Perfil: foto, nome, e-mail e senha em sequência vertical. */
+.perfil-form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+}
+.perfil-account-avatar,
+.perfil-account-fields {
+  width: 100%;
+  min-width: 0;
+}
+.perfil-account-avatar .perfil-avatar-card {
+  align-items: center;
+}
+.perfil-account-fields .perfil-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 14px;
+}
+.perfil-account-fields .perfil-field {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+@media (max-width: 650px) {
+  .perfil-form-content { gap: 18px; }
+}
+
+/* Perfil: foto à esquerda e ação ao lado; campos abaixo. */
+.perfil-form-heading { margin-bottom: 18px; }
+.perfil-account-avatar .perfil-avatar-card {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.perfil-account-avatar .avatar-circle { margin: 0; flex-shrink: 0; }
+.perfil-account-avatar .mural-btn { width: auto; min-width: 145px; max-width: none; }
+.perfil-account-avatar .perfil-avatar-card > div[style*="display: flex"] { width: auto !important; }
+@media (max-width: 480px) {
+  .perfil-account-avatar .perfil-avatar-card { gap: 14px; }
+  .perfil-account-avatar .avatar-circle { width: 80px; height: 80px; flex-basis: 80px; }
+}
+
+
+/* Conquistas: janela refinada e consistente com os cards do Tenna. */
+.perfil-modal-backdrop { padding: 22px; align-items: center; background: rgba(7, 29, 62, .64); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px); }
+.perfil-modal-panel { position: relative; width: min(1060px, 100%); max-height: min(88vh, 860px); overflow-y: auto; overflow-x: hidden; border: 1px solid #dbe8f7; border-radius: 22px; background: var(--card); box-shadow: 0 28px 80px rgba(4, 30, 66, .35); scrollbar-width: thin; }
+.perfil-modal-close { position: sticky; top: 15px; float: right; z-index: 10; margin: 15px 17px -55px 0; width: 40px; height: 40px; border: 1px solid #d5e4f7; border-radius: 12px; background: var(--card); color: var(--accent-dark); box-shadow: 0 3px 10px rgba(12, 64, 135, .09); line-height: 0; }
+.perfil-modal-close svg { display: block; }
+.perfil-modal-close:hover { background: var(--color-primary-100); }
+.perfil-modal-panel .perfil-achievements-section { padding: 29px 28px 23px; }
+.perfil-modal-panel .perfil-achievements-heading { padding-right: 55px; gap: 18px; padding-bottom: 18px; }
+.perfil-modal-panel .perfil-achievements-heading h2 { font-size: 26px; }
+.perfil-modal-panel .perfil-achievements-counter { border-radius: 13px; min-width: 104px; min-height: 64px; }
+.perfil-modal-panel .perfil-achievements-controls { align-items: center; margin: 18px 0; }
+.perfil-modal-panel .perfil-achievements-grid { gap: 13px; }
+.perfil-modal-panel .perfil-badge-card { position: relative; padding: 17px 17px 15px; min-height: 206px; background: var(--card); border: 1px solid #dae7f6; border-radius: 15px; transition: border-color .16s, box-shadow .16s; }
+.perfil-modal-panel .perfil-badge-card:hover { border-color: #a8c9ef; box-shadow: 0 5px 18px rgba(23, 95, 177, .08); }
+.perfil-modal-panel .perfil-badge-unlocked { border-color: #c1e7d3; background: color-mix(in srgb, var(--card) 96%, #2f9c6e); }
+.perfil-modal-panel .perfil-badge-unlocked .perfil-badge-icon { background: #e6f6ed; color: #17834c; }
+.perfil-modal-panel .perfil-badge-locked .perfil-badge-icon { background: #edf4fc; color: #8ca9cc; }
+.perfil-modal-panel .perfil-badge-top { margin-bottom: 11px; }
+.perfil-modal-panel .perfil-badge-icon { width: 43px; height: 43px; border-radius: 12px; }
+.perfil-modal-panel .perfil-badge-card h3 { font-size: 16px; margin: 6px 0; line-height: 1.3; }
+.perfil-modal-panel .perfil-badge-card > p { font-size: 12px; min-height: 0; margin-bottom: 20px; }
+.perfil-modal-panel .perfil-badge-bottom { margin-top: auto; }
+.perfil-modal-panel .perfil-badge-link { margin-top: 11px; }
+.perfil-modal-panel .perfil-achievements-explainer { margin-top: 16px; }
+@media(max-width: 780px) { .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .perfil-modal-panel .perfil-achievements-controls { flex-direction: column; align-items: stretch; } }
+@media(max-width: 560px) { .perfil-modal-backdrop { padding: 9px; } .perfil-modal-panel { max-height: 94vh; border-radius: 16px; } .perfil-modal-panel .perfil-achievements-section { padding: 18px 14px; } .perfil-modal-panel .perfil-achievements-heading { padding-right: 40px; align-items: flex-start; flex-direction: column; } .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: 1fr; } .perfil-modal-close { top: 9px; margin: 9px 9px -51px 0; } }
+html[data-theme='dark'] .perfil-modal-panel .perfil-badge-card { background: var(--dark-surface-2); border-color: var(--dark-border); }
+
+
+/* Janela de conquistas: cabeçalho e filtros fixos, rolagem apenas dos cards. */
+.perfil-modal-backdrop {
+  padding: clamp(12px, 2.5vh, 26px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.perfil-modal-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1040px, 100%);
+  height: min(760px, calc(100dvh - 40px));
+  max-height: calc(100dvh - 24px);
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  border-radius: 20px;
+}
+.perfil-modal-panel .perfil-achievements-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 24px 28px 0;
+  overflow: hidden;
+}
+.perfil-modal-panel .perfil-achievements-heading {
+  flex: 0 0 auto;
+  padding: 0 54px 17px 0;
+  align-items: center;
+}
+.perfil-modal-panel .perfil-achievements-heading h2 { font-size: 25px; }
+.perfil-modal-panel .perfil-achievements-controls {
+  flex: 0 0 auto;
+  margin: 14px 0 16px;
+  gap: 12px;
+}
+.perfil-modal-panel .perfil-achievements-notice { flex: 0 0 auto; }
+.perfil-modal-panel .perfil-modal-scroll-region {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 8px 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #a9bfdb transparent;
+  overscroll-behavior: contain;
+}
+.perfil-modal-panel .perfil-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.perfil-modal-panel .perfil-badge-card {
+  min-height: 175px;
+  padding: 17px;
+  border-radius: 14px;
+}
+.perfil-modal-panel .perfil-badge-top { margin-bottom: 8px; }
+.perfil-modal-panel .perfil-badge-card > p { margin: 0 0 12px; }
+.perfil-modal-panel .perfil-badge-link { margin-top: 10px; }
+.perfil-modal-panel .perfil-achievements-explainer { margin: 14px 0 0; }
+.perfil-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  float: none;
+  margin: 0;
+  z-index: 30;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: var(--accent-dark);
+}
+.perfil-modal-x {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.perfil-modal-x::before, .perfil-modal-x::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  width: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+.perfil-modal-x::after { transform: rotate(-45deg); }
+.perfil-modal-close:focus-visible { outline: 3px solid #66b7ff; outline-offset: 2px; }
+@media (max-width: 740px) {
+  .perfil-modal-panel { height: calc(100dvh - 20px); max-height: calc(100dvh - 20px); border-radius: 16px; }
+  .perfil-modal-panel .perfil-achievements-section { padding: 18px 16px 0; }
+  .perfil-modal-panel .perfil-achievements-heading { padding-right: 42px; gap: 10px; }
+  .perfil-modal-panel .perfil-achievements-counter { min-width: 90px; }
+  .perfil-modal-panel .perfil-achievements-controls { flex-direction: column; align-items: stretch; }
+  .perfil-modal-panel .perfil-achievements-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; }
+  .perfil-modal-panel .perfil-achievements-filter { flex-shrink: 0; }
+  .perfil-modal-panel .perfil-achievements-refresh { align-self: flex-start; width: auto; }
+  .perfil-modal-close { top: 15px; right: 14px; }
+}
+@media (max-width: 600px) {
+  .perfil-modal-panel .perfil-achievements-heading { flex-direction: column; align-items: flex-start; }
+  .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: 1fr; }
+  .perfil-modal-panel .perfil-badge-card { min-height: 165px; }
+}

@@ -1,7 +1,7 @@
 import { Icon } from './icons.jsx';
 import { ICONES } from './helpers.js';
 
-// Lista de matérias (com os tópicos expansíveis dentro de cada uma).
+// Lista de matérias (com os conteúdos expansíveis dentro de cada uma).
 // Extraído de AdminConteudos.jsx (era a seção "LISTA").
 
 export function ListaMaterias({
@@ -32,7 +32,7 @@ export function ListaMaterias({
         </strong>
 
         <span>
-          Buscando matérias e tópicos no banco.
+          Buscando matérias e conteúdos no banco.
         </span>
       </div>
     );
@@ -87,14 +87,14 @@ export function ListaMaterias({
 
           return (
             <article
-              className="content-subject-card"
+              className={`content-subject-card admin-content-subject ${aberta ? "is-expanded" : ""}`}
               key={
                 materia.id
               }
             >
 
               <div
-                className="content-subject-header"
+                className="content-subject-header admin-content-subject-header"
                 style={{
                   cursor:
                     'pointer',
@@ -168,7 +168,7 @@ export function ListaMaterias({
                     </h3>
 
                     <span
-                      className="admin-status"
+                      className="admin-status admin-content-status"
                       style={{
                         padding:
                           '4px 8px',
@@ -194,11 +194,6 @@ export function ListaMaterias({
                     </span>
                   </div>
 
-                  <p>
-                    {materia.descricao ||
-                      'Sem descrição cadastrada.'}
-                  </p>
-
                   <div
                     style={{
                       display:
@@ -219,7 +214,7 @@ export function ListaMaterias({
                       {materia.topicos
                         ?.length ||
                         0}{' '}
-                      tópicos
+                      conteúdos
                     </span>
 
                     <span>
@@ -235,32 +230,7 @@ export function ListaMaterias({
                 </div>
 
                 <div
-                  className="admin-subject-actions"
-                  onClick={(
-                    event
-                  ) =>
-                    event.stopPropagation()
-                  }
-                  style={{
-                    display:
-                      'flex',
-                    gap:
-                      '6px',
-                  }}
-                >
-                  <button
-                    type="button"
-                    className="mural-btn secondary"
-                    onClick={() => abrirEditarMateria(materia)}
-                    aria-label={`Editar descrição de ${materia.nome}`}
-                  >
-                    <Icon name="edit" size={15} />
-                    Editar descrição
-                  </button>
-                </div>
-
-                <div
-                  className="admin-chevron"
+                  className="admin-chevron admin-content-chevron"
                   style={{
                     display:
                       'flex',
@@ -285,7 +255,7 @@ export function ListaMaterias({
 
               {aberta && (
                 <div
-                  className="admin-topic-area"
+                  className="admin-topic-area admin-content-topic-area"
                   style={{
                     borderTop:
                       '1px solid var(--line)',
@@ -309,7 +279,7 @@ export function ListaMaterias({
                   >
                     <div>
                       <strong>
-                        Tópicos da matéria
+                        Conteúdos da matéria
                       </strong>
 
                       <p
@@ -330,7 +300,7 @@ export function ListaMaterias({
 
                     <button
                       type="button"
-                      className="mural-btn"
+                      className="mural-btn admin-content-action primary"
                       onClick={() =>
                         abrirNovoTopico(
                           materia
@@ -342,7 +312,7 @@ export function ListaMaterias({
                         size={15}
                       />
 
-                      Novo tópico
+                      Novo conteúdo
                     </button>
                   </div>
 
@@ -363,7 +333,7 @@ export function ListaMaterias({
                           index
                         ) => (
                           <div
-                            className="admin-topic-row"
+                            className="admin-topic-row admin-content-topic-row"
                             key={
                               topico.id
                             }
@@ -416,23 +386,6 @@ export function ListaMaterias({
                                   topico.nome
                                 }
                               </strong>
-
-                              {topico.descricao && (
-                                <small
-                                  style={{
-                                    display:
-                                      'block',
-                                    marginTop:
-                                      '3px',
-                                    color:
-                                      'var(--muted)',
-                                  }}
-                                >
-                                  {
-                                    topico.descricao
-                                  }
-                                </small>
-                              )}
                             </div>
 
                             <div
@@ -446,7 +399,7 @@ export function ListaMaterias({
                               }}
                             >
                               <span
-                                className="admin-status"
+                                className="admin-status admin-content-status"
                                 style={{
                                   padding:
                                     '4px 7px',
@@ -473,7 +426,7 @@ export function ListaMaterias({
 
                               <button
                                 type="button"
-                                className="mural-btn admin-topic-build"
+                                className="mural-btn admin-topic-build admin-content-action primary"
                                 onClick={() =>
                                   abrirConstrutor(
                                     topico,
@@ -490,7 +443,9 @@ export function ListaMaterias({
 
                               <button
                                 type="button"
-                                className="mural-btn secondary"
+                                className="mural-btn secondary admin-content-action icon-only"
+                                aria-label={`Editar tópico ${topico.nome}`}
+                                title="Editar tópico"
                                 onClick={() =>
                                   abrirEditarTopico(
                                     topico
@@ -505,7 +460,7 @@ export function ListaMaterias({
 
                               <button
                                 type="button"
-                                className="mural-btn secondary"
+                                className="mural-btn secondary admin-content-action"
                                 onClick={() =>
                                   alternarTopico(
                                     topico
@@ -519,7 +474,9 @@ export function ListaMaterias({
 
                               <button
                                 type="button"
-                                className="mural-btn danger"
+                                className="mural-btn danger admin-content-action icon-only"
+                                aria-label={`Excluir tópico ${topico.nome}`}
+                                title="Excluir tópico"
                                 onClick={() =>
                                   excluirTopico(
                                     topico

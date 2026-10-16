@@ -8,9 +8,6 @@ import {
 import {
   useNavigate
 } from 'react-router-dom';
-import {
-  useGamification
-} from '../../context/GamificationContext.jsx';
 import SubjectIcon
   from '../../components/SubjectIcon.jsx';
 import Icon
@@ -19,6 +16,7 @@ import { API_URL, request } from '../../services/api.js';
 import { gerarPlanoProgramado } from '../../utils/planoProgramado.js';
 import { avaliarPrazo } from '../../utils/prazoVestibulinho.js';
 import { getSubjectStyle } from '../../utils/subjects.js';
+import { chaveSessaoPlano, sugerirDataSessao, sessaoJaAgendada } from '../../utils/planoCalendario.js';
 // Paleta exclusiva da trilha: preserva a identidade do Tenna e diferencia as matérias.
 const PALETTE_STUDY = {
   matematica: { color: '#C73C4B', bg: '#FFF0F1' },
@@ -88,8 +86,6 @@ function savePlan(plan, months, days, modeloId, modeloAtualizadoEm) {
 export default function PlanoAutomatico() {
   const navigate =
     useNavigate();
-  const { addXP } =
-    useGamification();
   const planoAnterior = useMemo(carregarPlanoSalvo, []);
   const [
     months,
@@ -121,11 +117,6 @@ export default function PlanoAutomatico() {
       )
     );
   const [
-    addingWeek,
-    setAddingWeek
-  ] =
-    useState(null);
-  const [
     syncingPlan,
     setSyncingPlan
   ] =
@@ -152,6 +143,99 @@ export default function PlanoAutomatico() {
   const [studiedTopics, setStudiedTopics] = useState({});
   const [loadingProgress, setLoadingProgress] = useState(false);
   const [savingTopicId, setSavingTopicId] = useState(null);
+  const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
+  const [atividadesAgenda, setAtividadesAgenda] = useState([]);
+  const [carregandoAgenda, setCarregandoAgenda] = useState(false);
+  const [erroAgenda, setErroAgenda] = useState('');
+  const [sessaoSelecionada, setSessaoSelecionada] = useState(null);
+  const [dataAgenda, setDataAgenda] = useState('');
+  const [horarioAgenda, setHorarioAgenda] = useState('08:00');
+  const [salvandoAgenda, setSalvandoAgenda] = useState(false);
+  const [erroSalvarAgenda, setErroSalvarAgenda] = useState('');
+  const [mensagemAgenda, setMensagemAgenda] = useState('');
+
+  async function carregarAtividadesAgenda() {
+    if (!usuarioId) return [];
+    const resposta = await request(`/cronograma/${usuarioId}`, {}, 'Não foi possível consultar o calendário.');
+    const atividades = Array.isArray(resposta.atividades) ? resposta.atividades : [];
+    setAtividadesAgenda(atividades);
+    return atividades;
+  }
+
+  useEffect(() => {
+    if (!plan || !usuarioId) return;
+    let ativo = true;
+    setCarregandoAgenda(true);
+    setErroAgenda('');
+    request(`/cronograma/${usuarioId}`, {}, 'Não foi possível carregar o calendário.')
+      .then((resposta) => {
+        if (ativo) setAtividadesAgenda(Array.isArray(resposta.atividades) ? resposta.atividades : []);
+      })
+      .catch((erro) => { if (ativo) setErroAgenda(erro.message || 'Não foi possível carregar o calendário.'); })
+      .finally(() => { if (ativo) setCarregandoAgenda(false); });
+    return () => { ativo = false; };
+  }, [plan, usuarioId]);
+
+  useEffect(() => {
+    if (!sessaoSelecionada) return;
+    function fecharComEscape(evento) {
+      if (evento.key === 'Escape' && !salvandoAgenda) setSessaoSelecionada(null);
+    }
+    window.addEventListener('keydown', fecharComEscape);
+    return () => window.removeEventListener('keydown', fecharComEscape);
+  }, [sessaoSelecionada, salvandoAgenda]);
+
+  function abrirAdicionarSessao(item, mes, semana, dia, diaIndex, itemIndex) {
+    setMensagemAgenda('');
+    setErroSalvarAgenda('');
+    setDataAgenda(sugerirDataSessao(mes, semana, dia));
+    setHorarioAgenda('08:00');
+    setSessaoSelecionada({
+      item,
+      origem: chaveSessaoPlano(item, mes, semana, diaIndex, itemIndex),
+      dia: dia.day,
+    });
+  }
+
+  async function confirmarAdicionarSessao(evento) {
+    evento.preventDefault();
+    if (!sessaoSelecionada || !usuarioId || salvandoAgenda) return;
+    const { item, origem } = sessaoSelecionada;
+    try {
+      setSalvandoAgenda(true);
+      setErroSalvarAgenda('');
+      // Verifica novamente no servidor antes de criar para reduzir duplicações.
+      const existentes = await carregarAtividadesAgenda();
+      if (sessaoJaAgendada(existentes, origem)) {
+        setSessaoSelecionada(null);
+        setMensagemAgenda('Essa sessão já está no calendário.');
+        return;
+      }
+      const resposta = await request(`/cronograma/${usuarioId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          nome: item.topico,
+          materia: item.materia || 'Outro',
+          data: dataAgenda,
+          horario: horarioAgenda,
+          topicoId: item.topicoId || null,
+          done: false,
+          origem,
+        }),
+      }, 'Não foi possível adicionar esta sessão ao calendário.');
+      if (resposta.atividade) {
+        setAtividadesAgenda((anteriores) => [...anteriores, resposta.atividade]);
+      } else {
+        await carregarAtividadesAgenda();
+      }
+      setMensagemAgenda(`“${item.topico}” foi adicionado ao calendário.`);
+      setSessaoSelecionada(null);
+    } catch (erro) {
+      setErroSalvarAgenda(erro.message || 'Não foi possível adicionar a sessão.');
+    } finally {
+      setSalvandoAgenda(false);
+    }
+  }
 
   useEffect(() => {
     let ativo = true;
@@ -395,95 +479,6 @@ export default function PlanoAutomatico() {
   const combinacaoDisponivel = variacoesDisponiveis.find((c) =>
     Number(c.meses) === months && Number(c.dias) === days);
 
-  function montarAtividadesDoPlano(
-    p
-  ) {
-    const hoje =
-      new Date();
-    const nomesDias = [
-      'Domingo',
-      'Segunda',
-      'Terça',
-      'Quarta',
-      'Quinta',
-      'Sexta',
-      'Sábado'
-    ];
-    const domingo =
-      new Date(
-        hoje
-      );
-    domingo.setDate(
-      hoje.getDate() -
-      hoje.getDay()
-    );
-    const atividades =
-      [];
-    p.forEach(
-      (month) => {
-        month.semanas.forEach(
-          (week) => {
-            week.days.forEach(
-              (day) => {
-                if (
-                  !day.items.length
-                ) {
-                  return;
-                }
-                const indiceDia =
-                  nomesDias.indexOf(
-                    day.day
-                  );
-                const alvo =
-                  new Date(
-                    domingo
-                  );
-                alvo.setDate(
-                  domingo.getDate() +
-                    indiceDia +
-                    28 * (month.numero - 1) +
-                    7 *
-                      (
-                        week.number -
-                        1
-                      )
-                );
-                const dataFinal =
-                  day.data ||
-                  `${alvo.getFullYear()}-${pad(
-                    alvo.getMonth() + 1
-                  )}-${pad(
-                    alvo.getDate()
-                  )}`;
-                day.items.forEach(
-                  (item) => {
-                    atividades.push({
-                      data:
-                        dataFinal,
-                      horario:
-                        '08:00',
-                      nome:
-                        item.topico,
-                      materia:
-                        item.materia,
-                      topicoId:
-                        item.topicoId ||
-                        null,
-                      done:
-                        false,
-                      origem:
-                        'plano-automatico'
-                    });
-                  }
-                );
-              }
-            );
-          }
-        );
-      }
-    );
-    return atividades;
-  }
   async function generate() {
     if (!combinacaoDisponivel) {
       setSyncError('Ainda não há um cronograma disponível para essa combinação.');
@@ -516,169 +511,11 @@ export default function PlanoAutomatico() {
     setOpenWeeks(new Set(['1-1']));
     savePlan(planoGerado, mesesDoPlano, days, programacao.id, programacao.atualizado_em);
     setEditandoPlano(false);
-    const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
-    if (!usuarioId) { setSyncingPlan(false); return; }
-    const atividades = montarAtividadesDoPlano(planoGerado);
-    if (!atividades.length) { setSyncingPlan(false); return; }
-    try {
-      setSyncingPlan(true);
-      await request(
-        `/cronograma/${usuarioId}/lote`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            atividades,
-            substituirOrigem: 'plano-automatico'
-          })
-        },
-        'Não foi possível salvar o plano no cronograma.'
-      );
-      addXP(20, 'plano automático gerado');
-    } catch (erro) {
-      console.error('Erro ao salvar plano no cronograma:', erro);
-      setSyncError(
-        erro.message || 'O plano foi gerado, mas não foi possível salvá-lo no cronograma.'
-      );
-    } finally {
-      setSyncingPlan(false);
-    }
+    // Gerar o plano NÃO adiciona todas as sessões ao calendário.
+    // Cada sessão é escolhida e confirmada individualmente pelo aluno.
+    setSyncingPlan(false);
   }
-  async function addWeek(
-    month,
-    week
-  ) {
-    const usuarioId =
-      Number(
-        getUser().id ||
-        getUser().usuarioId ||
-        0
-      );
-    if (
-      !usuarioId
-    ) {
-      return;
-    }
-    const hoje =
-      new Date();
-    const nomesDias = [
-      'Domingo',
-      'Segunda',
-      'Terça',
-      'Quarta',
-      'Quinta',
-      'Sexta',
-      'Sábado'
-    ];
-    const domingo =
-      new Date(
-        hoje
-      );
-    domingo.setDate(
-      hoje.getDate() -
-      hoje.getDay()
-    );
-    const atividades =
-      [];
-    week.days.forEach(
-      (day) => {
-        if (
-          !day.items.length
-        ) {
-          return;
-        }
-        const indiceDia =
-          nomesDias.indexOf(
-            day.day
-          );
-        const alvo =
-          new Date(
-            domingo
-          );
-        alvo.setDate(
-          domingo.getDate() +
-            indiceDia +
-            28 * (month.numero - 1) +
-            7 *
-              (
-                week.number -
-                1
-              )
-        );
-        const dataFinal =
-          day.data ||
-          `${alvo.getFullYear()}-${pad(
-            alvo.getMonth() + 1
-          )}-${pad(
-            alvo.getDate()
-          )}`;
-        day.items.forEach(
-          (item) => {
-            atividades.push({
-              data:
-                dataFinal,
-              horario:
-                '08:00',
-              nome:
-                item.topico,
-              materia:
-                item.materia,
-              topicoId:
-                item.topicoId ||
-                null,
-              done:
-                false,
-              origem:
-                'plano-automatico'
-            });
-          }
-        );
-      }
-    );
-    if (
-      !atividades.length
-    ) {
-      return;
-    }
-    try {
-      setAddingWeek(
-        `${month.numero}-${week.number}`
-      );
-      await request(
-        `/cronograma/${usuarioId}/lote`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            atividades,
-            substituirOrigem:
-              null
-          })
-        },
-        'Não foi possível adicionar a semana ao calendário.'
-      );
-      addXP(
-        10,
-        'semana adicionada ao calendário'
-      );
-      navigate(
-        '/cronograma'
-      );
-    } catch (
-      erro
-    ) {
-      console.error(
-        'Erro ao adicionar semana:',
-        erro
-      );
-      window.alert(
-        erro.message ||
-        'Não foi possível adicionar a semana ao calendário.'
-      );
-    } finally {
-      setAddingWeek(
-        null
-      );
-    }
-  }
+
   const focoItem = nextPendingItem ||
     current?.semanas
       ?.flatMap(
@@ -778,7 +615,7 @@ export default function PlanoAutomatico() {
                     onClick={generate}
                     disabled={syncingPlan}
                   >
-                    {syncingPlan ? 'Salvando...' : plan ? 'Atualizar cronograma' : 'Gerar meu cronograma'}
+                    {syncingPlan ? 'Preparando...' : plan ? 'Atualizar cronograma' : 'Gerar meu cronograma'}
                   </button>
                 </div>
 
@@ -795,8 +632,8 @@ export default function PlanoAutomatico() {
               <span className="studyplan-eyebrow studyplan-eyebrow-light">
                 <span className="studyplan-eyebrow-mark" aria-hidden="true" /> SEU PLANO DE ESTUDOS
               </span>
-              <h1 id="studyplan-title">Seu caminho até o <span>Vestibulinho.</span></h1>
-              <p>Um passo de cada vez. Nós organizamos o caminho, você conquista cada etapa.</p>
+              <h1 id="studyplan-title">Seu cronograma <span>de estudos.</span></h1>
+              <p>Organize sua rotina e acompanhe cada conquista.</p>
               <div className="studyplan-hero-info">
                 <span><Icon name="calendar" size={15} /> {months} {months === 1 ? 'mês' : 'meses'} de preparação</span>
                 <span><Icon name="clock" size={15} /> {days} {days === 1 ? 'dia' : 'dias'} por semana</span>
@@ -816,7 +653,7 @@ export default function PlanoAutomatico() {
             </div>
           </section>
 
-          {syncingPlan && <p className="tenna-auto-sync-status" role="status">Salvando as atividades no calendário...</p>}
+          {syncingPlan && <p className="tenna-auto-sync-status" role="status">Preparando sua trilha de estudos...</p>}
           {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
           {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
             <div className="tenna-auto-date-warning" role="status">
@@ -856,7 +693,6 @@ export default function PlanoAutomatico() {
                 disabled={!focoItem && progress < 100}
               >
                 {progress === 100 && topicoIdsDoPlano.length > 0 ? 'Revisar conteúdos' : focoItem?.tipo === 'pratica' && !focoItem?.topicoId ? 'Praticar agora' : 'Estudar agora'}
-                <Icon name="arrowRight" size={18} />
               </button>
             </div>
           </section>
@@ -881,10 +717,12 @@ export default function PlanoAutomatico() {
               <div>
                 <span className="studyplan-eyebrow">SUA JORNADA</span>
                 <h2 id="studyplan-journey-heading">Sua trilha de estudos</h2>
-                <p>Explore um mês de cada vez. A semana atual já começa aberta para você.</p>
+                <p>Escolha seu mês e avance uma semana de cada vez.</p>
               </div>
               <span className="studyplan-stage-count"><Icon name="layers" size={15} /> Mês {current.numero} de {plan.length}</span>
             </div>
+            {mensagemAgenda && <div className="studyplan-calendar-feedback" role="status"><Icon name="check" size={17}/>{mensagemAgenda}</div>}
+            {erroAgenda && <div className="studyplan-calendar-error" role="alert">{erroAgenda} <button type="button" onClick={() => { setCarregandoAgenda(true); carregarAtividadesAgenda().then(() => setErroAgenda('')).catch((erro) => setErroAgenda(erro.message)).finally(() => setCarregandoAgenda(false)); }}>Tentar novamente</button></div>}
             <div className="studyplan-month-tabs" role="tablist" aria-label="Escolher mês do cronograma">
               {plan.map((mes) => {
                 const mesTopicos = [...new Set(mes.semanas.flatMap((semana) => semana.days.flatMap((dia) => dia.items.filter((item) => item.topicoId).map((item) => String(item.topicoId)))))];
@@ -900,7 +738,7 @@ export default function PlanoAutomatico() {
                     className={`studyplan-month-tab${mes.numero === current.numero ? ' active' : ''}`}
                     onClick={() => {
                       setSelected(mes.numero);
-                      setOpenWeeks((prev) => new Set([...prev, `${mes.numero}-1`]));
+                      setOpenWeeks(new Set([`${mes.numero}-1`]));
                     }}
                   >
                     <span className="studyplan-month-tab-number">{mesConcluido ? <Icon name="check" size={16} /> : pad(mes.numero)}</span>
@@ -915,7 +753,7 @@ export default function PlanoAutomatico() {
                 <div className="studyplan-month-heading-copy">
                   <span className="studyplan-eyebrow">MÊS {pad(current.numero)} · {phases[Math.min(current.numero - 1, phases.length - 1)]}</span>
                   <h3>{current.nome}</h3>
-                  <p>Organize seus estudos por semana e avance no seu tempo.</p>
+                  
                 </div>
                 <div className="studyplan-month-metrics">
                   <span><Icon name="calendar" size={15} /> {current.semanas.length} semanas</span>
@@ -924,7 +762,18 @@ export default function PlanoAutomatico() {
               </div>
 
               <div className="studyplan-weeks">
+                <div className="studyplan-weeks-intro"><strong>Escolha uma semana</strong><span>Visualize apenas as atividades que deseja organizar.</span></div>
+                <div className="studyplan-week-picker">
                 {current.semanas.map((week) => {
+                  const key = `${current.numero}-${week.number}`;
+                  const open = openWeeks.has(key);
+                  const items = week.days.flatMap(day => day.items).filter(item => item.topicoId);
+                  const done = items.filter(item => studiedTopics[String(item.topicoId)]).length;
+                  const status = items.length > 0 && done === items.length ? "Concluída" : done > 0 ? "Em andamento" : "Pendente";
+                  return <button key={key} type="button" className={`studyplan-week-choice${open ? ' active' : ''} status-${status === "Concluída" ? "done" : status === "Em andamento" ? "ongoing" : "pending"}`} aria-pressed={open} onClick={() => setOpenWeeks(new Set([key]))}><span>SEMANA {week.number}</span><strong>{status}</strong></button>;
+                })}
+                </div>
+                {current.semanas.filter(week => openWeeks.has(`${current.numero}-${week.number}`)).map((week) => {
                   const key = `${current.numero}-${week.number}`;
                   const open = openWeeks.has(key);
                   const weekItems = week.days.flatMap((day) => day.items);
@@ -939,9 +788,7 @@ export default function PlanoAutomatico() {
                         aria-expanded={open}
                         aria-controls={`studyplan-week-${key}`}
                         onClick={() => setOpenWeeks((prev) => {
-                          const updated = new Set(prev);
-                          updated.has(key) ? updated.delete(key) : updated.add(key);
-                          return updated;
+                          return prev.has(key) ? new Set() : new Set([key]);
                         })}
                       >
                         <span className="studyplan-week-number">{pad(week.number)}</span>
@@ -959,13 +806,15 @@ export default function PlanoAutomatico() {
                                   const style = corMateriaPlano(item.materia || 'Outro');
                                   const studied = item.topicoId ? Boolean(studiedTopics[String(item.topicoId)]) : false;
                                   const isSaving = savingTopicId === Number(item.topicoId);
+                                  const origemSessao = chaveSessaoPlano(item, current, week, i, itemIndex);
+                                  const agendada = sessaoJaAgendada(atividadesAgenda, origemSessao);
                                   return (
-                                    <article className={`studyplan-lesson${studied ? ' completed' : ''}`} key={`${key}-${day.day}-${i}-${itemIndex}`} style={{ '--study-color': style.color, '--study-bg': style.bg }}>
+                                    <article className={`studyplan-lesson${studied ? ' completed' : ''}${agendada ? ' scheduled' : ''}`} key={`${key}-${day.day}-${i}-${itemIndex}`} style={{ '--study-color': style.color, '--study-bg': style.bg }}>
                                       <div className="studyplan-lesson-details">
                                         <span className="studyplan-lesson-subject"><SubjectIcon materia={item.materia || 'Outro'} size={14} /> {item.materia || 'Atividade'}</span>
                                         <h4>{item.topico}</h4>
                                         <span className="studyplan-lesson-meta">
-                                          {item.tipo === 'pratica' ? (item.key?.startsWith('revisao:') ? 'Revisão · questões anteriores' : 'Prática e revisão') : `${item.tempoEstimado || 45} min · Conteúdo programado`}
+                                          {item.tipo === 'pratica' ? (item.key?.startsWith('revisao:') ? 'Revisão · questões anteriores' : 'Prática e revisão') : `${item.tempoEstimado || 45} min`}
                                         </span>
                                       </div>
                                       <div className="studyplan-lesson-actions">
@@ -974,8 +823,11 @@ export default function PlanoAutomatico() {
                                             <Icon name="check" size={15} /> {isSaving ? 'Salvando...' : studied ? 'Concluído' : 'Concluir'}
                                           </button>
                                         )}
+                                        <button type="button" className={`studyplan-add-calendar${agendada ? ' is-added' : ''}`} onClick={() => abrirAdicionarSessao(item, current, week, day, i, itemIndex)} disabled={agendada || carregandoAgenda || Boolean(erroAgenda) || !usuarioId} title={agendada ? 'Sessão já adicionada ao calendário' : 'Agendar somente esta sessão'}>
+                                          <Icon name={agendada ? 'check' : 'calendar'} size={15} /> {agendada ? 'No calendário' : 'Agendar'}
+                                        </button>
                                         <button type="button" className="studyplan-open-button" onClick={() => abrirDestinoItem(item)}>
-                                          {item.topicoId ? 'Estudar' : 'Praticar'} <Icon name="arrowRight" size={15} />
+                                          {item.topicoId ? 'Estudar' : 'Praticar'}
                                         </button>
                                       </div>
                                     </article>
@@ -994,8 +846,36 @@ export default function PlanoAutomatico() {
             </div>
           </section>
 
-          <p className="tenna-auto-admin-note">Esta programação foi definida pelo administrador para {months} {months === 1 ? 'mês' : 'meses'} e {days} {days === 1 ? 'dia' : 'dias'} por semana.</p>
+
         </main>
+      )}
+      {sessaoSelecionada && (
+        <div className="studyplan-schedule-overlay" role="presentation" onMouseDown={(evento) => {
+          if (evento.target === evento.currentTarget && !salvandoAgenda) setSessaoSelecionada(null);
+        }}>
+          <div className="studyplan-schedule-modal" role="dialog" aria-modal="true" aria-labelledby="studyplan-schedule-title">
+            <button className="studyplan-schedule-close" type="button" aria-label="Fechar" disabled={salvandoAgenda} onClick={() => setSessaoSelecionada(null)}><span aria-hidden="true">×</span></button>
+            <span className="studyplan-eyebrow"><Icon name="calendar" size={15}/> AGENDAMENTO INDIVIDUAL</span>
+            <h2 id="studyplan-schedule-title">Adicionar ao calendário</h2>
+            <p className="studyplan-schedule-description">Somente esta sessão será adicionada. Escolha quando deseja estudá-la.</p>
+            <div className="studyplan-schedule-topic">
+              <span>{sessaoSelecionada.item.materia || 'Atividade'} · {sessaoSelecionada.dia}</span>
+              <strong>{sessaoSelecionada.item.topico}</strong>
+              <small>{sessaoSelecionada.item.tempoEstimado || 45} minutos previstos</small>
+            </div>
+            <form onSubmit={confirmarAdicionarSessao}>
+              <div className="studyplan-schedule-fields">
+                <label>Data<input type="date" autoFocus required value={dataAgenda} onChange={(evento) => setDataAgenda(evento.target.value)} /></label>
+                <label>Horário<input type="time" required value={horarioAgenda} onChange={(evento) => setHorarioAgenda(evento.target.value)} /></label>
+              </div>
+              {erroSalvarAgenda && <p className="studyplan-calendar-error" role="alert">{erroSalvarAgenda}</p>}
+              <div className="studyplan-schedule-actions">
+                <button type="button" className="studyplan-schedule-cancel" onClick={() => setSessaoSelecionada(null)} disabled={salvandoAgenda}>Cancelar</button>
+                <button type="submit" className="studyplan-schedule-submit" disabled={salvandoAgenda || !dataAgenda || !horarioAgenda}><Icon name="calendar" size={16}/>{salvandoAgenda ? 'Adicionando...' : 'Confirmar atividade'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,548 @@
+[
+  {
+    "topico": "Interpretação de texto",
+    "descricao_topico": "Identifique ideias principais, informações explícitas e inferências.",
+    "titulo": "Interpretação de texto",
+    "descricao_pagina": "Aprenda a compreender mensagens, reconhecer pistas e tirar conclusões a partir da leitura.",
+    "minutos": 10,
+    "blocos": [
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "Ler é construir sentido",
+          "texto": "Interpretar um texto é compreender **o que ele diz** e **o que ele sugere**. Para isso, observe o tema, as informações apresentadas e a intenção de quem escreveu.\n\nA ideia principal é a mensagem central. Já os detalhes ajudam a explicar ou comprovar essa mensagem."
+        }
+      },
+      {
+        "tipo": "destaque",
+        "dados": {
+          "titulo": "Informação explícita x inferência",
+          "texto": "**Explícita:** aparece diretamente no texto.\n\n**Inferência:** conclusão que o leitor constrói com base nas pistas apresentadas.",
+          "variante": "info"
+        }
+      },
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "Leia este pequeno texto",
+          "texto": "**Uma manhã na praça**\n\nQuando chegou à praça, Elisa encontrou os bancos molhados e pequenas poças pelo caminho. Guardou o guarda-chuva na mochila e procurou um lugar seco para se sentar.\n\nO texto não afirma que choveu, mas oferece pistas para essa interpretação."
+        }
+      },
+      {
+        "tipo": "exemplo",
+        "dados": {
+          "titulo": "Como interpretar passo a passo",
+          "enunciado": "O que podemos concluir sobre o tempo antes da chegada de Elisa?",
+          "passos": [
+            {
+              "texto": "Localize as pistas: bancos molhados, poças e guarda-chuva guardado."
+            },
+            {
+              "texto": "Relacione essas informações com uma situação possível: chuva recente."
+            },
+            {
+              "texto": "Evite conclusões sem apoio no texto: não sabemos a hora nem a intensidade da chuva."
+            }
+          ],
+          "resultado": "É provável que tenha chovido pouco antes."
+        }
+      },
+      {
+        "tipo": "pergunta",
+        "dados": {
+          "titulo": "Teste sua interpretação",
+          "enunciado": "Qual alternativa apresenta uma inferência sustentada pelo texto?",
+          "alternativas": [
+            "Elisa foi à praça para encontrar amigos.",
+            "Provavelmente choveu antes de Elisa chegar.",
+            "A praça estava completamente vazia.",
+            "Elisa esqueceu o guarda-chuva em casa."
+          ],
+          "correta": 1,
+          "explicacao": "Os bancos molhados, as poças e o guarda-chuva são pistas que permitem inferir uma chuva recente."
+        }
+      },
+      {
+        "tipo": "lista",
+        "dados": {
+          "titulo": "Estratégias para a prova",
+          "itens": [
+            "Leia o enunciado antes de escolher uma alternativa.",
+            "Diferencie o que está escrito do que pode ser inferido.",
+            "Observe palavras que indicam oposição, causa e conclusão.",
+            "Desconfie de respostas com informações que não aparecem no texto."
+          ]
+        }
+      },
+      {
+        "tipo": "checklist",
+        "dados": {
+          "titulo": "Revise antes de avançar",
+          "itens": [
+            "Consigo identificar o assunto e a ideia principal.",
+            "Sei localizar informações explícitas.",
+            "Consigo justificar uma inferência com pistas do texto."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "topico": "Sintaxe",
+    "descricao_topico": "Reconheça sujeito, predicado e complementos na oração.",
+    "titulo": "Sintaxe: estrutura das orações",
+    "descricao_pagina": "Entenda como os termos se relacionam para formar frases com sentido.",
+    "minutos": 9,
+    "blocos": [
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "Como uma oração se organiza",
+          "texto": "A **sintaxe** estuda as relações entre os termos de uma oração. Em geral, a oração apresenta um verbo e pode ser analisada em sujeito, predicado e complementos.\n\nNa frase **“Os estudantes organizaram a biblioteca”**, o sujeito é “Os estudantes” e o predicado é “organizaram a biblioteca”."
+        }
+      },
+      {
+        "tipo": "tabela",
+        "dados": {
+          "titulo": "Termos essenciais",
+          "colunas": [
+            "Termo",
+            "Função",
+            "Exemplo"
+          ],
+          "linhas": [
+            [
+              "Sujeito",
+              "Termo sobre o qual se declara algo",
+              "Os estudantes"
+            ],
+            [
+              "Predicado",
+              "Informação declarada sobre o sujeito",
+              "organizaram a biblioteca"
+            ],
+            [
+              "Verbo",
+              "Núcleo verbal da ação ou do estado",
+              "organizaram"
+            ],
+            [
+              "Objeto direto",
+              "Complemento sem preposição obrigatória",
+              "a biblioteca"
+            ]
+          ]
+        }
+      },
+      {
+        "tipo": "exemplo",
+        "dados": {
+          "titulo": "Analisando uma oração",
+          "enunciado": "Observe: **“A professora explicou o conteúdo.”**",
+          "passos": [
+            {
+              "texto": "Encontre o verbo: **explicou**."
+            },
+            {
+              "texto": "Pergunte quem praticou a ação: **A professora** (sujeito)."
+            },
+            {
+              "texto": "Identifique o que se declara sobre o sujeito: **explicou o conteúdo** (predicado)."
+            },
+            {
+              "texto": "Pergunte “explicou o quê?”: **o conteúdo** (objeto direto)."
+            }
+          ],
+          "resultado": "Sujeito: A professora. Predicado: explicou o conteúdo."
+        }
+      },
+      {
+        "tipo": "destaque",
+        "dados": {
+          "titulo": "Dica importante",
+          "texto": "O sujeito nem sempre aparece antes do verbo. Em **“Chegaram os convidados”**, o sujeito é **“os convidados”**.",
+          "variante": "info"
+        }
+      },
+      {
+        "tipo": "pergunta",
+        "dados": {
+          "titulo": "Identifique o sujeito",
+          "enunciado": "Na oração “As crianças prepararam um cartaz”, qual é o sujeito?",
+          "alternativas": [
+            "Prepararam",
+            "Um cartaz",
+            "As crianças",
+            "Prepararam um cartaz"
+          ],
+          "correta": 2,
+          "explicacao": "“As crianças” é o termo sobre o qual se declara a ação de preparar um cartaz."
+        }
+      },
+      {
+        "tipo": "lista",
+        "dados": {
+          "titulo": "Resumo rápido",
+          "itens": [
+            "Localize o verbo para começar a análise.",
+            "Identifique o termo com o qual o verbo concorda, quando houver sujeito.",
+            "O predicado contém o verbo e a informação declarada.",
+            "Alguns verbos precisam de complementos para completar o sentido."
+          ]
+        }
+      },
+      {
+        "tipo": "checklist",
+        "dados": {
+          "titulo": "Confira seu aprendizado",
+          "itens": [
+            "Sei localizar o verbo da oração.",
+            "Consigo diferenciar sujeito e predicado.",
+            "Reconheço um objeto direto em exemplos simples."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "topico": "Pontuação",
+    "descricao_topico": "Use vírgula, ponto e outros sinais para organizar o sentido.",
+    "titulo": "Pontuação: clareza e sentido",
+    "descricao_pagina": "Entenda como os sinais de pontuação organizam ideias e evitam ambiguidades.",
+    "minutos": 8,
+    "blocos": [
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "Por que pontuar?",
+          "texto": "Os sinais de pontuação ajudam a organizar as ideias, indicar pausas sintáticas e tornar a leitura mais clara. A escolha de um sinal pode mudar a interpretação de uma frase.\n\nO **ponto final** encerra uma declaração. A **interrogação** marca uma pergunta direta. A **exclamação** pode expressar surpresa, emoção ou ordem."
+        }
+      },
+      {
+        "tipo": "lista",
+        "dados": {
+          "titulo": "Usos frequentes da vírgula",
+          "itens": [
+            "Separar itens de uma enumeração: “Comprei lápis, borracha e caderno.”",
+            "Isolar o vocativo: “Ana, pode me ajudar?”",
+            "Separar um adjunto adverbial deslocado: “Depois da aula, fomos à biblioteca.”",
+            "Isolar explicações intercaladas: “A escola, que fica no centro, abriu cedo.”"
+          ]
+        }
+      },
+      {
+        "tipo": "exemplos",
+        "dados": {
+          "titulo": "Compare a pontuação",
+          "correto": "**Os alunos terminaram a atividade.**",
+          "incorreto": "**Os alunos, terminaram a atividade.**",
+          "explicacao": "Em uma ordem direta simples, não se separa o sujeito do verbo por vírgula."
+        }
+      },
+      {
+        "tipo": "tabela",
+        "dados": {
+          "titulo": "Sinais e funções",
+          "colunas": [
+            "Sinal",
+            "Uso principal",
+            "Exemplo"
+          ],
+          "linhas": [
+            [
+              ".",
+              "Encerrar uma declaração",
+              "A aula começou."
+            ],
+            [
+              "?",
+              "Indicar pergunta direta",
+              "Você entendeu?"
+            ],
+            [
+              "!",
+              "Marcar exclamação",
+              "Que descoberta!"
+            ],
+            [
+              ":",
+              "Introduzir explicação ou lista",
+              "Levei três itens: livro, lápis e caderno."
+            ]
+          ]
+        }
+      },
+      {
+        "tipo": "pergunta",
+        "dados": {
+          "titulo": "Escolha a frase adequada",
+          "enunciado": "Qual alternativa apresenta pontuação adequada?",
+          "alternativas": [
+            "Depois da prova os alunos, descansaram.",
+            "Depois da prova, os alunos descansaram.",
+            "Os alunos, descansaram depois da prova.",
+            "Depois, da prova os alunos descansaram."
+          ],
+          "correta": 1,
+          "explicacao": "A vírgula separa a expressão adverbial inicial “Depois da prova”, sem dividir sujeito e verbo."
+        }
+      },
+      {
+        "tipo": "destaque",
+        "dados": {
+          "titulo": "Atenção",
+          "texto": "A vírgula não deve ser usada apenas porque fazemos uma pausa ao falar. É preciso considerar a estrutura da frase.",
+          "variante": "warning"
+        }
+      },
+      {
+        "tipo": "checklist",
+        "dados": {
+          "titulo": "Revisão",
+          "itens": [
+            "Sei reconhecer os principais sinais de pontuação.",
+            "Consigo usar a vírgula em enumerações e vocativos.",
+            "Evito separar sujeito e verbo com vírgula."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "topico": "Concordância verbal",
+    "descricao_topico": "Aprenda a relação entre sujeito e verbo.",
+    "titulo": "Concordância verbal",
+    "descricao_pagina": "Pratique a escolha da forma verbal de acordo com o sujeito da oração.",
+    "minutos": 8,
+    "blocos": [
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "O verbo concorda com o sujeito",
+          "texto": "Na concordância verbal, o verbo geralmente varia em **número** (singular ou plural) e **pessoa** para concordar com o sujeito.\n\nCompare: **“A estudante participa”** e **“As estudantes participam”**. A mudança no sujeito exige uma mudança na forma verbal."
+        }
+      },
+      {
+        "tipo": "tabela",
+        "dados": {
+          "titulo": "Observe as formas",
+          "colunas": [
+            "Sujeito",
+            "Verbo",
+            "Frase"
+          ],
+          "linhas": [
+            [
+              "O aluno",
+              "estuda",
+              "O aluno estuda."
+            ],
+            [
+              "Os alunos",
+              "estudam",
+              "Os alunos estudam."
+            ],
+            [
+              "Nós",
+              "aprendemos",
+              "Nós aprendemos."
+            ],
+            [
+              "Ela",
+              "escreveu",
+              "Ela escreveu um resumo."
+            ]
+          ]
+        }
+      },
+      {
+        "tipo": "exemplos",
+        "dados": {
+          "titulo": "Concordância na prática",
+          "correto": "**As meninas concluíram a atividade.**",
+          "incorreto": "**As meninas concluiu a atividade.**",
+          "explicacao": "O sujeito “As meninas” está no plural; por isso, o verbo também deve ficar no plural: “concluíram”."
+        }
+      },
+      {
+        "tipo": "exemplo",
+        "dados": {
+          "titulo": "Como verificar a concordância",
+          "enunciado": "Complete: **“Os livros da biblioteca ____ organizados.”**",
+          "passos": [
+            {
+              "texto": "Encontre o núcleo do sujeito: **livros**."
+            },
+            {
+              "texto": "Observe o número: **livros** está no plural."
+            },
+            {
+              "texto": "Escolha a forma verbal plural: **estão**."
+            }
+          ],
+          "resultado": "Os livros da biblioteca estão organizados."
+        }
+      },
+      {
+        "tipo": "pergunta",
+        "dados": {
+          "titulo": "Complete a frase",
+          "enunciado": "Qual forma completa corretamente “As equipes ____ cedo para o evento”?",
+          "alternativas": [
+            "chegou",
+            "chegaram",
+            "chega",
+            "chegamos"
+          ],
+          "correta": 1,
+          "explicacao": "“As equipes” é sujeito da terceira pessoa do plural, por isso a forma adequada é “chegaram”."
+        }
+      },
+      {
+        "tipo": "lista",
+        "dados": {
+          "titulo": "Dicas de revisão",
+          "itens": [
+            "Identifique o núcleo do sujeito antes de escolher o verbo.",
+            "Confira se o sujeito está no singular ou no plural.",
+            "Não confunda termos entre o sujeito e o verbo com o núcleo do sujeito.",
+            "Releia a frase inteira para verificar o sentido."
+          ]
+        }
+      },
+      {
+        "tipo": "checklist",
+        "dados": {
+          "titulo": "Antes de concluir",
+          "itens": [
+            "Identifico o núcleo do sujeito.",
+            "Reconheço formas verbais no singular e no plural.",
+            "Consigo corrigir erros simples de concordância."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "topico": "Figuras de linguagem",
+    "descricao_topico": "Reconheça recursos expressivos e seus efeitos de sentido.",
+    "titulo": "Figuras de linguagem",
+    "descricao_pagina": "Descubra como a linguagem figurada torna textos mais expressivos.",
+    "minutos": 9,
+    "blocos": [
+      {
+        "tipo": "texto",
+        "dados": {
+          "titulo": "Muito além do sentido literal",
+          "texto": "As **figuras de linguagem** são recursos expressivos usados para criar imagens, enfatizar ideias e produzir efeitos de sentido. Elas aparecem em poemas, músicas, propagandas e até em conversas do dia a dia.\n\nUma frase pode dizer algo sem utilizar todas as palavras em seu sentido literal."
+        }
+      },
+      {
+        "tipo": "tabela",
+        "dados": {
+          "titulo": "Conheça as principais figuras",
+          "colunas": [
+            "Figura",
+            "O que faz",
+            "Exemplo"
+          ],
+          "linhas": [
+            [
+              "Metáfora",
+              "Aproxima ideias sem conectivo comparativo",
+              "A leitura é uma janela."
+            ],
+            [
+              "Comparação",
+              "Relaciona elementos com conectivo",
+              "Leve como uma pluma."
+            ],
+            [
+              "Personificação",
+              "Atribui ações humanas ao não humano",
+              "O vento sussurrava."
+            ],
+            [
+              "Hipérbole",
+              "Exagera para dar ênfase",
+              "Esperei uma eternidade."
+            ]
+          ]
+        }
+      },
+      {
+        "tipo": "destaque",
+        "dados": {
+          "titulo": "Metáfora x comparação",
+          "texto": "Na **comparação**, há marcas explícitas, como “como” ou “tal qual”. Na **metáfora**, a aproximação acontece diretamente.",
+          "variante": "info"
+        }
+      },
+      {
+        "tipo": "exemplo",
+        "dados": {
+          "titulo": "Identificando o efeito de sentido",
+          "enunciado": "Leia: **“A cidade acordou antes do sol.”**",
+          "passos": [
+            {
+              "texto": "Observe o sujeito: **a cidade**."
+            },
+            {
+              "texto": "Perceba que “acordar” é uma ação atribuída figuradamente à cidade."
+            },
+            {
+              "texto": "Identifique o efeito: o texto apresenta a cidade como se fosse uma pessoa."
+            }
+          ],
+          "resultado": "Personificação (ou prosopopeia)."
+        }
+      },
+      {
+        "tipo": "pergunta",
+        "dados": {
+          "titulo": "Qual é a figura?",
+          "enunciado": "Em “O vento sussurrava entre as árvores”, qual figura de linguagem se destaca?",
+          "alternativas": [
+            "Comparação",
+            "Personificação",
+            "Hipérbole",
+            "Enumeração"
+          ],
+          "correta": 1,
+          "explicacao": "O vento recebe uma ação associada a seres humanos: “sussurrar”. Isso caracteriza personificação."
+        }
+      },
+      {
+        "tipo": "glossario",
+        "dados": {
+          "titulo": "Glossário de revisão",
+          "itens": [
+            {
+              "termo": "Sentido literal",
+              "definicao": "Sentido mais direto e habitual de uma palavra ou expressão."
+            },
+            {
+              "termo": "Sentido figurado",
+              "definicao": "Sentido construído pelo contexto, diferente do uso estritamente literal."
+            },
+            {
+              "termo": "Efeito de sentido",
+              "definicao": "Impressão ou interpretação que uma escolha de linguagem provoca no leitor."
+            }
+          ]
+        }
+      },
+      {
+        "tipo": "checklist",
+        "dados": {
+          "titulo": "Para revisar",
+          "itens": [
+            "Distingo sentido literal de sentido figurado.",
+            "Reconheço metáfora, comparação, personificação e hipérbole.",
+            "Consigo explicar o efeito de uma figura no texto."
+          ]
+        }
+      }
+    ]
+  }
+]

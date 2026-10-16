@@ -1,55 +1,15 @@
-// Cards de estatísticas do topo da tela de Conteúdos do admin.
-// Extraído de AdminConteudos.jsx (era a seção "ESTATÍSTICAS").
-
-export function Estatisticas({
-  totalMaterias,
-  totalAtivas,
-  totalTopicos,
-  totalTopicosAtivos,
-}) {
-  return (
-    <section className="admin-content-stats">
-
-      <article className="stat-card">
-        <div className="stat-value">
-          {totalMaterias}
-        </div>
-
-        <div className="stat-label">
-          Matérias cadastradas
-        </div>
-      </article>
-
-      <article className="stat-card">
-        <div className="stat-value">
-          {totalAtivas}
-        </div>
-
-        <div className="stat-label">
-          Matérias ativas
-        </div>
-      </article>
-
-      <article className="stat-card">
-        <div className="stat-value">
-          {totalTopicos}
-        </div>
-
-        <div className="stat-label">
-          Tópicos cadastrados
-        </div>
-      </article>
-
-      <article className="stat-card">
-        <div className="stat-value">
-          {totalTopicosAtivos}
-        </div>
-
-        <div className="stat-label">
-          Tópicos ativos
-        </div>
-      </article>
-
-    </section>
-  );
+const CARDS = [
+  ['Matérias cadastradas', 'blue', '▤'],
+  ['Matérias ativas', 'green', '✓'],
+  ['Conteúdos cadastrados', 'purple', '☷'],
+  ['Conteúdos ativos', 'orange', '✓'],
+];
+export function Estatisticas({ totalMaterias, totalAtivas, totalTopicos, totalTopicosAtivos }) {
+  const values = [totalMaterias, totalAtivas, totalTopicos, totalTopicosAtivos];
+  return <section className="admin-content-stats" aria-label="Resumo dos conteúdos">
+    {CARDS.map(([label, tone, icon], index) => <article className={`admin-content-stat-modern tone-${tone}`} key={label}>
+      <div className="admin-content-stat-icon-modern" aria-hidden="true">{icon}</div>
+      <strong>{values[index]}</strong><span>{label}</span>
+    </article>)}
+  </section>;
 }

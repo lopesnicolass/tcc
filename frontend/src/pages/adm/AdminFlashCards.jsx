@@ -9,6 +9,26 @@ const emptyForm = {
   topicoId: '',
 };
 
+function FlashSelect({ value, options, placeholder, onChange, disabled = false }) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((item) => String(item.value) === String(value));
+  return (
+    <div className="flash-custom-select">
+      <button type="button" className="flash-custom-trigger" disabled={disabled} aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span>{selected?.label || placeholder}</span><span className="flash-custom-chevron" aria-hidden="true" />
+      </button>
+      {open && !disabled && <>
+        <button type="button" className="flash-custom-dismiss" aria-label="Fechar opções" onClick={() => setOpen(false)} />
+        <div className="flash-custom-options" role="listbox">
+          {options.length ? options.map((item) => (
+            <button key={item.value} type="button" role="option" aria-selected={String(value) === String(item.value)} className={String(value) === String(item.value) ? 'selected' : ''} onClick={() => { onChange(String(item.value)); setOpen(false); }}>{item.label}</button>
+          )) : <div className="flash-custom-empty">Nenhum conteúdo cadastrado</div>}
+        </div>
+      </>}
+    </div>
+  );
+}
+
 export default function AdminFlashCards() {
   const [cards, setCards] = useState([]);
   const [materias, setMaterias] = useState([]);
@@ -499,45 +519,26 @@ export default function AdminFlashCards() {
               </div>
             </div>
 
-            <label className="admin-flashcard-filter-field">
+            <div className="admin-flashcard-filter-field">
               <span>Matéria</span>
-              <select
+              <FlashSelect
                 value={filtroMateria}
-                onChange={(event) => {
-                  setFiltroMateria(event.target.value);
-                  setFiltroTopico('');
-                }}
-              >
-                <option value="">Todas as matérias</option>
-                {materiasAtivas.map((materia) => (
-                  <option key={materia.id} value={materia.id}>
-                    {materia.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
+                placeholder="Todas as matérias"
+                options={[{ value: '', label: 'Todas as matérias' }, ...materiasAtivas.map((materia) => ({ value: materia.id, label: materia.nome }))]}
+                onChange={(value) => { setFiltroMateria(value); setFiltroTopico(''); }}
+              />
+            </div>
 
-            <label className="admin-flashcard-filter-field">
+            <div className="admin-flashcard-filter-field">
               <span>Conteúdo</span>
-              <select
+              <FlashSelect
                 value={filtroTopico}
-                onChange={(event) => setFiltroTopico(event.target.value)}
-                disabled={!filtroMateria}
-              >
-                <option value="">
-                  {!filtroMateria
-                    ? 'Selecione uma matéria'
-                    : filtroConteudos.length
-                      ? 'Todos os conteúdos'
-                      : 'Nenhum conteúdo cadastrado'}
-                </option>
-                {filtroConteudos.map((topico) => (
-                  <option key={topico.id} value={topico.id}>
-                    {topico.nome}
-                  </option>
-                ))}
-              </select>
-            </label>
+                placeholder={!filtroMateria ? 'Selecione uma matéria' : filtroConteudos.length ? 'Todos os conteúdos' : 'Nenhum conteúdo cadastrado'}
+                disabled={!filtroMateria || !filtroConteudos.length}
+                options={[{ value: '', label: 'Todos os conteúdos' }, ...filtroConteudos.map((topico) => ({ value: topico.id, label: topico.nome }))]}
+                onChange={setFiltroTopico}
+              />
+            </div>
 
             {filtrosAtivos && (
               <button
@@ -589,9 +590,6 @@ export default function AdminFlashCards() {
                 >
                   <div className="admin-flashcard-materia-header">
                     <div>
-                      <span className="admin-flashcard-section-eyebrow">
-                        MATÉRIA
-                      </span>
                       <h2>{materia}</h2>
                     </div>
                     <span className="admin-flashcard-section-count">
@@ -631,15 +629,6 @@ export default function AdminFlashCards() {
                             >
                               <strong>{card.primario}</strong>
 
-                              <span
-                                className={
-                                  card.conteudo
-                                    ? 'admin-flashcard-conteudo'
-                                    : 'admin-flashcard-conteudo pendente'
-                                }
-                              >
-                                {card.conteudo || 'Conteúdo não definido'}
-                              </span>
                             </div>
                           ))}
                         </div>
@@ -681,7 +670,7 @@ export default function AdminFlashCards() {
                   <span>Texto primário</span>
                   <textarea
                     className="modal-textarea"
-                    style={{ height: '90px' }}
+                    
                     placeholder="Digite a pergunta"
                     maxLength={40}
                     value={createForm.primario}
@@ -702,7 +691,7 @@ export default function AdminFlashCards() {
                   <span>Texto secundário</span>
                   <textarea
                     className="modal-textarea"
-                    style={{ height: '90px' }}
+                    
                     placeholder="Digite a resposta"
                     maxLength={90}
                     value={createForm.secundario}
@@ -720,43 +709,12 @@ export default function AdminFlashCards() {
 
                 <div className="admin-flashcard-field">
                   <span>Matéria</span>
-                  <select
-                    value={createForm.materiaId}
-                    onChange={handleMateriaCreateChange}
-                  >
-                    {renderMateriaOptions()}
-                  </select>
+                  <FlashSelect value={createForm.materiaId} placeholder="Selecione uma matéria" options={materias.map((materia) => ({ value: materia.id, label: materia.nome }))} onChange={(value) => handleMateriaCreateChange({ target: { value } })} />
                 </div>
 
                 <div className="admin-flashcard-field">
                   <span>Conteúdo</span>
-                  <select
-                    value={createForm.topicoId}
-                    onChange={(e) =>
-                      setCreateForm({
-                        ...createForm,
-                        topicoId: e.target.value,
-                      })
-                    }
-                    disabled={!createForm.materiaId}
-                  >
-                    <option value="">
-                      {!createForm.materiaId
-                        ? 'Selecione uma matéria primeiro'
-                        : createConteudos.length
-                          ? 'Selecione um conteúdo'
-                          : 'Nenhum conteúdo cadastrado'}
-                    </option>
-
-                    {createConteudos.map((topico) => (
-                      <option
-                        key={topico.id}
-                        value={topico.id}
-                      >
-                        {topico.nome}
-                      </option>
-                    ))}
-                  </select>
+                  <FlashSelect value={createForm.topicoId} placeholder={createForm.materiaId ? "Selecione um conteúdo" : "Selecione uma matéria primeiro"} disabled={!createForm.materiaId} options={createConteudos.map((topico) => ({ value: topico.id, label: topico.nome }))} onChange={(value) => setCreateForm((previous) => ({ ...previous, topicoId: value }))} />
                   <small>
                     O conteúdo precisa existir na matéria selecionada.
                   </small>
@@ -805,7 +763,7 @@ export default function AdminFlashCards() {
                   <span>Texto primário</span>
                   <textarea
                     className="modal-textarea"
-                    style={{ height: '90px' }}
+                    
                     maxLength={40}
                     value={editForm.primario}
                     onChange={(e) =>
@@ -825,7 +783,7 @@ export default function AdminFlashCards() {
                   <span>Texto secundário</span>
                   <textarea
                     className="modal-textarea"
-                    style={{ height: '90px' }}
+                    
                     maxLength={90}
                     value={editForm.secundario}
                     onChange={(e) =>
@@ -842,43 +800,12 @@ export default function AdminFlashCards() {
 
                 <div className="admin-flashcard-field">
                   <span>Matéria</span>
-                  <select
-                    value={editForm.materiaId}
-                    onChange={handleMateriaEditChange}
-                  >
-                    {renderMateriaOptions()}
-                  </select>
+                  <FlashSelect value={editForm.materiaId} placeholder="Selecione uma matéria" options={materias.map((materia) => ({ value: materia.id, label: materia.nome }))} onChange={(value) => handleMateriaEditChange({ target: { value } })} />
                 </div>
 
                 <div className="admin-flashcard-field">
                   <span>Conteúdo</span>
-                  <select
-                    value={editForm.topicoId}
-                    onChange={(e) =>
-                      setEditForm({
-                        ...editForm,
-                        topicoId: e.target.value,
-                      })
-                    }
-                    disabled={!editForm.materiaId}
-                  >
-                    <option value="">
-                      {!editForm.materiaId
-                        ? 'Selecione uma matéria primeiro'
-                        : editConteudos.length
-                          ? 'Selecione um conteúdo'
-                          : 'Nenhum conteúdo cadastrado'}
-                    </option>
-
-                    {editConteudos.map((topico) => (
-                      <option
-                        key={topico.id}
-                        value={topico.id}
-                      >
-                        {topico.nome}
-                      </option>
-                    ))}
-                  </select>
+                  <FlashSelect value={editForm.topicoId} placeholder={editForm.materiaId ? "Selecione um conteúdo" : "Selecione uma matéria primeiro"} disabled={!editForm.materiaId} options={editConteudos.map((topico) => ({ value: topico.id, label: topico.nome }))} onChange={(value) => setEditForm((previous) => ({ ...previous, topicoId: value }))} />
 
                   {!editing.topico_id && (
                     <small className="admin-flashcard-warning">

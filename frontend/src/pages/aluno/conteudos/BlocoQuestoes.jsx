@@ -5,7 +5,7 @@ import {
 } from 'react';
 
 import Icon from '../../../components/Icon.jsx';
-import { obterToken, request } from '../../../services/api.js';
+import { API_URL, obterToken, request } from '../../../services/api.js';
 
 function normalizarDados(
   valor
@@ -533,6 +533,12 @@ export default function BlocoQuestoes({
                         questao.pergunta
                       }
                     </h3>
+
+                    {questao.imagem && (
+                      <figure className="pagina-questao-imagem">
+                        <img src={`${API_URL}${questao.imagem}`} alt={`Imagem de apoio à questão ${index + 1}`} loading="lazy" />
+                      </figure>
+                    )}
 
                     <div className="pagina-question-options">
                       {letras.map(

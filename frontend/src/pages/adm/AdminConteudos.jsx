@@ -12,7 +12,6 @@ import {
 } from './admin-conteudos/helpers.js';
 
 import { Estatisticas } from './admin-conteudos/Estatisticas.jsx';
-import { Filtros } from './admin-conteudos/Filtros.jsx';
 import { ListaMaterias } from './admin-conteudos/ListaMaterias.jsx';
 import { ModalMateria } from './admin-conteudos/ModalMateria.jsx';
 import { ModalTopico } from './admin-conteudos/ModalTopico.jsx';
@@ -305,7 +304,7 @@ export default function AdminConteudos() {
   ) {
     const confirmar =
       window.confirm(
-        `Tem certeza que deseja excluir "${materia.nome}"?\n\nTodos os tópicos dessa matéria também serão excluídos.`
+        `Tem certeza que deseja excluir "${materia.nome}"?\n\nTodos os conteúdos dessa matéria também serão excluídos.`
       );
 
     if (!confirmar) {
@@ -552,16 +551,13 @@ export default function AdminConteudos() {
 
       <header className="page-header">
         <div>
-          <span className="admin-section-kicker">
-            CMS / CONTEÚDO
-          </span>
 
           <h1>
             Conteúdos
           </h1>
 
           <p>
-            As cinco matérias já vêm cadastradas. Personalize suas descrições e crie tópicos e aulas para os alunos.
+            As cinco matérias já vêm cadastradas. Personalize suas descrições e crie conteúdos e aulas para os alunos.
           </p>
         </div>
 
@@ -647,15 +643,6 @@ export default function AdminConteudos() {
         totalAtivas={totalAtivas}
         totalTopicos={totalTopicos}
         totalTopicosAtivos={totalTopicosAtivos}
-      />
-
-      {/* FILTROS */}
-
-      <Filtros
-        busca={busca}
-        setBusca={setBusca}
-        filtro={filtro}
-        setFiltro={setFiltro}
       />
 
       {/* LISTA */}

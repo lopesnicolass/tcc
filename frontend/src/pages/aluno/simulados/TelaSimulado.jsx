@@ -1,3 +1,4 @@
+import { API_URL } from '../../../services/api.js';
 import { useState } from 'react';
 
 // Tela de prova: preserva todas as questões e o salvamento automático de respostas.
@@ -91,6 +92,11 @@ export function TelaSimulado({
                   </span>
                 </div>
                 <h2 id={`titulo-questao-${questao.id}`}>{questao.pergunta}</h2>
+                {questao.imagem && (
+                  <figure className="simulado-prova-figura">
+                    <img src={`${API_URL}${questao.imagem}`} alt={`Imagem de apoio à questão ${index + 1}`} loading="lazy" />
+                  </figure>
+                )}
                 <div className="simulado-prova-opcoes" role="group" aria-label={`Alternativas da questão ${index + 1}`}>
                   {[
                     ['A', questao.alternativa_a], ['B', questao.alternativa_b],

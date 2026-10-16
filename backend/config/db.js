@@ -533,9 +533,24 @@ db.run(`
 
             correta TEXT NOT NULL,
 
-            materia TEXT NOT NULL
+            materia TEXT NOT NULL,
+
+            imagem TEXT DEFAULT NULL
         )
     `);
+
+    // Bancos já existentes também precisam da coluna opcional.
+    db.all('PRAGMA table_info(questoes)', (erro, colunas) => {
+        if (erro) {
+            console.error('Erro ao consultar colunas de questões:', erro);
+            return;
+        }
+        if (!(colunas || []).some(coluna => coluna.name === 'imagem')) {
+            db.run('ALTER TABLE questoes ADD COLUMN imagem TEXT DEFAULT NULL', (falha) => {
+                if (falha) console.error('Erro ao adicionar imagem nas questões:', falha);
+            });
+        }
+    });
 
 
     // =====================================================

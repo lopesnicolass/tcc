@@ -2,6 +2,7 @@
 import '../../styles/adm/AdminSimulados.css';
 import { useEffect, useState } from 'react';
 import { API_URL, obterToken } from '../../services/api.js';
+import { Icon } from './admin-conteudos/icons.jsx';
 
 function headerAuth(comJson = false) {
   const headers = {
@@ -20,7 +21,6 @@ const MIN_QUESTOES = 10;
 const emptySimulado = {
   nome: '',
   limiteTempo: '',
-  dificuldade: 'Média',
   materiaId: '',
   topicoId: ''
 };
@@ -32,7 +32,8 @@ const emptyQuestao = {
   c: '',
   d: '',
   e: '',
-  correta: 'A'
+  correta: 'A',
+  imagem: null
 };
 
 export default function AdminSimulados() {
@@ -41,14 +42,25 @@ export default function AdminSimulados() {
 
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptySimulado);
+  const [conteudosAbertos, setConteudosAbertos] = useState(false);
 
   const [questoes, setQuestoes] = useState([]);
   const [questoesOriginais, setQuestoesOriginais] = useState([]);
 
   const [showQuestaoModal, setShowQuestaoModal] = useState(false);
+
+  // Impede a rolagem da página de fundo enquanto qualquer modal estiver aberto.
+  useEffect(() => {
+    if (!showModal && !showQuestaoModal) return;
+    const anterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = anterior; };
+  }, [showModal, showQuestaoModal]);
   const [questaoForm, setQuestaoForm] = useState(emptyQuestao);
 
   const [questaoEditando, setQuestaoEditando] = useState(null);
+  const [enviandoImagem, setEnviandoImagem] = useState(false);
+  const [erroImagem, setErroImagem] = useState('');
 
   const [simuladoEditando, setSimuladoEditando] = useState(null);
 
@@ -207,8 +219,6 @@ export default function AdminSimulados() {
         nome: dadosSimulado.titulo || '',
         limiteTempo:
           dadosSimulado.tempo_limite || '',
-        dificuldade:
-          dadosSimulado.dificuldade || 'Média',
         materiaId:
           materiaEncontrada
             ? String(materiaEncontrada.id)
@@ -235,7 +245,8 @@ export default function AdminSimulados() {
           e:
             questao.alternativa_e || '',
           correta:
-            questao.correta || 'A'
+            questao.correta || 'A',
+          imagem: questao.imagem || null
         }));
 
       setQuestoes(questoesFormatadas);
@@ -270,6 +281,7 @@ export default function AdminSimulados() {
   // =====================================================
 
   function alterarForm(campo, valor) {
+    if (campo === 'materiaId' || campo === 'topicoId') setConteudosAbertos(false);
     setForm((prev) => ({
       ...prev,
       [campo]: valor,
@@ -284,6 +296,7 @@ export default function AdminSimulados() {
   // =====================================================
 
   function abrirCriarQuestao() {
+    setErroImagem('');
     setQuestaoEditando(null);
 
     setQuestaoForm({
@@ -298,6 +311,7 @@ export default function AdminSimulados() {
   // =====================================================
 
   function abrirEditarQuestao(index) {
+    setErroImagem('');
     const questao = questoes[index];
 
     setQuestaoEditando(index);
@@ -320,12 +334,48 @@ export default function AdminSimulados() {
     }));
   }
 
+  // Imagem é opcional e pertence apenas à questão editada.
+  async function enviarImagemQuestao(evento) {
+    const arquivo = evento.target.files?.[0];
+    evento.target.value = '';
+    if (!arquivo) return;
+
+    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(arquivo.type)) {
+      setErroImagem('Selecione uma imagem PNG, JPG, WEBP ou GIF.');
+      return;
+    }
+    if (arquivo.size > 5 * 1024 * 1024) {
+      setErroImagem('A imagem deve ter no máximo 5 MB.');
+      return;
+    }
+
+    setEnviandoImagem(true);
+    setErroImagem('');
+    try {
+      const dados = new FormData();
+      dados.append('imagem', arquivo);
+      const resposta = await fetch(`${API_URL}/questoes/imagem`, {
+        method: 'POST',
+        headers: headerAuth(),
+        body: dados
+      });
+      const corpo = await resposta.json();
+      if (!resposta.ok) throw new Error(corpo.mensagem || 'Falha ao enviar imagem.');
+      setQuestaoForm(anterior => ({ ...anterior, imagem: corpo.imagem }));
+    } catch (error) {
+      setErroImagem(error.message || 'Não foi possível enviar a imagem.');
+    } finally {
+      setEnviandoImagem(false);
+    }
+  }
+
   // =====================================================
   // SALVAR QUESTÃO NO FORMULÁRIO
   // =====================================================
 
   function handleAddQuestao(e) {
     e.preventDefault();
+    if (enviandoImagem) return;
 
     if (
       !questaoForm.enunciado.trim() ||
@@ -516,11 +566,6 @@ export default function AdminSimulados() {
       return false;
     }
 
-    if (!form.dificuldade) {
-      alert('Selecione uma dificuldade.');
-      return false;
-    }
-
     if (questoes.length < MIN_QUESTOES) {
       alert(
         `É necessário adicionar no mínimo ${MIN_QUESTOES} questões.`
@@ -557,7 +602,7 @@ export default function AdminSimulados() {
             materiaSelecionada.nome,
           topicoId:
             Number(form.topicoId),
-          dificuldade: form.dificuldade,
+          dificuldade: simuladoEditando ? (simulados.find(item => item.id === simuladoEditando)?.dificuldade || 'Média') : 'Média',
           ativo: 1
         })
       }
@@ -620,7 +665,8 @@ export default function AdminSimulados() {
               questao.correta,
 
             materia:
-              materiaSelecionada.nome
+              materiaSelecionada.nome,
+            imagem: questao.imagem || null
           })
         }
       );
@@ -747,7 +793,7 @@ export default function AdminSimulados() {
             materiaSelecionada.nome,
           topicoId:
             Number(form.topicoId),
-          dificuldade: form.dificuldade,
+          dificuldade: simulados.find(item => String(item.id) === String(simuladoId))?.dificuldade || 'Média',
           ativo: 1
         })
       }
@@ -799,7 +845,8 @@ export default function AdminSimulados() {
                   questao.correta,
 
                 materia:
-                  materiaSelecionada.nome
+                  materiaSelecionada.nome,
+                imagem: questao.imagem || null
               })
             }
           );
@@ -870,7 +917,8 @@ export default function AdminSimulados() {
                   questao.correta,
 
                 materia:
-                  materiaSelecionada.nome
+                  materiaSelecionada.nome,
+                imagem: questao.imagem || null
               })
             }
           );
@@ -986,14 +1034,26 @@ export default function AdminSimulados() {
     }
   }
 
+  const gruposSimulados = Object.entries(
+    simulados.reduce((materias, simulado) => {
+      const materia = simulado.materia || 'Sem matéria';
+      const conteudo = simulado.topico || 'Sem conteúdo';
+      if (!materias[materia]) materias[materia] = {};
+      if (!materias[materia][conteudo]) materias[materia][conteudo] = [];
+      materias[materia][conteudo].push(simulado);
+      return materias;
+    }, {})
+  ).sort(([a], [b]) => a.localeCompare(b, 'pt-BR'));
+
   // =====================================================
   // RENDER
   // =====================================================
 
   return (
-    <div>
-      <div className="page-header">
-        <h1>Simulados</h1>
+    <div className="admin-simulados-page">
+      <div className="page-header admin-simulados-heading">
+        <div><h1>Simulados</h1><p>Gerencie seus simulados organizados por matéria e conteúdo.</p></div>
+        <button className="admin-simulados-new" type="button" onClick={openCreate}>+ Novo simulado</button>
       </div>
 
       {erro && (
@@ -1014,427 +1074,211 @@ export default function AdminSimulados() {
             </h2>
 
             <p>
-              Clique no botão + para criar o
+              Clique em Novo simulado para criar o
               primeiro simulado.
             </p>
           </div>
         ) : (
-          simulados.map((s) => (
-            <div
-              className="admin-list-item"
-              key={s.id}
-            >
-              <div>
-                <strong>
-                  {s.titulo}
-                </strong>
-
-                <div className="admin-simulado-meta">
-                  {s.materia || 'Sem matéria'} •{' '}
-                  {s.topico || 'Sem conteúdo'} •{' '}
-                  {s.dificuldade || 'Média'} •{' '}
-                  {s.quantidade_questoes || 0}{' '}
-                  questões •{' '}
-                  {s.tempo_limite || 0} minutos
+          gruposSimulados.map(([materia, conteudos]) => (
+            <section className="admin-simulados-materia" key={materia}>
+              <header className="admin-simulados-materia-header">
+                {(() => {
+                  const dadosMateria = materiasConteudos.find(item => item.nome === materia);
+                  const iconesPermitidos = ['book', 'calculator', 'globe', 'flask', 'target'];
+                  return (
+                    <span
+                      className="admin-simulados-materia-icon"
+                      aria-hidden="true"
+                      style={{ background: dadosMateria?.cor || '#2783d3' }}
+                    >
+                      <Icon name={iconesPermitidos.includes(dadosMateria?.icone) ? dadosMateria.icone : 'book'} size={22} />
+                    </span>
+                  );
+                })()}
+                <div><h2>{materia}</h2><span>{Object.values(conteudos).flat().length} simulado(s)</span></div>
+              </header>
+              {Object.entries(conteudos).sort(([a], [b]) => a.localeCompare(b, 'pt-BR')).map(([conteudo, itens]) => (
+                <div className="admin-simulados-conteudo" key={conteudo}>
+                  <div className="admin-simulados-conteudo-heading">
+                    <h3>{conteudo}</h3><span>{itens.length} simulado(s)</span>
+                  </div>
+                  <div className="admin-simulados-items">
+                    {itens.map((s) => (
+                      <article className="admin-simulado-card" key={s.id}>
+                        <div className="admin-simulado-card-main">
+                          <strong>{s.titulo}</strong>
+                          <div className="admin-simulado-details">
+                            
+                            <span>{s.quantidade_questoes || 0} questões</span>
+                            <span>{s.tempo_limite || 0} minutos</span>
+                          </div>
+                        </div>
+                        <button className="admin-edit-btn" type="button" onClick={() => abrirEditar(s)} disabled={carregandoQuestoes || salvando || excluindo}>Editar simulado</button>
+                      </article>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
-              <button
-                className="admin-edit-btn"
-                type="button"
-                onClick={() =>
-                  abrirEditar(s)
-                }
-                disabled={
-                  carregandoQuestoes ||
-                  salvando ||
-                  excluindo
-                }
-              >
-                Editar
-              </button>
-            </div>
+              ))}
+            </section>
           ))
         )}
       </div>
 
-      <button
-        className="fab-add"
-        onClick={openCreate}
-        aria-label="Criar simulado"
-        type="button"
-      >
-        +
-      </button>
 
-      {/* =================================================
-          MODAL DO SIMULADO
-      ================================================= */}
-
+      {/* Modal de criação / edição de simulado */}
       {showModal && (
         <div
-          className="modal-overlay"
+          className="modal-overlay simulado-overlay"
           onClick={() => {
-            if (!salvando && !excluindo) {
-              setShowModal(false);
-            }
+            if (!salvando && !excluindo && !showQuestaoModal) setShowModal(false);
           }}
         >
-          <div
-            className="modal-card"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
+          <div className="modal-card simulado-editor-modal" role="dialog" aria-modal={!showQuestaoModal} aria-labelledby="simulado-modal-title" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>
-                {simuladoEditando
-                  ? 'Editar Simulado'
-                  : 'Criar Simulado'}
-              </h2>
+              <h2 id="simulado-modal-title">{simuladoEditando ? 'Editar Simulado' : 'Criar Simulado'}</h2>
             </div>
-
             <form onSubmit={handlePostar}>
-              <div className="modal-two-col">
-                <div>
-                  <div className="modal-input-group">
-                    <label>
-                      Nome do Simulado
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.nome}
-                      onChange={(e) =>
-                        alterarForm(
-                          'nome',
-                          e.target.value
-                        )
-                      }
-                      autoFocus
-                      disabled={
-                        salvando ||
-                        excluindo
-                      }
-                    />
-                  </div>
-
-                  <div className="modal-input-group">
-                    <label>
-                      Limite de tempo
-                    </label>
-
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Ex: 60"
-                      value={
-                        form.limiteTempo
-                      }
-                      onChange={(e) =>
-                        alterarForm(
-                          'limiteTempo',
-                          e.target.value
-                        )
-                      }
-                      disabled={
-                        salvando ||
-                        excluindo
-                      }
-                    />
-
-                    <small>
-                      Informe o tempo em minutos.
-                    </small>
-                  </div>
-
-                  <div className="modal-input-group">
-                    <label>
-                      Dificuldade
-                    </label>
-
-                    <select
-                      value={
-                        form.dificuldade
-                      }
-                      onChange={(e) =>
-                        alterarForm(
-                          'dificuldade',
-                          e.target.value
-                        )
-                      }
-                      disabled={
-                        salvando ||
-                        excluindo
-                      }
-                    >
-                      <option value="Fácil">
-                        Fácil
-                      </option>
-
-                      <option value="Média">
-                        Média
-                      </option>
-
-                      <option value="Difícil">
-                        Difícil
-                      </option>
-                    </select>
-                  </div>
+              <div className="simulado-form-grid">
+                <div className="modal-input-group simulado-name-field">
+                  <label htmlFor="simulado-nome">Nome do Simulado</label>
+                  <input
+                    id="simulado-nome"
+                    type="text"
+                    value={form.nome}
+                    onChange={e => alterarForm('nome', e.target.value)}
+                    autoFocus
+                    disabled={salvando || excluindo}
+                  />
                 </div>
-
-                <div>
-                  <span className="modal-materia-label">
-                    Matéria
-                  </span>
-
+                <div className="modal-input-group simulado-time-field">
+                  <label htmlFor="simulado-tempo">Limite de tempo <span className="simulado-label-hint">(minutos)</span></label>
+                  <input
+                    id="simulado-tempo"
+                    type="number"
+                    min="1"
+                    placeholder="Ex.: 60"
+                    value={form.limiteTempo}
+                    onChange={e => alterarForm('limiteTempo', e.target.value)}
+                    disabled={salvando || excluindo}
+                  />
+                </div>
+                <div className="simulado-form-subject">
+                  <span className="modal-materia-label" id="simulado-materia-label">Matéria</span>
                   {materiasConteudos.length === 0 ? (
-                    <p className="modal-note">
-                      Cadastre uma matéria e pelo menos
-                      um conteúdo antes de criar um simulado.
-                    </p>
+                    <p className="modal-note">Cadastre uma matéria e pelo menos um conteúdo antes de criar um simulado.</p>
                   ) : (
-                    <div className="modal-materia-list">
-                      {materiasConteudos.map(
-                        (materia) => (
-                          <button
-                            type="button"
-                            key={materia.id}
-                            className={`materia-pill ${
-                              String(form.materiaId) ===
-                              String(materia.id)
-                                ? 'selected'
-                                : ''
-                            }`}
-                            onClick={() =>
-                              alterarForm(
-                                'materiaId',
-                                String(materia.id)
-                              )
-                            }
-                            disabled={
-                              salvando ||
-                              excluindo
-                            }
-                          >
-                            {materia.nome}
-                          </button>
-                        )
-                      )}
+                    <div className="modal-materia-list" role="group" aria-labelledby="simulado-materia-label">
+                      {materiasConteudos.map(materia => (
+                        <button
+                          type="button"
+                          key={materia.id}
+                          className={`materia-pill ${String(form.materiaId) === String(materia.id) ? 'selected' : ''}`}
+                          aria-pressed={String(form.materiaId) === String(materia.id)}
+                          onClick={() => alterarForm('materiaId', String(materia.id))}
+                          disabled={salvando || excluindo}
+                        >{materia.nome}</button>
+                      ))}
                     </div>
                   )}
-
+                </div>
+                <div className="simulado-form-content">
                   <div className="modal-input-group simulado-content-group">
-                    <label>
-                      Conteúdo
-                    </label>
-
-                    <select
-                      value={form.topicoId}
-                      onChange={(e) =>
-                        alterarForm(
-                          'topicoId',
-                          e.target.value
-                        )
-                      }
-                      disabled={
-                        salvando ||
-                        excluindo ||
-                        !form.materiaId
-                      }
-                    >
-                      <option value="">
-                        {!form.materiaId
-                          ? 'Selecione uma matéria primeiro'
-                          : 'Selecione um conteúdo'}
-                      </option>
-
-                      {(
-                        materiasConteudos.find(
-                          (materia) =>
-                            String(materia.id) ===
-                            String(form.materiaId)
-                        )?.topicos || []
-                      )
-                        .filter(
-                          (topico) =>
-                            Number(topico.ativo) !== 0
-                        )
-                        .map(
-                          (topico) => (
-                            <option
-                              key={topico.id}
-                              value={topico.id}
-                            >
-                              {topico.nome}
-                            </option>
-                          )
-                        )}
-                    </select>
-
-                    {form.materiaId &&
-                      (
-                        materiasConteudos.find(
-                          (materia) =>
-                            String(materia.id) ===
-                            String(form.materiaId)
-                        )?.topicos || []
-                      ).filter(
-                        (topico) =>
-                          Number(topico.ativo) !== 0
-                      ).length === 0 && (
-                        <small>
-                          Esta matéria ainda não possui
-                          conteúdos cadastrados.
-                        </small>
-                      )}
+                    <label htmlFor="simulado-conteudo">Conteúdo</label>
+                    {(() => {
+                      const conteudosDisponiveis = (materiasConteudos.find(materia => String(materia.id) === String(form.materiaId))?.topicos || [])
+                        .filter(topico => Number(topico.ativo) !== 0);
+                      const selecionado = conteudosDisponiveis.find(topico => String(topico.id) === String(form.topicoId));
+                      const desabilitado = salvando || excluindo || !form.materiaId || conteudosDisponiveis.length === 0;
+                      return (
+                        <div className="simulado-conteudo-select" onBlur={e => {
+                          if (!e.currentTarget.contains(e.relatedTarget)) setConteudosAbertos(false);
+                        }} onKeyDown={e => {
+                          if (e.key === 'Escape') setConteudosAbertos(false);
+                        }}>
+                          <button
+                            id="simulado-conteudo"
+                            type="button"
+                            className={`simulado-conteudo-trigger ${conteudosAbertos ? 'is-open' : ''} ${!selecionado ? 'is-placeholder' : ''}`}
+                            aria-haspopup="listbox"
+                            aria-expanded={conteudosAbertos && !desabilitado}
+                            aria-controls="simulado-conteudo-opcoes"
+                            disabled={desabilitado}
+                            onClick={() => setConteudosAbertos(aberto => !aberto)}
+                          >
+                            <span>{selecionado?.nome || (form.materiaId ? 'Selecione um conteúdo' : 'Selecione uma matéria primeiro')}</span>
+                            <span className="simulado-conteudo-chevron" aria-hidden="true" />
+                          </button>
+                          {conteudosAbertos && !desabilitado && (
+                            <div id="simulado-conteudo-opcoes" className="simulado-conteudo-options" role="listbox" aria-label="Conteúdos disponíveis">
+                              {conteudosDisponiveis.map(topico => (
+                                <button
+                                  type="button"
+                                  role="option"
+                                  aria-selected={String(form.topicoId) === String(topico.id)}
+                                  key={topico.id}
+                                  className={`simulado-conteudo-option ${String(form.topicoId) === String(topico.id) ? 'is-selected' : ''}`}
+                                  onClick={() => alterarForm('topicoId', String(topico.id))}
+                                >
+                                  <span>{topico.nome}</span>
+                                  {String(form.topicoId) === String(topico.id) && <span aria-hidden="true">✓</span>}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    {form.materiaId && (materiasConteudos.find(materia => String(materia.id) === String(form.materiaId))?.topicos || [])
+                      .filter(topico => Number(topico.ativo) !== 0).length === 0 && (
+                      <small>Esta matéria ainda não possui conteúdos cadastrados.</small>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="simulado-questoes-header">
-                <button
-                  type="button"
-                  className="mural-btn secondary"
-                  onClick={
-                    abrirCriarQuestao
-                  }
-                  disabled={
-                    salvando ||
-                    excluindo
-                  }
-                >
-                  + Criar Questão
-                </button>
-              </div>
-
-              <div className="simulado-question-count">
-                <span
-                  className={`question-count-badge ${
-                    questoes.length <
-                    MIN_QUESTOES
-                      ? 'incomplete'
-                      : ''
-                  }`}
-                >
-                  {questoes.length} questão(ões)
-                  adicionada(s)
-                </span>
-
-                <p className="modal-note">
-                  É necessário no mínimo{' '}
-                  {MIN_QUESTOES} questões para
-                  postar um simulado.
-                </p>
-              </div>
-
-              {questoes.length > 0 && (
-                <div className="simulado-question-list">
-                  {questoes.map(
-                    (questao, index) => (
-                      <div
-                        key={
-                          questao.id ||
-                          `nova-${index}`
-                        }
-                        className="simulado-question-item"
-                      >
-                        <span>
-                          Questão {index + 1}{' '}
-                          — correta:{' '}
-                          {questao.correta}
+              <section className="simulado-questions-section" aria-labelledby="simulado-questoes-title">
+                <div className="simulado-questions-toolbar">
+                  <div className="simulado-questions-info">
+                    <h3 id="simulado-questoes-title">Questões do simulado</h3>
+                    <span className={`question-count-badge ${questoes.length < MIN_QUESTOES ? 'incomplete' : ''}`}>
+                      {questoes.length} de {MIN_QUESTOES} questões mínimas
+                    </span>
+                  </div>
+                  <button type="button" className="simulado-add-question" onClick={abrirCriarQuestao} disabled={salvando || excluindo}>
+                    + Criar questão
+                  </button>
+                </div>
+                {questoes.length === 0 ? (
+                  <p className="simulado-questions-empty">Nenhuma questão adicionada. Crie a primeira questão para começar.</p>
+                ) : (
+                  <div className="simulado-question-list">
+                    {questoes.map((questao, index) => (
+                      <div key={questao.id || `nova-${index}`} className="simulado-question-item">
+                        <span>Questão {index + 1} — correta: {questao.correta}
+                          {questao.imagem && <span className="simulado-question-image-label"> · Com imagem</span>}
                         </span>
-
                         <div className="simulado-question-actions">
-                          <button
-                            type="button"
-                            className="simulado-edit-question"
-                            onClick={() =>
-                              abrirEditarQuestao(
-                                index
-                              )
-                            }
-                            disabled={
-                              salvando ||
-                              excluindo
-                            }
-                          >
-                            Editar
-                          </button>
-
-                          <button
-                            type="button"
-                            className="simulado-remove-question"
-                            onClick={() =>
-                              removerQuestao(
-                                index
-                              )
-                            }
-                            disabled={
-                              salvando ||
-                              excluindo
-                            }
-                          >
-                            Remover
-                          </button>
+                          <button type="button" className="simulado-edit-question" onClick={() => abrirEditarQuestao(index)} disabled={salvando || excluindo}>Editar</button>
+                          <button type="button" className="simulado-remove-question" onClick={() => removerQuestao(index)} disabled={salvando || excluindo}>Remover</button>
                         </div>
                       </div>
-                    )
-                  )}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </section>
 
               <div className="modal-actions simulado-modal-actions">
                 <div>
                   {simuladoEditando && (
-                    <button
-                      type="button"
-                      className="mural-btn simulado-delete-button"
-                      onClick={
-                        excluirSimulado
-                      }
-                      disabled={
-                        salvando ||
-                        excluindo
-                      }
-                    >
-                      {excluindo
-                        ? 'Excluindo...'
-                        : 'Excluir Simulado'}
+                    <button type="button" className="simulado-delete-button" onClick={excluirSimulado} disabled={salvando || excluindo}>
+                      {excluindo ? 'Excluindo...' : 'Excluir simulado'}
                     </button>
                   )}
                 </div>
-
                 <div className="simulado-footer-actions">
-                  <button
-                    type="button"
-                    className="mural-btn ghost"
-                    disabled={
-                      salvando ||
-                      excluindo
-                    }
-                    onClick={() =>
-                      setShowModal(false)
-                    }
-                  >
-                    Cancelar
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="mural-btn primary"
-                    disabled={
-                      salvando ||
-                      excluindo ||
-                      questoes.length <
-                        MIN_QUESTOES
-                    }
-                  >
-                    {salvando
-                      ? 'Salvando...'
-                      : simuladoEditando
-                      ? 'Salvar alterações'
-                      : 'Postar'}
+                  <button type="button" className="mural-btn ghost" disabled={salvando || excluindo} onClick={() => setShowModal(false)}>Cancelar</button>
+                  <button type="submit" className="mural-btn primary" disabled={salvando || excluindo || questoes.length < MIN_QUESTOES}>
+                    {salvando ? 'Salvando...' : simuladoEditando ? 'Salvar alterações' : 'Postar'}
                   </button>
                 </div>
               </div>
@@ -1443,149 +1287,63 @@ export default function AdminSimulados() {
         </div>
       )}
 
-      {/* =================================================
-          MODAL DA QUESTÃO
-      ================================================= */}
-
+      {/* Modal de criação / edição de questão */}
       {showQuestaoModal && (
-        <div
-          className="modal-overlay"
-          onClick={() =>
-            setShowQuestaoModal(false)
-          }
-        >
-          <div
-            className="modal-card"
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
+        <div className="modal-overlay simulado-questao-overlay" onClick={() => { if (!enviandoImagem) setShowQuestaoModal(false); }}>
+          <div className="modal-card simulado-questao-modal" role="dialog" aria-modal="true" aria-labelledby="simulado-questao-title" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>
-                {questaoEditando !== null
-                  ? 'Editar Questão'
-                  : 'Criar Questão'}
-              </h2>
+              <h2 id="simulado-questao-title">{questaoEditando !== null ? 'Editar Questão' : 'Criar Questão'}</h2>
             </div>
-
-            <form
-              onSubmit={handleAddQuestao}
-            >
-              <div className="modal-scroll">
-                <div className="modal-input-group">
-                  <label>
-                    Enunciado
-                  </label>
-
+            <form onSubmit={handleAddQuestao}>
+              <div className="simulado-questao-fields">
+                <div className="modal-input-group simulado-enunciado-grupo">
+                  <label htmlFor="simulado-enunciado">Enunciado</label>
                   <textarea
+                    id="simulado-enunciado"
                     className="modal-textarea simulado-enunciado"
-                    value={
-                      questaoForm.enunciado
-                    }
-                    onChange={(e) =>
-                      alterarQuestao(
-                        'enunciado',
-                        e.target.value
-                      )
-                    }
+                    value={questaoForm.enunciado}
+                    onChange={e => alterarQuestao('enunciado', e.target.value)}
                     autoFocus
                   />
                 </div>
-
-                {[
-                  ['A', 'a'],
-                  ['B', 'b'],
-                  ['C', 'c'],
-                  ['D', 'd'],
-                  ['E', 'e']
-                ].map(
-                  ([letra, campo]) => (
-                    <div
-                      className="modal-input-group"
-                      key={campo}
-                    >
-                      <label>
-                        Alternativa {letra}
-                      </label>
-
-                      <input
-                        type="text"
-                        value={
-                          questaoForm[campo]
-                        }
-                        onChange={(e) =>
-                          alterarQuestao(
-                            campo,
-                            e.target.value
-                          )
-                        }
-                      />
+                <div className="modal-input-group simulado-imagem-grupo">
+                  <label htmlFor="imagem-da-questao">Imagem da questão <span>(opcional)</span></label>
+                  <p className="simulado-imagem-ajuda">Adicione mapas, gráficos ou ilustrações. PNG, JPG, WEBP ou GIF, até 5 MB.</p>
+                  {questaoForm.imagem && (
+                    <div className="simulado-imagem-previa">
+                      <img src={`${API_URL}${questaoForm.imagem}`} alt="Prévia da imagem da questão" />
+                      <button type="button" className="simulado-imagem-remover" onClick={() => alterarQuestao('imagem', null)} disabled={enviandoImagem}>Remover imagem</button>
                     </div>
-                  )
-                )}
-
-                <div className="modal-input-group">
-                  <label>
-                    Alternativa correta
-                  </label>
-
-                  <select
-                    value={
-                      questaoForm.correta
-                    }
-                    onChange={(e) =>
-                      alterarQuestao(
-                        'correta',
-                        e.target.value
-                      )
-                    }
-                  >
-                    <option value="A">
-                      A
-                    </option>
-
-                    <option value="B">
-                      B
-                    </option>
-
-                    <option value="C">
-                      C
-                    </option>
-
-                    <option value="D">
-                      D
-                    </option>
-
-                    <option value="E">
-                      E
-                    </option>
-                  </select>
+                  )}
+                  <input id="imagem-da-questao" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={enviarImagemQuestao} disabled={enviandoImagem} aria-describedby="simulado-imagem-estado" />
+                  <small id="simulado-imagem-estado" role={erroImagem ? 'alert' : 'status'}>
+                    {enviandoImagem ? 'Enviando imagem...' : erroImagem || (questaoForm.imagem ? 'Imagem adicionada à questão.' : 'Questões sem imagem também são permitidas.')}
+                  </small>
+                </div>
+                {[
+                  ['A', 'a'], ['B', 'b'], ['C', 'c'], ['D', 'd'], ['E', 'e']
+                ].map(([letra, campo]) => (
+                  <div className="modal-input-group simulado-alternativa-field" key={campo}>
+                    <label htmlFor={`simulado-alt-${campo}`}>Alternativa {letra}</label>
+                    <input id={`simulado-alt-${campo}`} type="text" value={questaoForm[campo]} onChange={e => alterarQuestao(campo, e.target.value)} />
+                  </div>
+                ))}
+                <div className="modal-input-group simulado-correta-field">
+                  <span className="simulado-correta-label" id="simulado-correta-label">Alternativa correta</span>
+                  <div className="simulado-alternativa-correta" role="radiogroup" aria-labelledby="simulado-correta-label">
+                    {['A', 'B', 'C', 'D', 'E'].map(letra => (
+                      <label key={letra} className={`simulado-alternativa-opcao ${questaoForm.correta === letra ? 'selecionada' : ''}`}>
+                        <input type="radio" name="simulado-alternativa-correta" value={letra} checked={questaoForm.correta === letra} onChange={() => alterarQuestao('correta', letra)} />
+                        <span>{letra}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
-
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="mural-btn ghost"
-                  onClick={() => {
-                    setShowQuestaoModal(
-                      false
-                    );
-                    setQuestaoEditando(
-                      null
-                    );
-                  }}
-                >
-                  Cancelar
-                </button>
-
-                <button
-                  type="submit"
-                  className="mural-btn primary"
-                >
-                  {questaoEditando !== null
-                    ? 'Salvar questão'
-                    : 'Criar'}
+              <div className="modal-actions simulado-questao-actions">
+                <button type="button" className="mural-btn ghost" onClick={() => { setShowQuestaoModal(false); setQuestaoEditando(null); }} disabled={enviandoImagem}>Cancelar</button>
+                <button type="submit" className="mural-btn primary" disabled={enviandoImagem}>
+                  {enviandoImagem ? 'Enviando imagem...' : questaoEditando !== null ? 'Salvar questão' : 'Criar questão'}
                 </button>
               </div>
             </form>

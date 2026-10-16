@@ -82,20 +82,6 @@ export function CategoriasSimulados({ indicadores, melhorDesempenho, piorDesempe
               <span className="simulados-resumo-materia">{piorDesempenho?.materia ?? 'Pratique mais matérias para comparar'}</span>
             </div>
           </section>
-          {indicadores.foco && (
-            <div className="simulados-destaques">
-              <div className="simulados-destaque">
-                  <div>
-                    <span className="simulados-destaque-label">Sugestão de revisão</span>
-                    <h2>{indicadores.foco.materia}</h2>
-                    <p>{indicadores.foco.percentual}% de acertos nas tentativas dessa matéria. Que tal praticar mais?</p>
-                  </div>
-                  <button type="button" className="simulados-destaque-acao simulados-destaque-acao-secundaria" onClick={() => selecionarMateria(indicadores.foco.materia)}>
-                    Ver simulados →
-                  </button>
-                </div>
-            </div>
-          )}
                 <section className="materias-simulados-section">
           <div className="materias-simulados-grid">
             {materiasDisponiveis.map((materia) => {

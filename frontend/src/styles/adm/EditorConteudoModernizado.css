@@ -1,0 +1,33 @@
+
+.tenna-editor-refresh .editor-page-header{gap:22px;margin-bottom:26px}
+.tenna-editor-refresh .editor-page-header h1{font-size:39px!important;letter-spacing:-.04em}
+.tenna-editor-refresh .editor-layout{grid-template-columns:minmax(0,1fr) 345px!important;gap:22px!important;align-items:start}
+.tenna-editor-refresh .editor-main{min-width:0}
+.tenna-editor-refresh .editor-panel{padding:28px!important;border:1px solid rgba(40,103,177,.12)!important;border-radius:22px!important;box-shadow:0 10px 30px -27px rgba(14,55,108,.45)!important}
+.tenna-editor-refresh .editor-panel-title{margin-bottom:22px}
+.tenna-editor-refresh .editor-panel-title h2,.tenna-editor-refresh .editor-sidebar h2{font-size:23px!important;letter-spacing:-.025em}
+.tenna-editor-refresh .editor-sidebar-description{font-size:14px;line-height:1.55}
+.tenna-editor-refresh .editor-field-label{font-size:15px!important;font-weight:750}
+.tenna-editor-refresh .editor-field input,.tenna-editor-refresh .editor-field textarea,.tenna-editor-refresh .editor-field select{font-size:15px!important;border-radius:12px;min-height:47px}
+.tenna-editor-refresh .editor-block-list{gap:16px}
+.tenna-editor-refresh .editor-block{overflow:hidden;border:1px solid #dbe8f7!important;border-radius:16px!important;box-shadow:0 3px 12px rgba(14,55,108,.035)}
+.tenna-editor-refresh .editor-block-header{padding:17px 19px;gap:14px;background:var(--paper,#f5f9fc);border-bottom:1px solid #e0eaf5}
+.tenna-editor-refresh .editor-block-icon{width:40px;height:40px;border-radius:11px}
+.tenna-editor-refresh .editor-block-name strong{font-size:16px!important}
+.tenna-editor-refresh .editor-block-name small{font-size:12px!important}
+.tenna-editor-refresh .editor-block-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.tenna-editor-refresh .editor-icon-button{width:38px;height:38px;border:1px solid #d7e5f5;border-radius:11px;background:var(--card,#fff);transition:background .15s,border-color .15s}
+.tenna-editor-refresh .editor-icon-button:hover:not(:disabled){background:#eaf4ff;border-color:#90bdf0}
+.tenna-editor-refresh button:focus-visible{outline:3px solid rgba(37,145,243,.4);outline-offset:2px}
+.tenna-editor-refresh .editor-block-body{padding:22px!important}
+.tenna-editor-refresh .editor-block-body h3{font-size:18px!important}
+.tenna-editor-refresh .editor-block-body p{font-size:14.5px!important;line-height:1.75}
+.tenna-editor-refresh .tenna-blocos-simples{gap:10px}
+.tenna-editor-refresh .tenna-bloco-opcao{min-height:90px;padding:13px 8px;gap:10px;border:1px solid #dbe7f5;border-radius:14px;font-size:13px;font-weight:750;line-height:1.35;transition:background .15s,border-color .15s}
+.tenna-editor-refresh .tenna-bloco-opcao:hover{border-color:#79b8f5;background:#f0f8ff}
+.tenna-editor-refresh .tenna-bloco-opcao.selected{border:2px solid #2695f6;background:#eaf5ff}
+.tenna-editor-refresh .tenna-blocos-extras>summary{font-size:13px;padding:17px 2px}
+.tenna-editor-refresh .editor-primary-button,.tenna-editor-refresh .editor-secondary-button,.tenna-editor-refresh .editor-add-button{min-height:44px;border-radius:12px;font-size:13.5px;font-weight:750}
+.tenna-editor-refresh .editor-sidebar{top:20px}
+@media(max-width:1050px){.tenna-editor-refresh .editor-layout{grid-template-columns:minmax(0,1fr)!important}.tenna-editor-refresh .editor-sidebar{position:static}.tenna-editor-refresh .tenna-blocos-simples{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.tenna-editor-refresh .editor-panel{padding:18px!important;border-radius:17px!important}.tenna-editor-refresh .editor-page-header h1{font-size:30px!important}.tenna-editor-refresh .editor-block-header{flex-wrap:wrap;padding:14px}.tenna-editor-refresh .editor-block-actions{width:100%;justify-content:flex-start}.tenna-editor-refresh .tenna-blocos-simples{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -65,6 +65,26 @@ export default function AdminCalendario() {
   const [excluindo, setExcluindo] = useState(null);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const [diaSelecionado, setDiaSelecionado] = useState(() => dateKey(new Date()));
+  const [campoAberto, setCampoAberto] = useState(null);
+  const [mesCampo, setMesCampo] = useState(() => new Date());
+  const diasCampo = useMemo(() => {
+    const primeiro = new Date(mesCampo.getFullYear(), mesCampo.getMonth(), 1);
+    const inicio = new Date(primeiro);
+    inicio.setDate(1 - primeiro.getDay());
+    return Array.from({ length: 42 }, (_, i) => {
+      const dia = new Date(inicio);
+      dia.setDate(inicio.getDate() + i);
+      return dia;
+    });
+  }, [mesCampo]);
+  function abrirCampoData() {
+    if (campoAberto === 'data') { setCampoAberto(null); return; }
+    const base = form.data ? new Date(`${form.data}T12:00:00`) : new Date();
+    setMesCampo(new Date(base.getFullYear(), base.getMonth(), 1));
+    setCampoAberto('data');
+  }
+
 
   async function carregarDatas() {
     try {
@@ -100,7 +120,8 @@ export default function AdminCalendario() {
     const inicio = new Date(primeiro);
     inicio.setDate(1 - primeiro.getDay());
 
-    return Array.from({ length: 42 }, (_, index) => {
+    const total = Math.ceil((primeiro.getDay() + new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 0).getDate()) / 7) * 7;
+    return Array.from({ length: total }, (_, index) => {
       const dia = new Date(inicio);
       dia.setDate(inicio.getDate() + index);
       return dia;
@@ -127,6 +148,7 @@ export default function AdminCalendario() {
 
   function iniciarEdicao(data) {
     setEditando(data.id);
+    setDiaSelecionado(data.data);
     setForm({
       titulo: data.titulo || '',
       tipo: data.tipo || 'Outro',
@@ -188,6 +210,7 @@ export default function AdminCalendario() {
 
       const dataSalva = new Date(`${form.data}T12:00:00`);
       setMesAtual(new Date(dataSalva.getFullYear(), dataSalva.getMonth(), 1));
+      setDiaSelecionado(form.data);
       const mensagemSucesso =
         editando
           ? 'Data importante atualizada com sucesso.'
@@ -234,11 +257,13 @@ export default function AdminCalendario() {
     );
   }
 
+  const hoje = dateKey(new Date());
+  const eventosSelecionados = datasOrdenadas.filter((item) => item.data === diaSelecionado);
+
   return (
     <div className="admin-calendar-page">
       <header className="admin-calendar-header">
         <div>
-          <span className="admin-calendar-eyebrow">CALENDÁRIO DO VESTIBULINHO</span>
           <h1>Datas importantes</h1>
           <p>
             Cadastre as datas que os estudantes precisam acompanhar, como inscrições,
@@ -247,41 +272,19 @@ export default function AdminCalendario() {
         </div>
       </header>
 
-      <section className="admin-calendar-stats">
-        <article>
-          <span>Datas cadastradas</span>
-          <strong>{datas.length}</strong>
-        </article>
-
-        <article>
-          <span>Datas neste mês</span>
-          <strong>{datasDoMes.length}</strong>
-        </article>
-
-        <article>
-          <span>Próxima data</span>
-          <strong>{proximaData ? formatarData(proximaData.data) : '—'}</strong>
-        </article>
-      </section>
-
       {mensagem && <div className="admin-calendar-feedback success">{mensagem}</div>}
       {erro && <div className="admin-calendar-feedback error">{erro}</div>}
 
       <div className="admin-calendar-layout">
         <section className="admin-calendar-month-card">
           <div className="admin-calendar-toolbar">
-            <div>
-              <span>VISUALIZAÇÃO</span>
-              <h2>{mesLabel(mesAtual)}</h2>
-            </div>
-
             <div className="admin-calendar-month-actions">
-              <button type="button" onClick={() => mudarMes(-1)} aria-label="Mês anterior">
-                ‹
-              </button>
-              <button type="button" onClick={() => mudarMes(1)} aria-label="Próximo mês">
-                ›
-              </button>
+              <button type="button" onClick={() => mudarMes(-1)} aria-label="Mês anterior">‹</button>
+              <h2>{mesLabel(mesAtual)}</h2>
+              <button type="button" onClick={() => mudarMes(1)} aria-label="Próximo mês">›</button>
+            </div>
+            <div className="admin-calendar-month-actions">
+              <button type="button" className="admin-calendar-today" onClick={() => { const d = new Date(); setMesAtual(new Date(d.getFullYear(), d.getMonth(), 1)); setDiaSelecionado(dateKey(d)); }}>Hoje</button>
             </div>
           </div>
 
@@ -296,36 +299,39 @@ export default function AdminCalendario() {
               const foraDoMes = dia.getMonth() !== mesAtual.getMonth();
 
               return (
-                <div
+                <button
+                  type="button"
                   key={chave}
-                  className={`admin-calendar-day ${foraDoMes ? 'outside' : ''}`}
+                  className={`admin-calendar-day ${foraDoMes ? 'outside' : ''} ${chave === hoje ? 'today' : ''} ${chave === diaSelecionado ? 'selected' : ''}`}
+                  onClick={() => setDiaSelecionado(chave)}
+                  aria-label={`${formatarData(chave)}: ${eventos.length} eventos`}
+                  aria-pressed={chave === diaSelecionado}
                 >
                   <span className="admin-calendar-day-number">{dia.getDate()}</span>
-
-                  {eventos.slice(0, 3).map((evento) => (
-                    <button
-                      type="button"
-                      key={evento.id}
-                      className={`admin-calendar-event ${getTipoClass(evento.tipo)}`}
-                      onClick={() => iniciarEdicao(evento)}
-                      title="Editar data"
-                    >
-                      <strong>{evento.titulo}</strong>
-                    </button>
-                  ))}
-
-                  {eventos.length > 3 && (
-                    <span className="admin-calendar-more">+{eventos.length - 3} mais</span>
-                  )}
-                </div>
+                  {chave === hoje && <span className="admin-calendar-today-tag">HOJE</span>}
+                  {eventos.length > 0 && <span className="admin-calendar-dots">{eventos.slice(0, 4).map((evento) => <span key={evento.id} className={`admin-calendar-type-dot ${getTipoClass(evento.tipo)}`} />)}</span>}
+                </button>
               );
             })}
           </div>
         </section>
 
-        <aside className="admin-calendar-form-card">
+        <aside className="admin-calendar-sidebar">
+          <section className="admin-calendar-selected-card">
+            <div className="admin-calendar-selected-heading">
+              <div><span>DATA SELECIONADA</span><h2>{formatarData(diaSelecionado)}</h2></div>
+              <button type="button" onClick={() => { cancelarEdicao(); setForm((atual) => ({ ...atual, data: diaSelecionado })); }} aria-label="Cadastrar evento nesta data">+</button>
+            </div>
+            {eventosSelecionados.length ? eventosSelecionados.map((item) => (
+              <button key={item.id} type="button" className="admin-calendar-selected-event" onClick={() => iniciarEdicao(item)}>
+                <span className={`admin-calendar-type-dot ${getTipoClass(item.tipo)}`} />
+                <span><strong>{item.titulo}</strong><small>{item.tipo}</small></span>
+                <span className="admin-calendar-edit-label">Editar</span>
+              </button>
+            )) : <p className="admin-calendar-empty">Nenhuma data importante neste dia.</p>}
+          </section>
+          <aside className="admin-calendar-form-card">
           <div className="admin-calendar-form-heading">
-            <span>{editando ? 'EDITAR DATA' : 'NOVA DATA'}</span>
             <h2>{editando ? 'Atualizar evento' : 'Adicionar data importante'}</h2>
             <p>Essas informações serão exibidas no calendário dos estudantes.</p>
           </div>
@@ -344,23 +350,36 @@ export default function AdminCalendario() {
             <div className="admin-calendar-form-row">
               <label>
                 Tipo
-                <select
-                  value={form.tipo}
-                  onChange={(event) => alterarForm('tipo', event.target.value)}
-                  disabled={salvando}
-                >
-                  {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
-                </select>
+                <div className="admin-calendar-picker-anchor">
+                  <button type="button" className="admin-calendar-field-button" aria-expanded={campoAberto === 'tipo'} disabled={salvando} onClick={() => setCampoAberto(campoAberto === 'tipo' ? null : 'tipo')}>
+                    <span>{form.tipo}</span><span className="admin-calendar-chevron" />
+                  </button>
+                  {campoAberto === 'tipo' && <div className="admin-calendar-dropdown" role="listbox" aria-label="Tipo de evento">
+                    {TIPOS.map((tipo) => <button type="button" role="option" aria-selected={form.tipo === tipo} key={tipo} className={form.tipo === tipo ? 'active' : ''} onClick={() => { alterarForm('tipo', tipo); setCampoAberto(null); }}>{tipo}</button>)}
+                  </div>}
+                </div>
               </label>
 
               <label>
                 Data
-                <input
-                  type="date"
-                  value={form.data}
-                  onChange={(event) => alterarForm('data', event.target.value)}
-                  disabled={salvando}
-                />
+                <div className="admin-calendar-picker-anchor">
+                  <button type="button" className="admin-calendar-field-button admin-calendar-date-button" aria-expanded={campoAberto === 'data'} disabled={salvando} onClick={abrirCampoData}>
+                    <span className={form.data ? '' : 'placeholder'}>{form.data ? formatarData(form.data) : 'dd/mm/aaaa'}</span>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+                  </button>
+                  {campoAberto === 'data' && <div className="admin-calendar-date-popover">
+                    <div className="admin-calendar-date-nav">
+                      <button type="button" aria-label="Mês anterior" onClick={() => setMesCampo(new Date(mesCampo.getFullYear(), mesCampo.getMonth()-1, 1))}>‹</button>
+                      <strong>{mesLabel(mesCampo)}</strong>
+                      <button type="button" aria-label="Próximo mês" onClick={() => setMesCampo(new Date(mesCampo.getFullYear(), mesCampo.getMonth()+1, 1))}>›</button>
+                    </div>
+                    <div className="admin-calendar-date-grid">
+                      {SEMANA.map((dia) => <span className="weekday" key={dia}>{dia.slice(0, 1)}</span>)}
+                      {diasCampo.map((dia) => { const chave = dateKey(dia); return <button type="button" key={chave} className={`${dia.getMonth() !== mesCampo.getMonth() ? 'outside' : ''} ${chave === form.data ? 'chosen' : ''} ${chave === dateKey(new Date()) ? 'current' : ''}`} onClick={() => { alterarForm('data', chave); setCampoAberto(null); }}>{dia.getDate()}</button>; })}
+                    </div>
+                    <div className="admin-calendar-date-footer"><button type="button" onClick={() => { alterarForm('data', ''); setCampoAberto(null); }}>Limpar</button><button type="button" onClick={() => { alterarForm('data', dateKey(new Date())); setCampoAberto(null); }}>Hoje</button></div>
+                  </div>}
+                </div>
               </label>
             </div>
 
@@ -389,7 +408,6 @@ export default function AdminCalendario() {
 
           <div className="admin-calendar-list-heading">
             <div>
-              <span>CADASTRO</span>
               <h3>Datas configuradas</h3>
             </div>
             <small>{datas.length}</small>
@@ -428,6 +446,7 @@ export default function AdminCalendario() {
               ))
             )}
           </div>
+          </aside>
         </aside>
       </div>
     </div>

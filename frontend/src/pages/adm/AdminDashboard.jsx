@@ -35,6 +35,16 @@ const ICONS = {
   ),
 };
 
+const QUICK_ACTIONS = [
+  { to: '/admin/conteudos', icon: 'book', title: 'Gerenciar conteúdos', description: 'Matérias e tópicos', tone: 'blue' },
+  { to: '/admin/simulados', icon: 'check', title: 'Gerenciar simulados', description: 'Simulados e questões', tone: 'green' },
+  { to: '/admin/provas', icon: 'file', title: 'Adicionar prova', description: 'Provas e gabaritos', tone: 'orange' },
+  { to: '/admin/usuarios', icon: 'users', title: 'Gerenciar usuários', description: 'Alunos e administradores', tone: 'purple' },
+  { to: '/admin/flashcards', icon: 'book', title: 'Flashcards', description: 'Cartões de estudo', tone: 'cyan' },
+  { to: '/admin/cronogramas', icon: 'activity', title: 'Cronogramas', description: 'Planos de estudo', tone: 'indigo' },
+  { to: '/admin/calendario', icon: 'activity', title: 'Calendário', description: 'Datas importantes', tone: 'rose' },
+];
+
 function Icon({ name, size = 20 }) {
   return (
     <svg
@@ -53,7 +63,6 @@ function Icon({ name, size = 20 }) {
   );
 }
 
-
 function formatDate(value) {
   if (!value) return '—';
 
@@ -67,9 +76,9 @@ function formatDate(value) {
   }).format(date);
 }
 
-function StatCard({ icon, value, label, detail, loading, unavailable }) {
+function StatCard({ icon, value, label, detail, loading, unavailable, tone = 'blue' }) {
   return (
-    <article className="admin-overview-stat">
+    <article className={`admin-overview-stat admin-overview-stat--${tone}`}>
       <div className="admin-overview-stat-top">
         <div className="admin-overview-stat-icon">
           <Icon name={icon} size={21} />
@@ -80,13 +89,14 @@ function StatCard({ icon, value, label, detail, loading, unavailable }) {
         {loading ? <span className="admin-skeleton admin-skeleton-number" /> : unavailable ? '—' : value}
       </div>
       <div className="admin-overview-stat-label">{label}</div>
+      <span className="admin-overview-stat-accent" aria-hidden="true" />
     </article>
   );
 }
 
-function QuickAction({ to, icon, title, description }) {
+function QuickAction({ to, icon, title, description, tone = 'blue' }) {
   return (
-    <Link to={to} className="admin-quick-action">
+    <Link to={to} className={`admin-quick-action admin-quick-action--${tone}`}>
       <span className="admin-quick-icon"><Icon name={icon} size={20} /></span>
       <span className="admin-quick-copy">
         <strong>{title}</strong>
@@ -170,12 +180,6 @@ export default function AdminDashboard() {
     [dados.provas]
   );
 
-  const admins = useMemo(
-    () => dados.usuarios.filter((usuario) => usuario.tipo === 'admin').length,
-    [dados.usuarios]
-  );
-
-  const alunos = Math.max(dados.usuarios.length - admins, 0);
   const statusGeral = Object.values(fontes).every(Boolean);
   const statusTexto = carregando ? 'Verificando informações' : statusGeral ? 'Dados carregados' : 'Dados parciais';
   const statusDescricao = carregando
@@ -188,7 +192,6 @@ export default function AdminDashboard() {
         <div className="admin-hero-copy">
           <span className="admin-eyebrow">PAINEL ADMINISTRATIVO</span>
           <h1>Visão geral</h1>
-          <p>Tenha uma visão rápida da plataforma e acesse diretamente o que precisa gerenciar.</p>
         </div>
 
         <div className="admin-hero-actions">
@@ -208,12 +211,6 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {ultimaAtualizacao && (
-        <div className="admin-update-line">
-          Última atualização às {ultimaAtualizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-      )}
-
       {erro && (
         <div className="admin-alert admin-dashboard-alert" role="alert">
           <span className="admin-alert-icon">!</span>
@@ -224,16 +221,15 @@ export default function AdminDashboard() {
       <section className="admin-overview-stats" aria-label="Resumo da plataforma">
         <div className="admin-stats-heading">
           <div>
-            <span className="admin-section-kicker">VISÃO DA PLATAFORMA</span>
             <h2>Resumo geral</h2>
           </div>
           <span>Dados atuais</span>
         </div>
         <div className="admin-stats-cards">
-          <StatCard icon="users" value={contarSeDisponivel(dados.usuarios, fontes.usuarios)} label="Usuários cadastrados" detail={`${alunos} alunos`} loading={carregando} unavailable={!fontes.usuarios} />
-          <StatCard icon="book" value={contarSeDisponivel(dados.questoes, fontes.questoes)} label="Questões cadastradas" detail="Banco de questões" loading={carregando} unavailable={!fontes.questoes} />
-          <StatCard icon="check" value={contarSeDisponivel(dados.simulados, fontes.simulados)} label="Simulados" detail="Disponíveis no sistema" loading={carregando} unavailable={!fontes.simulados} />
-          <StatCard icon="file" value={contarSeDisponivel(dados.provas, fontes.provas)} label="Provas anteriores" detail="Arquivos cadastrados" loading={carregando} unavailable={!fontes.provas} />
+          <StatCard icon="users" value={contarSeDisponivel(dados.usuarios, fontes.usuarios)} label="Usuários cadastrados" detail="Pessoas na plataforma" loading={carregando} unavailable={!fontes.usuarios} tone="blue" />
+          <StatCard icon="book" value={contarSeDisponivel(dados.questoes, fontes.questoes)} label="Questões cadastradas" detail="Banco de questões" loading={carregando} unavailable={!fontes.questoes} tone="green" />
+          <StatCard icon="check" value={contarSeDisponivel(dados.simulados, fontes.simulados)} label="Simulados" detail="Disponíveis no sistema" loading={carregando} unavailable={!fontes.simulados} tone="purple" />
+          <StatCard icon="file" value={contarSeDisponivel(dados.provas, fontes.provas)} label="Provas anteriores" detail="Arquivos cadastrados" loading={carregando} unavailable={!fontes.provas} tone="orange" />
         </div>
       </section>
 
@@ -248,13 +244,9 @@ export default function AdminDashboard() {
         </div>
 
         <div className="admin-quick-grid">
-          <QuickAction to="/admin/conteudos" icon="book" title="Gerenciar conteúdos" description="Matérias e tópicos" />
-          <QuickAction to="/admin/simulados" icon="check" title="Gerenciar simulados" description="Simulados e questões" />
-          <QuickAction to="/admin/provas" icon="file" title="Adicionar prova" description="Provas e gabaritos" />
-          <QuickAction to="/admin/usuarios" icon="users" title="Gerenciar usuários" description="Alunos e administradores" />
-          <QuickAction to="/admin/flashcards" icon="book" title="Flashcards" description="Cartões de estudo" />
-          <QuickAction to="/admin/cronogramas" icon="activity" title="Cronogramas" description="Planos de estudo" />
-          <QuickAction to="/admin/calendario" icon="activity" title="Calendário" description="Datas importantes" />
+          {QUICK_ACTIONS.map((item) => (
+            <QuickAction key={item.to} {...item} />
+          ))}
         </div>
       </section>
 
@@ -339,7 +331,7 @@ export default function AdminDashboard() {
               ['Usuários', 'usuarios'], ['Simulados', 'simulados'],
               ['Questões', 'questoes'], ['Provas', 'provas'],
             ].map(([nome, chave]) => (
-              <div className="admin-health-row" key={chave}>
+              <div className={`admin-health-row admin-health-row--${chave}`} key={chave}>
                 <span className="admin-health-icon"><Icon name="activity" size={18} /></span>
                 <div><strong>{nome}</strong><small>{carregando ? 'Consultando...' : fontes[chave] ? 'Consulta concluída' : 'Falha na consulta'}</small></div>
                 <span className={`admin-health-badge ${!carregando && !fontes[chave] ? 'is-unavailable' : ''}`}>

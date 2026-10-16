@@ -13,6 +13,7 @@ function criarQuestao(
     alternativaE,
     correta,
     materia,
+    imagem,
     callback
 ) {
 
@@ -26,9 +27,10 @@ function criarQuestao(
             alternativa_d,
             alternativa_e,
             correta,
-            materia
+            materia,
+            imagem
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.run(
@@ -41,7 +43,8 @@ function criarQuestao(
             alternativaD,
             alternativaE,
             correta,
-            materia
+            materia,
+            imagem
         ],
         function (erro) {
 
@@ -157,7 +160,8 @@ function listarQuestoesPorIds(
             alternativa_c,
             alternativa_d,
             alternativa_e,
-            materia
+            materia,
+            imagem
         FROM questoes
         WHERE id IN (${placeholders})
     `;
@@ -352,6 +356,7 @@ function atualizarQuestao(
     alternativaE,
     correta,
     materia,
+    imagem,
     callback
 ) {
 
@@ -366,7 +371,8 @@ function atualizarQuestao(
             alternativa_d = ?,
             alternativa_e = ?,
             correta = ?,
-            materia = ?
+            materia = ?,
+            imagem = ?
 
         WHERE id = ?
     `;
@@ -382,6 +388,7 @@ function atualizarQuestao(
             alternativaE,
             correta,
             materia,
+            imagem,
             id
         ],
         function (erro) {

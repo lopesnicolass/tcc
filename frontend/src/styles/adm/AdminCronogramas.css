@@ -1172,3 +1172,332 @@
   .admin-cronogramas .cronograma-card-header h2 { font-size: 21px; }
   .admin-cronogramas .cronograma-programacao-acoes .cronograma-btn { width: 100%; }
 }
+
+/* ==============================================================
+   CRONOGRAMAS — organização e seletores (2026)
+   Mantém a estrutura e os comportamentos de cadastro existentes.
+   ============================================================== */
+.admin-cronogramas {
+  max-width: 1500px;
+  padding: 30px 34px 66px;
+}
+
+.admin-cronogramas .admin-cronogramas-header {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0 0 5px;
+  margin-bottom: 23px;
+}
+
+.admin-cronogramas .admin-cronogramas-header h1 {
+  margin: 0 0 5px;
+  color: #0e4698;
+  font-size: clamp(29px, 2.5vw, 36px);
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+.admin-cronogramas .admin-cronogramas-header p {
+  margin: 0;
+  color: #658bc0;
+  font-size: 14px;
+}
+
+.admin-cronogramas .cronograma-layout { gap: 18px; }
+.admin-cronogramas .cronograma-resumo-card,
+.admin-cronogramas .cronograma-periodo-card,
+.admin-cronogramas .cronograma-semanas-card,
+.admin-cronogramas .cronograma-configurado-card { padding: 23px 25px; }
+
+.admin-cronogramas .cronograma-card-header { margin-bottom: 16px; }
+.admin-cronogramas .cronograma-card-header h2 { margin: 5px 0; font-size: 21px; }
+.admin-cronogramas .cronograma-card-header p { font-size: 13px; }
+
+/* Nome, duração e frequência na mesma linha; descrição abaixo. */
+.admin-cronogramas .cronograma-resumo-grid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 15px;
+}
+.admin-cronogramas .cronograma-resumo-grid .cronograma-campo-nome {
+  grid-column: auto;
+  grid-row: auto;
+}
+.admin-cronogramas .cronograma-resumo-grid .cronograma-campo-descricao {
+  grid-column: 1 / -1;
+  grid-row: auto;
+}
+.admin-cronogramas .cronograma-form-group { min-width: 0; }
+.admin-cronogramas .cronograma-form-group input,
+.admin-cronogramas .cronograma-form-group textarea { min-height: 46px; }
+.admin-cronogramas .cronograma-campo-descricao textarea { min-height: 66px; }
+.admin-cronogramas .tenna-variacoes-existentes { margin-bottom: 17px; }
+.admin-cronogramas .tenna-variacao-resumo { margin-top: 16px; }
+
+/* Semanas compactas: número | dia | conteúdo largo | remover. */
+.admin-cronogramas .cronograma-semanas-stack { gap: 12px; }
+.admin-cronogramas .cronograma-semana-block {
+  overflow: visible;
+  position: relative;
+  border: 1px solid #dbe7f8;
+  border-radius: 14px;
+  background: #fff;
+}
+.admin-cronogramas .cronograma-semana-top {
+  padding: 14px 18px;
+  border-radius: 13px 13px 0 0;
+  background: #f6faff;
+}
+.admin-cronogramas .cronograma-semana-top h3 { margin-top: 3px; font-size: 14px; }
+.admin-cronogramas .cronograma-itens-lista {
+  padding: 12px 14px 15px;
+  gap: 9px;
+}
+.admin-cronogramas .cronograma-item-row {
+  display: grid;
+  grid-template-columns: 34px minmax(145px, .27fr) minmax(220px, 1fr) 38px;
+  align-items: end;
+  gap: 12px;
+  padding: 12px 14px;
+  min-width: 0;
+  border: 1px solid #e1ebf8;
+  border-radius: 11px;
+  background: #fff;
+}
+.admin-cronogramas .cronograma-item-numero {
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+.admin-cronogramas .cronograma-item-dia-wrap,
+.admin-cronogramas .cronograma-item-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.admin-cronogramas .cronograma-item-dia-wrap > span,
+.admin-cronogramas .cronograma-item-select-wrap > span {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 0;
+  width: auto;
+  padding: 0;
+  border-radius: 0;
+  color: #235aa4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.admin-cronogramas .cronograma-item-remover {
+  align-self: end;
+  height: 44px;
+  width: 38px;
+  font-size: 21px;
+  line-height: 1;
+  border-radius: 10px;
+}
+.admin-cronogramas .cronograma-btn {
+  border-radius: 10px;
+  font-size: 12px;
+}
+.admin-cronogramas .cronograma-btn.small { padding: 10px 13px; }
+.admin-cronogramas .cronograma-programacao-acoes .cronograma-btn.principal { background: #176fce; }
+
+/* Seletor único de duração, dias e conteúdo, com pesquisa nos conteúdos. */
+.admin-cronogramas .cronograma-seletor {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  font-size: 13px;
+}
+.admin-cronogramas .cronograma-seletor.aberto { z-index: 80; }
+.admin-cronogramas .cronograma-seletor-trigger {
+  appearance: none;
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  border: 1px solid #cbdff6;
+  border-radius: 11px;
+  background: #f5faff;
+  font-family: inherit;
+  font-size: 13px;
+  color: #164d95;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.admin-cronogramas .cronograma-seletor-trigger > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.admin-cronogramas .cronograma-seletor-trigger svg { flex: 0 0 auto; transition: transform .16s ease; }
+.admin-cronogramas .cronograma-seletor-trigger.placeholder { color: #7498c8; }
+.admin-cronogramas .cronograma-seletor-trigger:hover { border-color: #91c3fb; background: #edf6ff; }
+.admin-cronogramas .cronograma-seletor-trigger:focus-visible,
+.admin-cronogramas .cronograma-seletor.aberto .cronograma-seletor-trigger {
+  outline: none;
+  border-color: #2588ef;
+  box-shadow: 0 0 0 3px rgba(37, 136, 239, .13);
+  background: #fff;
+}
+.admin-cronogramas .cronograma-seletor.aberto .cronograma-seletor-trigger svg { transform: rotate(180deg); }
+.admin-cronogramas .cronograma-seletor-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  min-width: min(290px, 100%);
+  padding: 6px;
+  border: 1px solid #d4e3f5;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(12, 55, 117, .19);
+}
+.admin-cronogramas .cronograma-seletor-menu.acima {
+  top: auto;
+  bottom: calc(100% + 7px);
+}
+.admin-cronogramas .cronograma-seletor-busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  padding: 0 11px;
+  background: #f3f8ff;
+  color: #5483bd;
+  border: 1px solid #e1eaf7;
+  border-radius: 9px;
+}
+.admin-cronogramas .cronograma-seletor-busca input {
+  flex: 1;
+  min-width: 0;
+  height: 41px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  outline: none;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  color: #184c8e;
+  font: inherit;
+}
+.admin-cronogramas .cronograma-seletor-opcoes {
+  max-height: 248px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #c6d8ee transparent;
+}
+.admin-cronogramas .cronograma-seletor-opcao {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #174f99;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.admin-cronogramas .cronograma-seletor-opcao:hover,
+.admin-cronogramas .cronograma-seletor-opcao.em-foco { background: #ecf5ff; }
+.admin-cronogramas .cronograma-seletor-opcao.selecionada { background: #e1f0ff; color: #0953a8; font-weight: 750; }
+.admin-cronogramas .cronograma-seletor-opcao-texto {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.admin-cronogramas .cronograma-seletor-opcao-texto small {
+  color: #7393bd;
+  font-size: 11px;
+  font-weight: 650;
+}
+.admin-cronogramas .cronograma-seletor-check { font-size: 15px; color: #1268ca; }
+.admin-cronogramas .cronograma-seletor-sem-resultados { padding: 13px; margin: 0; color: #7590b0; }
+
+@media (max-width: 1100px) {
+  .admin-cronogramas .cronograma-resumo-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .admin-cronogramas .cronograma-resumo-grid .cronograma-campo-nome { grid-column: 1 / -1; }
+  .admin-cronogramas .cronograma-item-row { grid-template-columns: 34px 150px minmax(0,1fr) 38px; }
+}
+@media (max-width: 800px) {
+  .admin-cronogramas { padding: 22px 18px 48px; }
+  .admin-cronogramas .cronograma-resumo-grid { grid-template-columns: 1fr 1fr; }
+  .admin-cronogramas .cronograma-resumo-grid .cronograma-campo-nome { grid-column: 1 / -1; }
+  .admin-cronogramas .cronograma-item-row {
+    grid-template-columns: 32px minmax(0,1fr) 38px;
+    gap: 9px 11px;
+    align-items: center;
+  }
+  .admin-cronogramas .cronograma-item-numero { grid-row: 1 / 3; }
+  .admin-cronogramas .cronograma-item-dia-wrap { grid-column: 2; grid-row: 1; }
+  .admin-cronogramas .cronograma-item-select-wrap { grid-column: 2; grid-row: 2; }
+  .admin-cronogramas .cronograma-item-remover { grid-column: 3; grid-row: 1 / 3; align-self: center; }
+}
+@media (max-width: 550px) {
+  .admin-cronogramas { padding: 16px 12px 40px; }
+  .admin-cronogramas .cronograma-resumo-card,
+  .admin-cronogramas .cronograma-periodo-card,
+  .admin-cronogramas .cronograma-semanas-card,
+  .admin-cronogramas .cronograma-configurado-card { padding: 18px 14px; }
+  .admin-cronogramas .cronograma-resumo-grid { grid-template-columns: 1fr; }
+  .admin-cronogramas .cronograma-resumo-grid .cronograma-campo-nome,
+  .admin-cronogramas .cronograma-resumo-grid .cronograma-campo-descricao { grid-column: auto; }
+  .admin-cronogramas .cronograma-semana-top { gap: 12px; }
+  .admin-cronogramas .cronograma-semana-actions { flex-wrap: wrap; }
+  .admin-cronogramas .cronograma-itens-lista { padding: 9px; }
+  .admin-cronogramas .cronograma-item-row { padding: 10px 8px; }
+  .admin-cronogramas .cronograma-seletor-menu { min-width: 0; }
+}
+
+/* Evita o contorno quadrado de foco herdado dos campos globais. */
+.admin-cronogramas .cronograma-seletor-busca input:focus,
+.admin-cronogramas .cronograma-seletor-busca input:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0;
+}
+.admin-cronogramas .cronograma-seletor-busca:focus-within {
+  border-color: #8dbdf5;
+  box-shadow: 0 0 0 2px rgba(31, 117, 211, .10);
+}
+
+/* Rodapé de ações da organização das semanas: separação e respiro. */
+.admin-cronogramas .cronograma-programacao-acoes {
+  margin-top: 20px;
+  padding: 20px 4px 4px;
+  border-top: 1px solid #dbe7f6;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  .admin-cronogramas .cronograma-programacao-acoes {
+    padding: 16px 0 2px;
+  }
+}
+
+/* Espaçamento entre o card das semanas e o resumo do cronograma atual. */
+.admin-cronogramas .cronograma-semanas-card {
+  margin-bottom: 24px;
+}

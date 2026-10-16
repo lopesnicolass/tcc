@@ -1,5 +1,6 @@
 const {
   listarTop3,
+  buscarPosicaoParticipante,
   buscarParticipacao,
   atualizarParticipacao,
   buscarFotoParticipante
@@ -15,15 +16,19 @@ function listar(req, res) {
     if (erro) return responderErro(res, erro);
     buscarParticipacao(req.usuario.id, (erroParticipacao, dados) => {
       if (erroParticipacao) return responderErro(res, erroParticipacao);
-      return res.json({
-        top3: alunos.map((aluno, indice) => ({
-          posicao: indice + 1,
-          id: aluno.id,
-          nome: aluno.nome,
-          xp: Number(aluno.xp) || 0,
-          possuiFoto: Boolean(aluno.possuiFoto)
-        })),
-        participando: Boolean(dados?.participando)
+      buscarPosicaoParticipante(req.usuario.id, (erroPosicao, usuarioRanking) => {
+        if (erroPosicao) return responderErro(res, erroPosicao);
+        return res.json({
+          top3: alunos.map((aluno, indice) => ({
+            posicao: indice + 1,
+            id: aluno.id,
+            nome: aluno.nome,
+            xp: Number(aluno.xp) || 0,
+            possuiFoto: Boolean(aluno.possuiFoto)
+          })),
+          participando: Boolean(dados?.participando),
+          minhaPosicao: usuarioRanking?.posicao ?? null
+        });
       });
     });
   });

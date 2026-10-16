@@ -14,6 +14,7 @@ export default function AdminUsuarios() {
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
   const [filtro, setFiltro] = useState('todos');
+  const [filtroAberto, setFiltroAberto] = useState(false);
 
   const carregarUsuarios = useCallback(async () => {
     setCarregando(true);
@@ -69,7 +70,6 @@ export default function AdminUsuarios() {
     <div className="admin-users-page">
       <header className="page-header admin-users-header">
         <div>
-          <span className="admin-section-kicker">GERENCIAMENTO</span>
           <h1>Usuários</h1>
           <p>Encontre estudantes e administradores e gerencie os cadastros da plataforma.</p>
         </div>
@@ -79,9 +79,9 @@ export default function AdminUsuarios() {
       </header>
 
       <section className="admin-users-stats" aria-label="Resumo de usuários">
-        <div><span>Total de contas</span><strong>{carregando || erro ? '—' : users.length}</strong></div>
-        <div><span>Estudantes</span><strong>{carregando || erro ? '—' : totalAlunos}</strong></div>
-        <div><span>Administradores</span><strong>{carregando || erro ? '—' : totalAdmins}</strong></div>
+        <div><span className="admin-users-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6M19 14a5 5 0 0 1 2 4v2"/></svg></span><span>Total de contas</span><strong>{carregando || erro ? '—' : users.length}</strong></div>
+        <div><span className="admin-users-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="m2 9 10-5 10 5-10 5L2 9ZM6 12v5c4 3 8 3 12 0v-5M22 9v7"/></svg></span><span>Estudantes</span><strong>{carregando || erro ? '—' : totalAlunos}</strong></div>
+        <div><span className="admin-users-stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span>Administradores</span><strong>{carregando || erro ? '—' : totalAdmins}</strong></div>
       </section>
 
       <section className="admin-users-panel" aria-label="Lista de usuários">
@@ -93,16 +93,20 @@ export default function AdminUsuarios() {
           <div className="admin-users-controls">
             <label className="admin-users-input-wrap">
               <span className="sr-only">Buscar usuários</span>
+              <svg className="admin-users-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
               <input type="search" value={busca} onChange={(event) => setBusca(event.target.value)} placeholder="Buscar nome ou e-mail" />
             </label>
-            <label className="admin-users-select-wrap">
-              <span className="sr-only">Filtrar por tipo de usuário</span>
-              <select value={filtro} onChange={(event) => setFiltro(event.target.value)}>
-                <option value="todos">Todos os tipos</option>
-                <option value="aluno">Estudantes</option>
-                <option value="admin">Administradores</option>
-              </select>
-            </label>
+            <div className="admin-users-select-wrap">
+              <button type="button" className="admin-users-filter-trigger" aria-label="Filtrar por tipo de usuário" aria-haspopup="listbox" aria-expanded={filtroAberto} onClick={() => setFiltroAberto(!filtroAberto)}>
+                <span>{filtro === 'aluno' ? 'Estudantes' : filtro === 'admin' ? 'Administradores' : 'Todos os tipos'}</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              {filtroAberto && <div className="admin-users-filter-options" role="listbox" aria-label="Tipo de usuário">
+                {[['todos','Todos os tipos'],['aluno','Estudantes'],['admin','Administradores']].map(([valor, rotulo]) => (
+                  <button key={valor} type="button" role="option" aria-selected={filtro === valor} className={filtro === valor ? 'is-selected' : ''} onClick={() => {setFiltro(valor);setFiltroAberto(false);}}>{rotulo}</button>
+                ))}
+              </div>}
+            </div>
           </div>
         </div>
 
@@ -112,7 +116,6 @@ export default function AdminUsuarios() {
           <p className="admin-users-empty" role="status">Carregando usuários...</p>
         ) : !erro && usuariosFiltrados.length > 0 ? (
           <>
-            <p className="admin-users-count" role="status">{usuariosFiltrados.length} {usuariosFiltrados.length === 1 ? 'usuário encontrado' : 'usuários encontrados'}</p>
             <div className="admin-users-list">
               {usuariosFiltrados.map((usuario) => (
                 <article className="admin-users-row" key={usuario.id}>

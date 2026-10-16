@@ -2,6 +2,22 @@ import '../../styles/adm/AdminProvas.css';
 import { useEffect, useMemo, useRef, useState } from "react";
 import { API_URL, request } from '../../services/api.js';
 
+function ProvasIcon({ name, size = 20 }) {
+    const paths = {
+        file: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></>,
+        check: <><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m8 12 3 3 5-6"/></>,
+        layers: <><rect x="4" y="4" width="13" height="15" rx="2"/><path d="M8 8h12v12a2 2 0 0 1-2 2H8"/></>,
+        search: <><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></>,
+        refresh: <><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.8 9A7 7 0 0 1 18 7l2 5M4 12l2 5a7 7 0 0 0 12.2-2"/></>,
+        upload: <><path d="M12 16V3m-5 5 5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></>,
+        trash: <><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6m4-6v6"/></>,
+        calendar: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></>,
+        plus: <path d="M12 5v14M5 12h14"/>,
+        close: <path d="M5 5l14 14M19 5 5 19"/>
+    };
+    return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+}
+
 export default function AdminProvas() {
     const [ano, setAno] = useState("");
     const [titulo, setTitulo] = useState("");
@@ -149,10 +165,6 @@ export default function AdminProvas() {
 
             <div className="admin-provas-header">
                 <div>
-                    <span className="admin-provas-tag">
-                        ADMINISTRADOR
-                    </span>
-
                     <h1>Provas Anteriores</h1>
 
                     <p>
@@ -167,7 +179,7 @@ export default function AdminProvas() {
                 <div className="admin-provas-card-header">
 
                     <div className="admin-provas-icon">
-                        📄
+                        <ProvasIcon name="file" size={22} />
                     </div>
 
                     <div>
@@ -232,12 +244,12 @@ export default function AdminProvas() {
 
                     <div className="admin-provas-files">
 
-                        <div className="admin-provas-file">
+                        <div className={`admin-provas-file ${arquivoProva ? "has-file" : ""}`}>
 
                             <div className="file-info">
 
                                 <div className="file-icon">
-                                    📄
+                                    <ProvasIcon name="file" size={22} />
                                 </div>
 
                                 <div>
@@ -256,7 +268,7 @@ export default function AdminProvas() {
                                 htmlFor="arquivoProva"
                                 className="file-button"
                             >
-                                Escolher PDF
+                                <ProvasIcon name="upload" size={16} /> Escolher PDF
                             </label>
 
                             <input
@@ -274,18 +286,18 @@ export default function AdminProvas() {
 
                             {arquivoProva && (
                                 <span className="file-selected">
-                                    ✓ {arquivoProva.name}
+                                    {arquivoProva.name}
                                 </span>
                             )}
 
                         </div>
 
-                        <div className="admin-provas-file">
+                        <div className={`admin-provas-file ${arquivoGabarito ? "has-file" : ""}`}>
 
                             <div className="file-info">
 
                                 <div className="file-icon">
-                                    ✅
+                                    <ProvasIcon name="check" size={22} />
                                 </div>
 
                                 <div>
@@ -304,7 +316,7 @@ export default function AdminProvas() {
                                 htmlFor="arquivoGabarito"
                                 className="file-button"
                             >
-                                Escolher PDF
+                                <ProvasIcon name="upload" size={16} /> Escolher PDF
                             </label>
 
                             <input
@@ -322,7 +334,7 @@ export default function AdminProvas() {
 
                             {arquivoGabarito && (
                                 <span className="file-selected">
-                                    ✓ {arquivoGabarito.name}
+                                    {arquivoGabarito.name}
                                 </span>
                             )}
 
@@ -355,7 +367,7 @@ export default function AdminProvas() {
                         >
                             {carregando
                                 ? "Cadastrando..."
-                                : "Cadastrar prova"
+                                : <><ProvasIcon name="plus" size={18} /> Cadastrar prova</>
                             }
                         </button>
 
@@ -367,10 +379,10 @@ export default function AdminProvas() {
 
             <div className="admin-provas-card">
 
-                <div className="admin-provas-card-header">
+                <div className="admin-provas-card-header admin-provas-list-header">
 
                     <div className="admin-provas-icon">
-                        📚
+                        <ProvasIcon name="layers" size={22} />
                     </div>
 
                     <div>
@@ -384,16 +396,13 @@ export default function AdminProvas() {
                 </div>
 
                 <div className="admin-provas-list-toolbar">
-                    <div className="admin-provas-list-counter">
-                        <strong>{carregandoLista || erroLista ? '—' : provas.length}</strong>
-                        <span>{provas.length === 1 ? 'prova cadastrada' : 'provas cadastradas'}</span>
-                    </div>
                     <label className="admin-provas-search">
+                        <ProvasIcon name="search" size={19} />
                         <span className="sr-only">Buscar provas por título ou ano</span>
-                        <input type="search" placeholder="Buscar por ano ou título" value={busca} onChange={(event) => setBusca(event.target.value)} />
+                        <input type="search" placeholder="Buscar por nome ou ano..." value={busca} onChange={(event) => setBusca(event.target.value)} />
                     </label>
-                    <button className="admin-provas-refresh" type="button" onClick={carregarProvas} disabled={carregandoLista}>
-                        {carregandoLista ? 'Atualizando...' : 'Atualizar'}
+                    <button className="admin-provas-refresh" type="button" onClick={carregarProvas} disabled={carregandoLista} title="Atualizar lista" aria-label="Atualizar lista">
+                        <ProvasIcon name="refresh" size={19} />
                     </button>
                 </div>
 
@@ -420,13 +429,16 @@ export default function AdminProvas() {
                                 key={prova.id}
                             >
 
-                                <div>
+                                <div className="prova-row-info">
+                                    <div className="prova-row-icon"><ProvasIcon name="file" size={22} /></div>
+                                    <div className="prova-row-text">
                                     <span className="prova-title">
                                         {prova.titulo}
                                     </span>
 
                                     <div className="prova-admin-ano">
-                                        Ano: {prova.ano}
+                                        <ProvasIcon name="calendar" size={14} /> {prova.ano}
+                                    </div>
                                     </div>
                                 </div>
 
@@ -437,7 +449,7 @@ export default function AdminProvas() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        Prova
+                                        <ProvasIcon name="file" size={16} /> Prova
                                     </a>
 
                                     <a
@@ -445,7 +457,7 @@ export default function AdminProvas() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        Gabarito
+                                        <ProvasIcon name="check" size={16} /> Gabarito
                                     </a>
 
                                     <button
@@ -454,7 +466,7 @@ export default function AdminProvas() {
                                         onClick={() => excluirProva(prova.id)}
                                         disabled={excluindoId !== null}
                                     >
-                                        {excluindoId === prova.id ? 'Excluindo...' : 'Excluir'}
+                                        <ProvasIcon name="trash" size={16} /> {excluindoId === prova.id ? 'Excluindo...' : 'Excluir'}
                                     </button>
 
                                 </div>

@@ -472,3 +472,115 @@
     overflow-x: auto;
   }
 }
+
+/* Calendário administrativo: linguagem visual alinhada ao calendário do estudante */
+.admin-calendar-header { margin-bottom: 20px; }
+.admin-calendar-layout { grid-template-columns: minmax(0, 1fr) minmax(315px, 350px); gap: 18px; }
+.admin-calendar-month-card, .admin-calendar-form-card, .admin-calendar-selected-card { border-radius: 20px; }
+.admin-calendar-month-card { padding: 18px 12px 14px; }
+.admin-calendar-toolbar { padding: 12px 10px 25px; border-bottom: 0; }
+.admin-calendar-month-actions { align-items: center; }
+.admin-calendar-month-actions h2 { margin: 0 4px; font-size: 22px; white-space: nowrap; }
+.admin-calendar-month-actions button { width: 36px; height: 36px; border-radius: 11px; font-size: 23px; }
+.admin-calendar-month-actions .admin-calendar-today { width: auto; padding: 0 15px; font-size: 12px; font-weight: 800; }
+.admin-calendar-weekdays { padding: 12px 0 9px; background: transparent; }
+.admin-calendar-grid { gap: 4px; border: 0; }
+.admin-calendar-day { position: relative; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; height: clamp(72px, 7.1vw, 103px); min-height: 0; padding: 9px; border: 1px solid var(--line, #dce8f7) !important; border-radius: 11px; background: var(--card); cursor: pointer; text-align: left; transition: border-color .15s, background .15s; }
+.admin-calendar-day:hover { border-color: #77b6fb !important; background: #f2f8ff; }
+.admin-calendar-day.outside { background: #f7f9fc; opacity: .55; }
+.admin-calendar-day.today { background: #e7f2ff; }
+.admin-calendar-day.selected { border: 2px solid #2687f7 !important; background: #e5f1ff; padding: 8px; }
+.admin-calendar-day-number { width: 25px; height: 25px; margin: 0; border-radius: 7px; justify-content: flex-start; }
+.admin-calendar-day.today .admin-calendar-day-number { justify-content: center; background: #1553aa; color: white; }
+.admin-calendar-today-tag { position: absolute; top: 13px; right: 7px; color: #1671d3; font-size: 9px; font-weight: 800; }
+.admin-calendar-dots { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
+.admin-calendar-dots .admin-calendar-type-dot { width: 9px; height: 9px; margin: 0; }
+.admin-calendar-sidebar { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.admin-calendar-selected-card { padding: 19px; background: var(--card); border: 1px solid var(--line, #dfe7ef); }
+.admin-calendar-selected-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 13px; border-bottom: 1px solid var(--line, #dfe7ef); }
+.admin-calendar-selected-heading span { font-size: 10px; letter-spacing: .1em; color: var(--accent, #2d6cdf); font-weight: 800; }
+.admin-calendar-selected-heading h2 { margin: 5px 0 0; font-size: 18px; color: var(--ink, #1b2b3a); }
+.admin-calendar-selected-heading button { width: 36px; height: 36px; border: 1px solid var(--line, #dfe7ef); border-radius: 10px; background: #edf5ff; color: #1261bd; font-size: 24px; cursor: pointer; }
+.admin-calendar-selected-event { width: 100%; display: flex; align-items: center; gap: 9px; padding: 12px 3px; background: transparent; border: 0; border-bottom: 1px solid var(--line, #dfe7ef); text-align: left; cursor: pointer; }
+.admin-calendar-selected-event > span:nth-child(2) { flex: 1; min-width: 0; }
+.admin-calendar-selected-event strong, .admin-calendar-selected-event small { display: block; color: var(--ink, #1b2b3a); }
+.admin-calendar-selected-event small { margin-top: 4px; color: var(--muted, #7d8b9a); }
+.admin-calendar-edit-label { font-size: 11px; color: var(--accent, #2d6cdf); font-weight: 800; }
+.admin-calendar-form-card { padding: 20px; }
+.admin-calendar-form { gap: 12px; }
+.admin-calendar-form textarea { min-height: 82px; }
+@media (max-width: 1150px) { .admin-calendar-layout { grid-template-columns: 1fr; } .admin-calendar-sidebar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: start; } }
+@media (max-width: 760px) { .admin-calendar-sidebar { display: flex; } .admin-calendar-grid { min-width: 0; } .admin-calendar-month-card { overflow: hidden; padding: 10px 5px; } .admin-calendar-day { height: 65px; padding: 5px; } .admin-calendar-day.selected { padding: 4px; } .admin-calendar-today-tag { display: none; } .admin-calendar-month-actions h2 { font-size: 17px; } .admin-calendar-toolbar { padding: 12px 5px; } }
+
+/* Refinamento dos cards laterais */
+.admin-calendar-sidebar { gap: 14px; }
+.admin-calendar-selected-card,
+.admin-calendar-form-card { border: 1px solid #dce8f6; box-shadow: 0 6px 22px rgba(19,69,128,.045); }
+.admin-calendar-selected-card { padding: 20px; }
+.admin-calendar-selected-heading { padding-bottom: 16px; }
+.admin-calendar-selected-heading h2 { font-size: 22px; letter-spacing: -.5px; }
+.admin-calendar-selected-heading button { display: grid; place-items: center; width: 38px; height: 38px; border-color: #cbdff8; font-size: 23px; transition: background .2s, transform .2s; }
+.admin-calendar-selected-heading button:hover { background: #dbeeff; transform: translateY(-1px); }
+.admin-calendar-selected-card .admin-calendar-empty { padding: 23px 8px 7px; line-height: 1.5; }
+.admin-calendar-selected-event { border-radius: 10px; padding: 12px 9px; }
+.admin-calendar-selected-event:hover { background: #f1f7ff; }
+.admin-calendar-form-card { padding: 22px; }
+.admin-calendar-form-heading { padding-bottom: 16px; }
+.admin-calendar-form-heading h2 { font-size: 21px; line-height: 1.25; letter-spacing: -.35px; }
+.admin-calendar-form-heading p { line-height: 1.55; }
+.admin-calendar-form { gap: 16px; padding: 20px 0 22px; }
+.admin-calendar-form label { gap: 8px; font-size: 12px; }
+.admin-calendar-form input,
+.admin-calendar-form select,
+.admin-calendar-form textarea { min-height: 44px; border-radius: 10px; border-color: #d5e2f3; background: #fbfdff; transition: border-color .2s, box-shadow .2s; }
+.admin-calendar-form textarea { min-height: 95px; }
+.admin-calendar-form input:hover,
+.admin-calendar-form select:hover,
+.admin-calendar-form textarea:hover { border-color: #a8c7ed; }
+.admin-calendar-form-actions { padding-top: 2px; }
+.admin-calendar-primary,
+.admin-calendar-secondary { min-height: 42px; border-radius: 10px; padding: 0 17px; transition: filter .2s, transform .2s; }
+.admin-calendar-primary:hover,
+.admin-calendar-secondary:hover { filter: brightness(.96); transform: translateY(-1px); }
+.admin-calendar-list-heading { padding-top: 20px; }
+.admin-calendar-list-heading h3 { font-size: 17px; }
+.admin-calendar-list { gap: 9px; margin-top: 15px; }
+.admin-calendar-list-item { align-items: center; gap: 11px; padding: 14px 12px; border-radius: 13px; border-color: #d9e6f5; background: #fbfdff; transition: border-color .2s, background .2s; }
+.admin-calendar-list-item:hover { border-color: #a9cef5; background: #f5faff; }
+.admin-calendar-list-item > div:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+.admin-calendar-list-item strong { font-size: 13px; }
+.admin-calendar-list-item > div > span { font-size: 11px; margin-top: 5px; }
+.admin-calendar-list-item p { margin-top: 6px; font-size: 11px; }
+.admin-calendar-list-actions { gap: 7px; align-self: center; }
+.admin-calendar-list-actions button { min-width: 58px; border: 1px solid #cfe1f8; background: #eef6ff; border-radius: 7px; padding: 7px 9px; font-size: 11px; }
+.admin-calendar-list-actions button:hover { background: #dcecff; }
+.admin-calendar-list-actions button.danger { border-color: #f5d2d2; background: #fff7f7; }
+.admin-calendar-list-actions button.danger:hover { background: #ffebeb; }
+@media (max-width: 420px) { .admin-calendar-form-card { padding: 17px; } .admin-calendar-form-row { grid-template-columns: 1fr; } }
+
+/* Campos de tipo e data com menus próprios, sem controles nativos */
+.admin-calendar-form-row > label { min-width: 0; }
+.admin-calendar-picker-anchor { position: relative; width: 100%; min-width: 0; }
+.admin-calendar-field-button { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-height:44px; padding:0 12px; border:1px solid #d5e2f3; border-radius:10px; background:#fbfdff; color:#104b9d; font:inherit; font-weight:700; text-align:left; cursor:pointer; }
+.admin-calendar-field-button:hover,.admin-calendar-field-button[aria-expanded="true"] { border-color:#2687f7; box-shadow:0 0 0 3px rgba(38,135,247,.12); }
+.admin-calendar-field-button:disabled { opacity:.55; cursor:not-allowed; }
+.admin-calendar-field-button .placeholder { color:#7895bc; }
+.admin-calendar-chevron { width:8px; height:8px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg) translateY(-2px); }
+.admin-calendar-dropdown,.admin-calendar-date-popover { position:absolute; top:calc(100% + 7px); right:0; z-index:100; background:#fff; border:1px solid #d5e2f3; border-radius:13px; box-shadow:0 14px 35px rgba(13,57,113,.18); }
+.admin-calendar-dropdown { left:0; padding:5px; min-width:155px; }
+.admin-calendar-dropdown button { display:block; width:100%; padding:11px 12px; border:0; border-radius:8px; background:transparent; color:#164b90; text-align:left; font:inherit; font-weight:600; cursor:pointer; }
+.admin-calendar-dropdown button:hover { background:#edf5ff; }
+.admin-calendar-dropdown button.active { background:#176bd1; color:white; }
+.admin-calendar-date-popover { width:282px; max-width:calc(100vw - 30px); padding:12px; }
+.admin-calendar-date-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; color:#12488e; }
+.admin-calendar-date-nav strong { font-size:13px; text-transform:capitalize; }
+.admin-calendar-date-nav button { width:30px; height:30px; border:1px solid #dce8f7; border-radius:8px; background:white; color:#1254a7; font-size:23px; cursor:pointer; }
+.admin-calendar-date-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:3px; }
+.admin-calendar-date-grid .weekday { text-align:center; padding:6px 0; color:#7895bc; font-size:10px; font-weight:800; }
+.admin-calendar-date-grid button { aspect-ratio:1; min-width:0; border:0; border-radius:8px; background:transparent; color:#174579; font-size:12px; cursor:pointer; }
+.admin-calendar-date-grid button:hover { background:#eaf4ff; }
+.admin-calendar-date-grid button.outside { color:#b5c5d9; }
+.admin-calendar-date-grid button.current { outline:1px solid #7db5f5; }
+.admin-calendar-date-grid button.chosen { background:#176bd1; color:white; font-weight:800; }
+.admin-calendar-date-footer { display:flex; justify-content:space-between; margin-top:10px; padding-top:9px; border-top:1px solid #e5edf8; }
+.admin-calendar-date-footer button { border:0; background:transparent; color:#176bd1; font-weight:700; cursor:pointer; }

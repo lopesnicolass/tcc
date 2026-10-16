@@ -1,3 +1,4 @@
+import { API_URL } from '../../../services/api.js';
 import { createPortal } from 'react-dom';
 
 // Resultado e correção mantêm os dados oficiais retornados pelo backend.
@@ -59,6 +60,11 @@ export function TelaResultado({
                     <span className={`simulado-resultado-estado ${acertou ? 'certo' : 'incorreto'}`}>{acertou ? 'Correta' : respostaUsuario ? 'Incorreta' : 'Não respondida'}</span>
                   </div>
                   <h3>{questao.pergunta}</h3>
+                  {questao.imagem && (
+                    <figure className="simulado-prova-figura">
+                      <img src={`${API_URL}${questao.imagem}`} alt={`Imagem de apoio à questão ${index + 1}`} loading="lazy" />
+                    </figure>
+                  )}
                   <div className="simulado-resultado-alternativas">
                     {[
                       ['A', questao.alternativa_a],

@@ -18,6 +18,24 @@ function listarTop3(callback) {
   `, [], callback);
 }
 
+
+// Colocação individual, incluindo participantes fora do Top 3.
+// Usa a mesma ordenação de XP e desempate por ID do ranking público.
+function buscarPosicaoParticipante(id, callback) {
+  db.get(`
+    SELECT
+      (SELECT COUNT(*) + 1 FROM usuarios outros
+        INNER JOIN ranking_participantes op ON op.usuario_id = outros.id
+        WHERE LOWER(TRIM(outros.tipo)) = 'aluno' AND op.participando = 1
+          AND (COALESCE(outros.xp, 0) > COALESCE(u.xp, 0)
+            OR (COALESCE(outros.xp, 0) = COALESCE(u.xp, 0) AND outros.id < u.id))
+      ) AS posicao
+    FROM usuarios u
+    INNER JOIN ranking_participantes p ON p.usuario_id = u.id
+    WHERE u.id = ? AND LOWER(TRIM(u.tipo)) = 'aluno' AND p.participando = 1
+  `, [id], callback);
+}
+
 function buscarParticipacao(id, callback) {
   db.get(`
     SELECT CASE WHEN p.participando = 1 THEN 1 ELSE 0 END AS participando
@@ -50,6 +68,7 @@ function buscarFotoParticipante(id, callback) {
 
 module.exports = {
   listarTop3,
+  buscarPosicaoParticipante,
   buscarParticipacao,
   atualizarParticipacao,
   buscarFotoParticipante

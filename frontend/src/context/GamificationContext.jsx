@@ -233,6 +233,7 @@ export function GamificationProvider({ children }) {
       value={{
         xp: state.xp,
         streak: state.streak,
+        lastActiveDate: state.lastActiveDate,
         level,
         title,
         xpIntoLevel,

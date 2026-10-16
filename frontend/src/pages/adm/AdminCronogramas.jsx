@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import '../../styles/adm/AdminCronogramas.css';
 import { API_URL } from '../../services/api.js';
 
@@ -86,6 +86,110 @@ function contarSemanasPreenchidas(grade) {
           semana.itens.length > 0
       ).length,
     0
+  );
+}
+
+
+// Seletor compartilhado pelos campos do cronograma: não depende do menu nativo do navegador.
+function SeletorTenna({ value, options, onChange, placeholder = 'Selecione', searchable = false, ariaLabel }) {
+  const [aberto, setAberto] = useState(false);
+  const [pesquisa, setPesquisa] = useState('');
+  const [indiceAtivo, setIndiceAtivo] = useState(0);
+  const [abrirAcima, setAbrirAcima] = useState(false);
+  const referencia = useRef(null);
+  const buscaRef = useRef(null);
+
+  const selecionada = options.find((opcao) => String(opcao.value) === String(value));
+  const filtradas = options.filter((opcao) =>
+    `${opcao.group || ''} ${opcao.label}`.toLocaleLowerCase('pt-BR')
+      .includes(pesquisa.trim().toLocaleLowerCase('pt-BR'))
+  );
+
+  useEffect(() => {
+    if (!aberto) return undefined;
+    const fecharFora = (evento) => {
+      if (!referencia.current?.contains(evento.target)) setAberto(false);
+    };
+    document.addEventListener('pointerdown', fecharFora);
+    return () => document.removeEventListener('pointerdown', fecharFora);
+  }, [aberto]);
+
+  useEffect(() => {
+    if (aberto && searchable) buscaRef.current?.focus();
+  }, [aberto, searchable]);
+
+  function alternar() {
+    if (!aberto) {
+      const posicao = referencia.current?.getBoundingClientRect();
+      setAbrirAcima(Boolean(posicao && window.innerHeight - posicao.bottom < 310 && posicao.top > 310));
+      setPesquisa('');
+      setIndiceAtivo(Math.max(0, options.findIndex((opcao) => String(opcao.value) === String(value))));
+    }
+    setAberto(!aberto);
+  }
+
+  function selecionar(opcao) {
+    onChange(String(opcao.value));
+    setAberto(false);
+    setPesquisa('');
+  }
+
+  function teclado(evento) {
+    if (evento.key === 'Escape') {
+      setAberto(false);
+      return;
+    }
+    if (evento.key === 'ArrowDown' || evento.key === 'ArrowUp') {
+      evento.preventDefault();
+      if (!aberto) { alternar(); return; }
+      setIndiceAtivo((anterior) => Math.max(0, Math.min(filtradas.length - 1, anterior + (evento.key === 'ArrowDown' ? 1 : -1))));
+    }
+    if (evento.key === 'Enter' && aberto && filtradas[indiceAtivo]) {
+      evento.preventDefault();
+      selecionar(filtradas[indiceAtivo]);
+    }
+  }
+
+  return (
+    <div className={`cronograma-seletor ${aberto ? 'aberto' : ''}`} ref={referencia} onKeyDown={teclado}>
+      <button
+        type="button"
+        className={`cronograma-seletor-trigger ${!selecionada ? 'placeholder' : ''}`}
+        onClick={alternar}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={aberto}
+      >
+        <span>{selecionada?.label || placeholder}</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {aberto && (
+        <div className={`cronograma-seletor-menu ${abrirAcima ? 'acima' : ''}`}>
+          {searchable && (
+            <div className="cronograma-seletor-busca">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+              <input ref={buscaRef} value={pesquisa} type="search" placeholder="Buscar matéria ou conteúdo..."
+                aria-label="Buscar matéria ou conteúdo"
+                onChange={(evento) => { setPesquisa(evento.target.value); setIndiceAtivo(0); }} />
+            </div>
+          )}
+          <div className="cronograma-seletor-opcoes" role="listbox" aria-label={ariaLabel}>
+            {filtradas.length ? filtradas.map((opcao, indice) => (
+              <button key={`${opcao.value}-${indice}`} type="button" role="option"
+                aria-selected={String(opcao.value) === String(value)}
+                className={`cronograma-seletor-opcao ${String(opcao.value) === String(value) ? 'selecionada' : ''} ${indice === indiceAtivo ? 'em-foco' : ''}`}
+                onMouseEnter={() => setIndiceAtivo(indice)} onClick={() => selecionar(opcao)}>
+                <span className="cronograma-seletor-opcao-texto">
+                  {opcao.group && <small>{opcao.group}</small>}
+                  <span>{opcao.label}</span>
+                </span>
+                {String(opcao.value) === String(value) && <span className="cronograma-seletor-check" aria-hidden="true">✓</span>}
+              </button>
+            )) : <p className="cronograma-seletor-sem-resultados">Nenhum conteúdo encontrado.</p>}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -869,12 +973,8 @@ export default function AdminCronogramas() {
 
         <div>
 
-          <span className="admin-cronogramas-eyebrow">
-            ÁREA ADMINISTRATIVA
-          </span>
-
           <h1>
-            Cronograma de estudos
+            Cronogramas
           </h1>
 
           <p>
@@ -978,63 +1078,38 @@ export default function AdminCronogramas() {
 
             </label>
 
-            <label className="cronograma-form-group">
+            <div className="cronograma-form-group">
 
               <span>
                 Duração do plano (meses)
               </span>
 
-              <select
-                value={
-                  mesesSelecionados ||
-                  ''
-                }
-                onChange={
-                  (event) =>
-                    abrirVariacao(event.target.value, frequenciaSelecionada)
-                }
-              >
+              <SeletorTenna
+                value={mesesSelecionados || ''}
+                onChange={(valor) => abrirVariacao(valor, frequenciaSelecionada)}
+                placeholder="Selecione a duração"
+                ariaLabel="Duração do plano em meses"
+                options={Array.from({ length: TOTAL_MESES }, (_, index) => ({
+                  value: index + 1,
+                  label: `${index + 1} ${index === 0 ? 'mês' : 'meses'}`
+                }))}
+              />
 
-                <option value="">
-                  Selecione
-                </option>
+            </div>
 
-                {Array.from(
-                  {
-                    length:
-                      TOTAL_MESES
-                  },
-                  (_, index) =>
-                    TOTAL_MESES -
-                    index
-                ).map(
-                  (mes) => (
-                    <option
-                      key={mes}
-                      value={mes}
-                    >
-                      {mes}{' '}
-                      {mes === 1
-                        ? 'mês'
-                        : 'meses'}
-                    </option>
-                  )
-                )}
-
-              </select>
-
-            </label>
-
-            <label className="cronograma-form-group">
+            <div className="cronograma-form-group">
               <span>Dias de estudo por semana</span>
-              <select value={frequenciaSelecionada || ''}
-                onChange={(event) => abrirVariacao(mesesSelecionados, event.target.value)}>
-                <option value="">Selecione</option>
-                {DIAS_ESTUDO.map((dia) => <option key={dia} value={dia}>
-                  {dia} {dia === 1 ? 'dia' : 'dias'} por semana
-                </option>)}
-              </select>
-            </label>
+              <SeletorTenna
+                value={frequenciaSelecionada || ''}
+                onChange={(valor) => abrirVariacao(mesesSelecionados, valor)}
+                placeholder="Selecione os dias"
+                ariaLabel="Dias de estudo por semana"
+                options={DIAS_ESTUDO.map((dia) => ({
+                  value: dia,
+                  label: `${dia} ${dia === 1 ? 'dia' : 'dias'} por semana`
+                }))}
+              />
+            </div>
 
             <label className="cronograma-form-group cronograma-campo-descricao">
 
@@ -1314,101 +1389,31 @@ export default function AdminCronogramas() {
                               </span>
 
                               <div className="cronograma-item-dia-wrap">
-
-                                <span>
-                                  Dia de estudo
-                                </span>
-
-                                <select
-                                  value={
-                                    item.diaEstudo ||
-                                    1
-                                  }
-                                  onChange={
-                                    (
-                                      event
-                                    ) =>
-                                      alterarDiaItem(
-                                        mesSelecionado,
-                                        semana.semana,
-                                        item.ordem,
-                                        event.target
-                                          .value
-                                      )
-                                  }
-                                  aria-label={`Dia de estudo do conteúdo ${item.ordem}`}
-                                >
-
-                                  {DIAS_ESTUDO.filter((dia) => dia <= frequenciaSelecionada).map(
-                                    (dia) => (
-                                      <option
-                                        key={
-                                          dia
-                                        }
-                                        value={
-                                          dia
-                                        }
-                                      >
-                                        Dia {dia}
-                                      </option>
-                                    )
-                                  )}
-
-                                </select>
-
+                                <span>Dia de estudo</span>
+                                <SeletorTenna
+                                  value={item.diaEstudo || 1}
+                                  ariaLabel={`Dia de estudo do conteúdo ${item.ordem}`}
+                                  onChange={(valor) => alterarDiaItem(mesSelecionado, semana.semana, item.ordem, valor)}
+                                  options={DIAS_ESTUDO.filter((dia) => dia <= frequenciaSelecionada).map((dia) => ({
+                                    value: dia, label: `Dia ${dia}`
+                                  }))}
+                                />
                               </div>
 
                               <div className="cronograma-item-select-wrap">
-
-                                <span>
-                                  Conteúdo da semana
-                                </span>
-
-                                <select
-                                  value={
-                                    item.topicoId
-                                  }
-                                  onChange={
-                                    (
-                                      event
-                                    ) =>
-                                      alterarItem(
-                                        mesSelecionado,
-                                        semana.semana,
-                                        item.ordem,
-                                        event.target
-                                          .value
-                                      )
-                                  }
-                                >
-
-                                  <option value="">
-                                    Selecione matéria e conteúdo
-                                  </option>
-
-                                  {opcoesConteudo.map(
-                                    (opcao) => (
-                                      <option
-                                        key={
-                                          opcao.topicoId
-                                        }
-                                        value={
-                                          opcao.topicoId
-                                        }
-                                      >
-                                        {
-                                          opcao.materia
-                                        }{' '}
-                                        —{' '}
-                                        {
-                                          opcao.topico
-                                        }
-                                      </option>
-                                    )
-                                  )}
-
-                                </select>
-
+                                <span>Conteúdo da semana</span>
+                                <SeletorTenna
+                                  value={item.topicoId}
+                                  ariaLabel={`Conteúdo da semana ${semana.semana}, item ${item.ordem}`}
+                                  placeholder="Escolha a matéria e o conteúdo"
+                                  searchable
+                                  onChange={(valor) => alterarItem(mesSelecionado, semana.semana, item.ordem, valor)}
+                                  options={opcoesConteudo.map((opcao) => ({
+                                    value: opcao.topicoId,
+                                    label: opcao.topico,
+                                    group: opcao.materia
+                                  }))}
+                                />
                               </div>
 
                               <button
@@ -1484,9 +1489,7 @@ export default function AdminCronogramas() {
 
           )}
 
-        </section>
-
-        <div className="cronograma-programacao-acoes">
+          <div className="cronograma-programacao-acoes">
 
           <button
             className="cronograma-btn principal grande"
@@ -1503,7 +1506,9 @@ export default function AdminCronogramas() {
                 : 'Criar cronograma'}
           </button>
 
-        </div>
+          </div>
+
+        </section>
 
       </form>
 

@@ -70,6 +70,9 @@ export default function Perfil() {
   const [atualizacaoConquistas, setAtualizacaoConquistas] = useState(0);
   const [filtroConquistas, setFiltroConquistas] = useState('Todas');
   const [participaRanking, setParticipaRanking] = useState(null);
+  const [modalConquistasAberto, setModalConquistasAberto] = useState(false);
+  const [posicaoRanking, setPosicaoRanking] = useState(null);
+  const [erroPosicaoRanking, setErroPosicaoRanking] = useState(false);
   const [salvandoRanking, setSalvandoRanking] = useState(false);
   const [erroRanking, setErroRanking] = useState('');
 
@@ -80,6 +83,35 @@ export default function Perfil() {
       .catch(() => { if (ativo) setErroRanking('Não foi possível consultar sua participação no ranking.'); });
     return () => { ativo = false; };
   }, []);
+
+  useEffect(() => {
+    let ativo = true;
+    async function consultarPosicao() {
+      try {
+        const dados = await request('/gamificacao/ranking');
+        const idUsuario = Number(usuarioInicial?.id);
+        const indiceTop3 = Array.isArray(dados?.top3) ? dados.top3.findIndex((aluno) => Number(aluno.id) === idUsuario) : -1;
+        const posicao = Number(dados?.minhaPosicao ?? (indiceTop3 >= 0 ? indiceTop3 + 1 : 0));
+        if (ativo) {
+          setPosicaoRanking(Number.isInteger(posicao) && posicao > 0 ? posicao : null);
+          setErroPosicaoRanking(false);
+        }
+      } catch {
+        if (ativo) { setPosicaoRanking(null); setErroPosicaoRanking(true); }
+      }
+    }
+    consultarPosicao();
+    return () => { ativo = false; };
+  }, [participaRanking]);
+
+  useEffect(() => {
+    if (!modalConquistasAberto) return;
+    const fechar = (evento) => { if (evento.key === 'Escape') setModalConquistasAberto(false); };
+    document.addEventListener('keydown', fechar);
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', fechar); document.body.style.overflow = overflowAnterior; };
+  }, [modalConquistasAberto]);
 
   async function alternarRanking() {
     if (participaRanking === null || salvandoRanking) return;
@@ -739,24 +771,7 @@ export default function Perfil() {
         <div className="perfil-hero-intro">
           <span className="perfil-hero-kicker"><Icon name="trophy" size={15} /> SUA JORNADA</span>
           <h1 id="perfil-titulo">Seu espaço de conquistas</h1>
-          <p>Acompanhe seu nível, veja o que já conquistou e descubra seus próximos objetivos.</p>
-        </div>
-        <div className="perfil-hero-dados">
-          <div className="perfil-level-details">
-            <span className="perfil-level-badge">{nivelInfo ? nivelInfo.nivel : '—'}</span>
-            <div>
-              <span className="perfil-level-label">NÍVEL ATUAL</span>
-              <strong>{tituloNivel}</strong>
-            </div>
-          </div>
-          <div className="perfil-level-track" role="progressbar" aria-label="Progresso do nível" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressoNivel}>
-            <span style={{ width: `${progressoNivel}%` }} />
-          </div>
-          <div className="perfil-level-foot">
-            <span>{nivelInfo ? `${nivelInfo.xpNoNivel} / ${nivelInfo.xpProximoNivel} XP no nível` : 'XP indisponível'}</span>
-            <span>{dadosXP ? `${Number(dadosXP.xp).toLocaleString('pt-BR')} XP total` : '—'}</span>
-          </div>
-          <div className="perfil-hero-streak"><Icon name="calendar" size={16} /><strong>{dadosXP ? Number(dadosXP.streak) || 0 : '—'}</strong> dias de sequência atual</div>
+          <p>Gerencie seu perfil e acompanhe suas conquistas.</p>
         </div>
       </section>
 
@@ -769,12 +784,115 @@ export default function Perfil() {
 
           <div className="perfil-form-heading">
             <div>
-              <span className="perfil-section-kicker">DADOS DA CONTA</span>
               <h2>Informações do perfil</h2>
-              <p>Atualize seus dados pessoais e mantenha sua conta sempre organizada.</p>
             </div>
           </div>
 
+          <div className="perfil-form-content">
+            <div className="perfil-account-avatar">          <div className="perfil-avatar-card perfil-profile-card">
+
+            <div className="perfil-side-heading">
+              <span className="perfil-section-kicker">SUA CONTA</span>
+              <h3>Foto de perfil</h3>
+            </div>
+
+            <div
+              className="avatar-circle"
+              style={{
+                overflow: 'hidden',
+                position: 'relative'
+              }}
+            >
+
+              {imagemAvatar ? (
+
+                <img
+                  src={imagemAvatar}
+                  alt="Foto de perfil"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+
+              ) : (
+
+                primeiraLetra
+
+              )}
+
+            </div>
+
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={
+                handleSelecionarFoto
+              }
+              style={{
+                display: 'none'
+              }}
+            />
+
+            <button
+              type="button"
+              className="mural-btn"
+              onClick={() =>
+                fileInputRef.current?.click()
+              }
+            >
+              {foto
+                ? 'Alterar foto'
+                : 'Adicionar foto'}
+            </button>
+
+            {previewFoto && (
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  width: '100%',
+                  justifyContent: 'center'
+                }}
+              >
+
+                <button
+                  type="button"
+                  className="mural-btn primary"
+                  onClick={
+                    handleSalvarFoto
+                  }
+                  disabled={salvandoFoto}
+                >
+                  {salvandoFoto
+                    ? 'Salvando...'
+                    : 'Salvar foto'}
+                </button>
+
+                <button
+                  type="button"
+                  className="mural-btn"
+                  onClick={
+                    cancelarFoto
+                  }
+                >
+                  Cancelar
+                </button>
+
+              </div>
+
+            )}
+
+
+
+          </div>
+
+            </div>
+            <div className="perfil-account-fields">
           <div className="perfil-fields">
 
           <div className="perfil-field">
@@ -917,6 +1035,8 @@ export default function Perfil() {
 
           </div>
 
+            </div>
+          </div>
           <div className="perfil-form-footer">
             <span>Suas alterações serão aplicadas à sua conta.</span>
             <button
@@ -928,116 +1048,7 @@ export default function Perfil() {
                 ? 'Salvando...'
                 : 'Salvar alterações'}
             </button>
-          </div>
-
-        </form>
-
-        <div className="perfil-side-column">
-          <div className="perfil-avatar-card perfil-profile-card">
-
-            <div className="perfil-side-heading">
-              <span className="perfil-section-kicker">SUA CONTA</span>
-              <h3>Foto de perfil</h3>
-            </div>
-
-            <div
-              className="avatar-circle"
-              style={{
-                overflow: 'hidden',
-                position: 'relative'
-              }}
-            >
-
-              {imagemAvatar ? (
-
-                <img
-                  src={imagemAvatar}
-                  alt="Foto de perfil"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-
-              ) : (
-
-                primeiraLetra
-
-              )}
-
-            </div>
-
-            <div className="perfil-avatar-meta">
-              <strong>{values.nome || 'Seu perfil'}</strong>
-              <span>{values.email || 'E-mail da conta'}</span>
-            </div>
-
-            <span className="perfil-profile-badge">Perfil pessoal</span>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={
-                handleSelecionarFoto
-              }
-              style={{
-                display: 'none'
-              }}
-            />
-
-            <button
-              type="button"
-              className="mural-btn"
-              onClick={() =>
-                fileInputRef.current?.click()
-              }
-            >
-              {foto
-                ? 'Alterar foto'
-                : 'Adicionar foto'}
-            </button>
-
-            {previewFoto && (
-
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  width: '100%',
-                  justifyContent: 'center'
-                }}
-              >
-
-                <button
-                  type="button"
-                  className="mural-btn primary"
-                  onClick={
-                    handleSalvarFoto
-                  }
-                  disabled={salvandoFoto}
-                >
-                  {salvandoFoto
-                    ? 'Salvando...'
-                    : 'Salvar foto'}
-                </button>
-
-                <button
-                  type="button"
-                  className="mural-btn"
-                  onClick={
-                    cancelarFoto
-                  }
-                >
-                  Cancelar
-                </button>
-
-              </div>
-
-            )}
-
-            <button
+                        <button
               type="button"
               className="btn-logout"
               onClick={
@@ -1061,19 +1072,22 @@ export default function Perfil() {
               Sair
 
             </button>
-
           </div>
 
+        </form>
+
+        <div className="perfil-side-column">
           <section className="perfil-ranking-card" aria-labelledby="perfil-ranking-titulo">
             <div className="perfil-ranking-top">
               <Icon name="trophy" size={22} />
               <div>
                 <h3 id="perfil-ranking-titulo">Ranking da turma</h3>
-                <p>Escolha se deseja aparecer no Top 3 de XP da Home.</p>
+                <p>Apareça entre os destaques da turma.</p>
               </div>
             </div>
+            <div className="perfil-ranking-position"><strong>{participaRanking ? (posicaoRanking ? `${posicaoRanking}º` : '—') : '—'}</strong><span>{participaRanking ? (posicaoRanking ? 'Sua posição atual' : (erroPosicaoRanking ? 'Erro ao carregar o ranking' : 'Posição não disponível')) : 'Participe para aparecer no ranking'}</span></div>
             <p className="perfil-ranking-description">
-              Ao participar, estudantes logados poderão ver seu nome, foto de perfil e XP. Você pode sair quando quiser.
+              Seu nome, foto e XP ficam visíveis para outros estudantes enquanto você participar.
             </p>
             <button
               type="button"
@@ -1086,16 +1100,25 @@ export default function Perfil() {
             </button>
             {erroRanking && <p className="perfil-ranking-error" role="alert">{erroRanking}</p>}
           </section>
+          <section className="perfil-conquistas-resumo panel-card">
+            <div className="perfil-resumo-heading"><div><span className="perfil-section-kicker">SEU PROGRESSO</span><h3>Suas conquistas</h3></div><Icon name="award" size={22}/></div>
+            <div className="perfil-resumo-count"><strong>{carregandoConquistas ? '—' : totalDesbloqueadas}<span> / {conquistas.length}</span></strong><small>desbloqueadas</small></div>
+            <div className="perfil-resumo-track"><span style={{width: `${conquistas.length ? totalDesbloqueadas / conquistas.length * 100 : 0}%`}} /></div>
+            <button type="button" className="perfil-resumo-open" onClick={() => setModalConquistasAberto(true)}>Ver todas as conquistas</button>
+          </section>
         </div>
 
       </div>
 
+      {modalConquistasAberto && (
+        <div className="perfil-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setModalConquistasAberto(false); }}>
+          <div className="perfil-modal-panel" role="dialog" aria-modal="true" aria-labelledby="perfil-conquistas-titulo">
+            <button type="button" className="perfil-modal-close" onClick={() => setModalConquistasAberto(false)} aria-label="Fechar conquistas"><span className="perfil-modal-x" aria-hidden="true" /></button>
       <section className="perfil-achievements-section panel-card" aria-labelledby="perfil-conquistas-titulo">
         <div className="perfil-achievements-heading">
           <div>
-            <span className="perfil-section-kicker">METAS DO SEU ESTUDO</span>
             <h2 id="perfil-conquistas-titulo">Suas conquistas</h2>
-            <p>Medalhas liberadas conforme seu progresso registrado no Tenna.</p>
+            <p>Acompanhe os objetivos que você já alcançou.</p>
           </div>
           <div className="perfil-achievements-counter" aria-live="polite">
             <strong>{carregandoConquistas ? '—' : totalDesbloqueadas} / {conquistas.length}</strong>
@@ -1127,6 +1150,7 @@ export default function Perfil() {
           </p>
         )}
 
+        <div className="perfil-modal-scroll-region">
         <div className="perfil-achievements-grid">
           {conquistasVisiveis.map((conquista) => {
             const status = !conquista.verificado ? 'Não verificada'
@@ -1145,7 +1169,7 @@ export default function Perfil() {
                 <p>{conquista.descricao}</p>
                 <div className="perfil-badge-bottom">
                   <div className="perfil-badge-count">
-                    <span>Progresso</span>
+                    <span>{conquista.desbloqueada ? "Meta alcançada" : "Seu progresso"}</span>
                     <strong>{conquista.verificado && !carregandoConquistas
                       ? `${conquista.progresso} / ${conquista.meta}` : '—'}</strong>
                   </div>
@@ -1159,7 +1183,7 @@ export default function Perfil() {
                 {!conquista.desbloqueada && conquista.verificado && !carregandoConquistas && (
                   <button type="button" className="perfil-badge-link"
                     onClick={() => navigate(conquista.destino)}>
-                    Ir estudar <Icon name="arrowRight" size={15} />
+                    Continuar estudando
                   </button>
                 )}
               </article>
@@ -1167,9 +1191,14 @@ export default function Perfil() {
           })}
         </div>
         <p className="perfil-achievements-explainer">
-          As conquistas refletem seu progresso atual. Elas não concedem XP adicional. A meta de horas semanais não aparece porque o Tenna ainda não registra horas efetivas de estudo.
+          As conquistas acompanham seu progresso e não concedem XP adicional.
         </p>
+        </div>
       </section>
+
+          </div>
+        </div>
+      )}
 
     </div>
 

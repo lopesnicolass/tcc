@@ -1,55 +1,347 @@
-/* Estilos da página AdminSimulados */
+/* Simulados do administrador. Estilos exclusivos desta página. */
+.admin-simulados-page .admin-simulados-heading {
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
+  flex-wrap:wrap; margin-bottom:26px;
+}
+.admin-simulados-heading h1 {margin:0 0 7px; font-size:38px; letter-spacing:-.035em; color:var(--ink);}
+.admin-simulados-heading p {margin:0; font-size:14.5px; color:var(--muted);}
+.admin-simulados-new {
+  appearance:none; background:#1976d2; color:#fff; border:1px solid #1976d2;
+  border-radius:11px; padding:13px 20px; font:700 14px inherit;
+  font-family:inherit; font-size:14px; font-weight:700; cursor:pointer;
+  transition:background .15s ease, box-shadow .15s ease;
+}
+.admin-simulados-new:hover {background:#125eaf; box-shadow:0 5px 12px rgba(25,118,210,.15);}
+.simulado-error {margin-bottom:20px;}
+.admin-simulados-page .admin-list {display:flex; flex-direction:column; gap:22px;}
+.admin-simulados-materia {
+  background:var(--card,#fff); border:1px solid var(--line,#dbe8f7);
+  border-radius:21px; padding:24px; box-shadow:0 7px 24px rgba(15,64,120,.035);
+}
+.admin-simulados-materia-header {
+  display:flex; align-items:center; gap:14px; padding-bottom:19px;
+  border-bottom:1px solid var(--line,#dbe8f7);
+}
+.admin-simulados-materia-icon {
+  width:46px; height:46px; flex-shrink:0; display:grid; place-items:center;
+  border-radius:13px; color:#fff;
+}
+.admin-simulados-materia-header h2 {margin:0 0 4px; color:var(--ink); font-size:23px;}
+.admin-simulados-materia-header span:not(.admin-simulados-materia-icon) {font-size:13px; color:var(--muted);}
+.admin-simulados-conteudo {padding-top:21px;}
+.admin-simulados-conteudo-heading {display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
+.admin-simulados-conteudo-heading h3 {font-size:17px; color:var(--ink); margin:0;}
+.admin-simulados-conteudo-heading span {font-size:12px; font-weight:700; background:#eaf4ff; color:#1769bd; padding:5px 10px; border-radius:99px;}
+.admin-simulados-items {display:grid; gap:10px;}
+.admin-simulado-card {
+  border:1px solid var(--line,#dbe8f7); border-radius:14px;
+  padding:19px 20px; display:flex; justify-content:space-between;
+  align-items:center; gap:20px; background:var(--paper,#f8fbff);
+}
+.admin-simulado-card-main {min-width:0;}
+.admin-simulado-card-main > strong {display:block; font-size:17px; color:var(--ink); margin-bottom:11px;}
+.admin-simulado-details {display:flex; gap:9px; align-items:center; flex-wrap:wrap;}
+.admin-simulado-details span {
+  border-radius:8px; background:var(--card,#fff); border:1px solid var(--line,#dbe8f7);
+  color:var(--ink-soft,#55749a); padding:6px 10px; font-size:12.5px; font-weight:650;
+}
+.admin-simulado-card .admin-edit-btn {
+  appearance:none; white-space:nowrap; padding:11px 17px; border-radius:10px;
+  background:#e5f2ff; color:#125ca9; border:1px solid #b9d9f8;
+  font-family:inherit; font-size:13.5px; font-weight:750; cursor:pointer;
+}
+.admin-simulado-card .admin-edit-btn:hover:not(:disabled) {background:#d5eaff; border-color:#86b8ef;}
 
-.modal-scroll{ max-height:70vh; overflow-y:auto; padding-right:4px; }
+/* Sobreposição específica: a modal da questão deve ficar acima da modal do simulado. */
+.simulado-overlay {z-index:100; overflow:hidden; overscroll-behavior:contain;}
+.simulado-questao-overlay {z-index:110; overflow:hidden; overscroll-behavior:contain; background:rgba(12,51,111,.56);}
+.admin-area .modal-card.simulado-editor-modal,
+.admin-area .modal-card.simulado-questao-modal,
+.modal-card.simulado-editor-modal,
+.modal-card.simulado-questao-modal {
+  box-sizing:border-box; flex:0 1 auto; height:auto; min-height:0;
+  margin:auto; border-radius:22px; padding:28px 34px 26px;
+  max-height:calc(100dvh - 32px); overflow-y:auto;
+  overscroll-behavior:contain;
+  background:var(--card,#fff);
+}
+.admin-area .modal-card.simulado-editor-modal,
+.modal-card.simulado-editor-modal {width:min(1060px,calc(100vw - 36px)); max-width:1060px;}
+.admin-area .modal-card.simulado-questao-modal,
+.modal-card.simulado-questao-modal {width:min(1040px,calc(100vw - 36px)); max-width:1040px;}
+.simulado-editor-modal .modal-header,
+.simulado-questao-modal .modal-header {margin-bottom:22px;}
+.simulado-editor-modal .modal-header h2,
+.simulado-questao-modal .modal-header h2 {margin:0; font-size:26px; font-weight:750; letter-spacing:-.02em;}
+.simulado-editor-modal .modal-input-group,
+.simulado-questao-modal .modal-input-group {min-width:0; margin:0; display:flex; flex-direction:column; gap:7px;}
+.simulado-editor-modal .modal-input-group label,
+.simulado-questao-modal .modal-input-group label,
+.simulado-editor-modal .modal-materia-label,
+.simulado-questao-modal .simulado-correta-label {
+  display:block; margin:0; font-size:14px; line-height:1.35; font-weight:700;
+  text-transform:none; letter-spacing:normal; color:var(--ink-soft,#37689e);
+}
+.simulado-label-hint {color:var(--muted); font-weight:500; font-size:12px;}
+.simulado-editor-modal .modal-input-group input,
+.simulado-editor-modal .modal-input-group select,
+.simulado-questao-modal .modal-input-group input:not([type=file]):not([type=radio]),
+.simulado-questao-modal .modal-input-group select,
+.simulado-questao-modal .simulado-enunciado {
+  box-sizing:border-box; width:100%; min-width:0; min-height:46px;
+  padding:11px 14px; border:1px solid #bbd7f6; border-radius:11px;
+  background:var(--paper,#e9f5ff); color:var(--ink,#154776);
+  font:500 14px/1.45 inherit; font-family:inherit; font-size:14px;
+  outline:none; box-shadow:none;
+  transition:border-color .15s ease,box-shadow .15s ease,background-color .15s ease;
+}
+.simulado-editor-modal .modal-input-group input:focus,
+.simulado-editor-modal .modal-input-group select:focus,
+.simulado-questao-modal .modal-input-group input:not([type=file]):focus,
+.simulado-questao-modal .simulado-enunciado:focus {
+  border-color:#4da3ff; box-shadow:0 0 0 3px rgba(77,163,255,.17);
+  background:var(--card,#fff);
+}
+.simulado-editor-modal .modal-input-group small {color:var(--muted); font-size:12px; line-height:1.4;}
 
-.admin-list{ display:flex; flex-direction:column; gap:12px; }
+/* Ficha do simulado: identificação e tempo, depois matéria e conteúdo. */
+.simulado-editor-modal .simulado-form-grid {
+  display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr);
+  gap:20px 22px; align-items:start;
+}
+.simulado-editor-modal .simulado-form-grid > div {min-width:0;}
+.simulado-editor-modal .simulado-form-subject {grid-column:1; grid-row:2;}
+.simulado-editor-modal .simulado-form-content {grid-column:2; grid-row:2;}
+.simulado-editor-modal .modal-materia-list {
+  display:flex; flex-wrap:wrap; gap:8px; min-width:0; margin-top:9px;
+}
+.simulado-editor-modal .materia-pill {
+  appearance:none; border:1px solid var(--line,#c9def7);
+  background:var(--paper,#fff); color:var(--ink-soft,#34649e);
+  padding:9px 15px; border-radius:10px; min-height:39px;
+  font-family:inherit; font-size:13px; font-weight:650; line-height:1.2;
+  cursor:pointer; transform:none; transition:background-color .15s ease,border-color .15s ease;
+}
+.simulado-editor-modal .materia-pill:hover:not(:disabled) {transform:none; background:#e5f2ff; border-color:#7fb6f0;}
+.simulado-editor-modal .materia-pill.selected {background:#1976d2; border-color:#1976d2; color:white;}
+.simulado-editor-modal .materia-pill.selected:hover:not(:disabled) {background:#1266ba;}
+.simulado-editor-modal .simulado-content-group {margin:0;}
+.simulado-editor-modal .modal-note {margin:8px 0; color:var(--muted); font-size:12.5px;}
 
-.admin-list-item{
-  background:var(--card); border-radius:var(--radius-md); padding:16px 22px;
-  display:flex; align-items:center; justify-content:space-between;
-  box-shadow:0 1px 2px rgba(13,71,161,0.05);
-  font-weight:600; color:var(--ink); font-size:16px;
-  transition:transform .18s var(--bouncy);
+/* Questões do simulado. */
+.simulado-editor-modal .simulado-questions-section {
+  margin-top:26px; padding:18px 20px;
+  border:1px solid var(--line,#cbdff5); border-radius:15px;
+  background:var(--paper,#f3f9ff);
+}
+.simulado-questions-toolbar {display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap;}
+.simulado-questions-info {display:flex; align-items:center; flex-wrap:wrap; gap:11px;}
+.simulado-questions-info h3 {margin:0; font-size:17px; font-weight:750; color:var(--ink);}
+.simulado-editor-modal .question-count-badge {
+  display:inline-flex; align-items:center; padding:7px 11px; border:0;
+  border-radius:99px; background:#e5f4ee; color:#25764b; font-size:12px; font-weight:700;
+}
+.simulado-editor-modal .question-count-badge.incomplete {background:#fff0d8; color:#a75e00;}
+.simulado-questions-empty {margin:13px 0 0; color:var(--muted); font-size:13px;}
+.simulado-question-list {display:flex; flex-direction:column; gap:9px; margin-top:14px; max-height:none; overflow:visible;}
+.simulado-question-item {display:flex; align-items:center; justify-content:space-between; gap:16px; padding:11px 13px; border:1px solid var(--line,#c9def7); border-radius:10px; background:var(--card,#fff); color:var(--ink); font-size:13px;}
+.simulado-question-actions {display:flex; gap:7px; flex-shrink:0;}
+.simulado-edit-question,.simulado-remove-question {appearance:none; border:1px solid var(--line,#c9def7); background:var(--card,#fff); color:#165ea9; border-radius:8px; padding:8px 12px; font:650 12px inherit; font-family:inherit; font-size:12px; font-weight:650; cursor:pointer;}
+.simulado-remove-question {color:#bb303e; border-color:#f1cbce;}
+.simulado-edit-question:hover:not(:disabled) {background:#e8f3ff;}
+.simulado-remove-question:hover:not(:disabled) {background:#fff0f0;}
+.simulado-question-image-label {color:#27834d; font-weight:700;}
+
+/* Botões claros e consistentes em ambos os formulários. */
+.simulado-editor-modal .simulado-add-question,
+.simulado-editor-modal .simulado-footer-actions button,
+.simulado-editor-modal .simulado-delete-button,
+.simulado-questao-modal .modal-actions button {
+  appearance:none; -webkit-appearance:none; display:inline-flex; justify-content:center; align-items:center;
+  min-height:44px; padding:10px 19px; margin:0; border-radius:11px;
+  border:1px solid transparent; font-family:inherit; font-size:14px; line-height:1.3; font-weight:750;
+  cursor:pointer; box-shadow:none; transform:none;
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.simulado-editor-modal .simulado-add-question,
+.simulado-editor-modal .simulado-footer-actions .primary,
+.simulado-questao-modal .modal-actions .primary {background:#1976d2; border-color:#1976d2; color:#fff;}
+.simulado-editor-modal .simulado-add-question:hover:not(:disabled),
+.simulado-editor-modal .simulado-footer-actions .primary:hover:not(:disabled),
+.simulado-questao-modal .modal-actions .primary:hover:not(:disabled) {background:#115eae; border-color:#115eae; box-shadow:0 5px 15px rgba(25,118,210,.16); transform:none;}
+.simulado-editor-modal .simulado-footer-actions .ghost,
+.simulado-questao-modal .modal-actions .ghost {background:#ecf5ff; color:#155ca9; border-color:#c7dff8;}
+.simulado-editor-modal .simulado-footer-actions .ghost:hover:not(:disabled),
+.simulado-questao-modal .modal-actions .ghost:hover:not(:disabled) {background:#dcecff; border-color:#a5cef7; transform:none;}
+.simulado-editor-modal .simulado-delete-button {border-color:#f5c7c7; background:#fff0f0; color:#b52b35;}
+.simulado-editor-modal .simulado-delete-button:hover:not(:disabled) {background:#ffe3e3;}
+.simulado-editor-modal button:disabled,
+.simulado-questao-modal button:disabled {opacity:.55; cursor:not-allowed; box-shadow:none; transform:none;}
+.simulado-editor-modal button:focus-visible,
+.simulado-questao-modal button:focus-visible {outline:3px solid #8ac1ff; outline-offset:2px;}
+.simulado-editor-modal .simulado-modal-actions {
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; padding-top:18px; margin-top:20px;
+  border-top:1px solid var(--line,#dbe8f7);
+}
+.simulado-footer-actions {display:flex; gap:10px; margin-left:auto;}
+
+/* Modal de questão: uma só rolagem no cartão; alternativas em duas colunas. */
+.simulado-questao-modal > form {display:flex; flex-direction:column; gap:0;}
+.simulado-questao-modal .simulado-questao-fields {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:22px; row-gap:14px; align-content:start;
+}
+.simulado-questao-modal .simulado-enunciado-grupo,
+.simulado-questao-modal .simulado-imagem-grupo {grid-column:1/-1;}
+.simulado-questao-modal .simulado-enunciado {height:105px; min-height:105px; resize:vertical; font-family:inherit;}
+.simulado-questao-modal .simulado-imagem-grupo {
+  padding:14px 17px; border:1px dashed #afd2bb; border-radius:13px;
+  background:var(--paper,#f8fcfa); gap:6px;
+}
+.simulado-questao-modal .simulado-imagem-grupo label span {font-size:12px; font-weight:500; color:var(--muted);}
+.simulado-questao-modal .simulado-imagem-ajuda {margin:0 0 5px; font-size:12px; line-height:1.5; color:var(--muted);}
+.simulado-questao-modal .simulado-imagem-grupo input[type=file] {
+  box-sizing:border-box; display:block; width:100%; min-width:0;
+  border:1px solid #c9def7; border-radius:10px; background:var(--card,#fff);
+  padding:6px 9px; font:500 12px inherit; font-family:inherit; font-size:12px;
+  color:var(--ink);
+}
+.simulado-questao-modal input[type=file]::file-selector-button {
+  appearance:none; padding:9px 13px; margin-right:12px; border:1px solid #c9def7;
+  border-radius:8px; background:#e8f3ff; color:#175da7; font-family:inherit; font-size:12px; font-weight:750; cursor:pointer;
+}
+.simulado-questao-modal .simulado-imagem-grupo small {font-size:12px; line-height:1.4; color:var(--muted);}
+.simulado-imagem-previa {display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.simulado-imagem-previa img {max-width:min(100%,300px); max-height:160px; object-fit:contain; border-radius:10px; border:1px solid var(--line);}
+.simulado-imagem-remover {appearance:none; border:1px solid #efc8c8; background:var(--card,#fff); color:#b72d38; padding:8px 12px; border-radius:9px; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;}
+.simulado-questao-modal .simulado-correta-field {grid-column:2;}
+.simulado-questao-modal .simulado-alternativa-correta {display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px;}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao {
+  position:relative; display:flex; align-items:center; justify-content:center;
+  min-width:0; min-height:46px; margin:0; border:1px solid #bfd9f6;
+  border-radius:11px; background:#e9f4ff; color:#155aa2;
+  font-family:inherit; font-size:14px; font-weight:750;
+  cursor:pointer; transition:background .15s ease,border-color .15s ease;
+}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao:hover {background:#d9ebff; border-color:#8dbff1;}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao.selecionada {background:#1976d2; border-color:#1976d2; color:#fff;}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao:focus-within {outline:3px solid #91c6ff; outline-offset:2px;}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao input[type=radio] {
+  position:absolute; width:1px; height:1px; opacity:0; pointer-events:none;
+}
+.simulado-questao-modal .simulado-correta-field .simulado-alternativa-opcao span {pointer-events:none;}
+.simulado-questao-modal .simulado-questao-actions {
+  display:flex; justify-content:flex-end; align-items:center; gap:11px;
+  padding-top:17px; margin-top:21px; border-top:1px solid var(--line,#dbe8f7);
 }
 
-.admin-list-item:hover{ transform:translateX(4px); }
-
-.admin-edit-btn{
-  background:var(--paper); border:1.5px solid var(--line); color:var(--ink-soft);
-  border-radius:var(--radius-sm); padding:8px 16px; font-size:13.5px; font-weight:600; cursor:pointer;
-  transition:border-color .15s ease, color .15s ease, transform .18s var(--bouncy);
+@media(max-width:750px) {
+  .admin-simulados-materia {padding:16px;}
+  .admin-simulado-card {flex-direction:column; align-items:stretch;}
+  .admin-simulado-card .admin-edit-btn {align-self:flex-start;}
+  .admin-simulados-heading h1 {font-size:31px;}
+  .admin-area .modal-card.simulado-editor-modal,
+  .admin-area .modal-card.simulado-questao-modal,
+  .modal-card.simulado-editor-modal,
+  .modal-card.simulado-questao-modal {padding:22px 19px; width:calc(100vw - 22px); max-height:calc(100dvh - 22px);}
+  .simulado-editor-modal .simulado-form-grid,
+  .simulado-questao-modal .simulado-questao-fields {grid-template-columns:minmax(0,1fr); gap:16px;}
+  .simulado-editor-modal .simulado-form-subject,
+  .simulado-editor-modal .simulado-form-content,
+  .simulado-questao-modal .simulado-correta-field {grid-column:auto; grid-row:auto;}
+  .simulado-questions-toolbar {align-items:stretch;}
+  .simulado-editor-modal .simulado-add-question {width:100%;}
+  .simulado-question-item {flex-wrap:wrap;}
+  .simulado-editor-modal .simulado-modal-actions {flex-wrap:wrap;}
+  .simulado-footer-actions {width:100%;}
+  .simulado-footer-actions button {flex:1;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .simulado-editor-modal button,
+  .simulado-questao-modal button {transition:none;}
 }
 
-.admin-edit-btn:hover{ border-color:var(--accent); color:var(--ink); transform:scale(1.05); }
+/* Seletor personalizado de conteúdo, consistente com os botões do Tenna. */
+.simulado-editor-modal .simulado-conteudo-select {position:relative; width:100%;}
+.simulado-editor-modal .simulado-conteudo-trigger {
+  appearance:none; width:100%; min-height:46px; display:flex; align-items:center;
+  justify-content:space-between; gap:12px; padding:10px 14px;
+  border:1px solid #bbd7f6; border-radius:11px;
+  background:var(--paper,#e9f5ff); color:var(--ink,#154776);
+  font-family:inherit; font-size:14px; font-weight:600; text-align:left;
+  cursor:pointer; transition:border-color .15s, box-shadow .15s, background .15s;
+}
+.simulado-editor-modal .simulado-conteudo-trigger.is-placeholder {font-weight:500; color:var(--ink-soft,#4776ac);}
+.simulado-editor-modal .simulado-conteudo-trigger:hover:not(:disabled) {background:#edf6ff; border-color:#87bdf2;}
+.simulado-editor-modal .simulado-conteudo-trigger:focus-visible,
+.simulado-editor-modal .simulado-conteudo-trigger.is-open {
+  outline:none; border-color:#4da3ff; box-shadow:0 0 0 3px rgba(77,163,255,.17); background:var(--card,#fff);
+}
+.simulado-editor-modal .simulado-conteudo-trigger:disabled {opacity:.65; cursor:not-allowed;}
+.simulado-conteudo-chevron {width:9px; height:9px; flex:none; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg) translateY(-2px); transition:transform .15s;}
+.is-open .simulado-conteudo-chevron {transform:rotate(225deg) translate(-2px,-1px);}
+.simulado-editor-modal .simulado-conteudo-options {
+  position:absolute; z-index:30; top:calc(100% + 6px); left:0; right:0;
+  padding:6px; max-height:240px; overflow-y:auto; overscroll-behavior:contain;
+  background:var(--card,#fff); border:1px solid var(--line,#cbdff5);
+  border-radius:12px; box-shadow:0 14px 35px rgba(15,58,105,.16);
+}
+.simulado-editor-modal .simulado-conteudo-option {
+  appearance:none; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  width:100%; padding:11px 12px; border:0; border-radius:8px;
+  background:transparent; color:var(--ink,#154776); font:500 14px/1.35 inherit;
+  font-family:inherit; font-size:14px; text-align:left; cursor:pointer;
+}
+.simulado-editor-modal .simulado-conteudo-option:hover,
+.simulado-editor-modal .simulado-conteudo-option:focus-visible {background:#e9f4ff; outline:none;}
+.simulado-editor-modal .simulado-conteudo-option.is-selected {background:#e0efff; color:#0757ad; font-weight:700;}
 
-.modal-note{ font-size:12.5px; color:var(--muted); margin-top:10px; }
-
-.admin-list{display:flex;flex-direction:column;}
-
-.admin-list-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line);}
-
-.admin-list-row:last-child{border-bottom:0;padding-bottom:0;}
-
-.admin-list-main{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;}
-
-.admin-list-main strong{font-size:14px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-.admin-list-main span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-
-/* Layout dos simulados — estilos mantidos no CSS, sem inline style no JSX */
-.simulado-error{ margin-bottom:20px; }
-.admin-simulado-meta{ margin-top:5px; font-size:14px; opacity:.7; }
-.simulado-content-group{ margin-top:16px; }
-.simulado-questoes-header{ margin-top:20px; }
-.simulado-question-count{ margin-top:15px; }
-.simulado-question-list{ max-height:220px; overflow-y:auto; }
-.simulado-question-item{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px; margin-bottom:8px; border:1px solid #ddd; border-radius:var(--radius-sm); }
-.simulado-question-actions{ display:flex; gap:8px; }
-.simulado-edit-question,.simulado-remove-question{ border:none; background:transparent; cursor:pointer; }
-.simulado-edit-question{ color:#2563eb; }
-.simulado-remove-question{ color:#dc2626; }
-.simulado-modal-actions{ margin-top:20px; display:flex; justify-content:space-between; }
-.simulado-delete-button{ background:#dc2626; color:#fff; }
-.simulado-footer-actions{ display:flex; gap:10px; }
-.simulado-enunciado{ height:90px; }
+/* Organização compacta da listagem de simulados — sem afetar os modais. */
+.admin-simulados-page .admin-list { gap:16px; }
+.admin-simulados-page .admin-simulados-materia {
+  padding:20px 22px; border-radius:18px;
+}
+.admin-simulados-page .admin-simulados-materia-header {
+  gap:12px; padding-bottom:15px;
+}
+.admin-simulados-page .admin-simulados-materia-icon {
+  width:42px; height:42px; border-radius:11px;
+}
+.admin-simulados-page .admin-simulados-materia-header h2 {
+  margin:0; font-size:20px; line-height:1.25;
+}
+/* A contagem já aparece no conteúdo; evita repetição e altura desnecessária. */
+.admin-simulados-page .admin-simulados-materia-header div > span { display:none; }
+.admin-simulados-page .admin-simulados-conteudo { padding-top:15px; }
+.admin-simulados-page .admin-simulados-conteudo + .admin-simulados-conteudo {
+  margin-top:14px; border-top:1px solid var(--line,#dbe8f7);
+}
+.admin-simulados-page .admin-simulados-conteudo-heading {
+  gap:9px; margin-bottom:9px;
+}
+.admin-simulados-page .admin-simulados-conteudo-heading h3 {
+  font-size:15px; font-weight:750;
+}
+.admin-simulados-page .admin-simulados-conteudo-heading span {
+  font-size:11px; padding:4px 8px;
+}
+.admin-simulados-page .admin-simulados-items { gap:8px; }
+.admin-simulados-page .admin-simulado-card {
+  padding:13px 16px; border-radius:12px; gap:14px;
+  background:var(--paper,#f8fbff);
+}
+.admin-simulados-page .admin-simulado-card-main > strong {
+  margin-bottom:7px; font-size:15px; line-height:1.4;
+}
+.admin-simulados-page .admin-simulado-details { gap:7px; }
+.admin-simulados-page .admin-simulado-details span {
+  padding:4px 8px; font-size:11.5px; border-radius:7px;
+}
+.admin-simulados-page .admin-simulado-card .admin-edit-btn {
+  padding:9px 13px; font-size:12.5px; border-radius:9px;
+}
+@media (max-width:640px) {
+  .admin-simulados-page .admin-simulados-materia { padding:16px; }
+  .admin-simulados-page .admin-simulado-card { align-items:flex-start; }
+}

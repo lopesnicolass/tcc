@@ -11,21 +11,17 @@ export function Modal({
   salvando,
 }) {
   return (
-    <div className="admin-modal-backdrop">
-      <div className="admin-modal">
+    <div className="admin-modal-backdrop admin-modal-backdrop-refined">
+      <div className="admin-modal admin-modal-refined">
 
         <div className="admin-modal-head">
           <div>
-            <span className="admin-section-kicker">
-              ADMINISTRAÇÃO
-            </span>
-
             <h2>{titulo}</h2>
           </div>
 
           <button
             type="button"
-            className="admin-modal-close"
+            className="admin-modal-close" aria-label="Fechar janela"
             onClick={onClose}
             disabled={salvando}
           >
@@ -36,12 +32,12 @@ export function Modal({
           </button>
         </div>
 
-        {children}
+        <div className="admin-modal-scroll-content">{children}</div>
 
         <div className="admin-modal-actions">
           <button
             type="button"
-            className="mural-btn secondary"
+            className="mural-btn secondary admin-modal-button admin-modal-button-cancel"
             onClick={onClose}
             disabled={salvando}
           >
@@ -50,7 +46,7 @@ export function Modal({
 
           <button
             type="button"
-            className="mural-btn"
+            className="mural-btn admin-modal-button admin-modal-button-save"
             onClick={onSave}
             disabled={salvando}
           >

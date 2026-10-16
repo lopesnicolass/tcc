@@ -423,3 +423,158 @@
     transition:none;
   }
 }
+
+/* Refinamento visual da página de flashcards */
+.admin-flashcard-list{gap:18px;padding-bottom:100px}
+.admin-flashcard-materia-section{background:var(--card,#fff);padding:24px;border-radius:20px;box-shadow:0 5px 20px rgba(14,63,120,.045)}
+.admin-flashcard-materia-header{margin-bottom:20px;padding-bottom:15px}
+.admin-flashcard-content-section{margin-bottom:24px}
+.admin-flashcard-grid{grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px;padding-bottom:0}
+.admin-flashcard-item{min-height:132px;padding:20px;border:1px solid #e2ecf8;border-radius:15px;background:linear-gradient(155deg,#fff 65%,#f4f9ff);justify-content:space-between;box-shadow:0 2px 5px rgba(17,65,127,.035)}
+.admin-flashcard-item:hover{border-color:#93c5fd;transform:translateY(-2px);box-shadow:0 8px 20px rgba(17,65,127,.10)}
+.admin-flashcard-item strong{font-size:15px;line-height:1.5;color:#104b9e}
+.admin-flashcard-conteudo{font-size:12px}
+.admin-flashcard-filters{grid-template-columns:minmax(250px,1.6fr) minmax(160px,1fr) minmax(160px,1fr) auto;gap:12px;padding:18px;border-radius:18px;background:var(--card,#fff);margin-bottom:18px}
+.admin-flashcard-search-box input,.admin-flashcard-filter-field select{min-height:46px;border-radius:11px}
+.admin-flashcard-modal{width:min(94vw,640px);max-width:640px;border-radius:22px;overflow:visible}
+.admin-flashcard-modal .modal-header{padding:24px 28px 12px}
+.admin-flashcard-modal .modal-header h2{font-size:23px;letter-spacing:-.025em}
+.admin-flashcard-modal .modal-body{padding:14px 28px 18px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px}
+.admin-flashcard-modal .admin-flashcard-field{margin:0;min-width:0}
+.admin-flashcard-modal .admin-flashcard-field > span{font-size:12px}
+.admin-flashcard-modal .modal-textarea{width:100%;min-height:108px;box-sizing:border-box;resize:vertical;border:1px solid #d6e3f5;border-radius:12px;padding:13px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+.admin-flashcard-modal .modal-textarea:focus{outline:none;border-color:#2789ed;box-shadow:0 0 0 3px rgba(39,137,237,.12)}
+.admin-flashcard-modal .admin-flashcard-field select{min-height:46px;border-radius:11px;border-color:#d6e3f5}
+.admin-flashcard-modal .modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 28px 24px}
+.admin-flashcard-modal .modal-actions .mural-btn{appearance:none;min-height:43px;padding:0 20px;border-radius:11px;border:1px solid #cdddf2;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.admin-flashcard-modal .modal-actions .mural-btn.ghost{background:#fff;color:#1451a2}
+.admin-flashcard-modal .modal-actions .mural-btn.primary{background:#1677dc;color:white;border-color:#1677dc}
+.admin-flashcard-modal .modal-actions .mural-btn:hover{filter:brightness(.96)}
+.admin-flashcard-modal .modal-delete{margin:0 28px 24px}
+@media(max-width:900px){.admin-flashcard-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-flashcard-search{grid-column:1/-1}}
+@media(max-width:700px){.admin-flashcard-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.admin-flashcard-materia-section{padding:16px}.admin-flashcard-modal .modal-body{grid-template-columns:1fr;padding:12px 18px}.admin-flashcard-modal .modal-header{padding:22px 18px 10px}.admin-flashcard-modal .modal-actions{padding:14px 18px 20px}.admin-flashcard-filters{grid-template-columns:1fr}.admin-flashcard-search{grid-column:auto}}
+
+/* Modal de flashcards: remove os espaçamentos herdados do modal genérico. */
+.admin-area .admin-flashcard-modal,
+.admin-flashcard-modal{
+  width:min(560px,calc(100vw - 32px));
+  max-width:560px;
+  box-sizing:border-box;
+  padding:0;
+  border-radius:20px;
+  overflow:hidden;
+  max-height:calc(100dvh - 32px);
+  overflow-y:auto;
+}
+.admin-flashcard-modal .modal-header{
+  margin:0;
+  padding:24px 26px 8px;
+}
+.admin-flashcard-modal .modal-header h2{
+  margin:0;
+  font-size:21px;
+}
+.admin-flashcard-modal form{margin:0}
+.admin-flashcard-modal .modal-body{
+  margin:0;
+  padding:16px 26px 12px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+  align-items:start;
+}
+.admin-flashcard-modal .admin-flashcard-field{gap:7px;margin:0;min-width:0}
+.admin-flashcard-modal .modal-textarea{
+  height:104px;
+  min-height:104px;
+  max-height:180px;
+  padding:12px;
+  line-height:1.5;
+}
+.admin-flashcard-modal .admin-flashcard-field > small{min-height:14px;font-size:11px}
+.admin-flashcard-modal .admin-flashcard-field select{width:100%;min-height:44px}
+.admin-flashcard-modal .modal-actions{
+  margin:0;
+  padding:12px 26px 24px;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.admin-flashcard-modal .modal-delete{margin:0 26px 22px}
+@media(max-width:600px){
+  .admin-flashcard-modal .modal-header{padding:22px 18px 6px}
+  .admin-flashcard-modal .modal-body{grid-template-columns:1fr;padding:14px 18px 10px;gap:13px}
+  .admin-flashcard-modal .modal-textarea{height:82px;min-height:82px}
+  .admin-flashcard-modal .modal-actions{padding:12px 18px 20px}
+}
+
+/* Modal ampliado e seletores consistentes com o Tenna */
+.admin-area .admin-flashcard-modal,.admin-flashcard-modal{width:min(760px,calc(100vw - 32px));max-width:760px;overflow:visible;max-height:calc(100dvh - 40px)}
+.admin-flashcard-modal .modal-header{padding:30px 34px 12px}
+.admin-flashcard-modal .modal-body{padding:20px 34px 22px;gap:22px 20px}
+.admin-flashcard-modal .modal-textarea{height:145px;min-height:145px}
+.admin-flashcard-modal .modal-actions{padding:14px 34px 30px}
+.flash-custom-select{position:relative;min-width:0}
+.flash-custom-trigger{width:100%;min-height:46px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #d6e3f5;border-radius:11px;background:#fff;color:#1250a4;font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.flash-custom-trigger:focus-visible{outline:3px solid #93c5fd;outline-offset:1px}
+.flash-custom-trigger:disabled{background:#f3f7fc;color:#9aaec8;cursor:not-allowed}
+.flash-custom-chevron{width:8px;height:8px;flex:none;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.flash-custom-dismiss{position:fixed;inset:0;z-index:30;border:0;background:transparent;cursor:default}
+.flash-custom-options{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:31;max-height:190px;overflow-y:auto;padding:6px;background:white;border:1px solid #d6e3f5;border-radius:12px;box-shadow:0 12px 30px rgba(10,51,106,.17)}
+.flash-custom-options button{display:block;width:100%;padding:11px 12px;border:0;border-radius:8px;background:transparent;color:#144c98;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+.flash-custom-options button:hover,.flash-custom-options button.selected{background:#e7f2ff;color:#0752b4}
+.flash-custom-empty{padding:12px;color:#7e96b5;font-size:12px}
+@media(max-width:600px){.admin-area .admin-flashcard-modal,.admin-flashcard-modal{max-height:calc(100dvh - 24px);overflow-y:auto}.admin-flashcard-modal .modal-header{padding:22px 20px 8px}.admin-flashcard-modal .modal-body{padding:14px 20px;grid-template-columns:1fr}.admin-flashcard-modal .modal-actions{padding:12px 20px 22px}}
+
+/* Seletores personalizados da barra de filtros */
+.admin-flashcard-filters{position:relative;z-index:3;overflow:visible}
+.admin-flashcard-filter-field{min-width:0}
+.admin-flashcard-filter-field .flash-custom-select{width:100%}
+.admin-flashcard-filter-field .flash-custom-trigger{min-height:46px;border-radius:11px;padding:0 15px;background:#fff}
+.admin-flashcard-filter-field .flash-custom-trigger[aria-expanded="true"]{border-color:#2388ed;box-shadow:0 0 0 3px rgba(35,136,237,.13)}
+.admin-flashcard-filter-field .flash-custom-trigger:disabled{background:#f3f7fc;color:#9baac0}
+.admin-flashcard-filter-field .flash-custom-options{max-height:235px;z-index:101;padding:6px;border:1px solid #d8e5f5;border-radius:12px;box-shadow:0 14px 32px rgba(17,57,108,.16)}
+.admin-flashcard-filter-field .flash-custom-options button{padding:11px 12px;border-radius:8px}
+.admin-flashcard-filter-field .flash-custom-dismiss{z-index:100}
+
+/* Cards administrativos com a mesma aparência da face frontal do estudante.
+   O clique continua abrindo a edição, sem alterar as funcionalidades. */
+.admin-flashcard-grid {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 18px;
+  padding-bottom: 0;
+}
+.admin-flashcard-item {
+  box-sizing: border-box;
+  height: 148px;
+  min-height: 148px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 5px 16px rgba(13,71,161,.045);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.admin-flashcard-item strong {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.admin-flashcard-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(33,150,243,.28);
+  box-shadow: 0 10px 22px rgba(13,71,161,.08);
+}
+.admin-flashcard-item:focus-visible {
+  outline: 3px solid #2196f3;
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .admin-flashcard-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+}

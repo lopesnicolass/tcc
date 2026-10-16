@@ -36,6 +36,20 @@ const ICONS = {
   user: <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" />,
 };
 
+function toDateKey(value) {
+  if (!value) return null;
+
+  if (typeof value === 'string') {
+    const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  return new Intl.DateTimeFormat('sv-SE').format(parsed);
+}
+
 export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
   const { streak, lastActiveDate } = useGamification();
   const fecharRef = useRef(null);
@@ -182,20 +196,22 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
       {streakOpen && createPortal((() => {
         const streakValue = Math.max(0, Number(streak) || 0);
         const hoje = new Intl.DateTimeFormat('sv-SE').format(new Date());
-        const ultimaAtividade = lastActiveDate || null;
-        const ativoHoje = ultimaAtividade === hoje;
+        const ultimaAtividade = toDateKey(lastActiveDate);
+        const dataFinalChave = ultimaAtividade || (streakValue > 0 ? hoje : null);
+        const ativoHoje = dataFinalChave === hoje;
         const proximaMeta = streakValue < 7 ? 7 : Math.ceil((streakValue + 1) / 7) * 7;
         const faltamParaMeta = Math.max(proximaMeta - streakValue, 0);
-        const progressoMeta = streakValue < 7 ? streakValue : (streakValue % 7);
-        const fimSemana = new Date();
+        const progressoMeta = streakValue < 7 ? streakValue : (streakValue % 7 || 7);
+        const fimSemana = new Date(`${hoje}T12:00:00`);
+        const dataFinal = dataFinalChave ? new Date(`${dataFinalChave}T12:00:00`) : null;
+        const dataInicio = dataFinal
+          ? new Date(dataFinal.getTime() - Math.max(streakValue - 1, 0) * 86400000)
+          : null;
+
         const diasSemana = Array.from({ length: 7 }, (_, index) => {
           const data = new Date(fimSemana);
           data.setDate(fimSemana.getDate() - (6 - index));
           const chave = new Intl.DateTimeFormat('sv-SE').format(data);
-          const dataFinal = ultimaAtividade ? new Date(`${ultimaAtividade}T12:00:00`) : null;
-          const dataInicio = dataFinal
-            ? new Date(dataFinal.getTime() - Math.max(streakValue - 1, 0) * 86400000)
-            : null;
           const completo = Boolean(
             dataFinal &&
             dataInicio &&
@@ -207,7 +223,8 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
             chave,
             rotulo: new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(data).replace('.', ''),
             completo,
-            hoje: chave === hoje
+            hoje: chave === hoje,
+            pendenteHoje: chave === hoje && !ativoHoje
           };
         });
 
@@ -252,10 +269,13 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
                     <div className="streak-day" key={dia.chave}>
                       <span className="streak-day-label">{dia.rotulo}</span>
                       <span
-                        className={`streak-day-dot ${dia.completo ? 'is-complete' : ''} ${dia.hoje ? 'is-today' : ''}`}
-                        aria-label={`${dia.rotulo}: ${dia.completo ? 'atividade registrada' : 'sem atividade'}`}
+                        className={`streak-day-dot ${dia.completo ? 'is-complete' : ''} ${dia.hoje ? 'is-today' : ''} ${dia.pendenteHoje ? 'is-pending' : ''}`}
+                        aria-label={`${dia.rotulo}: ${dia.completo ? 'atividade registrada' : dia.pendenteHoje ? 'pendente hoje' : 'sem atividade'}`}
                       >
-                        {dia.completo ? '🔥' : '•'}
+                        <span className="streak-day-dot-icon" aria-hidden="true">{dia.completo ? '🔥' : dia.pendenteHoje ? '•' : '·'}</span>
+                      </span>
+                      <span className={`streak-day-status ${dia.completo ? 'is-complete' : dia.pendenteHoje ? 'is-pending' : ''}`}>
+                        {dia.completo ? 'feito' : dia.pendenteHoje ? 'hoje' : 'vazio'}
                       </span>
                     </div>
                   ))}

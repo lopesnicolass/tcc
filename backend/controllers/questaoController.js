@@ -22,6 +22,14 @@ function alternativasValidas() {
     ];
 }
 
+function imagemDaQuestao(valor) {
+    if (valor == null || valor === '') return null;
+    if (typeof valor !== 'string' || !/^\/uploads\/questoes\/[a-zA-Z0-9_-]+\.(png|jpg|jpeg|webp|gif)$/.test(valor)) {
+        throw new TypeError('Imagem inválida. Envie a imagem pelo upload de questões.');
+    }
+    return valor;
+}
+
 function normalizarIds(valor) {
     let valores = [];
 
@@ -77,7 +85,8 @@ function cadastrarQuestao(
         alternativa_e,
 
         correta,
-        materia
+        materia,
+        imagem
     } = req.body;
 
 
@@ -137,6 +146,10 @@ function cadastrarQuestao(
     }
 
 
+    let caminhoImagem;
+    try { caminhoImagem = imagemDaQuestao(imagem); }
+    catch (erro) { return res.status(400).json({ mensagem: erro.message }); }
+
     criarQuestao(
         pergunta.trim(),
         a.trim(),
@@ -146,6 +159,7 @@ function cadastrarQuestao(
         e.trim(),
         respostaCorreta,
         materia,
+        caminhoImagem,
         (
             erro,
             resultado
@@ -190,7 +204,8 @@ function cadastrarQuestao(
                     correta:
                         respostaCorreta,
 
-                    materia
+                    materia,
+                    imagem: caminhoImagem
                 }
             });
         }
@@ -484,7 +499,8 @@ function editarQuestao(
         alternativa_e,
 
         correta,
-        materia
+        materia,
+        imagem
     } = req.body;
 
 
@@ -544,6 +560,10 @@ function editarQuestao(
     }
 
 
+    let caminhoImagem;
+    try { caminhoImagem = imagemDaQuestao(imagem); }
+    catch (erro) { return res.status(400).json({ mensagem: erro.message }); }
+
     atualizarQuestao(
         id,
         pergunta.trim(),
@@ -554,6 +574,7 @@ function editarQuestao(
         e.trim(),
         respostaCorreta,
         materia,
+        caminhoImagem,
         (
             erro,
             resultado

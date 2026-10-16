@@ -19,6 +19,7 @@ import { APARENCIA_PADRAO, normalizarAparencia } from '../../utils/aparenciaCont
 import '../../styles/adm/EditorConteudoVisual.css';
 import '../../styles/adm/EditorConteudoRefinado.css';
 import '../../styles/adm/EditorConteudoDidatico.css';
+import '../../styles/adm/EditorConteudoModernizado.css';
 
 // Estrutura única para aulas NOVAS. Os blocos são editáveis e podem ser removidos.
 // Aulas já existentes não são alteradas.
@@ -840,7 +841,7 @@ export default function EditorConteudo({
   }
 
   return (
-    <div className="admin-page">
+    <div className="admin-page tenna-editor-refresh">
 
       <header className="page-header editor-page-header">
         <div>
@@ -856,10 +857,6 @@ export default function EditorConteudo({
 
             Voltar aos tópicos
           </button>
-
-          <span className="admin-section-kicker">
-            CMS / CONTEÚDO
-          </span>
 
           <h1>
             {topicoNome}
