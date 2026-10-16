@@ -296,7 +296,7 @@ export default function Terrario() {
       <div className="terr-layout">
         <section className="terr-scene-card" aria-labelledby="terr-scene-title">
           <div className="terr-scene-topbar">
-            <div><span className="terr-kicker">SALA 01 · SEU PONTO DE PARTIDA</span><h2 id="terr-scene-title">Ninho Inicial</h2></div>
+            <div className="terr-scene-heading"><span className="terr-kicker">SALA 01 · SEU PONTO DE PARTIDA</span><h2 id="terr-scene-title">Ninho Inicial</h2><p>O primeiro espaço da sua jornada com a Tenna.</p></div>
             <div className="terr-scene-actions">
               <span className={`terr-status ${game.status === 'running' ? 'is-working' : ''}`}><span />{game.status === 'running' ? 'Tenna focada' : 'Tenna em casa'}</span>
               <button type="button" className={`terr-decorate-button ${decorate ? 'active' : ''}`} onClick={() => setDecorate((value) => !value)} aria-pressed={decorate}>
@@ -337,7 +337,7 @@ export default function Terrario() {
             </div>
           </div>
           <div className="terr-scene-bottom">
-            <div className="terr-room-journey"><span>PRÓXIMO CAPÍTULO</span><strong>O Cantinho de Estudos</strong><small>{sessionsUntilNextRoom === 0 ? 'Meta alcançada! Próxima sala em desenvolvimento.' : `Faltam ${sessionsUntilNextRoom} sessões para a meta de 5`}</small></div>
+            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMO CAPÍTULO</span><strong>O Cantinho de Estudos</strong><small>{sessionsUntilNextRoom === 0 ? 'Meta alcançada! Próxima sala em desenvolvimento.' : `Faltam ${sessionsUntilNextRoom} sessões para a meta de 5`}</small></div></div>
             <div className="terr-room-progress"><div><span>{Math.min(game.sessions, 5)} de 5 sessões</span><strong>{Math.min(100, game.sessions * 20)}%</strong></div><div className="terr-progress-track"><span style={{ width: `${Math.min(100, game.sessions * 20)}%` }}/></div></div>
           </div>
         </section>
@@ -381,10 +381,10 @@ export default function Terrario() {
             const owned = game.owned.includes(item.id);
             const visible = game.visible.includes(item.id);
             return (
-              <article key={item.id} className={`terr-item-card ${selected === item.id ? 'active' : ''}`}>
+              <article key={item.id} className={`terr-item-card ${selected === item.id ? 'active' : ''} ${owned ? 'is-owned' : ''} ${visible ? 'is-placed' : ''}`}>
                 <button type="button" className="terr-item-preview" onClick={() => { setSelected(item.id); if (owned) setDecorate(true); }} aria-label={`Selecionar ${item.name}`}><img src={item.img} alt="" loading="lazy"/></button>
                 <div className="terr-item-desc"><strong>{item.name}</strong><small>{item.subtitle}</small></div>
-                <div className="terr-item-bottom"><span>{owned ? '✓ Desbloqueado' : `🌱 ${item.price}`}</span><button type="button" onClick={() => purchase(item)}>{owned ? visible ? 'Guardar' : 'Colocar' : 'Comprar'}</button></div>
+                <div className="terr-item-bottom"><span className={owned ? 'terr-owned-label' : 'terr-cost-label'}>{owned ? '✓ Desbloqueado' : `🌱 ${item.price}`}</span><button type="button" onClick={() => purchase(item)}>{owned ? visible ? 'Guardar' : 'Colocar' : 'Comprar'}</button></div>
               </article>
             );
           })}
