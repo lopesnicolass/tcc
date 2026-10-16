@@ -1,3 +1,10 @@
 node_modules/
 .env
 dist/
+
+# Nunca versionar dados privados ou bancos reais
+backend/banco/*.sqlite
+backend/banco/*.sqlite-*
+backend/uploads/
+**/*.backup-*.sqlite
+*.zip

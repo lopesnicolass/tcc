@@ -1558,7 +1558,7 @@ export default function FlashCards() {
 
           <section className="flashcards-materias flashcards-materias-direta" aria-label="Baralhos disponíveis">
             <div className="flashcards-decks-grid">
-              {materiasDisponiveis.map((materia, indice) => {
+              {materiasDisponiveis.map((materia) => {
                 const cardsDaMateria = cards.filter((card) => card.subject === materia);
                 const quantidade = cardsDaMateria.length;
                 return (

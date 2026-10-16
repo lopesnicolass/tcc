@@ -6,17 +6,13 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
     const remetente = process.env.EMAIL_FROM;
 
     if (!apiKey || !remetente) {
-        console.log("\n========================================");
-        console.log("LINK DE RECUPERAÇÃO DE SENHA (DEV)");
-        console.log(link);
-        console.log("========================================\n");
-        return { modo: "dev" };
+        throw new Error('Provedor de e-mail não configurado. Informe RESEND_API_KEY e EMAIL_FROM.');
     }
 
     const corpo = [
         `Olá${nome ? `, ${nome}` : ""}!`,
         "",
-        "Recebemos uma solicitação para redefinir a senha da sua conta no Prepara ETECAMP.",
+        "Recebemos uma solicitação para redefinir a senha da sua conta no Tenna.",
         "",
         "Acesse o link abaixo para criar uma nova senha:",
         link,
@@ -34,7 +30,7 @@ async function enviarEmailRecuperacao({ destinatario, nome, link }) {
         body: JSON.stringify({
             from: remetente,
             to: [destinatario],
-            subject: "Redefinição de senha - Prepara ETECAMP",
+            subject: "Redefinição de senha - Tenna",
             text: corpo
         })
     });

@@ -75,7 +75,7 @@ export default function RedefinirSenha() {
             onClick={() => navigate('/')}
             aria-label="Voltar para a página inicial"
           >
-            <img src={logoWordmark} alt="Prepara ETECAMP" className="panel-visual-logo" />
+            <img src={logoWordmark} alt="Tenna" className="panel-visual-logo" />
           </button>
         </div>
 

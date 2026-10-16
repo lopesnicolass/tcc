@@ -1,7 +1,7 @@
 // src/components/Icon.jsx
 // Ícones genéricos no mesmo estilo da sidebar (linha fina, cor herdada)
 
-export const ICON_PATHS = {
+const ICON_PATHS = {
   calendar:
     'M4 9h16M7 3v4M17 3v4M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z',
   check:

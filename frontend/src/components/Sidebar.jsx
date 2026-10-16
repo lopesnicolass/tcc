@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
-import { useGamification } from '../context/GamificationContext.jsx';
+import { useGamification } from '../context/GamificationShared.js';
 import logoIcon from '../assets/tenna_logo.webp';
 import ThemeToggle from './ThemeToggle.jsx';
 

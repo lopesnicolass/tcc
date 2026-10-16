@@ -1,15 +1,17 @@
 import '../../styles/aluno/Simulados.css';
-import { useEffect, useState, useRef } from 'react';
-import { useGamification } from '../../context/GamificationContext.jsx';
+import { useEffect, useEffectEvent, useState, useRef } from 'react';
+import { useGamification } from '../../context/GamificationShared.js';
 
 import { TelaResultado } from './simulados/TelaResultado.jsx';
 import { TelaSimulado } from './simulados/TelaSimulado.jsx';
 import { ListaSimulados } from './simulados/ListaSimulados.jsx';
 import { filtrarPorMateria, integrarStatusComHistorico } from './simulados/dadosSimulados.js';
 import { request } from '../../services/api.js';
+import { lerPrazoSalvo, lerSegundosSalvos, pausarPrazo, retomarPrazo, calcularSegundosRestantes } from '../../utils/simuladoCronometro.js';
+import { prepararTentativaPersistida } from '../../utils/simuladoTentativa.js';
 
 export default function Simulados() {
-  const { addXP } = useGamification();
+  const { recarregarGamificacao } = useGamification();
 
   const [simulados, setSimulados] = useState([]);
   const [filtro, setFiltro] = useState('Todas');
@@ -54,10 +56,13 @@ export default function Simulados() {
   // Reflete tentativas salvas no servidor sem interromper provas em andamento.
   useEffect(() => {
     if (!Array.isArray(historicoResultados)) return;
-    setSimulados((atuais) => {
-      const integrados = integrarStatusComHistorico(atuais, historicoResultados);
-      return integrados.some((item, index) => item !== atuais[index]) ? integrados : atuais;
-    });
+    const atualizar = setTimeout(() => {
+      setSimulados((atuais) => {
+        const integrados = integrarStatusComHistorico(atuais, historicoResultados);
+        return integrados.some((item, index) => item !== atuais[index]) ? integrados : atuais;
+      });
+    }, 0);
+    return () => clearTimeout(atualizar);
   }, [historicoResultados, simulados]);
 
   // ==========================================
@@ -72,6 +77,15 @@ export default function Simulados() {
 
   const finalizandoPorTempo =
     useRef(false);
+
+  // O intervalo usa sempre as respostas e a função de finalização atuais.
+  const respostasAtuais = useRef({});
+  const finalizarSimuladoRef = useRef(null);
+  const ultimaTentativaAutomatica = useRef(0);
+
+  useEffect(() => {
+    respostasAtuais.current = respostas;
+  }, [respostas]);
 
   const abrindoSimuladoPorParametro =
     useRef(false);
@@ -143,6 +157,17 @@ export default function Simulados() {
     return `statusSimulados_${usuarioId}`;
   }
 
+  function obterChaveTentativa(simuladoId) {
+    const usuarioId = obterUsuarioId();
+    return usuarioId ? `tentativaSimulado_${usuarioId}_${simuladoId}` : null;
+  }
+
+  function prepararTentativa(simuladoId, nova = false) {
+    const chave = obterChaveTentativa(simuladoId);
+    if (!chave) throw new Error('Usuário não encontrado para registrar a tentativa.');
+    return prepararTentativaPersistida(localStorage, chave, nova);
+  }
+
   function obterChaveRespostas(
     simuladoId
   ) {
@@ -196,6 +221,21 @@ export default function Simulados() {
     }
 
     return `prazoSimulado_${usuarioId}_${simuladoId}`;
+  }
+
+  function obterChaveRestante(simuladoId) {
+    const usuarioId = obterUsuarioId();
+    return usuarioId ? `restanteSimulado_${usuarioId}_${simuladoId}` : null;
+  }
+
+  // Ao sair da prova, preserva o tempo em segundos e remove o prazo ativo.
+  // Assim o relógio só avança enquanto o simulado está aberto.
+  function pausarCronometro(simulado) {
+    if (!simulado || simulado.status === 'concluido') return;
+    const chavePrazo = obterChavePrazo(simulado.id);
+    const chaveRestante = obterChaveRestante(simulado.id);
+    if (!chavePrazo || !chaveRestante) return;
+    pausarPrazo(localStorage, chavePrazo, chaveRestante);
   }
 
   function obterChaveInicio(
@@ -253,6 +293,17 @@ export default function Simulados() {
             )
           )
         : NaN;
+
+    const limiteMinutos = Number(simulado.tempo_limite);
+    if (Number.isFinite(limiteMinutos) && limiteMinutos > 0) {
+      const limite = Math.ceil(limiteMinutos * 60);
+      const pausado = lerSegundosSalvos(localStorage, obterChaveRestante(simulado.id));
+      const prazo = lerPrazoSalvo(localStorage, obterChavePrazo(simulado.id));
+      const restante = Number.isFinite(pausado)
+        ? pausado
+        : Number.isFinite(prazo) ? calcularSegundosRestantes(prazo) : NaN;
+      if (Number.isFinite(restante)) return Math.max(0, limite - Math.min(restante, limite));
+    }
 
     if (Number.isFinite(inicio)) {
       const segundos =
@@ -362,10 +413,10 @@ export default function Simulados() {
       );
 
     if (chave) {
-      localStorage.removeItem(
-        chave
-      );
+      localStorage.removeItem(chave);
     }
+    const chaveRestante = obterChaveRestante(simuladoId);
+    if (chaveRestante) localStorage.removeItem(chaveRestante);
   }
 
   // ==========================================
@@ -411,10 +462,9 @@ export default function Simulados() {
         60 *
         1000;
 
-    localStorage.setItem(
-      chave,
-      String(prazo)
-    );
+    localStorage.setItem(chave, String(prazo));
+    const chaveRestante = obterChaveRestante(simulado.id);
+    if (chaveRestante) localStorage.removeItem(chaveRestante);
 
     registrarInicioSimulado(
       simulado
@@ -460,101 +510,57 @@ export default function Simulados() {
       return;
     }
 
-    const prazoSalvo =
-      Number(
-        localStorage.getItem(
-          chave
-        )
-      );
+    const chaveRestante = obterChaveRestante(simulado.id);
+    const segundosLimite = Math.ceil(minutos * 60);
+    const haviaPausa = Number.isFinite(lerSegundosSalvos(localStorage, chaveRestante));
+    const haviaPrazo = Number.isFinite(lerPrazoSalvo(localStorage, chave));
+    const restante = retomarPrazo(
+      localStorage, chave, chaveRestante, segundosLimite
+    );
 
-    if (
-      !Number.isFinite(
-        prazoSalvo
-      )
-    ) {
-      iniciarCronometro(
-        simulado
-      );
-
-      return;
-    }
-
-    const restante =
-      Math.max(
-        0,
-        Math.ceil(
-          (
-            prazoSalvo -
-            Date.now()
-          ) / 1000
-        )
-      );
-
-    const chaveInicio =
-      obterChaveInicio(
-        simulado.id
-      );
-
-    if (
-      chaveInicio &&
-      !Number.isFinite(
-        Number(
-          localStorage.getItem(
-            chaveInicio
-          )
-        )
-      )
-    ) {
-      const inicioCalculado =
-        prazoSalvo -
-        minutos *
-          60 *
-          1000;
-
+    // Reconstitui o início apenas ao retomar uma pausa ou recuperar um
+    // cronômetro sem início salvo, para que a duração ignore o intervalo fora.
+    const chaveInicio = obterChaveInicio(simulado.id);
+    if (chaveInicio && (haviaPausa || !haviaPrazo ||
+        !Number.isFinite(lerPrazoSalvo(localStorage, chaveInicio)))) {
       localStorage.setItem(
         chaveInicio,
-        String(
-          inicioCalculado
-        )
+        String(Date.now() - (segundosLimite - restante) * 1000)
       );
     }
 
-    setTempoRestante(
-      restante
-    );
+    setTempoRestante(restante);
   }
 
   // ==========================================
   // ATUALIZAR CRONÔMETRO
   // ==========================================
 
+  const pausarCronometroNoEfeito = useEffectEvent((simulado) => pausarCronometro(simulado));
+  const carregarCronometroNoEfeito = useEffectEvent((simulado) => carregarCronometro(simulado));
+  const obterChavePrazoNoEfeito = useEffectEvent((id) => obterChavePrazo(id));
+
   useEffect(() => {
     if (
       !simuladoSelecionado ||
+      simuladoSelecionado.status === 'concluido' ||
       resultadoFinal
     ) {
       return;
     }
 
-    carregarCronometro(
-      simuladoSelecionado
-    );
+    const inicioCronometro = setTimeout(() => {
+      carregarCronometroNoEfeito(simuladoSelecionado);
+    }, 0);
 
     const intervalo =
       setInterval(() => {
         const chave =
-          obterChavePrazo(
+          obterChavePrazoNoEfeito(
             simuladoSelecionado.id
           );
 
-        const prazo =
-          chave
-            ? Number(
-                localStorage.getItem(
-                  chave
-                )
-              )
-            : NaN;
+        const prazo = lerPrazoSalvo(localStorage, chave);
 
         if (
           !Number.isFinite(
@@ -564,16 +570,7 @@ export default function Simulados() {
           return;
         }
 
-        const restante =
-          Math.max(
-            0,
-            Math.ceil(
-              (
-                prazo -
-                Date.now()
-              ) / 1000
-            )
-          );
+        const restante = calcularSegundosRestantes(prazo);
 
         setTempoRestante(
           restante
@@ -581,114 +578,31 @@ export default function Simulados() {
 
         if (
           restante <= 0 &&
-          !finalizandoPorTempo.current
+          !finalizandoPorTempo.current &&
+          Date.now() - ultimaTentativaAutomatica.current >= 15000
         ) {
           finalizandoPorTempo.current =
             true;
 
-          clearInterval(
-            intervalo
-          );
-
-          finalizarSimulado(
-            true
-          );
+          // Se a API falhar, o próximo ciclo poderá tentar novamente.
+          ultimaTentativaAutomatica.current = Date.now();
+          finalizarSimuladoRef.current?.(true);
         }
       }, 1000);
 
-    return () =>
-      clearInterval(
-        intervalo
-      );
+    const pausarAoFecharPagina = () => pausarCronometroNoEfeito(simuladoSelecionado);
+    window.addEventListener('pagehide', pausarAoFecharPagina);
+
+    return () => {
+      clearTimeout(inicioCronometro);
+      clearInterval(intervalo);
+      window.removeEventListener('pagehide', pausarAoFecharPagina);
+      pausarAoFecharPagina();
+    };
   }, [
     simuladoSelecionado,
     resultadoFinal,
     questoes.length
-  ]);
-
-  // ==========================================
-  // CARREGAR SIMULADOS
-  // ==========================================
-
-  useEffect(() => {
-    carregarHistoricoResultados();
-    carregarSimulados();
-  }, []);
-
-  // ==========================================
-  // ABRIR SIMULADO VINDO DO CONTEÚDO
-  // ==========================================
-
-  useEffect(() => {
-    if (
-      carregando ||
-      simulados.length === 0 ||
-      simuladoSelecionado ||
-      abrindoSimuladoPorParametro.current
-    ) {
-      return;
-    }
-
-    const parametros =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const simuladoId =
-      Number(
-        parametros.get(
-          'simuladoId'
-        )
-      );
-
-    if (
-      !Number.isInteger(
-        simuladoId
-      ) ||
-      simuladoId <= 0
-    ) {
-      return;
-    }
-
-    const simulado =
-      simulados.find(
-        (item) =>
-          Number(
-            item.id
-          ) ===
-          simuladoId
-      );
-
-    // Retira o parâmetro da URL imediatamente.
-    // Assim o mesmo simulado não é aberto
-    // novamente por outro render.
-    window.history.replaceState(
-      {},
-      '',
-      window.location.pathname
-    );
-
-    if (!simulado) {
-      setErro(
-        'O simulado solicitado não foi encontrado.'
-      );
-
-      return;
-    }
-
-    abrindoSimuladoPorParametro.current =
-      true;
-
-    abrirSimulado(
-      simulado
-    ).finally(() => {
-      abrindoSimuladoPorParametro.current =
-        false;
-    });
-  }, [
-    carregando,
-    simulados,
-    simuladoSelecionado
   ]);
 
   async function carregarSimulados() {
@@ -786,7 +700,7 @@ export default function Simulados() {
       return;
     }
 
-    let statusSalvos = {};
+    let statusSalvos;
 
     try {
       statusSalvos =
@@ -854,6 +768,9 @@ export default function Simulados() {
           ? dados.questoes
           : [];
 
+      // Reutiliza o ID se a prova estava em andamento; gera outro ao refazer.
+      prepararTentativa(simulado.id, simulado.status !== 'em-progresso');
+
       setSimuladoSelecionado(
         simulado
       );
@@ -884,6 +801,7 @@ export default function Simulados() {
               ) || '{}'
             );
 
+          respostasAtuais.current = respostasSalvas;
           setRespostas(
             respostasSalvas
           );
@@ -945,10 +863,7 @@ export default function Simulados() {
           'em-progresso'
         );
 
-        addXP(
-          10,
-          'simulado iniciado'
-        );
+        // O início não concede XP sem uma tentativa validada no servidor.
       }
 
       // ========================================
@@ -989,6 +904,97 @@ export default function Simulados() {
   }
 
   // ==========================================
+  // CARREGAR SIMULADOS
+  // ==========================================
+
+  const carregarSimuladosNoEfeito = useEffectEvent(() => carregarSimulados());
+
+  useEffect(() => {
+    const iniciar = setTimeout(() => {
+      void carregarHistoricoResultados();
+      void carregarSimuladosNoEfeito();
+    }, 0);
+    return () => clearTimeout(iniciar);
+  }, []);
+
+  // ==========================================
+  // ABRIR SIMULADO VINDO DO CONTEÚDO
+  // ==========================================
+
+  const abrirSimuladoNoEfeito = useEffectEvent((simulado) => abrirSimulado(simulado));
+
+  useEffect(() => {
+    if (
+      carregando ||
+      simulados.length === 0 ||
+      simuladoSelecionado ||
+      abrindoSimuladoPorParametro.current
+    ) {
+      return;
+    }
+
+    const parametros =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const simuladoId =
+      Number(
+        parametros.get(
+          'simuladoId'
+        )
+      );
+
+    if (
+      !Number.isInteger(
+        simuladoId
+      ) ||
+      simuladoId <= 0
+    ) {
+      return;
+    }
+
+    const simulado =
+      simulados.find(
+        (item) =>
+          Number(
+            item.id
+          ) ===
+          simuladoId
+      );
+
+    // Retira o parâmetro da URL imediatamente.
+    // Assim o mesmo simulado não é aberto
+    // novamente por outro render.
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname
+    );
+
+    if (!simulado) {
+      queueMicrotask(() => setErro('O simulado solicitado não foi encontrado.'));
+
+      return;
+    }
+
+    abrindoSimuladoPorParametro.current =
+      true;
+
+    // Abre no próximo microtask; não cancelar no cleanup, pois o parâmetro
+    // já foi retirado da URL (inclusive durante remount em StrictMode).
+    queueMicrotask(() => {
+      void abrirSimuladoNoEfeito(simulado).finally(() => {
+        abrindoSimuladoPorParametro.current = false;
+      });
+    });
+  }, [
+    carregando,
+    simulados,
+    simuladoSelecionado
+  ]);
+
+  // ==========================================
   // SELECIONAR / TROCAR RESPOSTA
   // ==========================================
 
@@ -1026,6 +1032,7 @@ export default function Simulados() {
           }
         }
 
+        respostasAtuais.current = novasRespostas;
         return novasRespostas;
       }
     );
@@ -1043,7 +1050,8 @@ export default function Simulados() {
           method: 'POST',
 
           body: JSON.stringify({
-            respostas
+            respostas: respostasAtuais.current,
+            tentativaId: prepararTentativa(simuladoSelecionado.id)
           })
         },
         'Erro ao corrigir o simulado.'
@@ -1228,10 +1236,8 @@ export default function Simulados() {
         );
       }
 
-      addXP(
-        50,
-        'simulado concluído'
-      );
+      // O backend concede XP depois de persistir o resultado.
+      await recarregarGamificacao('simulado concluído');
 
       // O resultado já foi persistido por /simulados/:id/corrigir.
       // Recarrega o histórico oficial, sem duplicar tentativas no localStorage.
@@ -1263,6 +1269,8 @@ export default function Simulados() {
       // ========================================
       // REMOVER RESPOSTAS SALVAS
       // ========================================
+      const chaveTentativa = obterChaveTentativa(simuladoSelecionado.id);
+      if (chaveTentativa) localStorage.removeItem(chaveTentativa);
 
       const chaveRespostas =
         obterChaveRespostas(
@@ -1299,6 +1307,10 @@ export default function Simulados() {
     }
   }
 
+  useEffect(() => {
+    finalizarSimuladoRef.current = finalizarSimulado;
+  });
+
   // ==========================================
   // REFAZER SIMULADO
   // ==========================================
@@ -1309,6 +1321,7 @@ export default function Simulados() {
     ) {
       return;
     }
+    prepararTentativa(simuladoSelecionado.id, true);
 
     const chaveRespostas =
       obterChaveRespostas(
@@ -1419,8 +1432,12 @@ export default function Simulados() {
       return;
     }
 
-    finalizandoPorTempo.current =
-      false;
+    finalizandoPorTempo.current = false;
+
+    // Pausa imediatamente ao clicar em voltar, antes mesmo do próximo render.
+    if (simuladoSelecionado && !resultadoFinal) {
+      pausarCronometro(simuladoSelecionado);
+    }
 
     setSimuladoSelecionado(
       null

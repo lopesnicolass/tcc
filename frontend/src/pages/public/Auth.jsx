@@ -25,7 +25,6 @@ export default function Auth() {
   const viewportRef = useRef(null);
   const loginViewRef = useRef(null);
   const cadViewRef = useRef(null);
-  const indicatorRef = useRef(null);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -176,7 +175,7 @@ export default function Auth() {
             onClick={() => navigate('/')}
             aria-label="Voltar para a página inicial"
           >
-            <img src={logoWordmark} alt="Prepara ETECAMP" className="panel-visual-logo" />
+            <img src={logoWordmark} alt="Tenna" className="panel-visual-logo" />
           </button>
         </div>
 

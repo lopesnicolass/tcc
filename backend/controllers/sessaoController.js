@@ -1,6 +1,7 @@
 const {
     listarSessoesAtivas: buscarSessoesAtivas,
-    encerrarSessao
+    encerrarSessao,
+    encerrarSessaoPorId
 } = require("../models/sessaoModel");
 
 
@@ -54,7 +55,13 @@ function sair(req, res) {
         });
     }
 
-    encerrarSessao(usuarioId, (erro) => {
+    // O próprio usuário sai somente da sessão autenticada; admins podem
+    // desconectar todas as sessões de outra conta.
+    const encerrar = Number(req.usuario.id) === usuarioId
+        ? (callback) => encerrarSessaoPorId(req.sessaoId, callback)
+        : (callback) => encerrarSessao(usuarioId, callback);
+
+    encerrar((erro) => {
 
         if (erro) {
             console.error("❌ Erro ao encerrar sessão:", erro);

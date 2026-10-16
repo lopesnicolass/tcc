@@ -2,9 +2,8 @@ import '../../styles/aluno/Perfil.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { request } from '../../services/api.js';
-import { LEVEL_TITLES, xpForLevel } from '../../context/GamificationContext.jsx';
 import Icon from '../../components/Icon.jsx';
-import { CATEGORIAS_CONQUISTAS, calcularNivelPorXp, montarConquistas } from '../../utils/conquistas.js';
+import { CATEGORIAS_CONQUISTAS, montarConquistas } from '../../utils/conquistas.js';
 
 export default function Perfil() {
 
@@ -102,7 +101,7 @@ export default function Perfil() {
     }
     consultarPosicao();
     return () => { ativo = false; };
-  }, [participaRanking]);
+  }, [participaRanking, usuarioInicial?.id]);
 
   useEffect(() => {
     if (!modalConquistasAberto) return;
@@ -170,14 +169,6 @@ export default function Perfil() {
   );
   const totalDesbloqueadas = conquistas.filter((item) => item.desbloqueada).length;
   const faltandoVerificar = conquistas.some((item) => !item.verificado);
-  const dadosXP = dadosConquistas.gamificacao;
-  const nivelInfo = dadosXP ? calcularNivelPorXp(dadosXP.xp, xpForLevel) : null;
-  const tituloNivel = nivelInfo
-    ? LEVEL_TITLES[Math.min(nivelInfo.nivel - 1, LEVEL_TITLES.length - 1)]
-    : 'Aguardando dados';
-  const progressoNivel = nivelInfo
-    ? Math.round((nivelInfo.xpNoNivel / nivelInfo.xpProximoNivel) * 100)
-    : 0;
 
   // =====================================================
   // CONVERTER BLOB DO SQLITE PARA IMAGEM

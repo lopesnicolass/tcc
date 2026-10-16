@@ -7,8 +7,6 @@ import { Icon } from './admin-conteudos/icons.jsx';
 import {
   EMPTY_MATERIA,
   EMPTY_TOPICO,
-  ICONES,
-  gerarSlug,
 } from './admin-conteudos/helpers.js';
 
 import { Estatisticas } from './admin-conteudos/Estatisticas.jsx';
@@ -32,10 +30,10 @@ export default function AdminConteudos() {
   const [sucesso, setSucesso] =
     useState('');
 
-  const [busca, setBusca] =
+  const [busca] =
     useState('');
 
-  const [filtro, setFiltro] =
+  const [filtro] =
     useState('todas');
 
   const [materiaAberta, setMateriaAberta] =
@@ -84,7 +82,8 @@ export default function AdminConteudos() {
   }
 
   useEffect(() => {
-    carregarMaterias();
+    const iniciar = setTimeout(() => { void carregarMaterias(); }, 0);
+    return () => clearTimeout(iniciar);
   }, []);
 
   function abrirConstrutor(topico, materia) {
@@ -108,18 +107,6 @@ export default function AdminConteudos() {
     }, 3500);
   }
 
-  function abrirNovaMateria() {
-    setFormMateria({
-      ...EMPTY_MATERIA,
-      ordem:
-        materias.length + 1,
-    });
-
-    setModalMateria({
-      modo: 'criar',
-    });
-  }
-
   function abrirEditarMateria(
     materia
   ) {
@@ -136,9 +123,7 @@ export default function AdminConteudos() {
         materia.descricao ||
         '',
       ativa:
-        Boolean(
-          materia.ativa
-        ),
+        materia.ativa,
       ordem:
         materia.ordem || 0,
     });
@@ -394,9 +379,7 @@ export default function AdminConteudos() {
           method: 'PUT',
           body: JSON.stringify({
             ativa:
-              !Boolean(
-                materia.ativa
-              ),
+              !materia.ativa,
           }),
         }
       );
@@ -430,9 +413,7 @@ export default function AdminConteudos() {
           method: 'PUT',
           body: JSON.stringify({
             ativo:
-              !Boolean(
-                topico.ativo
-              ),
+              !topico.ativo,
           }),
         }
       );
@@ -479,14 +460,10 @@ export default function AdminConteudos() {
           const correspondeFiltro =
             filtro === 'todas' ||
             (filtro === 'ativas' &&
-              Boolean(
-                materia.ativa
-              )) ||
+              materia.ativa) ||
             (filtro ===
               'inativas' &&
-              !Boolean(
-                materia.ativa
-              ));
+              !materia.ativa);
 
           return (
             correspondeBusca &&
@@ -526,9 +503,7 @@ export default function AdminConteudos() {
           []
         ).filter(
           (topico) =>
-            Boolean(
-              topico.ativo
-            )
+            topico.ativo
         ).length,
       0
     );

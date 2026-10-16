@@ -7,9 +7,11 @@ const {
     buscarSenhaPorId,
     buscarUsuarioPorEmail,
     atualizarPerfil,
+    atualizarPerfilESenha,
     atualizarSenha,
     atualizarFoto
 } = require("../models/usuarioModel");
+const { encerrarOutrasSessoes } = require("../models/sessaoModel");
 
 
 // =====================================================
@@ -81,271 +83,47 @@ function buscarMeuPerfil(req, res) {
 // =====================================================
 
 async function editarPerfil(req, res) {
-
     const usuarioId = Number(req.usuario.id);
+    const { nome, email, senhaAtual, novaSenha } = req.body || {};
+    const nomeNormalizado = String(nome || '').trim();
+    const emailNormalizado = String(email || '').trim().toLowerCase();
 
-    const {
-        nome,
-        email,
-        senhaAtual,
-        novaSenha
-    } = req.body;
-
-
-    // =================================================
-    // VALIDAÇÃO
-    // =================================================
-
-    if (!nome || nome.trim().length < 2) {
-
-        return res.status(400).json({
-            mensagem: "O nome deve possuir pelo menos 2 caracteres."
-        });
-
+    if (nomeNormalizado.length < 2) return res.status(400).json({ mensagem: 'O nome deve possuir pelo menos 2 caracteres.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNormalizado)) return res.status(400).json({ mensagem: 'Informe um e-mail válido.' });
+    if (novaSenha && (!senhaAtual || String(novaSenha).length < 6)) {
+        return res.status(400).json({ mensagem: 'Informe sua senha atual e uma nova senha com pelo menos 6 caracteres.' });
     }
 
-
-    if (!email) {
-
-        return res.status(400).json({
-            mensagem: "O e-mail é obrigatório."
-        });
-
-    }
-
-
-    const emailValido =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    if (!emailValido) {
-
-        return res.status(400).json({
-            mensagem: "Informe um e-mail válido."
-        });
-
-    }
-
-
-    // =================================================
-    // BUSCAR USUÁRIO
-    // =================================================
-
-    buscarUsuarioPorId(
-        usuarioId,
-        async (erro, usuario) => {
-
-            if (erro) {
-
-                console.error(erro);
-
-                return res.status(500).json({
-                    mensagem: "Erro ao consultar usuário."
-                });
-
-            }
-
-
-            if (!usuario) {
-
-                return res.status(404).json({
-                    mensagem: "Usuário não encontrado."
-                });
-
-            }
-
-
-            // =================================================
-            // VERIFICAR EMAIL DUPLICADO
-            // =================================================
-
-            buscarUsuarioPorEmail(
-                email,
-                async (erroEmail, usuarioEmail) => {
-
-                    if (erroEmail) {
-
-                        console.error(erroEmail);
-
-                        return res.status(500).json({
-                            mensagem: "Erro ao verificar e-mail."
-                        });
-
-                    }
-
-
-                    if (
-                        usuarioEmail &&
-                        usuarioEmail.id !== usuarioId
-                    ) {
-
-                        return res.status(409).json({
-                            mensagem:
-                                "Este e-mail já está sendo utilizado."
-                        });
-
-                    }
-
-
-                    // =================================================
-                    // SE FOR ALTERAR SENHA
-                    // =================================================
-
-                    if (novaSenha) {
-
-                        if (!senhaAtual) {
-
-                            return res.status(400).json({
-                                mensagem:
-                                    "Informe sua senha atual."
-                            });
-
-                        }
-
-
-                        if (novaSenha.length < 6) {
-
-                            return res.status(400).json({
-                                mensagem:
-                                    "A nova senha deve possuir pelo menos 6 caracteres."
-                            });
-
-                        }
-
-
-                        const dadosSenha =
-                            await new Promise((resolve, reject) => {
-
-                                buscarSenhaPorId(
-                                    usuarioId,
-                                    (erroSenha, resultado) => {
-
-                                        if (erroSenha) {
-                                            return reject(erroSenha);
-                                        }
-
-                                        resolve(resultado);
-                                    }
-                                );
-                            });
-
-                        if (!dadosSenha || !dadosSenha.senha) {
-
-                            return res.status(404).json({
-                                mensagem: "Usuário não encontrado."
-                            });
-
-                        }
-
-                        const senhaCorreta =
-                            await bcrypt.compare(
-                                senhaAtual,
-                                dadosSenha.senha
-                            );
-
-                        if (!senhaCorreta) {
-
-                            return res.status(401).json({
-                                mensagem:
-                                    "A senha atual está incorreta."
-                            });
-
-                        }
-
-
-                        const senhaCriptografada =
-                            await bcrypt.hash(
-                                novaSenha,
-                                10
-                            );
-
-
-                        atualizarSenha(
-                            usuarioId,
-                            senhaCriptografada,
-                            (erroSenha) => {
-
-                                if (erroSenha) {
-
-                                    console.error(
-                                        erroSenha
-                                    );
-
-                                    return res.status(500).json({
-                                        mensagem:
-                                            "Erro ao atualizar senha."
-                                    });
-
-                                }
-
-                            }
-                        );
-
-                    }
-
-
-                    // =================================================
-                    // ATUALIZAR NOME + EMAIL
-                    // =================================================
-
-                    atualizarPerfil(
-                        usuarioId,
-                        nome.trim(),
-                        email.trim(),
-                        (erroAtualizacao) => {
-
-                            if (erroAtualizacao) {
-
-                                console.error(
-                                    erroAtualizacao
-                                );
-
-                                return res.status(500).json({
-                                    mensagem:
-                                        "Erro ao atualizar perfil."
-                                });
-
-                            }
-
-
-                            buscarUsuarioPorId(
-                                usuarioId,
-                                (erroFinal, usuarioAtualizado) => {
-
-                                    if (erroFinal) {
-
-                                        console.error(
-                                            erroFinal
-                                        );
-
-                                        return res.status(500).json({
-                                            mensagem:
-                                                "Perfil atualizado, mas não foi possível carregar os novos dados."
-                                        });
-
-                                    }
-
-
-                                    return res.status(200).json({
-
-                                        mensagem:
-                                            "Perfil atualizado com sucesso!",
-
-                                        usuario:
-                                            usuarioAtualizado
-
-                                    });
-
-                                }
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
+    const promisificar = (funcao, ...args) => new Promise((resolve, reject) => {
+        funcao(...args, (erro, dado) => erro ? reject(erro) : resolve(dado));
+    });
+    try {
+        const usuario = await promisificar(buscarUsuarioPorId, usuarioId);
+        if (!usuario) return res.status(404).json({ mensagem: 'Usuário não encontrado.' });
+        const outroUsuario = await promisificar(buscarUsuarioPorEmail, emailNormalizado);
+        if (outroUsuario && Number(outroUsuario.id) !== usuarioId) {
+            return res.status(409).json({ mensagem: 'Este e-mail já está sendo utilizado.' });
         }
-    );
+
+        if (novaSenha) {
+            const senhaSalva = await promisificar(buscarSenhaPorId, usuarioId);
+            if (!senhaSalva || !await bcrypt.compare(String(senhaAtual), senhaSalva.senha)) {
+                return res.status(401).json({ mensagem: 'A senha atual está incorreta.' });
+            }
+            const hash = await bcrypt.hash(String(novaSenha), 10);
+            // Nome, e-mail e senha são gravados juntos; não há sucesso parcial.
+            await promisificar(atualizarPerfilESenha, usuarioId, nomeNormalizado, emailNormalizado, hash);
+            // A sessão atual permanece; dispositivos anteriores são desconectados.
+            await promisificar(encerrarOutrasSessoes, usuarioId, req.sessaoId);
+        } else {
+            await promisificar(atualizarPerfil, usuarioId, nomeNormalizado, emailNormalizado);
+        }
+        const usuarioAtualizado = await promisificar(buscarUsuarioPorId, usuarioId);
+        return res.status(200).json({ mensagem: 'Perfil atualizado com sucesso!', usuario: usuarioAtualizado });
+    } catch (erro) {
+        console.error('Erro ao atualizar perfil:', erro);
+        return res.status(500).json({ mensagem: 'Não foi possível concluir a atualização do perfil.' });
+    }
 }
 
 

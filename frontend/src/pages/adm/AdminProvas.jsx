@@ -55,7 +55,8 @@ export default function AdminProvas() {
     }
 
     useEffect(() => {
-        carregarProvas();
+        const iniciar = setTimeout(() => { void carregarProvas(); }, 0);
+        return () => clearTimeout(iniciar);
     }, []);
 
     async function cadastrarProva(event) {

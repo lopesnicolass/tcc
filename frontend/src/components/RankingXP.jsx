@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL, obterToken, request } from '../services/api.js';
 import Icon from './Icon.jsx';
-import { xpForLevel } from '../context/GamificationContext.jsx';
+import { xpForLevel } from '../context/GamificationShared.js';
 
 function nivelPorXp(total) {
   let nivel = 1;
@@ -21,6 +21,7 @@ export default function RankingXP({ xp, usuarioId }) {
   const [alunos, setAlunos] = useState([]);
   const [fotos, setFotos] = useState({});
   const [participando, setParticipando] = useState(false);
+  const [minhaPosicao, setMinhaPosicao] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [recarregar, setRecarregar] = useState(0);
@@ -41,6 +42,8 @@ export default function RankingXP({ xp, usuarioId }) {
         const lista = Array.isArray(dados.top3) ? dados.top3.slice(0, 3) : [];
         setAlunos(lista);
         setParticipando(Boolean(dados.participando));
+        setMinhaPosicao(Number.isSafeInteger(Number(dados.minhaPosicao)) && Number(dados.minhaPosicao) > 0
+          ? Number(dados.minhaPosicao) : null);
         setCarregando(false);
 
         const token = obterToken();
@@ -86,7 +89,6 @@ export default function RankingXP({ xp, usuarioId }) {
     posicao: indice + 1
   }));
 
-  const minhaPosicao = alunosExibidos.find((aluno) => String(aluno.id) === String(usuarioId))?.posicao;
 
   return (
     <section className="home-ranking panel-card" aria-labelledby="home-ranking-title">
@@ -106,8 +108,8 @@ export default function RankingXP({ xp, usuarioId }) {
         {participando && !carregando && !erro && (
           <div className="home-ranking-my-position" aria-label="Sua posição no ranking">
             <span>SUA COLOCAÇÃO</span>
-            <strong>{minhaPosicao ? `${minhaPosicao}º lugar` : 'Fora do top 3'}</strong>
-            <small>{minhaPosicao ? 'Você está no Top 3' : 'Continue acumulando XP'}</small>
+            <strong>{minhaPosicao ? `${minhaPosicao}º lugar` : 'Sem colocação'}</strong>
+            <small>{minhaPosicao && minhaPosicao <= 3 ? 'Você está no Top 3' : 'Continue acumulando XP'}</small>
             <span className="home-ranking-position-icon" aria-hidden="true"><Icon name="trophy" size={20} /></span>
           </div>
         )}

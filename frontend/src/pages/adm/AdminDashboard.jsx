@@ -167,7 +167,8 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    carregarDashboard();
+    const iniciar = setTimeout(() => { void carregarDashboard(); }, 0);
+    return () => clearTimeout(iniciar);
   }, [carregarDashboard]);
 
   const usuariosRecentes = useMemo(

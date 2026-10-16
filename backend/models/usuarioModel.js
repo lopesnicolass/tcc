@@ -228,6 +228,15 @@ function atualizarSenha(
 }
 
 
+// Atualiza perfil e senha com uma única operação SQLite atômica.
+function atualizarPerfilESenha(id, nome, email, senha, callback) {
+    db.run(
+        `UPDATE usuarios SET nome = ?, email = ?, senha = ? WHERE id = ?`,
+        [nome, email, senha, id],
+        function (erro) { callback(erro, this?.changes || 0); }
+    );
+}
+
 // =====================================================
 // ATUALIZAR FOTO
 // =====================================================
@@ -433,6 +442,7 @@ module.exports = {
     criarUsuario,
     listarUsuarios,
     atualizarPerfil,
+    atualizarPerfilESenha,
     atualizarSenha,
     atualizarFoto,
     excluirUsuario,

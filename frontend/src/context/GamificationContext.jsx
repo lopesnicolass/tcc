@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useState,
   useEffect,
   useCallback,
@@ -8,26 +6,7 @@ import {
 } from 'react';
 
 import { request, obterToken } from '../services/api.js';
-
-const GamificationContext = createContext(null);
-
-export const LEVEL_TITLES = [
-  'Iniciante',
-  'Aplicado',
-  'Focado',
-  'Dedicado',
-  'Disciplinado',
-  'Avançado',
-  'Estrategista',
-  'Passei Direto',
-  'Mestre ETEC',
-  'Sou ETECAMP'
-];
-
-// XP necessário para entrar no próximo nível.
-export function xpForLevel(level) {
-  return level * 100;
-}
+import { GamificationContext, LEVEL_TITLES, xpForLevel } from './GamificationShared.js';
 
 function calcLevel(xp) {
   let level = 1;
@@ -45,15 +24,6 @@ function calcLevel(xp) {
   };
 }
 
-const XP_ACTIONS = {
-  'simulado iniciado': 'simulado_iniciado',
-  'simulado concluído': 'simulado_concluido',
-  'flashcard revisado': 'flashcard_revisado',
-  'novo post-it': 'novo_postit',
-  'semana adicionada ao cronograma': 'semana_cronograma',
-  'atividade concluída': 'atividade_concluida'
-};
-
 export function GamificationProvider({ children }) {
   const [state, setState] = useState({
     xp: 0,
@@ -62,19 +32,19 @@ export function GamificationProvider({ children }) {
   });
 
   const [toast, setToast] = useState(null);
+  const clearToast = useCallback(() => setToast(null), []);
 
-  // Evita duas requisições idênticas simultâneas causadas por
-  // duplo clique ou por uma mesma ação disparada duas vezes.
-  const requestsEmAndamento = useRef(new Set());
+  const xpAtualRef = useRef(0);
   const atividadeRegistradaData = useRef(null);
   const registrarAtividadeEmAndamento = useRef(false);
 
-  const carregarGamificacao = useCallback(async () => {
+  const carregarGamificacao = useCallback(async (motivo = '') => {
     const token = obterToken();
 
     if (!token) {
       atividadeRegistradaData.current = null;
       registrarAtividadeEmAndamento.current = false;
+      xpAtualRef.current = 0;
       setState({ xp: 0, streak: 0, lastActiveDate: null });
       return;
     }
@@ -82,18 +52,26 @@ export function GamificationProvider({ children }) {
     try {
       const dados = await request('/gamificacao');
 
+      const xpAtualizado = Number(dados.xp) || 0;
+      const ganho = Math.max(0, xpAtualizado - xpAtualRef.current);
+      xpAtualRef.current = xpAtualizado;
       setState({
-        xp: Number(dados.xp) || 0,
+        xp: xpAtualizado,
         streak: Number(dados.streak) || 0,
         lastActiveDate: dados.lastActiveDate || null
       });
+      // A interface apenas exibe o ganho confirmado pelo servidor.
+      if (motivo && ganho > 0) {
+        setToast({ amount: ganho, reason: motivo, key: Date.now() });
+      }
     } catch (erro) {
       console.error('Erro ao carregar XP:', erro);
     }
   }, []);
 
   useEffect(() => {
-    carregarGamificacao();
+    const iniciar = setTimeout(() => { void carregarGamificacao(); }, 0);
+    return () => clearTimeout(iniciar);
   }, [carregarGamificacao]);
 
   useEffect(() => {
@@ -168,55 +146,6 @@ export function GamificationProvider({ children }) {
   }
 
 
-  async function addXP(amount, reason) {
-    const token = obterToken();
-
-    if (!token) {
-      console.warn('Usuário não está logado.');
-      return;
-    }
-
-    const action = XP_ACTIONS[reason];
-
-    if (!action) {
-      console.error(`Ação de XP não cadastrada: ${reason}`);
-      return;
-    }
-
-    const requestKey = `${action}`;
-
-    if (requestsEmAndamento.current.has(requestKey)) {
-      return;
-    }
-
-    requestsEmAndamento.current.add(requestKey);
-
-    try {
-      const dados = await request('/gamificacao/xp', {
-        method: 'POST',
-        body: JSON.stringify({ action })
-      });
-
-      setState({
-        xp: Number(dados.xp) || 0,
-        streak: Number(dados.streak) || 0,
-        lastActiveDate: dados.lastActiveDate || null
-      });
-
-      if (dados.gainedXP !== 0) {
-        setToast({
-          amount: Number(dados.gainedXP) || Number(amount) || 0,
-          reason,
-          key: Date.now()
-        });
-      }
-    } catch (erro) {
-      console.error('Erro ao enviar XP:', erro);
-    } finally {
-      requestsEmAndamento.current.delete(requestKey);
-    }
-  }
-
   const {
     level,
     xpIntoLevel,
@@ -238,10 +167,9 @@ export function GamificationProvider({ children }) {
         title,
         xpIntoLevel,
         xpForNext,
-        addXP,
         registrarAtividade,
         toast,
-        clearToast: () => setToast(null),
+        clearToast,
         recarregarGamificacao: carregarGamificacao
       }}
     >
@@ -250,14 +178,3 @@ export function GamificationProvider({ children }) {
   );
 }
 
-export function useGamification() {
-  const context = useContext(GamificationContext);
-
-  if (!context) {
-    throw new Error(
-      'useGamification precisa estar dentro de GamificationProvider'
-    );
-  }
-
-  return context;
-}

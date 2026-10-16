@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    throw new Error('Defina JWT_SECRET com pelo menos 32 caracteres no ambiente de produção.');
+}
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -77,9 +80,14 @@ require("./config/ensureRanking");
 const app =
     express();
 
-app.use(
-    cors()
-);
+const origens = String(process.env.FRONTEND_URL || 'http://localhost:5173')
+    .split(',').map(origem => origem.trim()).filter(Boolean);
+app.use(cors({
+    origin(origem, callback) {
+        if (!origem || origens.includes(origem)) return callback(null, true);
+        callback(new Error('Origem não autorizada pelo CORS.'));
+    }
+}));
 
 app.use(
     express.json()
@@ -201,7 +209,7 @@ app.get(
 
         res.json({
             mensagem:
-                "API do Vestibulinho funcionando!"
+                "API Tenna funcionando!"
         });
 
     }

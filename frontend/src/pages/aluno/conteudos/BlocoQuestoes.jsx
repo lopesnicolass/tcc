@@ -157,13 +157,14 @@ export default function BlocoQuestoes({
     setErro,
   ] = useState('');
 
+  const questaoIdsChave = questaoIds.join(',');
+
   useEffect(() => {
     let ativo = true;
 
     async function carregarQuestoes() {
       if (
-        questaoIds.length ===
-        0
+        !questaoIdsChave
       ) {
         if (ativo) {
           setQuestoes([]);
@@ -182,7 +183,7 @@ export default function BlocoQuestoes({
         const dadosResposta =
           await request(
             `/questoes/aluno?ids=${encodeURIComponent(
-              questaoIds.join(',')
+              questaoIdsChave
             )}`,
             {},
             'Não foi possível carregar as questões.'
@@ -231,7 +232,7 @@ export default function BlocoQuestoes({
     };
   }, [
     bloco?.id,
-    questaoIds.join(',')
+    questaoIdsChave
   ]);
 
   function selecionarResposta(

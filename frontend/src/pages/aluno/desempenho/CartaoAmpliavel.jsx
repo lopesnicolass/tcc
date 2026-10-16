@@ -1,4 +1,4 @@
-import { cloneElement, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 /** Reutiliza o próprio card no modal, sem um layout alternativo. */
@@ -7,7 +7,6 @@ export function CartaoAmpliavel({ titulo, tamanho = 'normal', children }) {
   const botaoFecharRef = useRef(null);
   const caixaRef = useRef(null);
   const gatilhoRef = useRef(null);
-  const cardRef = useRef(null);
 
   useEffect(() => {
     if (!aberto) return undefined;
@@ -41,33 +40,36 @@ export function CartaoAmpliavel({ titulo, tamanho = 'normal', children }) {
     };
   }, [aberto]);
 
-  const abrir = () => {
+  const abrir = (card) => {
     const ativo = document.activeElement;
-    gatilhoRef.current = cardRef.current?.contains(ativo) ? ativo : cardRef.current;
+    gatilhoRef.current = card.contains(ativo) ? ativo : card;
     setAberto(true);
   };
   const aoClicar = (evento) => {
     if (evento.target.closest('a, input, select, textarea, [role="button"], [data-sem-ampliacao]')) return;
     if (evento.target.closest('button')) return;
-    abrir();
+    abrir(evento.currentTarget);
   };
   const aoTeclarCard = (evento) => {
     if (evento.target !== evento.currentTarget) return;
     if (evento.key === 'Enter' || evento.key === ' ') {
       evento.preventDefault();
-      abrir();
+      abrir(evento.currentTarget);
     }
   };
-  const classe = `${children.props.className || ''} desempenho-card-ampliavel`;
-  const cardOriginal = cloneElement(children, {
-    className: classe,
-    ref: cardRef,
-    tabIndex: 0,
-    'aria-label': `${titulo}. Pressione Enter para ampliar`,
-    'aria-haspopup': 'dialog',
-    onClick: (evento) => { children.props.onClick?.(evento); if (!evento.defaultPrevented) aoClicar(evento); },
-    onKeyDown: (evento) => { children.props.onKeyDown?.(evento); if (!evento.defaultPrevented) aoTeclarCard(evento); }
-  });
+  // A tag original (section/article) mantém a mesma estrutura visual,
+  // sem cloneElement, que pode acessar implicitamente refs durante o render.
+  const Tag = children.type;
+  const propriedades = children.props;
+  const classe = `${propriedades.className || ''} desempenho-card-ampliavel`;
+  const cardOriginal = <Tag {...propriedades}
+    className={classe}
+    tabIndex={0}
+    aria-label={`${titulo}. Pressione Enter para ampliar`}
+    aria-haspopup="dialog"
+    onClick={(evento) => { propriedades.onClick?.(evento); if (!evento.defaultPrevented) aoClicar(evento); }}
+    onKeyDown={(evento) => { propriedades.onKeyDown?.(evento); if (!evento.defaultPrevented) aoTeclarCard(evento); }}
+  />;
 
   return <>
     {cardOriginal}
@@ -77,7 +79,7 @@ export function CartaoAmpliavel({ titulo, tamanho = 'normal', children }) {
       }}>
         <div className={`desempenho-ampliacao-dialog desempenho-ampliacao-dialog--${tamanho}`} ref={caixaRef}
           role="dialog" aria-modal="true" aria-label={titulo}>
-          {cloneElement(children, { className: classe })}
+          <Tag {...propriedades} className={classe} />
           <button ref={botaoFecharRef} className="desempenho-ampliacao-fechar" type="button"
             onClick={() => setAberto(false)} aria-label={`Fechar ${titulo}`} title="Fechar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
         </div>

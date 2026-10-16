@@ -1,13 +1,4 @@
-// Pecinhas pequenas e reutilizáveis da página de Desempenho.
-// Extraído de Desempenho.jsx (estava tudo junto no mesmo arquivo).
 
-export const cardStyle = {
-  background: '#ffffff',
-  borderRadius: '20px',
-  padding: '22px',
-  boxShadow:
-    '0 8px 28px rgba(21,72,125,0.07)'
-};
 
 export function CardLabel({
   children

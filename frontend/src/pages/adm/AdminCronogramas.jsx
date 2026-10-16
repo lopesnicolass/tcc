@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import '../../styles/adm/AdminCronogramas.css';
 import { API_URL } from '../../services/api.js';
 
@@ -278,10 +278,6 @@ export default function AdminCronogramas() {
       mesSelecionado - 1
     ];
 
-  useEffect(() => {
-    carregarTudo();
-  }, []);
-
   async function carregarTudo() {
     setCarregando(true);
     setErro('');
@@ -351,6 +347,15 @@ export default function AdminCronogramas() {
       setCarregando(false);
     }
   }
+
+  const carregarTudoNoEfeito = useEffectEvent(() => carregarTudo());
+
+  useEffect(() => {
+    const iniciar = setTimeout(() => {
+      void carregarTudoNoEfeito();
+    }, 0);
+    return () => clearTimeout(iniciar);
+  }, []);
 
   function alterarDiaItem(
     mesNumero,

@@ -149,10 +149,21 @@ function encerrarSessaoPorId(sessaoId, callback) {
 }
 
 
+function encerrarOutrasSessoes(usuarioId, sessaoAtualId, callback) {
+    db.run(
+        `UPDATE sessoes SET ativo = 0, logout_em = CURRENT_TIMESTAMP
+         WHERE usuario_id = ? AND id != ? AND ativo = 1`,
+        [usuarioId, sessaoAtualId],
+        callback
+    );
+}
+
+
 module.exports = {
     criarSessao,
     buscarSessaoAtivaPorId,
     listarSessoesAtivas,
     encerrarSessaoPorId,
+    encerrarOutrasSessoes,
     encerrarSessao
 };

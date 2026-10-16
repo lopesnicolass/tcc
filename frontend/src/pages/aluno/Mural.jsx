@@ -1,6 +1,6 @@
 import '../../styles/aluno/Mural.css';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useGamification } from '../../context/GamificationContext.jsx';
+import { useGamification } from '../../context/GamificationShared.js';
 import { request } from '../../services/api.js';
 
 const MATERIAS = [
@@ -139,7 +139,7 @@ function obterUsuarioId() {
 
 export default function Mural() {
 
-  const { addXP } =
+  const { recarregarGamificacao } =
     useGamification();
 
 
@@ -191,17 +191,6 @@ export default function Mural() {
 
   const [editMateria, setEditMateria] =
     useState(MATERIAS[0]);
-
-
-  // ===================================================
-  // CARREGAR POST-ITS
-  // ===================================================
-
-  useEffect(() => {
-
-    carregarPostits();
-
-  }, []);
 
 
   async function carregarPostits() {
@@ -260,6 +249,14 @@ export default function Mural() {
 
     }
   }
+
+  useEffect(() => {
+
+    const iniciar = setTimeout(() => { void carregarPostits(); }, 0);
+    return () => clearTimeout(iniciar);
+
+  }, []);
+
 
 
   // ===================================================
@@ -335,10 +332,8 @@ export default function Mural() {
         ]
       );
 
-      addXP(
-        10,
-        'novo post-it'
-      );
+      // O servidor só concede XP se o post-it foi realmente criado.
+      await recarregarGamificacao('novo post-it');
 
       setShowAddModal(false);
 

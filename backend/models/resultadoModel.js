@@ -11,39 +11,39 @@ function criarResultado(
     erros,
     totalQuestoes,
     porcentagem,
+    opcoes,
     callback
 ) {
-
-    const sql = `
-        INSERT INTO resultados
-        (
-            usuario_id,
-            simulado_id,
-            acertos,
-            erros,
-            total_questoes,
-            porcentagem
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    db.run(
-        sql,
-        [
-            usuarioId,
-            simuladoId,
-            acertos,
-            erros,
-            totalQuestoes,
-            porcentagem
-        ],
+    // Compatível com inserções administrativas anteriores.
+    if (typeof opcoes === 'function') {
+        callback = opcoes;
+        opcoes = {};
+    }
+    const tentativaId = opcoes?.tentativaId || null;
+    const detalhes = opcoes?.detalhes || null;
+    db.run(`INSERT INTO resultados
+        (usuario_id, simulado_id, acertos, erros, total_questoes,
+         porcentagem, tentativa_id, detalhes_json)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(usuario_id, tentativa_id) DO NOTHING`,
+        [usuarioId, simuladoId, acertos, erros, totalQuestoes,
+         porcentagem, tentativaId, detalhes ? JSON.stringify(detalhes) : null],
         function (erro) {
-
-            if (erro) {
-                return callback(erro);
-            }
-
-            callback(null, this);
+            if (erro) return callback(erro);
+            if (this.changes) return callback(null, { lastID: this.lastID, duplicado: false });
+            // O mesmo envio já foi persistido antes. Retornar a nota original.
+            db.get(`SELECT id, simulado_id, acertos, erros, total_questoes,
+                      porcentagem, detalhes_json FROM resultados
+                      WHERE usuario_id=? AND tentativa_id=?`,
+                [usuarioId, tentativaId], (erroBusca, registro) => {
+                    if (erroBusca) return callback(erroBusca);
+                    if (!registro) return callback(new Error('Tentativa já registrada, mas não encontrada.'));
+                    let detalhesSalvos = [];
+                    try { detalhesSalvos = JSON.parse(registro.detalhes_json || '[]'); }
+                    catch { return callback(new Error('Detalhes do resultado inválidos.')); }
+                    callback(null, { lastID: registro.id, duplicado: true,
+                        registro: { ...registro, detalhes: detalhesSalvos } });
+                });
         }
     );
 }

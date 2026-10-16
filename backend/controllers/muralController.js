@@ -4,6 +4,7 @@ const {
     atualizarPostit,
     excluirPostit
 } = require("../models/muralModel");
+const { concederXPVerificado } = require('../services/xpService');
 
 const {
     MATERIAS_MURAL,
@@ -193,11 +194,13 @@ function criar(req, res) {
                 });
             }
 
-            return res.status(201).json({
-                mensagem:
-                    "Post-it criado com sucesso!",
-
-                postit
+            // XP depende da criação persistida, não de um POST de XP do navegador.
+            concederXPVerificado(usuarioId, 'novo_postit', postit.id, (erroXP) => {
+                if (erroXP) console.error('Falha ao registrar XP do post-it:', erroXP);
+                return res.status(201).json({
+                    mensagem: 'Post-it criado com sucesso!',
+                    postit
+                });
             });
         }
     );

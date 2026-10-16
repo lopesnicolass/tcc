@@ -30,7 +30,10 @@ export default function AdminUsuarios() {
     }
   }, []);
 
-  useEffect(() => { carregarUsuarios(); }, [carregarUsuarios]);
+  useEffect(() => {
+    const iniciar = setTimeout(() => { void carregarUsuarios(); }, 0);
+    return () => clearTimeout(iniciar);
+  }, [carregarUsuarios]);
 
   const usuariosFiltrados = useMemo(() => {
     const termo = normalizarTexto(busca.trim());

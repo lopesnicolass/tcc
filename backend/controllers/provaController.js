@@ -28,6 +28,7 @@ function cadastrarProva(req, res) {
     const arquivoGabarito = req.files?.arquivo_gabarito?.[0];
 
     if (!ano || !titulo) {
+        for (const arquivo of [arquivoProva, arquivoGabarito]) if (arquivo) apagarArquivoFisico(arquivo.filename);
         return res.status(400).json({
             mensagem: "Ano e título são obrigatórios."
         });
@@ -48,7 +49,8 @@ function cadastrarProva(req, res) {
 
             if (erro) {
                 console.error(erro);
-
+                apagarArquivoFisico(arquivoProva.filename);
+                apagarArquivoFisico(arquivoGabarito.filename);
                 return res.status(500).json({
                     mensagem: "Erro ao cadastrar prova."
                 });

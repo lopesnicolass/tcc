@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useGamification } from '../context/GamificationContext.jsx';
+import { useGamification } from '../context/GamificationShared.js';
 import './Terrario.css';
 
 import salaImg from './assets/sala-ninho.webp';

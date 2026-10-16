@@ -156,9 +156,7 @@ export default function BlocoChecklist({
     if (bloco?.id) {
       carregarProgresso();
     } else {
-      setCarregando(
-        false
-      );
+      queueMicrotask(() => { if (ativo) setCarregando(false); });
     }
 
     return () => {

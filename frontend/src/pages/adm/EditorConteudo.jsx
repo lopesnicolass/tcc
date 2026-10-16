@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import '../../styles/adm/EditorConteudo.css';
 
 import { request } from './editor-conteudo/api.js';
@@ -35,7 +35,6 @@ const ESTRUTURA_PADRAO = [
 export default function EditorConteudo({
   topicoId,
   topicoNome,
-  materiaNome,
   aoVoltar,
 }) {
   const inicializacaoEmAndamento = useRef(null);
@@ -263,11 +262,16 @@ export default function EditorConteudo({
     }
   }
 
+  const carregarPaginaNoEfeito = useEffectEvent(() => carregarPagina());
+
   useEffect(() => {
     if (!topicoId) return;
 
-    carregarPagina();
-    carregarRelacionados();
+    const iniciar = setTimeout(() => {
+      void carregarPaginaNoEfeito();
+      void carregarRelacionados();
+    }, 0);
+    return () => clearTimeout(iniciar);
   }, [topicoId]);
 
   function mostrarSucesso(mensagem) {

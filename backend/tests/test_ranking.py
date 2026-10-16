@@ -51,6 +51,14 @@ class RankingTest(unittest.TestCase):
         self.assertEqual([r[0] for r in rows], [1, 4, 2])
         self.assertEqual(len(rows), 3)
 
+    def test_real_position_beyond_top3_and_tie(self):
+        for id in [1, 2, 3, 4]:
+            self.join(id)
+        consulta = extrair_sql('buscarPosicaoParticipante')
+        self.assertEqual(self.db.execute(consulta, (3,)).fetchone()[0], 4)
+        self.assertEqual(self.db.execute(consulta, (2,)).fetchone()[0], 3)
+        self.assertEqual(self.db.execute(consulta, (1,)).fetchone()[0], 1)
+
     def test_only_opted_in_students(self):
         self.join(2)
         self.join(5)

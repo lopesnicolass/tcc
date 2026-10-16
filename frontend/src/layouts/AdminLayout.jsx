@@ -10,7 +10,10 @@ import '../styles/adm/AdminPolish.css';
 export default function AdminLayout() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    const fechar = setTimeout(() => setMobileMenuOpen(false), 0);
+    return () => clearTimeout(fechar);
+  }, [location.pathname]);
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
     const closeOnEscape = (event) => { if (event.key === 'Escape') setMobileMenuOpen(false); };

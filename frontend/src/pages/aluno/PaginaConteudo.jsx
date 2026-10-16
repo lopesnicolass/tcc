@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSubjectStyle } from '../../utils/subjects.js';
 import { normalizarAparencia, obterPaletaMateria } from '../../utils/aparenciaConteudo.js';
-import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 import { TextoFormatado } from '../../components/conteudos/TextoFormatado.jsx';
 import { BlocoDidatico } from '../../components/conteudos/BlocosDidaticos.jsx';
@@ -189,7 +188,7 @@ export default function PaginaConteudo() {
   ] = useState(0);
 
   const [
-    mostrarResposta,
+    ,
     setMostrarResposta,
   ] = useState(false);
 
@@ -350,11 +349,9 @@ export default function PaginaConteudo() {
     ) {
       carregarPagina();
     } else {
-      setErro(
-        'Tópico inválido.'
-      );
-
-      setCarregando(false);
+      queueMicrotask(() => {
+        if (ativo) { setErro('Tópico inválido.'); setCarregando(false); }
+      });
     }
 
     return () => {
@@ -481,11 +478,11 @@ export default function PaginaConteudo() {
         error
       );
 
-      setFlashcards([]);
-      setFlashcardAtual(0);
-      setMostrarResposta(
-        false
-      );
+      queueMicrotask(() => {
+        setFlashcards([]);
+        setFlashcardAtual(0);
+        setMostrarResposta(false);
+      });
     } finally {
       setCarregandoFlashcards(
         false
@@ -512,13 +509,13 @@ export default function PaginaConteudo() {
     if (
       !blocoFlashcards
     ) {
-      setFlashcards([]);
-      setFlashcardAtual(0);
-      setMostrarResposta(
-        false
-      );
+      const limpar = setTimeout(() => {
+        setFlashcards([]);
+        setFlashcardAtual(0);
+        setMostrarResposta(false);
+      }, 0);
 
-      return;
+      return () => clearTimeout(limpar);
     }
 
     const dados =
@@ -532,73 +529,17 @@ export default function PaginaConteudo() {
           dados.ids
       );
 
-    carregarFlashcards(
-      ids
-    );
+    // Dispara o carregamento fora da fase síncrona do efeito.
+    const iniciar = setTimeout(() => {
+      void carregarFlashcards(ids);
+    }, 0);
+    return () => clearTimeout(iniciar);
   }, [blocos]);
 
-  const cardAtual =
-    flashcards.length >
-    0
-      ? flashcards[
-          flashcardAtual
-        ]
-      : null;
-
   useEffect(() => {
-    setMostrarResposta(
-      false
-    );
+    const atualizar = setTimeout(() => setMostrarResposta(false), 0);
+    return () => clearTimeout(atualizar);
   }, [flashcardAtual]);
-
-  function alternarResposta() {
-    setMostrarResposta(
-      (atual) => !atual
-    );
-  }
-
-  function proximoFlashcard() {
-    if (
-      flashcards.length ===
-      0
-    ) {
-      return;
-    }
-
-    setMostrarResposta(
-      false
-    );
-
-    setFlashcardAtual(
-      (atual) =>
-        Math.min(
-          atual + 1,
-          flashcards.length -
-            1
-        )
-    );
-  }
-
-  function anteriorFlashcard() {
-    if (
-      flashcards.length ===
-      0
-    ) {
-      return;
-    }
-
-    setMostrarResposta(
-      false
-    );
-
-    setFlashcardAtual(
-      (atual) =>
-        Math.max(
-          atual - 1,
-          0
-        )
-    );
-  }
 
   /* ========================================================
      PROGRESSO
@@ -701,7 +642,6 @@ export default function PaginaConteudo() {
     [pagina?.aparencia]
   );
   const paleta = obterPaletaMateria(pagina?.materia);
-  const progressoPercentual = estudado ? 100 : 0;
   const tituloBloco = (bloco, indice) => {
     const dados = normalizarDados(bloco);
     const nomes = {

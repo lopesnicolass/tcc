@@ -1,9 +1,15 @@
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
 
-const nome = "Administrador";
-const email = "admin@vestibulinho.com";
-const senha = "Admin123";
+// Configure ADMIN_EMAIL e ADMIN_PASSWORD apenas no ambiente de provisionamento.
+const nome = process.env.ADMIN_NAME || 'Administrador';
+const email = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
+const senha = process.env.ADMIN_PASSWORD;
+if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !senha || senha.length < 12) {
+    console.error('Defina ADMIN_EMAIL e ADMIN_PASSWORD (mínimo 12 caracteres) antes de criar o administrador.');
+    process.exit(1);
+}
 
 async function criarAdmin() {
 
@@ -55,7 +61,7 @@ async function criarAdmin() {
                         );
 
                         console.log("Email:", email);
-                        console.log("Senha:", senha);
+                        // Nunca imprimir a senha no console.
 
                         db.close();
                     }

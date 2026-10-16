@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import '../../styles/aluno/Cronograma.css';
-import { useGamification } from '../../context/GamificationContext.jsx';
-import { getSubjectStyle } from '../../utils/subjects.js';
-import SubjectIcon from '../../components/SubjectIcon.jsx';
 import Icon from '../../components/Icon.jsx';
 import { request } from '../../services/api.js';
-import { eventosVisiveisDia, resumirDia, resumirMes } from '../../utils/calendarioResumo.js';
 
 const STORAGE_KEY =
   'tenna_calendario_atividades';
@@ -151,8 +147,6 @@ const emptyForm = {
 };
 
 export default function Cronograma() {
-  const { addXP } =
-    useGamification();
 
   const usuarioId =
     getUserId();
@@ -341,9 +335,14 @@ export default function Cronograma() {
     }
   }
 
+  const carregarCronogramaNoEfeito = useEffectEvent(() => carregarCronograma());
+
   useEffect(() => {
-    carregarCronograma();
-    carregarDatasImportantes();
+    const iniciar = setTimeout(() => {
+      void carregarCronogramaNoEfeito();
+      void carregarDatasImportantes();
+    }, 0);
+    return () => clearTimeout(iniciar);
   }, [usuarioId]);
 
   const monthTitle =
@@ -408,15 +407,7 @@ export default function Cronograma() {
     datasImportantes.filter(
       (item) => item.data === selectedDate
     );
-
-  const monthPrefix =
-    `${currentMonth.getFullYear()}-${pad(currentMonth.getMonth() + 1)}`;
-
-  const resumoMes = resumirMes(activities, monthPrefix);
-  const resumoDia = resumirDia(selectedActivities);
   const selectedDateObject = new Date(`${selectedDate}T12:00:00`);
-  const numeroDiaSelecionado = selectedDateObject.getDate();
-  const mesDiaSelecionado = selectedDateObject.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
 
 
   function changeMonth(delta) {
@@ -568,10 +559,7 @@ export default function Cronograma() {
           await carregarCronograma();
         }
 
-        addXP(
-          5,
-          'atividade adicionada ao calendário'
-        );
+        // Criar atividade não rende XP até existir evento verificado no servidor.
       }
 
       setSelectedDate(
@@ -1055,11 +1043,6 @@ export default function Cronograma() {
 
               selectedActivities.map(
                 (activity) => {
-
-                  const style =
-                    getSubjectStyle(
-                      activity.materia
-                    );
 
                   return (
 

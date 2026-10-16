@@ -46,10 +46,6 @@ export default function AdminFlashCards() {
   const [filtroMateria, setFiltroMateria] = useState('');
   const [filtroTopico, setFiltroTopico] = useState('');
 
-  useEffect(() => {
-    carregarDados();
-  }, []);
-
   async function carregarDados() {
     try {
       setCarregando(true);
@@ -118,6 +114,12 @@ export default function AdminFlashCards() {
     }
   }
 
+  useEffect(() => {
+    const iniciar = setTimeout(() => { void carregarDados(); }, 0);
+    return () => clearTimeout(iniciar);
+  }, []);
+
+
   function obterMateriasAtivas() {
     return materias.filter(
       (materia) => Number(materia.ativa) === 1
@@ -134,26 +136,11 @@ export default function AdminFlashCards() {
     );
   }
 
-  const materiasAtivas = useMemo(
-    () => obterMateriasAtivas(),
-    [materias]
-  );
+  const materiasAtivas = obterMateriasAtivas();
 
-  const createConteudos = useMemo(
-    () =>
-      obterConteudosDaMateria(
-        createForm.materiaId
-      ),
-    [createForm.materiaId, materias]
-  );
+  const createConteudos = obterConteudosDaMateria(createForm.materiaId);
 
-  const editConteudos = useMemo(
-    () =>
-      obterConteudosDaMateria(
-        editForm.materiaId
-      ),
-    [editForm.materiaId, materias]
-  );
+  const editConteudos = obterConteudosDaMateria(editForm.materiaId);
 
   function openCreate() {
     setErro('');
@@ -388,10 +375,7 @@ export default function AdminFlashCards() {
     }
   }
 
-  const filtroConteudos = useMemo(
-    () => obterConteudosDaMateria(filtroMateria),
-    [filtroMateria, materias]
-  );
+  const filtroConteudos = obterConteudosDaMateria(filtroMateria);
 
   const cardsFiltrados = useMemo(() => {
     const termo = busca.trim().toLocaleLowerCase();
@@ -458,25 +442,6 @@ export default function AdminFlashCards() {
     setBusca('');
     setFiltroMateria('');
     setFiltroTopico('');
-  }
-
-  function renderMateriaOptions() {
-    return (
-      <>
-        <option value="">
-          Selecione uma matéria
-        </option>
-
-        {materiasAtivas.map((materia) => (
-          <option
-            key={materia.id}
-            value={materia.id}
-          >
-            {materia.nome}
-          </option>
-        ))}
-      </>
-    );
   }
 
   return (

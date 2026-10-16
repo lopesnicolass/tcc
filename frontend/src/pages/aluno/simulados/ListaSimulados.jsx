@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { STATUS_LABEL, BTN_LABEL } from './constants.js';
-import { CategoriasSimulados, estiloMateria } from './CategoriasSimulados.jsx';
+import { CategoriasSimulados } from './CategoriasSimulados.jsx';
+import { estiloMateria } from './estiloMateria.js';
 import './ListaSimulados.css';
 import {
   MATERIAS_SIMULADOS,
@@ -12,7 +13,6 @@ import {
 export function ListaSimulados({
   filtro,
   setFiltro,
-  simulados,
   erro,
   historicoResultados,
   simuladosVisiveis,

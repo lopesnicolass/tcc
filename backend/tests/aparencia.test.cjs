@@ -9,7 +9,7 @@ test('configuração antiga ou ausente usa padrões', () => {
 
 test('salva apenas preferências permitidas com valores tipados', () => {
   const dados = normalizarAparencia({ tema: 'violeta', formato: 'cartoes', rotulo: ' Aula ', mensagem: ' Vamos aprender ', minutos: '18', mostrarIndice: false, CSS: 'javascript:alert(1)' });
-  assert.deepEqual(dados, { tema: 'violeta', formato: 'cartoes', rotulo: 'Aula', mensagem: 'Vamos aprender', minutos: 18, mostrarIndice: false });
+  assert.deepEqual(dados, { ...PADRAO, tema: 'violeta', formato: 'cartoes', rotulo: 'Aula', mensagem: 'Vamos aprender', minutos: 18, mostrarIndice: false });
 });
 
 test('valida temas, tempo, índice e JSON malformado', () => {

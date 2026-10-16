@@ -22,113 +22,6 @@ const SUBJECTS = [
 
 
 /* ============================================================
-   ÍCONES
-   ============================================================ */
-
-function IconFlashcards() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="7" width="14" height="10" rx="2" />
-      <path d="M7 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2" />
-    </svg>
-  );
-}
-
-
-function IconSimulados() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="5" y="4" width="14" height="17" rx="2" />
-      <path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1Z" />
-      <path d="m9 13 2 2 4-4" />
-    </svg>
-  );
-}
-
-
-function IconCronograma() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
-      <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" />
-      <path d="M7.5 13.2h2M11 13.2h2M14.5 13.2h2M7.5 16.5h2M11 16.5h2" />
-    </svg>
-  );
-}
-
-
-function IconDesempenho() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 20V10M11 20V4M18 20v-6" />
-      <path d="M3 20h18" />
-    </svg>
-  );
-}
-
-
-function IconMural() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4.5 4V6a1 1 0 0 1 1-1Z" />
-      <path d="M8 10h8M8 13h5" />
-    </svg>
-  );
-}
-
-
-function IconXP() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 3.5 14.6 9l6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.9l6-.9L12 3.5Z" />
-    </svg>
-  );
-}
-
-
-/* ============================================================
    FUNCIONALIDADES
    ============================================================ */
 
@@ -400,7 +293,7 @@ export default function Landing() {
 
             <h1>
               Organize seus estudos e conquiste sua vaga na{' '}
-              <span className="accent-word">ETECAMP.</span>
+              <span className="accent-word">TENNA.</span>
             </h1>
 
 

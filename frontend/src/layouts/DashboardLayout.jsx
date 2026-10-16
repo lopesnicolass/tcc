@@ -14,7 +14,10 @@ export default function DashboardLayout() {
     sessionStorage.getItem('etecamp_admin_preview') === 'true'
   );
 
-  useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    const fechar = setTimeout(() => setMobileMenuOpen(false), 0);
+    return () => clearTimeout(fechar);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;

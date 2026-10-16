@@ -8,8 +8,7 @@ const autenticarToken =
 
 const {
     buscar,
-    registrar,
-    ganharXP
+    registrar
 } = require("../controllers/gamificacaoController");
 
 
@@ -30,12 +29,10 @@ router.post(
 );
 
 
-// Adicionar XP ao usuário logado
-router.post(
-    "/xp",
-    autenticarToken,
-    ganharXP
-);
+// XP é concedido apenas após ações verificadas no backend.
+router.post('/xp', autenticarToken, (req, res) => res.status(403).json({
+    mensagem: 'XP só pode ser concedido por atividades confirmadas pelo servidor.'
+}));
 
 
 // Ranking exclusivo para alunos autenticados, com participação voluntária.

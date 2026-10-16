@@ -16,7 +16,7 @@ const {
 } = require("../config/mailer");
 
 const {
-    criarSessao
+    criarSessao, encerrarSessao
 } = require("../models/sessaoModel");
 
 
@@ -266,6 +266,11 @@ async function esqueciSenha(req, res) {
         });
     }
 
+    // Resposta igual para todos os e-mails quando o provedor estiver indisponível.
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+        return res.status(503).json({ mensagem: 'Recuperação temporariamente indisponível. Tente novamente mais tarde.' });
+    }
+
     const mensagemPadrao =
         "Se o e-mail estiver cadastrado, enviaremos um link para redefinir sua senha.";
 
@@ -490,9 +495,12 @@ async function redefinirSenha(req, res) {
                                     });
                                 }
 
-                                return res.status(200).json({
-                                    mensagem:
-                                        "Senha redefinida com sucesso!"
+                                encerrarSessao(usuario.id, (erroSessoes) => {
+                                    if (erroSessoes) {
+                                        console.error(erroSessoes);
+                                        return res.status(500).json({ mensagem: 'Senha alterada, mas não foi possível encerrar as sessões antigas.' });
+                                    }
+                                    return res.status(200).json({ mensagem: 'Senha redefinida com sucesso! Faça login novamente.' });
                                 });
 
                             }

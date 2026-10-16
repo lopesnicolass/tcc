@@ -1,11 +1,11 @@
 import '../../styles/aluno/Home.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGamification } from '../../context/GamificationContext.jsx';
+import { useGamification } from '../../context/GamificationShared.js';
 import {
   LEVEL_TITLES,
   xpForLevel
-} from '../../context/GamificationContext.jsx';
+} from '../../context/GamificationShared.js';
 import Icon from '../../components/Icon.jsx';
 import RankingXP from '../../components/RankingXP.jsx';
 import { API_URL, obterToken } from '../../services/api.js';
@@ -135,8 +135,7 @@ export default function Home() {
           respostaProgresso,
           respostaDesempenho,
           respostaResultados,
-          respostaCalendario,
-          respostaCronograma
+          respostaCalendario
         ] = respostas;
 
         const [

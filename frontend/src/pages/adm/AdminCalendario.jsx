@@ -102,18 +102,14 @@ export default function AdminCalendario() {
   }
 
   useEffect(() => {
-    carregarDatas();
+    const iniciar = setTimeout(() => { void carregarDatas(); }, 0);
+    return () => clearTimeout(iniciar);
   }, []);
 
   const datasOrdenadas = useMemo(
     () => [...datas].sort((a, b) => String(a.data).localeCompare(String(b.data))),
     [datas]
   );
-
-  const proximaData = useMemo(() => {
-    const hoje = dateKey(new Date());
-    return datasOrdenadas.find((item) => item.data >= hoje) || null;
-  }, [datasOrdenadas]);
 
   const diasDoMes = useMemo(() => {
     const primeiro = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), 1);
@@ -127,18 +123,6 @@ export default function AdminCalendario() {
       return dia;
     });
   }, [mesAtual]);
-
-  const datasDoMes = useMemo(
-    () =>
-      datas.filter((item) => {
-        const [ano, mes] = String(item.data || '').split('-');
-        return (
-          Number(ano) === mesAtual.getFullYear() &&
-          Number(mes) === mesAtual.getMonth() + 1
-        );
-      }),
-    [datas, mesAtual]
-  );
 
   function alterarForm(campo, valor) {
     setForm((atual) => ({ ...atual, [campo]: valor }));

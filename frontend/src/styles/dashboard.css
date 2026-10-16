@@ -2374,3 +2374,7 @@ html[data-theme='dark'] .student-area .student-sidebar .student-sidebar-brand {
   .streak-modal-section{ padding:16px; }
   .streak-day-dot{ width:42px; height:42px; border-radius:14px; }
 }
+
+/* Esconde o aviso de XP após a janela visível, sem atualizar estado em useEffect. */
+.xp-toast.show { animation: tenna-xp-toast-out .4s ease 1.8s forwards; }
+@keyframes tenna-xp-toast-out { to { opacity: 0; transform: translateY(-12px) scale(.9); } }

@@ -86,7 +86,7 @@ function savePlan(plan, months, days, modeloId, modeloAtualizadoEm) {
 export default function PlanoAutomatico() {
   const navigate =
     useNavigate();
-  const planoAnterior = useMemo(carregarPlanoSalvo, []);
+  const planoAnterior = useMemo(() => carregarPlanoSalvo(), []);
   const [
     months,
     setMonths
@@ -128,12 +128,12 @@ export default function PlanoAutomatico() {
     useState('');
   const [, setCronogramaModelo] = useState(null);
   const [
-    carregandoModelo,
+    ,
     setCarregandoModelo
   ] =
     useState(true);
   const [
-    modeloError,
+    ,
     setModeloError
   ] =
     useState('');
@@ -165,8 +165,9 @@ export default function PlanoAutomatico() {
   useEffect(() => {
     if (!plan || !usuarioId) return;
     let ativo = true;
-    setCarregandoAgenda(true);
-    setErroAgenda('');
+    queueMicrotask(() => {
+      if (ativo) { setCarregandoAgenda(true); setErroAgenda(''); }
+    });
     request(`/cronograma/${usuarioId}`, {}, 'Não foi possível carregar o calendário.')
       .then((resposta) => {
         if (ativo) setAtividadesAgenda(Array.isArray(resposta.atividades) ? resposta.atividades : []);
@@ -291,7 +292,7 @@ export default function PlanoAutomatico() {
     }
     carregarProgramacoes();
     return () => { ativo = false; };
-  }, []);
+  }, [planoAnterior?.days, planoAnterior?.modeloAtualizadoEm, planoAnterior?.modeloId, planoAnterior?.months, planoAnterior?.plan]);
 
   async function carregarProgressoPlano() {
     const token = localStorage.getItem('token');
@@ -324,7 +325,8 @@ export default function PlanoAutomatico() {
   }
 
   useEffect(() => {
-    carregarProgressoPlano();
+    const iniciar = setTimeout(() => { void carregarProgressoPlano(); }, 0);
+    return () => clearTimeout(iniciar);
   }, []);
 
   function abrirDestinoItem(item) {
@@ -353,7 +355,7 @@ export default function PlanoAutomatico() {
     }
 
     const topicoId = Number(item.topicoId);
-    const novoStatus = !Boolean(studiedTopics[String(topicoId)]);
+    const novoStatus = !studiedTopics[String(topicoId)];
 
     try {
       setSavingTopicId(topicoId);
@@ -539,7 +541,6 @@ export default function PlanoAutomatico() {
   const mostrandoConfig = !plan || editandoPlano;
   const mesesDisponiveis = Array.from({ length: 12 }, (_, index) => 12 - index);
   const diasDisponiveis = Array.from({ length: 7 }, (_, index) => index + 1);
-  const existeProgramacao = Boolean(combinacaoDisponivel);
 
 
   return (

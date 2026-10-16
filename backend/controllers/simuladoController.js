@@ -23,6 +23,7 @@ const {
 const {
     criarResultado
 } = require("../models/resultadoModel");
+const { concederXPVerificado } = require('../services/xpService');
 
 
 // =====================================================
@@ -1032,8 +1033,16 @@ function corrigirSimulado(
 
 
     const {
-        respostas
+        respostas,
+        tentativaId
     } = req.body || {};
+
+    // Cada tentativa possui uma chave criada na abertura da prova e
+    // preservada no navegador para permitir repetir envios sem duplicar nota.
+    if (typeof tentativaId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tentativaId)) {
+        return res.status(400).json({ mensagem: 'Identificador da tentativa inválido.' });
+    }
 
 
     const usuarioId =
@@ -1212,6 +1221,7 @@ function corrigirSimulado(
                 erros,
                 totalQuestoes,
                 porcentagem,
+                { tentativaId, detalhes },
 
                 (
                     erroResultado,
@@ -1234,25 +1244,38 @@ function corrigirSimulado(
                     }
 
 
-                    return res.status(200).json({
+                    // Caso a resposta tenha sido reenviada, devolvemos a nota
+                    // original. A mesma chave não pode representar outras respostas.
+                    const original = resultadoSalvo.registro;
+                    if (resultadoSalvo.duplicado) {
+                        const mesmasRespostas = (original.detalhes || []).length === detalhes.length &&
+                            original.detalhes.every((item, indice) =>
+                                Number(item.questaoId) === Number(detalhes[indice].questaoId) &&
+                                item.respostaUsuario === detalhes[indice].respostaUsuario);
+                        if (Number(original.simulado_id) !== simuladoId || !mesmasRespostas) {
+                            return res.status(409).json({ mensagem: 'Esta tentativa já foi finalizada com outras respostas.' });
+                        }
+                    }
 
-                        resultado: {
-
-                            id:
-                                resultadoSalvo.lastID,
-
-                            acertos,
-
-                            erros,
-
-                            totalQuestoes,
-
-                            porcentagem
-
-                        },
-
-                        detalhes
-
+                    // O XP sempre está ligado ao ID da tentativa persistida.
+                    // Reenvios só podem encontrar o mesmo evento, nunca criar outro.
+                    concederXPVerificado(usuarioId, 'simulado_concluido', resultadoSalvo.lastID, (erroXP) => {
+                        if (erroXP) {
+                            console.error('Falha ao registrar XP do simulado:', erroXP);
+                            return res.status(503).json({
+                                mensagem: 'Resultado salvo, mas não foi possível confirmar o XP. Tente finalizar novamente.'
+                            });
+                        }
+                        return res.status(200).json({
+                            resultado: {
+                                id: resultadoSalvo.lastID,
+                                acertos: original ? original.acertos : acertos,
+                                erros: original ? original.erros : erros,
+                                totalQuestoes: original ? original.total_questoes : totalQuestoes,
+                                porcentagem: original ? original.porcentagem : porcentagem
+                            },
+                            detalhes: original ? original.detalhes : detalhes
+                        });
                     });
 
                 }

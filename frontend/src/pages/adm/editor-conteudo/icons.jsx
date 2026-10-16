@@ -1,7 +1,7 @@
 // Ícones SVG usados só dentro do Editor de Conteúdo.
 // Extraído de EditorConteudo.jsx (estava tudo junto no mesmo arquivo).
 
-export const ICONS = {
+const ICONS = {
   arrowLeft: <path d="M19 12H5m7-7-7 7 7 7" />,
   plus: <path d="M12 5v14M5 12h14" />,
   save: (

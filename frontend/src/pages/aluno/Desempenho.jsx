@@ -1,5 +1,5 @@
 import '../../styles/aluno/Desempenho.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { META } from './desempenho/constants.js';
 import { Hero } from './desempenho/Hero.jsx';
@@ -127,19 +127,14 @@ export default function Desempenho() {
     }
 
 
-    function limitar(
+    const limitar = useCallback((
         valor,
         minimo = 0,
         maximo = 100
-    ) {
-        return Math.min(
-            maximo,
-            Math.max(
-                minimo,
-                numero(valor)
-            )
-        );
-    }
+    ) => Math.min(
+        maximo,
+        Math.max(minimo, Number(valor || 0))
+    ), []);
 
 
     function porcentagem(valor) {
@@ -499,7 +494,8 @@ export default function Desempenho() {
 
         }, [
             resultadosCronologicos,
-            desvioMedio
+            desvioMedio,
+            limitar
         ]);
 
 

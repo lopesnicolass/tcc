@@ -1,25 +1,21 @@
-import { useEffect, useState } from 'react';
-import { useGamification } from '../context/GamificationContext.jsx';
+import { useEffect } from 'react';
+import { useGamification } from '../context/GamificationShared.js';
 
 export default function XPToast() {
   const { toast, clearToast } = useGamification();
-  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
-    setVisible(true);
-    const hide = setTimeout(() => setVisible(false), 1800);
-    const clear = setTimeout(() => clearToast(), 2200);
+    const clear = setTimeout(clearToast, 2200);
     return () => {
-      clearTimeout(hide);
       clearTimeout(clear);
     };
-  }, [toast]);
+  }, [toast, clearToast]);
 
   if (!toast) return null;
 
   return (
-    <div className={`xp-toast ${visible ? 'show' : ''}`}>
+    <div key={toast.key} className="xp-toast show">
       ⭐ +{toast.amount} XP{toast.reason ? ` · ${toast.reason}` : ''}
     </div>
   );

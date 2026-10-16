@@ -68,7 +68,7 @@ db.serialize(() => {
                     )
                 ) {
 
-                    criarIndice();
+                    garantirTentativas();
 
                     return;
                 }
@@ -102,7 +102,7 @@ db.serialize(() => {
                             "✅ Coluna simulado_id adicionada."
                         );
 
-                        criarIndice();
+                        garantirTentativas();
                     }
                 );
             }
@@ -110,11 +110,38 @@ db.serialize(() => {
     }
 
 
+    // Migração sem perda de dados: identifica cada tentativa de maneira única.
+    // NULL permite manter os resultados históricos e inserções administrativas.
+    function garantirTentativas() {
+        db.all('PRAGMA table_info(resultados)', (erro, colunas) => {
+            if (erro) return console.error('Erro ao consultar resultados:', erro);
+            const campos = new Set((colunas || []).map(({ name }) => name));
+            const adicionarDetalhes = () => {
+                if (campos.has('detalhes_json')) return criarIndice();
+                db.run('ALTER TABLE resultados ADD COLUMN detalhes_json TEXT', (falha) => {
+                    if (falha) return console.error('Erro ao adicionar detalhes_json:', falha);
+                    criarIndice();
+                });
+            };
+            if (campos.has('tentativa_id')) return adicionarDetalhes();
+            db.run('ALTER TABLE resultados ADD COLUMN tentativa_id TEXT', (falha) => {
+                if (falha) return console.error('Erro ao adicionar tentativa_id:', falha);
+                adicionarDetalhes();
+            });
+        });
+    }
+
     // =====================================================
     // ÍNDICE
     // =====================================================
 
     function criarIndice() {
+        // Necessário antes de receber as correções do aluno: retries não criam
+        // uma segunda nota (nem um segundo evento de XP).
+        db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_resultados_tentativa_unica
+                ON resultados(usuario_id, tentativa_id)`, (erroIndice) => {
+            if (erroIndice) console.error('Erro ao garantir índice de tentativas:', erroIndice);
+        });
 
         db.run(
             `

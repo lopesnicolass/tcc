@@ -11,7 +11,6 @@ export function TelaSimulado({
   voltarParaSimulados,
   formatarTempo,
   selecionarResposta,
-  proximaQuestao,
   finalizarSimulado,
   erro
 }) {

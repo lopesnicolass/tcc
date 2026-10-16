@@ -104,7 +104,7 @@ export async function request(
         await resposta.text();
 
 
-    let dados = {};
+    let dados;
 
 
     try {
