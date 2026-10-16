@@ -1,10 +1,37 @@
-node_modules/
-.env
-dist/
+# Dependências e arquivos gerados
+**/node_modules/
+**/dist/
+**/coverage/
+**/.vite/
+*.log
+npm-debug.log*
 
-# Nunca versionar dados privados ou bancos reais
-backend/banco/*.sqlite
-backend/banco/*.sqlite-*
-backend/uploads/
-**/*.backup-*.sqlite
+# Segredos: somente exemplos podem ser versionados
+**/.env
+**/.env.*
+!**/.env.example
+
+# Banco, backups e dados locais (preservar as pastas)
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.db
+*.db-*
+*.bak
+*.backup
+backend/banco/*
+!backend/banco/.gitkeep
+
+# PDFs e arquivos enviados pelos usuários
+backend/uploads/**
+!backend/uploads/
+!backend/uploads/provas/
+!backend/uploads/provas/.gitkeep
+!backend/uploads/questoes/
+!backend/uploads/questoes/.gitkeep
+
+# Artefatos e arquivos temporários
 *.zip
+*.tmp
+.DS_Store
+Thumbs.db
