@@ -62,6 +62,8 @@ const conteudoPaginaRoutes =
 const checklistRoutes =
     require("./routes/checklistRoutes");
 
+const terrarioRoutes = require("./routes/terrarioRoutes");
+
 // =====================================================
 // INICIALIZAÇÕES
 // =====================================================
@@ -72,6 +74,7 @@ require("./config/ensureCronogramasModelos");
 require("./config/ensureResultados");
 require("./config/ensureXP");
 require("./config/ensureRanking");
+require("./config/ensureTerrario");
 
 // =====================================================
 // APP
@@ -198,6 +201,8 @@ app.use(
     "/checklists",
     checklistRoutes
 );
+
+app.use("/terrario", terrarioRoutes);
 
 // =====================================================
 // TESTE DA API

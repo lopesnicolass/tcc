@@ -1,7 +1,7 @@
 /*
  * Terrário · apresentação para a banca
- * Somente classes .terr-*: mantém o cenário original, seus assets,
- * as coordenadas de decoração e a lógica de sessões intactos.
+ * Classes .terr-* isoladas do restante da aplicação. Cena e itens novos
+ * com toda a lógica de sessões, pagamentos e persistência preservada.
  */
 .terr-page {
   --terr-ink: #123c76;
@@ -170,14 +170,14 @@
 .terr-decorate-button:hover, .terr-secondary:hover { border-color:#70b2f1; background:var(--terr-surface-muted); transform:translateY(-1px); }
 .terr-decorate-button.active { border-color: #1b64c5; background:#1b64c5; color:white; }
 
-/* O conteúdo da cena permanece INALTERADO: mesma imagem, escala, itens e coordenadas. */
+/* Ninho renovado: imagem de toca transparente, perspectiva fixa e decoração em camadas. */
 .terr-scene-shell {
   padding: 15px 20px;
-  background: linear-gradient(180deg, #e5f6fd 0%, #d9f2f8 100%);
+  background: linear-gradient(180deg, #e4f8ff 0%, #d9f4fb 100%);
   border-top: 1px solid #e0edf8;
   border-bottom: 1px solid #e0edf8;
 }
-.terr-scene { position: relative; isolation: isolate; width: 100%; max-width: 650px; aspect-ratio: 1; margin: 0 auto; touch-action: pan-y; }
+.terr-scene { position: relative; isolation: isolate; width: 100%; max-width: 720px; aspect-ratio: 1343 / 1171; margin: 0 auto; touch-action: pan-y; }
 .terr-scene-background { display: block; width:100%; height:100%; object-fit:contain; pointer-events:none; user-select:none; }
 .terr-scene-story {
   position:absolute;
@@ -204,10 +204,9 @@
 .terr-scene-item.movable:active { cursor:grabbing; }
 .terr-scene-item.selected { outline:3px dashed #227fdb; filter:drop-shadow(0 2px 13px rgba(21,116,233,.42)); }
 .terr-scene-item:focus-visible { outline:3px solid #006dff; outline-offset:4px; }
-.terr-character { pointer-events:none; position:absolute; width:17%; left:47%; top:69%; transform:translate(-50%,-87%); filter:drop-shadow(0 9px 7px rgba(76,41,19,.21)); }
-.terr-tenna-svg { display:block; width:100%; height:auto; transform-origin:50% 92%; animation:terrBob 3.4s ease-in-out infinite; }
-.terr-tenna-svg.is-studying { animation:terrStudy 1.8s ease-in-out infinite; }
-.terr-tenna-svg.is-cheering { animation:terrCheer 1s ease-in-out 2; }
+.terr-character { pointer-events:none; position:absolute; width:29%; left:58%; top:68%; transform:translate(-50%,-73%); filter:drop-shadow(0 5px 3px rgba(76,41,19,.14)); }
+.terr-tenna-picture, .terr-tenna-img { display:block; width:100%; height:auto; }
+.terr-tenna-img { pointer-events:none; user-select:none; }
 .terr-inroom-timer { position:absolute; bottom:18%; left:50%; transform:translateX(-50%); z-index:115; background:#1259b9; color:white; border:2px solid #a7dbff; border-radius:999px; padding:8px 18px; box-shadow:0 6px 18px #0f55a966; font-size:13px; font-weight:900; white-space:nowrap; }
 .terr-decor-hint { position:absolute; z-index:110; bottom:4%; left:50%; transform:translateX(-50%); max-width:85%; width:max-content; padding:8px 12px; border-radius:12px; background:rgba(14,58,118,.88); color:white; font-size:11px; font-weight:700; text-align:center; pointer-events:none; }
 
@@ -409,7 +408,7 @@
   .terr-duration-options { gap:5px; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .terr-tenna-svg { animation:none!important; }
+  .terr-tenna-img { animation:none!important; }
   .terr-progress-track > span, .terr-item-card, .terr-item-preview img,
   .terr-primary, .terr-decorate-button, .terr-secondary, .terr-item-bottom button { transition:none!important; }
 }
@@ -441,3 +440,220 @@ html[data-theme='dark'] .terr-item-preview { border-color:#34516b; background:li
 html[data-theme='dark'] .terr-item-bottom button { background:#2d4f72; border-color:#456c92; color:#d7eaff; }
 html[data-theme='dark'] .terr-item-card.active { box-shadow:0 0 0 2px #356497; }
 html[data-theme='dark'] .terr-inventory-balance { border-color:#426083; }
+
+/* Etapa 2: matéria, estados de API e recompensa confirmada pelo servidor. */
+.terr-subject-select {
+  display:block; width:100%; min-height:45px; margin:10px 0 19px; padding:10px 13px;
+  border:1px solid var(--terr-border); border-radius:11px;
+  background:var(--terr-surface-soft); color:var(--terr-strong);
+  font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+}
+.terr-subject-select:disabled { opacity:.7; cursor:not-allowed; }
+.terr-subject-select:focus-visible { outline:3px solid #54aeff; outline-offset:2px; }
+.terr-focus-summary {
+  display:flex; flex-direction:column; gap:8px; margin-top:15px; padding:15px;
+  border:1px solid #8dcfb7; border-radius:13px; background:#ecfbf3; color:#19553b;
+  font-size:12px; line-height:1.5;
+}
+.terr-focus-summary strong { font-size:14px; }
+.terr-focus-summary > div { display:flex; flex-wrap:wrap; gap:8px; }
+.terr-focus-summary > div span { padding:6px 9px; border-radius:9px; background:#d3f3e3; font-weight:800; }
+.terr-focus-summary small { color:#36775c; }
+.terr-error {
+  display:flex; justify-content:space-between; align-items:center; gap:15px;
+  margin:0 0 16px; padding:13px 16px; border:1px solid #ffbdbd;
+  border-radius:12px; background:#fff1f1; color:#9d2935; font-size:13px;
+}
+.terr-error button { flex-shrink:0; padding:9px 12px; border:1px solid #ffb5b5; border-radius:8px; background:white; color:#8d1825; font-weight:800; }
+.terr-inline-notice { margin-top:10px; font-size:11.5px; color:var(--terr-text-soft); }
+.terr-primary:disabled, .terr-secondary:disabled, .terr-item-bottom button:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.terr-item-bottom button:disabled:hover { background:var(--terr-surface-muted); }
+html[data-theme='dark'] .terr-focus-summary { border-color:#326852; background:#1c4035; color:#d6f9e6; }
+html[data-theme='dark'] .terr-focus-summary > div span { background:#285943; }
+html[data-theme='dark'] .terr-focus-summary small { color:#b6e5cc; }
+html[data-theme='dark'] .terr-error { background:#451f2d; border-color:#854452; color:#ffd5d8; }
+html[data-theme='dark'] .terr-error button { background:#592a37; color:#ffe8e8; border-color:#995462; }
+@media(max-width:410px) { .terr-error { flex-direction:column; align-items:flex-start; } }
+
+/* Etapa 3: loja funcional e inventário persistido. */
+.terr-item-card:not(.is-owned) .terr-item-bottom button:not(:disabled) {
+  color:#fff; background:#1769ce; border-color:#1769ce;
+  box-shadow:0 5px 10px -8px rgba(17,84,170,.7);
+}
+.terr-item-card:not(.is-owned) .terr-item-bottom button:not(:disabled):hover {
+  background:#1156ad; border-color:#1156ad;
+}
+.terr-item-card.is-owned .terr-item-preview { background:linear-gradient(155deg,#eefaf4,#f1faff 60%,#fff9e9); }
+.terr-item-card .terr-item-bottom { flex-wrap:wrap; }
+.terr-item-card .terr-item-bottom button { max-width:100%; }
+html[data-theme='dark'] .terr-item-card.is-owned .terr-item-preview {
+  background:linear-gradient(155deg,#274e46,#284767 60%,#4d4535);
+}
+html[data-theme='dark'] .terr-item-card:not(.is-owned) .terr-item-bottom button:not(:disabled) {
+  color:#fff; background:#2269bf; border-color:#2269bf;
+}
+
+
+/* Jornada da Tenna: a primeira sala é jogável; demais cartões são prévias. */
+.terr-journey { margin-top:22px; padding:27px 27px 25px; border:1px solid var(--terr-border); border-radius:22px; background:var(--terr-surface); box-shadow:var(--terr-shadow); }
+.terr-journey-header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:23px; }
+.terr-journey-header h2 { margin:4px 0 8px; font-size:clamp(22px,2.1vw,28px); color:var(--terr-strong); font-weight:850; letter-spacing:-.035em; }
+.terr-journey-header h2 span { color:#f4b642; }
+.terr-journey-header p { max-width:650px; margin:0; font-size:12.5px; line-height:1.7; color:var(--terr-text-soft); }
+.terr-journey-count { min-width:136px; padding:13px 18px; border:1px solid var(--terr-border); border-radius:17px; background:var(--terr-surface-soft); text-align:center; }
+.terr-journey-count strong { display:block; color:var(--terr-strong); font-size:23px; font-weight:900; line-height:1.1; }
+.terr-journey-count strong span { color:var(--terr-text-soft); font-size:15px; font-weight:750; }
+.terr-journey-count small { display:block; margin-top:5px; color:var(--terr-text-soft); font-size:10px; font-weight:700; }
+.terr-journey-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; }
+.terr-page .terr-journey-card { --room-a:#e8f4ff; --room-b:#c5e6ff; display:flex; flex-direction:column; align-items:stretch; gap:0; min-width:0; min-height:236px; padding:14px 15px; background:var(--terr-surface); color:var(--terr-strong); border:1px solid var(--terr-border); border-radius:17px; text-align:left; transition:transform .16s,border-color .16s,box-shadow .16s; }
+.terr-page .terr-journey-card:hover { transform:translateY(-2px); border-color:#8cbdeb; }
+.terr-page .terr-journey-card.is-selected { border:2px solid #3288e5; padding:13px 14px; box-shadow:0 0 0 3px rgba(42,135,228,.09); }
+.terr-page .terr-journey-card.is-future { opacity:.82; }
+.terr-journey-card-top { display:flex; justify-content:space-between; color:var(--terr-text-soft); font-size:9px; font-weight:900; letter-spacing:.105em; }
+.terr-journey-card-top > span:last-child { font-size:14px; letter-spacing:0; }
+.terr-journey-visual { position:relative; display:grid; place-items:center; height:89px; width:100%; margin:10px 0 12px; border-radius:12px; overflow:hidden; background:linear-gradient(130deg,var(--room-a),var(--room-b)); }
+.terr-journey-visual:before { content:''; position:absolute; width:130px; height:130px; left:-32px; top:-65px; border-radius:50%; background:rgba(255,255,255,.26); }
+.terr-journey-visual:after { content:''; position:absolute; width:95px; height:95px; right:-25px; bottom:-65px; border-radius:50%; border:18px solid rgba(255,255,255,.27); }
+.terr-journey-visual > span { position:relative; z-index:1; font-size:41px; filter:drop-shadow(0 4px 3px rgba(0,0,0,.09)); }
+.terr-journey-card > strong { display:block; font-size:15px; line-height:1.25; font-weight:850; }
+.terr-journey-card > small { display:block; min-height:27px; padding-top:5px; color:var(--terr-text-soft); font-size:11px; line-height:1.45; }
+.terr-journey-pill { align-self:flex-start; margin-top:auto; padding:5px 10px; border-radius:100px; font-size:10px; font-weight:800; background:var(--terr-surface-muted); color:var(--terr-text-soft); }
+.terr-journey-pill.is-atual { background:#e5f5eb; color:#24754c; }
+.terr-journey-pill.is-conquistada { background:#e7f6ed; color:#23814b; }
+.terr-journey-pill.is-em-progresso { background:#e6f1ff; color:#185aa5; }
+.terr-journey-estudos { --room-a:#ffefd8!important; --room-b:#f8ce92!important; }
+.terr-journey-biblioteca { --room-a:#ede8ff!important; --room-b:#c9baf4!important; }
+.terr-journey-oficina { --room-a:#ffe9e1!important; --room-b:#f9bda8!important; }
+.terr-journey-jardim { --room-a:#e5f9e6!important; --room-b:#b5e0ae!important; }
+.terr-journey-mirante { --room-a:#e3f2ff!important; --room-b:#a3d8eb!important; }
+.terr-journey-detail { display:flex; align-items:flex-start; gap:19px; margin-top:17px; padding:23px 24px; border:1px solid var(--terr-border); border-radius:17px; background:var(--terr-surface-soft); }
+.terr-journey-detail-icon { display:grid; place-items:center; flex:0 0 58px; height:58px; border-radius:17px; background:var(--terr-surface); font-size:29px; }
+.terr-journey-detail-copy { flex:1; min-width:0; }
+.terr-journey-detail-copy > span { font-size:10px; font-weight:900; color:var(--terr-accent); letter-spacing:.1em; }
+.terr-journey-detail h3 { margin:5px 0 6px; font-size:20px; font-weight:850; color:var(--terr-strong); }
+.terr-journey-detail p { margin:0; color:var(--terr-text-soft); font-size:12px; line-height:1.7; }
+.terr-journey-detail p.terr-journey-future-note { margin-top:10px; font-size:11px; }
+.terr-journey-goal { max-width:530px; margin-top:16px; }
+.terr-journey-goal > div:first-child { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-bottom:9px; color:var(--terr-strong); font-size:11px; font-weight:850; }
+.terr-journey-goal .terr-progress-track { height:9px; }
+.terr-journey-goal small { display:block; margin-top:9px; color:var(--terr-text-soft); font-size:10.5px; line-height:1.55; }
+.terr-journey-back { white-space:nowrap; padding:10px 14px; border:1px solid var(--terr-border); border-radius:10px; background:var(--terr-surface); color:var(--terr-accent); text-decoration:none; font-size:11px; font-weight:850; }
+.terr-journey-back:hover { text-decoration:underline; }
+@media(max-width:930px) { .terr-journey-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:720px) {
+  .terr-journey { border-radius:18px; padding:20px 16px; }
+  .terr-journey-header { flex-wrap:wrap; gap:14px; }
+  .terr-journey-count { min-width:0; display:flex; align-items:center; gap:12px; text-align:left; }
+  .terr-journey-count small { margin-top:0; }
+  .terr-page .terr-journey-card { min-height:205px; padding:11px; }
+  .terr-page .terr-journey-card.is-selected { padding:10px; }
+  .terr-journey-visual { height:70px; }
+  .terr-journey-visual > span { font-size:32px; }
+  .terr-journey-detail { padding:16px; gap:12px; flex-wrap:wrap; }
+  .terr-journey-detail-icon { width:45px; height:45px; flex-basis:45px; font-size:23px; }
+  .terr-journey-back { margin-left:auto; }
+}
+@media(max-width:365px) { .terr-journey-cards { grid-template-columns:1fr; } }
+html[data-theme='dark'] .terr-journey-pill.is-atual,
+html[data-theme='dark'] .terr-journey-pill.is-conquistada { background:#174c39; color:#9ceac3; }
+html[data-theme='dark'] .terr-journey-pill.is-em-progresso { background:#183e69; color:#b4d9ff; }
+@media(prefers-reduced-motion:reduce) { .terr-page .terr-journey-card { transition:none; } .terr-page .terr-journey-card:hover { transform:none; } }
+
+
+/* Etapa 5: confirmação segura, leitura confortável e pequenos ajustes para toque. */
+.terr-confirm-cancel {
+  margin-top: 13px;
+  padding: 14px;
+  border: 1px solid #e8b6a8;
+  border-radius: 12px;
+  background: #fff7f3;
+  color: #803b29;
+}
+.terr-confirm-cancel p { margin: 0 0 12px; font-size: 12px; line-height: 1.55; }
+.terr-confirm-cancel > div { display: flex; flex-wrap: wrap; gap: 9px; }
+.terr-confirm-cancel button { min-height: 40px; flex: 1 1 130px; padding: 9px 12px; border-radius: 9px; font-size: 11px; font-weight: 850; }
+.terr-cancel-back { border: 1px solid #d7e6f5; background: var(--terr-surface); color: var(--terr-strong); }
+.terr-cancel-confirm { border: 1px solid #bd6053; background: #ac4336; color: white; }
+.terr-cancel-confirm:hover { background: #8c2e24; }
+.terr-cancel-confirm:disabled { cursor: not-allowed; opacity: .6; }
+.terr-scene-item.movable { touch-action: none; }
+.terr-inventory-foot span { color: var(--terr-text-soft); }
+.terr-inventory-balance { color: var(--terr-accent); border-color: var(--terr-border); }
+.terr-cost-label { color: #286645; }
+html[data-theme='dark'] .terr-confirm-cancel { background: #422b2b; border-color: #835046; color: #ffe5d8; }
+html[data-theme='dark'] .terr-cancel-back { border-color: #4b647d; }
+html[data-theme='dark'] .terr-cost-label { color: #9be0b0; }
+html[data-theme='dark'] .terr-owned-label { color: #8ad9b7; }
+html[data-theme='dark'] .terr-item-card.is-placed .terr-item-bottom button { color: #c5defa; border-color: var(--terr-border); }
+html[data-theme='dark'] .terr-status.is-working { background: #184d3e; color: #aaedcf; }
+html[data-theme='dark'] .terr-status.is-working > span { background: #5fdba1; box-shadow: 0 0 0 3px #32604b; }
+@media (max-width: 420px) {
+  .terr-header h1 { overflow-wrap: anywhere; }
+  .terr-duration-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .terr-inventory-header p { max-width: 95%; }
+  .terr-confirm-cancel > div { flex-direction: column; }
+  .terr-confirm-cancel button { width: 100%; flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terr-timer-clock { animation: none !important; }
+}
+
+/* Novo cenário: prioriza as paredes da toca, evitando que itens de parede fiquem no chão. */
+.terr-scene.in-decorating-mode { touch-action:pan-y; }
+.terr-scene-item { -webkit-user-drag:none; }
+.terr-scene-item.movable { touch-action:none; }
+.terr-tenna-picture { width:100%; }
+@media(max-width:600px) {
+  .terr-scene-shell { padding:9px 6px; }
+  .terr-scene-story { top:2%; font-size:9px; padding:6px 8px; }
+  .terr-character { width:30%; }
+}
+
+/* Modo de avaliação da decoração — temporário, sem transações no backend. */
+.terr-test-banner {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:14px; margin:0 0 20px; padding:15px 19px;
+  border:1px solid var(--terr-border); border-radius:16px;
+  background:var(--terr-surface); color:var(--terr-strong);
+  box-shadow:0 4px 14px rgba(23,70,120,.04);
+}
+.terr-test-banner.is-active { border-color:#8cbde7; background:linear-gradient(110deg,#f0f8ff,#fff); }
+.terr-test-banner-copy { flex:1 1 360px; display:flex; flex-direction:column; gap:4px; }
+.terr-test-banner-copy strong { color:var(--terr-strong); font-size:13px; font-weight:850; }
+.terr-test-banner-copy span { color:var(--terr-text-soft); font-size:11px; line-height:1.6; }
+.terr-test-banner-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
+.terr-test-banner-actions button { min-height:37px; padding:8px 11px; border:1px solid var(--terr-border); border-radius:9px; background:var(--terr-surface); color:var(--terr-accent); font-size:11px; font-weight:800; }
+.terr-test-banner-actions button:hover { border-color:#7fb4e6; background:var(--terr-surface-muted); }
+.terr-test-banner-actions .terr-test-mode-toggle { border-color:#1c67bd; color:#fff; background:#1c67bd; }
+.terr-test-banner-actions .terr-test-mode-toggle:hover { background:#0f4d99; color:#fff; }
+html[data-theme='dark'] .terr-test-banner.is-active { background:linear-gradient(110deg,#162f4b,#1b3449); border-color:#4273a2; }
+@media(max-width:600px){ .terr-test-banner { padding:13px; } .terr-test-banner-actions { width:100%; justify-content:stretch; } .terr-test-banner-actions button { flex:1 1 auto; } }
+
+
+/* Controles compactos de tamanho: ficam fora do palco, sem cobrir os móveis. */
+.terr-size-toolbar {
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px;
+  padding:12px 19px; background:var(--terr-surface);
+  border-block:1px solid var(--terr-line); position:relative; z-index:1;
+}
+.terr-size-item { display:flex; align-items:center; gap:9px; min-width:150px; flex:1 1 170px; }
+.terr-size-item img { width:38px; height:36px; object-fit:contain; }
+.terr-size-item strong, .terr-size-item small { display:block; }
+.terr-size-item strong { font-size:12px; color:var(--terr-strong); }
+.terr-size-item small { font-size:10px; color:var(--terr-text-soft); margin-top:2px; }
+.terr-size-editor { display:flex; align-items:center; gap:7px; flex:2 1 280px; min-width:0; }
+.terr-size-editor input[type='range'] { flex:1; min-width:70px; max-width:170px; accent-color:#176ad1; cursor:pointer; }
+.terr-size-step { width:31px; height:31px; border:1px solid var(--terr-border); background:var(--terr-surface-muted); color:var(--terr-strong); font-size:19px; line-height:1; border-radius:9px; font-weight:750; }
+.terr-size-step:hover:not(:disabled) { border-color:#318ee8; }
+.terr-size-toolbar button:disabled { opacity:.45; cursor:not-allowed; }
+.terr-size-value { text-align:center; min-width:37px; font-size:12px; font-weight:850; color:var(--terr-strong); font-variant-numeric:tabular-nums; }
+.terr-size-reset, .terr-wall-snap { padding:8px 10px; background:var(--terr-surface-muted); border:1px solid var(--terr-border); border-radius:9px; color:var(--terr-accent); font-weight:750; font-size:11px; white-space:nowrap; }
+.terr-wall-snap { background:#edf6ff; border-color:#c4dffb; color:#155ab5; }
+.terr-size-reset:hover:not(:disabled), .terr-wall-snap:hover:not(:disabled) { border-color:#318ee8; }
+html[data-theme='dark'] .terr-wall-snap { background:#234568; color:#d4eaff; border-color:#5279a5; }
+@media(max-width:650px) {
+  .terr-size-toolbar { padding:11px 12px; gap:9px; }
+  .terr-size-item { flex-basis:100%; }
+  .terr-size-editor { flex-basis:100%; }
+  .terr-size-editor input[type='range'] { max-width:unset; }
+}
