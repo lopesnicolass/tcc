@@ -185,3 +185,73 @@ test('Terrário: escala do móvel é persistida por aluno sem gastar sementes', 
   assert.equal((await model.buscarEstado(2)).inventario.find(item => item.id === 'mesa'), undefined);
   banco.close();
 });
+
+test('Terrário: sala 2 só permite comprar móveis depois do desbloqueio e não altera a Sala 1', async () => {
+  const { banco, model } = novoBanco();
+  const initial = await model.buscarEstado(1);
+  assert.equal(initial.salaDesbloqueada, 1);
+  assert.equal(initial.inventario.some(item => item.id.startsWith('s2_')), false);
+  banco.prepare('UPDATE terrario_usuario SET sementes=90 WHERE usuario_id=1').run();
+  await assert.rejects(model.comprarItem(1, 's2_mesa'), /Desbloqueie a Sala 2/);
+  assert.equal((await model.buscarEstado(1)).sementes, 90);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2 WHERE usuario_id=1').run();
+  await model.comprarItem(1, 's2_mesa');
+  let state = await model.buscarEstado(1);
+  assert.equal(state.sementes, 66);
+  assert.equal(state.inventario.find(item => item.id === 's2_mesa').equipado, false);
+  assert.equal(state.inventario.find(item => item.id === 'vasinho').equipado, true);
+  await assert.rejects(model.comprarItem(1, 's2_mesa'), /já possui/);
+  assert.equal((await model.buscarEstado(1)).sementes, 66);
+  await model.personalizarItem(1, 's2_mesa', { equipado:true, x:45, y:68, escala:1.2 });
+  state = await model.buscarEstado(1);
+  assert.deepEqual(state.inventario.find(item => item.id === 's2_mesa'), { id:'s2_mesa', equipado:true, x:45, y:68, escala:1.2 });
+  assert.equal(state.inventario.find(item => item.id === 'vasinho').equipado, true);
+  await model.personalizarItem(1, 's2_mesa', { equipado:false });
+  state = await model.buscarEstado(1);
+  assert.equal(state.inventario.find(item => item.id === 's2_mesa').equipado, false);
+  await assert.rejects(model.comprarItem(2, 's2_mesa'), /Desbloqueie a Sala 2/);
+  banco.close();
+});
+
+test('Terrário: Sala 2 mantém posição e escala próprias, respeitando zonas e bloqueio', async () => {
+  const { banco, model } = novoBanco();
+  await model.buscarEstado(1);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2, sementes=100 WHERE usuario_id=1').run();
+  await model.comprarItem(1,'s2_mural');
+  await model.comprarItem(1,'s2_cadeira');
+  assert.equal((await model.buscarEstado(1)).sementes,76);
+  await assert.rejects(model.personalizarItem(1, 's2_mural', { equipado:true, x:55, y:75 }), /Posição inválida/);
+  await model.personalizarItem(1, 's2_mural', { equipado:true, x:51, y:39, escala:1.4 });
+  await model.personalizarItem(1, 's2_cadeira', { equipado:true, x:57, y:72 });
+  let estado = await model.buscarEstado(1);
+  assert.equal(estado.inventario.find(i => i.id === 's2_mural').escala,1.4);
+  assert.equal(estado.inventario.find(i => i.id === 's2_cadeira').x,57);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=1 WHERE usuario_id=1').run();
+  await assert.rejects(model.personalizarItem(1, 's2_cadeira', { equipado:false }), /Desbloqueie a Sala 2/);
+  banco.close();
+});
+
+
+test('Terrário: quatro novos itens da Sala 2 exigem desbloqueio, têm preços e zonas válidas', async () => {
+  const { banco, model } = novoBanco();
+  await model.buscarEstado(1);
+  const itens = [
+    ['s2_tapete_redondo',11,53,83],
+    ['s2_vaso',8,18,68],
+    ['s2_livros',6,52,81],
+    ['s2_avisos',12,29,39],
+  ];
+  for (const [id] of itens) await assert.rejects(model.comprarItem(1,id), /Desbloqueie a Sala 2/);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2, sementes=100 WHERE usuario_id=1').run();
+  for (const [id,preco,x,y] of itens) {
+    const anterior = (await model.buscarEstado(1)).sementes;
+    await model.comprarItem(1,id);
+    assert.equal((await model.buscarEstado(1)).sementes, anterior-preco);
+    await model.personalizarItem(1,id,{ equipado:true,x,y });
+  }
+  const estado = await model.buscarEstado(1);
+  assert.equal(estado.inventario.filter(item=>item.id.startsWith('s2_')).length,4);
+  assert.equal(estado.inventario.find(item=>item.id==='vasinho').equipado,true);
+  await assert.rejects(model.personalizarItem(1,'s2_avisos',{ equipado:true,x:29,y:80 }), /Posição inválida/);
+  banco.close();
+});

@@ -31,6 +31,21 @@ const ITENS = Object.freeze({
   mesa_redonda: { x: 76, y: 73, zona: 'chao' },
   almofada: { x: 63, y: 80, zona: 'tapete' },
   banquinho_tronco: { x: 82, y: 80, zona: 'chao' },
+  // Sala 2: itens exclusivos, com IDs separados das compras da Sala 1.
+  s2_mesa: { x: 36, y: 66, zona: 'chao', sala: 2 },
+  s2_cadeira: { x: 36, y: 73, zona: 'chao', sala: 2 },
+  s2_estante: { x: 76, y: 68, zona: 'chao', sala: 2 },
+  s2_mural: { x: 49, y: 35, zona: 'parede', sala: 2 },
+  s2_calendario: { x: 69, y: 36, zona: 'parede', sala: 2 },
+  s2_globo: { x: 26, y: 79, zona: 'chao', sala: 2 },
+  s2_puff: { x: 64, y: 81, zona: 'tapete', sala: 2 },
+  s2_planta: { x: 84, y: 38, zona: 'pendurado', sala: 2 },
+  s2_luzes: { x: 48, y: 29, zona: 'pendurado', sala: 2 },
+  s2_caixa: { x: 81, y: 80, zona: 'chao', sala: 2 },
+  s2_tapete_redondo: { x: 53, y: 83, zona: 'tapete', sala: 2 },
+  s2_vaso: { x: 18, y: 68, zona: 'chao', sala: 2 },
+  s2_livros: { x: 52, y: 81, zona: 'chao', sala: 2 },
+  s2_avisos: { x: 29, y: 39, zona: 'parede', sala: 2 },
 });
 
 function executar(sql, args = []) {
@@ -58,8 +73,20 @@ function validarItem(itemId) {
   }
 }
 
+async function exigirSalaLiberada(usuarioId, itemId) {
+  const sala = ITENS[itemId].sala || 1;
+  if (sala === 1) return;
+  const perfil = await obter('SELECT sala_desbloqueada FROM terrario_usuario WHERE usuario_id=?', [usuarioId]);
+  if (!perfil || perfil.sala_desbloqueada < sala) {
+    const erro = new Error(`Desbloqueie a Sala ${sala} antes de usar seus móveis.`);
+    erro.status = 403;
+    throw erro;
+  }
+}
+
 async function comprarItem(usuarioId, itemId) {
   validarItem(itemId);
+  await exigirSalaLiberada(usuarioId, itemId);
   if (itemId === 'vasinho') {
     const erro = new Error('O vasinho já é seu.'); erro.status = 409; throw erro;
   }
@@ -84,6 +111,7 @@ async function comprarItem(usuarioId, itemId) {
 
 async function personalizarItem(usuarioId, itemId, dados) {
   validarItem(itemId);
+  await exigirSalaLiberada(usuarioId, itemId);
   if (typeof dados?.equipado !== 'boolean') {
     const erro = new Error('Escolha se deseja colocar ou guardar o item.'); erro.status = 400; throw erro;
   }

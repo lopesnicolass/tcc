@@ -638,9 +638,10 @@ export default function Mural() {
           onClick={() =>
             setFiltro('Todas')
           }
+          aria-label={`Filtrar por Todas (${postits.length})`}
         >
 
-          Todas
+          <span className="materia-tab-label">Todas</span>
 
           <span className="materia-tab-count materia-tab-count-todas">
             {postits.length}
@@ -665,9 +666,10 @@ export default function Mural() {
               onClick={() =>
                 setFiltro(materia)
               }
+              aria-label={`Filtrar por ${materia} (${postits.filter((postit) => normalizarMateria(postit.materia) === materia).length})`}
             >
 
-              {materia}
+              <span className="materia-tab-label">{materia}</span>
 
               <span className={`materia-tab-count ${materiaPillClass(materia).replace('materia-pill-', 'materia-tab-count-')}`}>
 

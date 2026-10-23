@@ -318,15 +318,23 @@
 .terr-item-card:hover { border-color:#a5cbf0; box-shadow:0 10px 18px -16px rgba(20,77,141,.4); transform:translateY(-2px); }
 .terr-item-card.active { border-color:#6caff1; box-shadow:0 0 0 2px rgba(86,166,243,.16); }
 .terr-item-preview {
-  display:grid; place-items:center;
+  display:flex; align-items:center; justify-content:center;
   width:100%; height:162px;
-  padding:11px;
+  padding:14px;
   overflow:hidden;
   border:0;
   border-bottom:1px solid var(--terr-line);
   background:linear-gradient(160deg,#f0f8ff,#f5fcff 58%,#fff8ed);
 }
-.terr-item-preview img { display:block; width:93%; height:99%; object-fit:contain; filter:drop-shadow(0 7px 7px rgba(92,50,22,.14)); transition:transform .2s; }
+.terr-item-preview img {
+  display:block;
+  width:auto; height:auto;
+  min-width:0; min-height:0;
+  max-width:88%; max-height:90%;
+  object-fit:contain;
+  filter:drop-shadow(0 6px 6px rgba(92,50,22,.13));
+  transition:transform .2s;
+}
 .terr-item-preview:hover img { transform:translateY(-3px) scale(1.025); }
 .terr-item-desc { min-height:70px; padding:13px 13px 9px; }
 .terr-item-desc strong { display:block; color:var(--terr-strong); font-size:12px; font-weight:850; line-height:1.35; }
@@ -494,7 +502,7 @@ html[data-theme='dark'] .terr-item-card:not(.is-owned) .terr-item-bottom button:
 }
 
 
-/* Jornada da Tenna: a primeira sala é jogável; demais cartões são prévias. */
+/* Mapa do formigueiro: três salas em pirâmide; somente a primeira é jogável nesta etapa. */
 .terr-journey { margin-top:22px; padding:27px 27px 25px; border:1px solid var(--terr-border); border-radius:22px; background:var(--terr-surface); box-shadow:var(--terr-shadow); }
 .terr-journey-header { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:23px; }
 .terr-journey-header h2 { margin:4px 0 8px; font-size:clamp(22px,2.1vw,28px); color:var(--terr-strong); font-weight:850; letter-spacing:-.035em; }
@@ -504,28 +512,50 @@ html[data-theme='dark'] .terr-item-card:not(.is-owned) .terr-item-bottom button:
 .terr-journey-count strong { display:block; color:var(--terr-strong); font-size:23px; font-weight:900; line-height:1.1; }
 .terr-journey-count strong span { color:var(--terr-text-soft); font-size:15px; font-weight:750; }
 .terr-journey-count small { display:block; margin-top:5px; color:var(--terr-text-soft); font-size:10px; font-weight:700; }
-.terr-journey-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:13px; }
+.terr-map-heading { display:flex; align-items:center; justify-content:center; gap:15px; margin:2px 0 18px; color:var(--terr-text-soft); font-size:10px; font-weight:850; letter-spacing:.08em; text-align:center; }
+.terr-map-heading-line { width:32px; max-width:12%; height:1px; background:var(--terr-border); }
+.terr-journey-cards {
+  position:relative; isolation:isolate;
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+  column-gap:clamp(14px,4vw,44px); row-gap:39px;
+  max-width:950px; margin:0 auto;
+  padding:7px clamp(0px,3.5vw,35px) 6px;
+}
+/* Card 3 acima dos cards 1 e 2. A ordem de tabulação permanece 1→2→3. */
+.terr-journey-room-1 { grid-column:1; grid-row:2; }
+.terr-journey-room-2 { grid-column:2; grid-row:2; }
+.terr-journey-room-3 { grid-column:1 / -1; grid-row:1; width:min(100%,410px); justify-self:center; }
+.terr-journey-tunnels {
+  position:absolute; inset:0; display:block; width:100%; height:100%;
+  overflow:visible; pointer-events:none; z-index:-1;
+}
+.terr-journey-tunnels path { fill:none; stroke:#b7d0e6; stroke-width:.65; stroke-dasharray:1.5 1.1; stroke-linecap:round; }
+
 .terr-page .terr-journey-card { --room-a:#e8f4ff; --room-b:#c5e6ff; display:flex; flex-direction:column; align-items:stretch; gap:0; min-width:0; min-height:236px; padding:14px 15px; background:var(--terr-surface); color:var(--terr-strong); border:1px solid var(--terr-border); border-radius:17px; text-align:left; transition:transform .16s,border-color .16s,box-shadow .16s; }
 .terr-page .terr-journey-card:hover { transform:translateY(-2px); border-color:#8cbdeb; }
 .terr-page .terr-journey-card.is-selected { border:2px solid #3288e5; padding:13px 14px; box-shadow:0 0 0 3px rgba(42,135,228,.09); }
-.terr-page .terr-journey-card.is-future { opacity:.82; }
+.terr-page .terr-journey-card.is-future { opacity:1; }
+.terr-page .terr-journey-room-3 { border-color:#bed5ee; background:linear-gradient(180deg,var(--terr-surface-soft),var(--terr-surface)); }
+.terr-page .terr-journey-room-3.is-selected { border-color:#3288e5; }
+
 .terr-journey-card-top { display:flex; justify-content:space-between; color:var(--terr-text-soft); font-size:9px; font-weight:900; letter-spacing:.105em; }
 .terr-journey-card-top > span:last-child { font-size:14px; letter-spacing:0; }
-.terr-journey-visual { position:relative; display:grid; place-items:center; height:89px; width:100%; margin:10px 0 12px; border-radius:12px; overflow:hidden; background:linear-gradient(130deg,var(--room-a),var(--room-b)); }
+.terr-journey-visual { position:relative; display:grid; place-items:center; height:112px; width:100%; margin:10px 0 12px; border-radius:12px; overflow:hidden; background:linear-gradient(130deg,var(--room-a),var(--room-b)); }
+.terr-journey-visual img { display:block; position:relative; z-index:1; width:100%; height:100%; object-fit:contain; user-select:none; pointer-events:none; filter:drop-shadow(0 3px 3px rgba(95,60,40,.1)); }
+
 .terr-journey-visual:before { content:''; position:absolute; width:130px; height:130px; left:-32px; top:-65px; border-radius:50%; background:rgba(255,255,255,.26); }
 .terr-journey-visual:after { content:''; position:absolute; width:95px; height:95px; right:-25px; bottom:-65px; border-radius:50%; border:18px solid rgba(255,255,255,.27); }
-.terr-journey-visual > span { position:relative; z-index:1; font-size:41px; filter:drop-shadow(0 4px 3px rgba(0,0,0,.09)); }
+.terr-journey-visual .terr-journey-symbol { position:absolute; z-index:2; right:10px; bottom:8px; display:grid; place-items:center; width:37px; height:37px; border:1px solid rgba(255,255,255,.95); border-radius:12px; background:rgba(255,255,255,.88); font-size:21px; box-shadow:0 3px 12px rgba(63,99,130,.12); }
+.terr-journey-roof { position:absolute; z-index:2; top:7px; left:8px; padding:5px 8px; border-radius:7px; background:rgba(12,46,85,.85); color:white; font-size:9px; font-weight:850; letter-spacing:.025em; }
+
 .terr-journey-card > strong { display:block; font-size:15px; line-height:1.25; font-weight:850; }
 .terr-journey-card > small { display:block; min-height:27px; padding-top:5px; color:var(--terr-text-soft); font-size:11px; line-height:1.45; }
 .terr-journey-pill { align-self:flex-start; margin-top:auto; padding:5px 10px; border-radius:100px; font-size:10px; font-weight:800; background:var(--terr-surface-muted); color:var(--terr-text-soft); }
 .terr-journey-pill.is-atual { background:#e5f5eb; color:#24754c; }
 .terr-journey-pill.is-conquistada { background:#e7f6ed; color:#23814b; }
 .terr-journey-pill.is-em-progresso { background:#e6f1ff; color:#185aa5; }
-.terr-journey-estudos { --room-a:#ffefd8!important; --room-b:#f8ce92!important; }
-.terr-journey-biblioteca { --room-a:#ede8ff!important; --room-b:#c9baf4!important; }
-.terr-journey-oficina { --room-a:#ffe9e1!important; --room-b:#f9bda8!important; }
-.terr-journey-jardim { --room-a:#e5f9e6!important; --room-b:#b5e0ae!important; }
-.terr-journey-mirante { --room-a:#e3f2ff!important; --room-b:#a3d8eb!important; }
+.terr-journey-estudos { --room-a:#fff5e4!important; --room-b:#f6dbb4!important; }
+.terr-journey-reta-final { --room-a:#e8f4ed!important; --room-b:#b8dfd2!important; }
 .terr-journey-detail { display:flex; align-items:flex-start; gap:19px; margin-top:17px; padding:23px 24px; border:1px solid var(--terr-border); border-radius:17px; background:var(--terr-surface-soft); }
 .terr-journey-detail-icon { display:grid; place-items:center; flex:0 0 58px; height:58px; border-radius:17px; background:var(--terr-surface); font-size:29px; }
 .terr-journey-detail-copy { flex:1; min-width:0; }
@@ -539,24 +569,39 @@ html[data-theme='dark'] .terr-item-card:not(.is-owned) .terr-item-bottom button:
 .terr-journey-goal small { display:block; margin-top:9px; color:var(--terr-text-soft); font-size:10.5px; line-height:1.55; }
 .terr-journey-back { white-space:nowrap; padding:10px 14px; border:1px solid var(--terr-border); border-radius:10px; background:var(--terr-surface); color:var(--terr-accent); text-decoration:none; font-size:11px; font-weight:850; }
 .terr-journey-back:hover { text-decoration:underline; }
-@media(max-width:930px) { .terr-journey-cards { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
 @media(max-width:720px) {
   .terr-journey { border-radius:18px; padding:20px 16px; }
   .terr-journey-header { flex-wrap:wrap; gap:14px; }
   .terr-journey-count { min-width:0; display:flex; align-items:center; gap:12px; text-align:left; }
   .terr-journey-count small { margin-top:0; }
-  .terr-page .terr-journey-card { min-height:205px; padding:11px; }
+  .terr-journey-cards { row-gap:31px; column-gap:15px; padding:2px 0 6px; }
+  .terr-page .terr-journey-card { min-height:220px; padding:11px; }
   .terr-page .terr-journey-card.is-selected { padding:10px; }
-  .terr-journey-visual { height:70px; }
-  .terr-journey-visual > span { font-size:32px; }
+  .terr-journey-visual { height:96px; }
+  .terr-journey-visual .terr-journey-symbol { width:30px; height:30px; font-size:17px; right:7px; bottom:7px; }
   .terr-journey-detail { padding:16px; gap:12px; flex-wrap:wrap; }
   .terr-journey-detail-icon { width:45px; height:45px; flex-basis:45px; font-size:23px; }
   .terr-journey-back { margin-left:auto; }
 }
-@media(max-width:365px) { .terr-journey-cards { grid-template-columns:1fr; } }
+@media(max-width:440px) {
+  .terr-journey-cards { column-gap:9px; row-gap:24px; }
+  .terr-page .terr-journey-card { min-height:209px; padding:9px; border-radius:13px; }
+  .terr-page .terr-journey-card.is-selected { padding:8px; }
+  .terr-journey-card > strong { font-size:12px; overflow-wrap:anywhere; }
+  .terr-journey-card > small { font-size:10px; }
+  .terr-journey-card-top { font-size:8px; }
+  .terr-journey-visual { height:81px; margin:8px 0 10px; }
+  .terr-journey-roof { font-size:7px; padding:4px 6px; }
+  .terr-journey-pill { font-size:9px; padding:5px 7px; }
+  .terr-map-heading { font-size:9px; }
+}
+
 html[data-theme='dark'] .terr-journey-pill.is-atual,
 html[data-theme='dark'] .terr-journey-pill.is-conquistada { background:#174c39; color:#9ceac3; }
 html[data-theme='dark'] .terr-journey-pill.is-em-progresso { background:#183e69; color:#b4d9ff; }
+html[data-theme='dark'] .terr-page .terr-journey-room-3 { border-color:#456280; }
+html[data-theme='dark'] .terr-journey-tunnels path { stroke:#53718c; }
 @media(prefers-reduced-motion:reduce) { .terr-page .terr-journey-card { transition:none; } .terr-page .terr-journey-card:hover { transform:none; } }
 
 
@@ -657,3 +702,114 @@ html[data-theme='dark'] .terr-wall-snap { background:#234568; color:#d4eaff; bor
   .terr-size-editor { flex-basis:100%; }
   .terr-size-editor input[type='range'] { max-width:unset; }
 }
+
+/* Mundo navegável no próprio cenário, como um formigueiro contínuo.
+   Salas bloqueadas não entram no DOM do mapa fora do modo decorar. */
+.terr-world-toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; flex-wrap:wrap; padding:0 0 11px;
+}
+.terr-world-hint { color:#376fa3; font-size:11px; font-weight:750; }
+.terr-world-room-buttons { display:flex; gap:7px; flex-wrap:wrap; }
+.terr-world-room-buttons button {
+  padding:8px 12px; border:1px solid #b6d6f2; border-radius:10px;
+  background:#fff; color:#195a99; font-size:11px; font-weight:850;
+}
+.terr-world-room-buttons button:hover { background:#e7f5ff; }
+.terr-world-room-buttons button.active { color:#fff; background:#1864b8; border-color:#1864b8; }
+.terr-world-viewport {
+  position:relative; width:100%; height:clamp(440px,55vw,655px);
+  overflow:auto; overscroll-behavior:contain; scroll-behavior:auto;
+  border:1px solid #b8e3f2; border-radius:18px;
+  background:radial-gradient(circle at 40% 15%, #f4fdff, #dff7fd 80%);
+  cursor:grab; touch-action:pan-x pan-y;
+  scrollbar-width:thin; scrollbar-color:#9ec4e2 #e2f6fd;
+}
+.terr-world-viewport:active { cursor:grabbing; }
+.terr-world-viewport:focus-visible { outline:3px solid #288bee; outline-offset:3px; }
+.terr-world-viewport.is-individual { height:auto; max-height:none; overflow:auto; }
+.terr-world-board { position:relative; isolation:isolate; margin:0 auto; }
+.terr-world-board.is-individual { width:min(100%,650px); padding:8px; }
+/* As três câmaras compartilham a borda de terra, sem túneis artificiais.
+   O posicionamento usa uma pequena sobreposição entre os contornos orgânicos
+   do PNG transparente: a pirâmide forma um único formigueiro compacto. */
+.terr-world-board.is-base { width:1280px; height:605px; }
+.terr-world-board.is-piramide { width:1280px; height:1040px; }
+.terr-world-room { position:absolute; width:600px; }
+.terr-world-board.is-individual .terr-world-room { position:relative; width:100%; }
+.terr-world-board.is-base .terr-world-room-1 { left:60px; top:12px; }
+.terr-world-board.is-base .terr-world-room-2 { left:620px; top:12px; }
+.terr-world-board.is-piramide .terr-world-room-1 { left:60px; top:440px; z-index:2; }
+.terr-world-board.is-piramide .terr-world-room-2 { left:620px; top:440px; z-index:2; }
+.terr-world-board.is-piramide .terr-world-room-3 { left:340px; top:14px; z-index:1; }
+.terr-world-room-heading {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  width:fit-content; max-width:100%; min-height:36px;
+  margin:0 auto 4px; padding:7px 13px;
+  background:rgba(255,255,255,.94); border:1px solid #cae4f4;
+  border-radius:13px; box-shadow:0 6px 12px rgba(19,83,115,.07);
+  color:#144f91; font-size:11px; font-weight:850;
+}
+.terr-world-room-heading span:last-child { white-space:nowrap; color:#18784e; }
+.terr-world-room.is-locked .terr-world-room-heading span:last-child { color:#9a5b29; }
+/* Etiquetas nas extremidades: não cobrem a junção entre as três tocas. */
+.terr-world-board.is-piramide .terr-world-room-1 > .terr-world-room-heading { margin-left:0; margin-right:auto; }
+.terr-world-board.is-piramide .terr-world-room-2 > .terr-world-room-heading { margin-left:auto; margin-right:0; }
+.terr-world-room .terr-scene { width:100%; max-width:none; }
+.terr-world-preview { position:relative; aspect-ratio:1343 / 1171; }
+.terr-world-preview > img { display:block; width:100%; height:100%; object-fit:contain; pointer-events:none; user-select:none; }
+.terr-world-preview.is-locked > img { opacity:.44; filter:grayscale(.4) saturate(.75); }
+.terr-world-preview.is-unlocked > img { opacity:.78; }
+.terr-world-gate {
+  position:absolute; z-index:2; top:47%; left:50%; transform:translate(-50%,-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  width:64%; padding:19px; text-align:center;
+  color:#174a80; border:1px solid #c7e1f6; border-radius:19px;
+  background:rgba(255,255,255,.95); box-shadow:0 9px 24px rgba(29,82,121,.15);
+  pointer-events:none;
+}
+.terr-world-gate-symbol { display:grid; place-items:center; width:45px; height:45px; background:#eaf4ff; border-radius:50%; font-size:23px; }
+.terr-world-gate strong { font-size:15px; font-weight:900; }
+.terr-world-gate small { font-size:11px; line-height:1.5; }
+.terr-world-roof {
+  position:absolute; top:13%; left:50%; transform:translateX(-50%);
+  padding:8px 12px; border-radius:999px; background:#79513bea;
+  color:#fff; font-size:10px; font-weight:850; white-space:nowrap;
+}
+.terr-world-footnote { margin:11px 5px 0; color:#477ca7; font-size:11px; line-height:1.5; }
+.terr-journey-navigation-tip { margin:0 0 15px; color:var(--terr-text-soft); font-size:12px; }
+.terr-world-board .terr-scene { touch-action:pan-x pan-y; }
+.terr-world-board .terr-scene-item.movable { touch-action:none; }
+@media(max-width:720px) {
+  .terr-world-viewport { height:clamp(370px,65vh,560px); border-radius:14px; }
+  .terr-world-hint { font-size:10px; }
+  .terr-world-room-buttons button { padding:7px 10px; }
+  .terr-world-room-heading { font-size:11px; }
+  .terr-world-board.is-individual { padding:4px; }
+  .terr-world-gate { width:67%; }
+}
+html[data-theme='dark'] .terr-world-toolbar { color:#b5daf6; }
+html[data-theme='dark'] .terr-world-viewport { border-color:#315979; background:radial-gradient(circle at 40% 15%, #284963, #19384f 80%); }
+html[data-theme='dark'] .terr-world-room-heading, html[data-theme='dark'] .terr-world-gate { border-color:#4d6c86; background:#203a50; color:#e4f3ff; }
+html[data-theme='dark'] .terr-world-hint, html[data-theme='dark'] .terr-world-footnote { color:#b4d2ed; }
+html[data-theme='dark'] .terr-world-room-buttons button:not(.active) { color:#badafa; background:#233e59; border-color:#456b8c; }
+@media(prefers-reduced-motion:reduce) { .terr-world-viewport { scroll-behavior:auto; } }
+
+.terr-world-board .terr-scene-item:not(.movable) { touch-action:pan-x pan-y; }
+
+/* Sala 2 começa sem mobília, mas a estrutura original e a Tenna permanecem. */
+.terr-scene-empty .terr-empty-room-message {
+  position:absolute;
+  top:7%; left:50%; transform:translateX(-50%);
+  max-width:70%; padding:8px 13px; border-radius:999px;
+  text-align:center; white-space:normal;
+  background:rgba(255,255,255,.94); border:1px solid #cce4f7;
+  box-shadow:0 4px 16px rgba(18,78,115,.12);
+  color:#19558c; font-size:12px; font-weight:800;
+  pointer-events:none;
+}
+
+.terr-inventory-empty { display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:42px 20px 48px; border-top:1px solid var(--terr-line); }
+.terr-inventory-empty > span { font-size:35px; }
+.terr-inventory-empty > strong { color:var(--terr-strong); font-size:19px; }
+.terr-inventory-empty > p { max-width:420px; margin:0 0 8px; color:var(--terr-text-soft); font-size:13px; line-height:1.65; }

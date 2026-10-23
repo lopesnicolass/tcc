@@ -68,3 +68,11 @@ test('deco antiga: reposiciona somente mesa e prateleira nos padrões anteriores
   assert.deepEqual(mantido.positions.mesa,{x:53,y:62});
   assert.deepEqual(mantido.positions.prateleira,{x:30,y:40});
 });
+
+// A troca da ilustração da cadeira não deve mexer em decoração personalizada.
+test('migração do padrão da cadeira e estante na Sala 2 preserva posições manuais', async () => {
+  const { posicaoPadraoCompat } = await import('../src/terrario/modoTeste.js');
+  assert.deepEqual(posicaoPadraoCompat({ id: 's2_cadeira', x:36, y:73 }, { x:50, y:75 }), { id:'s2_cadeira', x:36, y:73 });
+  assert.deepEqual(posicaoPadraoCompat({ id: 's2_estante', x:76, y:68 }, { x:74, y:63 }), { id:'s2_estante', x:76, y:68 });
+  assert.deepEqual(posicaoPadraoCompat({ id: 's2_cadeira', x:36, y:73 }, { x:48, y:77 }), { x:48, y:77 });
+});

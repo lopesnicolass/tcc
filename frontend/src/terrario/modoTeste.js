@@ -4,6 +4,15 @@ import { ajustarEscala, posicionarItemNaZona } from './posicionamentoItens.js';
 // O estado é isolado por aluno e fica somente no armazenamento deste navegador.
 export const TEST_STORAGE_PREFIX = 'tenna_terrario_decora_teste_v1_';
 
+// Migra apenas posicionamentos que ainda coincidem com os antigos padrões.
+// Se o aluno arrastou um móvel, a posição personalizada permanece intacta.
+export function posicaoPadraoCompat(item, ponto) {
+  if (!ponto) return item;
+  if (item.id === 's2_cadeira' && ponto.x === 50 && ponto.y === 75) return item;
+  if (item.id === 's2_estante' && ponto.x === 74 && ponto.y === 63) return item;
+  return ponto;
+}
+
 export function baseTeste(itens, inventario = []) {
   return {
     iniciado: true,
@@ -14,7 +23,7 @@ export function baseTeste(itens, inventario = []) {
     })),
     positions: Object.fromEntries(itens.map((item) => {
       const salvo = inventario.find((owned) => owned.id === item.id);
-      return [item.id, posicionarItemNaZona({ x: salvo?.x ?? item.x, y: salvo?.y ?? item.y }, item, salvo?.escala ?? 1)];
+      return [item.id, posicionarItemNaZona(posicaoPadraoCompat(item, { x: salvo?.x ?? item.x, y: salvo?.y ?? item.y }), item, salvo?.escala ?? 1)];
     }))
   };
 }
@@ -35,7 +44,7 @@ export function lerTeste(storage, chave, itens) {
         // Atualiza somente itens que ainda estavam exatamente na posição
         // padrão antiga. Deslocamentos feitos manualmente são preservados.
         const antigos = { mesa: [50, 61], prateleira: [27, 39] };
-        const pos = antigos[item.id] && safe.x === antigos[item.id][0] && safe.y === antigos[item.id][1] ? item : safe;
+        const pos = posicaoPadraoCompat(item, antigos[item.id] && safe.x === antigos[item.id][0] && safe.y === antigos[item.id][1] ? item : safe);
         return [item.id, posicionarItemNaZona(pos, item, salvo.scales?.[item.id] ?? 1)];
       }))
     };

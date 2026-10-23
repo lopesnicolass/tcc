@@ -1269,3 +1269,67 @@
 /* Espacamento entre filtros/pesquisa e post-its */
 .mural-page .mural-grid { margin-top: 28px; }
 @media (max-width: 700px) { .mural-page .mural-grid { margin-top: 24px; } }
+
+
+/* Filtros compactos em telas muito pequenas: exibe apenas as bolinhas com contagem */
+.mural-page .materia-tab-label {
+  display: inline;
+}
+
+@media (max-width: 520px) {
+  .mural-page .materia-tabs {
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .mural-page .materia-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mural-page .materia-tab {
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    transition: transform .16s ease;
+  }
+
+  .mural-page .materia-tab:hover,
+  .mural-page .materia-tab:not(.active):hover {
+    background: transparent;
+    transform: translateY(-1px);
+  }
+
+  .mural-page .materia-tab-label {
+    display: none;
+  }
+
+  .mural-page .materia-tab-count {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    flex: 0 0 40px;
+    border-width: 2px;
+    font-size: 12px;
+    box-shadow: 0 6px 14px -10px rgba(18, 89, 182, .55);
+    transition: transform .16s ease, box-shadow .16s ease, outline-color .16s ease;
+  }
+
+  .mural-page .materia-tab.active .materia-tab-count {
+    transform: scale(1.08);
+    outline: 3px solid rgba(18, 89, 182, .22);
+    outline-offset: 2px;
+    box-shadow: 0 10px 18px -10px rgba(18, 89, 182, .45);
+  }
+
+  .mural-page .materia-tab.active .materia-tab-count-todas {
+    background: #1259b6;
+    color: #fff;
+    border-color: #1259b6;
+  }
+}
