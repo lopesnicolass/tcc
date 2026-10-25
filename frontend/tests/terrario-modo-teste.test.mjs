@@ -76,3 +76,44 @@ test('migração do padrão da cadeira e estante na Sala 2 preserva posições m
   assert.deepEqual(posicaoPadraoCompat({ id: 's2_estante', x:76, y:68 }, { x:74, y:63 }), { id:'s2_estante', x:76, y:68 });
   assert.deepEqual(posicaoPadraoCompat({ id: 's2_cadeira', x:36, y:73 }, { x:48, y:77 }), { x:48, y:77 });
 });
+
+// A harmonização visual da Sala 2 só migra o padrão antigo e preserva
+// qualquer disposição personalizada. A seleção cheia antiga vira uma
+// prévia enxuta apenas uma vez (os 14 itens continuam no catálogo).
+test('Sala 2: posições padrão antigas migram, mas arrastos manuais permanecem', async () => {
+  const { posicaoPadraoCompat } = await import('../src/terrario/modoTeste.js');
+  assert.deepEqual(posicaoPadraoCompat({id:'s2_mesa',x:50,y:60}, {x:36,y:66}), {id:'s2_mesa',x:50,y:60});
+  assert.deepEqual(posicaoPadraoCompat({id:'s2_estante',x:26,y:72}, {x:76,y:68}), {id:'s2_estante',x:26,y:72});
+  assert.deepEqual(posicaoPadraoCompat({id:'s2_mesa',x:50,y:60}, {x:40,y:65}), {x:40,y:65});
+});
+
+test('Sala 2: prévia carregada com todos os móveis é reorganizada uma única vez', () => {
+  const ids = ['s2_mesa','s2_cadeira','s2_estante','s2_mural','s2_calendario','s2_globo',
+    's2_puff','s2_planta','s2_luzes','s2_caixa','s2_tapete_redondo','s2_vaso','s2_livros','s2_avisos'];
+  const itens = ids.map(id=>({id,x:50,y:68,width:14,zone:'chao'}));
+  const storage = {getItem:()=>JSON.stringify({visible:ids,positions:{},scales:{}})};
+  const estado = lerTeste(storage,'sala2',itens);
+  assert.equal(estado.layoutV3,true);
+  assert.equal(estado.visible.length,10);
+  const novo = lerTeste({getItem:()=>JSON.stringify({...estado,visible:ids})},'sala2',itens);
+  assert.equal(novo.visible.length,14);
+});
+
+test('nova montagem PNG retira somente cadeira automática duplicada, preservando a ajustada', async () => {
+  const { lerTeste } = await import('../src/terrario/modoTeste.js');
+  const itens = [
+    {id:'s2_mesa',x:50,y:65,width:33,zone:'chao'},
+    {id:'s2_cadeira',x:43,y:69,width:12,zone:'chao'},
+    ...Array.from({length:12}, (_,i)=>({id:`s2_item_${i}`,x:40,y:70,width:12,zone:'chao'})),
+  ];
+  const montar = (posicao) => lerTeste({getItem:()=>JSON.stringify({
+    visible:['s2_mesa','s2_cadeira'],
+    positions:{s2_mesa:{x:50,y:60},s2_cadeira:posicao},
+    scales:{},layoutV3:true,
+  })},'decor',itens);
+  const automatica = montar({x:43,y:69});
+  assert.ok(!automatica.visible.includes('s2_cadeira'));
+  assert.ok(automatica.visible.includes('s2_mesa'));
+  const customizada = montar({x:47,y:70});
+  assert.ok(customizada.visible.includes('s2_cadeira'));
+});

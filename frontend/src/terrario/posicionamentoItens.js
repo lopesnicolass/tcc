@@ -34,6 +34,8 @@ export function ajustarEscala(valor) {
 export const PAREDE_POSICOES = Object.freeze({
   mesa: Object.freeze({ x: 50, y: 56 }),
   prateleira: Object.freeze({ x: 26, y: 36 }),
+  guarda_roupa: Object.freeze({ x: 59, y: 51 }),
+  s2_mesa: Object.freeze({ x: 50, y: 62 }),
 });
 export function posicaoEncostada(id) {
   return PAREDE_POSICOES[id] || null;
@@ -42,7 +44,19 @@ export function posicaoEncostada(id) {
 // Uma peça aumentada não deve poder sair pelas laterais do quadro.
 // O limite ainda respeita a região própria de chão/parede.
 export function limitesParaItem(item, escala = 1) {
-  const zona = limitesItem(item?.zone);
+  const base = limitesItem(item?.zone);
+  // Limites especiais para objetos que devem ocupar a parte superior do ninho.
+  // A regra permanece isolada dos outros móveis das Salas 1 e 3.
+  const excecoes = {
+    guarda_roupa: { yMin: 42 },
+    s2_mesa: { yMin: 43 },
+    s2_luzes: { yMin: 12 },
+    s2_planta: { yMin: 16 },
+    // Relógio e calendário acompanham a faixa curva à direita na Sala 3.
+    s3_relogio: { xMax: 88 },
+    s3_calendario: { xMax: 88, yMax: 55 },
+  };
+  const zona = { ...base, ...(excecoes[item?.id] || {}) };
   const metade = Math.max(0, (item?.width || 0) * ajustarEscala(escala) / 2);
   return {
     ...zona,

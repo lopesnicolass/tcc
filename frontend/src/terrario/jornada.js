@@ -1,5 +1,5 @@
-// Mapa visual das três salas. A Sala 2 preserva o desbloqueio já existente
-// no servidor; os demais ambientes serão implementados em etapas posteriores.
+// Mapa visual das três salas do formigueiro.
+// Sala 2: 5 sessões válidas. Sala 3: 10 sessões válidas.
 export const SALAS_TENNA = Object.freeze([
   {
     numero: 1, nome: 'Ninho Inicial', subtitulo: 'Onde tudo começa',
@@ -8,34 +8,42 @@ export const SALAS_TENNA = Object.freeze([
   },
   {
     numero: 2, nome: 'Refúgio do Conhecimento', subtitulo: 'Seu cantinho de evolução',
-    descricao: 'Uma sala que começa vazia e será decorada com móveis próprios. Ela é conquistada após cinco sessões de foco válidas.',
+    descricao: 'Uma sala dedicada aos estudos. Ela é conquistada após cinco sessões de foco válidas.',
     simbolo: '📚', tema: 'estudos'
   },
   {
-    numero: 3, nome: 'Sala da Reta Final', subtitulo: 'A um passo da ETECAMP',
-    descricao: 'O último ambiente dentro do formigueiro. Seu teto permanece fechado: a abertura para a ETECAMP será uma conquista especial, implementada em uma etapa futura.',
+    numero: 3, nome: 'Sala do Desafio Final', subtitulo: 'É hora de colocar o aprendizado em prática',
+    descricao: 'O último ambiente do formigueiro lembra o dia do vestibulinho: hora de enfrentar a prova com tudo o que foi aprendido.',
     simbolo: '⭐', tema: 'reta-final'
   },
 ]);
 
 export function construirJornada(estado) {
   const sessoesValidas = Math.max(0, Number(estado?.sessoesValidas) || 0);
-  // A verificação do desbloqueio real continua no backend, sem simular a sala 3.
-  const desbloqueada = Math.min(2, Math.max(1, Number(estado?.salaDesbloqueada) || 1));
-  const objetivo = 5;
-  const progresso = Math.min(objetivo, sessoesValidas);
+  const desbloqueada = Math.min(3, Math.max(1, Number(estado?.salaDesbloqueada) || 1));
+  const objetivoAtual = desbloqueada >= 3 ? 10 : desbloqueada >= 2 ? 10 : 5;
+  const progressoAtual = Math.min(objetivoAtual, sessoesValidas);
+  const faltamAtual = Math.max(0, objetivoAtual - progressoAtual);
+  const faltamSala2 = Math.max(0, 5 - sessoesValidas);
+  const faltamSala3 = Math.max(0, 10 - sessoesValidas);
+
   return {
-    progresso, objetivo, faltam: Math.max(0, objetivo - progresso),
-    percentual: Math.round(progresso / objetivo * 100),
+    progresso: progressoAtual,
+    objetivo: objetivoAtual,
+    faltam: faltamAtual,
+    faltamSala2,
+    faltamSala3,
+    percentual: Math.round((progressoAtual / objetivoAtual) * 100),
     segundaConquistada: desbloqueada >= 2,
+    terceiraConquistada: desbloqueada >= 3,
     totalConquistadas: desbloqueada,
-    salas: SALAS_TENNA.map(sala => ({
+    salas: SALAS_TENNA.map((sala) => ({
       ...sala,
       conquistada: sala.numero <= desbloqueada,
-      jogavel: sala.numero === 1 || (sala.numero === 2 && desbloqueada >= 2),
+      jogavel: sala.numero <= desbloqueada,
       estado: sala.numero === 1 ? 'atual'
         : sala.numero === 2 ? (desbloqueada >= 2 ? 'conquistada' : 'em-progresso')
-        : 'futura',
+        : desbloqueada >= 3 ? 'conquistada' : (desbloqueada >= 2 ? 'em-progresso' : 'futura'),
     })),
   };
 }

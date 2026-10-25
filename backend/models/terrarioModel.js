@@ -31,21 +31,38 @@ const ITENS = Object.freeze({
   mesa_redonda: { x: 76, y: 73, zona: 'chao' },
   almofada: { x: 63, y: 80, zona: 'tapete' },
   banquinho_tronco: { x: 82, y: 80, zona: 'chao' },
+  guarda_roupa: { x: 59, y: 51, zona: 'chao', sala: 1, limites: { yMin: 42 } },
   // Sala 2: itens exclusivos, com IDs separados das compras da Sala 1.
-  s2_mesa: { x: 36, y: 66, zona: 'chao', sala: 2 },
-  s2_cadeira: { x: 36, y: 73, zona: 'chao', sala: 2 },
-  s2_estante: { x: 76, y: 68, zona: 'chao', sala: 2 },
-  s2_mural: { x: 49, y: 35, zona: 'parede', sala: 2 },
-  s2_calendario: { x: 69, y: 36, zona: 'parede', sala: 2 },
-  s2_globo: { x: 26, y: 79, zona: 'chao', sala: 2 },
-  s2_puff: { x: 64, y: 81, zona: 'tapete', sala: 2 },
-  s2_planta: { x: 84, y: 38, zona: 'pendurado', sala: 2 },
-  s2_luzes: { x: 48, y: 29, zona: 'pendurado', sala: 2 },
-  s2_caixa: { x: 81, y: 80, zona: 'chao', sala: 2 },
-  s2_tapete_redondo: { x: 53, y: 83, zona: 'tapete', sala: 2 },
-  s2_vaso: { x: 18, y: 68, zona: 'chao', sala: 2 },
-  s2_livros: { x: 52, y: 81, zona: 'chao', sala: 2 },
-  s2_avisos: { x: 29, y: 39, zona: 'parede', sala: 2 },
+  s2_mesa: { x: 50, y: 62, zona: 'chao', sala: 2, limites: { yMin: 43 } },
+  s2_cadeira: { x: 43, y: 69, zona: 'chao', sala: 2 },
+  s2_estante: { x: 26, y: 74, zona: 'chao', sala: 2 },
+  s2_mural: { x: 50, y: 34, zona: 'parede', sala: 2 },
+  s2_calendario: { x: 72, y: 35, zona: 'parede', sala: 2 },
+  s2_globo: { x: 26, y: 84, zona: 'chao', sala: 2 },
+  s2_puff: { x: 75, y: 82, zona: 'tapete', sala: 2 },
+  s2_planta: { x: 17, y: 33, zona: 'pendurado', sala: 2, limites: { yMin: 16 } },
+  s2_luzes: { x: 49, y: 20, zona: 'pendurado', sala: 2, limites: { yMin: 12 } },
+  s2_caixa: { x: 84, y: 81, zona: 'chao', sala: 2 },
+  s2_tapete_redondo: { x: 58, y: 82, zona: 'tapete', sala: 2 },
+  s2_vaso: { x: 84, y: 68, zona: 'chao', sala: 2 },
+  s2_livros: { x: 45, y: 78, zona: 'chao', sala: 2 },
+  s2_avisos: { x: 28, y: 39, zona: 'parede', sala: 2 },
+  // Sala 3: reta final, ainda dentro do formigueiro, sem abertura no teto por enquanto.
+  s3_mesa: { x: 43, y: 80, zona: 'chao', sala: 3 },
+  s3_lousa: { x: 29, y: 43, zona: 'parede', sala: 3 },
+  s3_relogio: { x: 82, y: 31, zona: 'parede', sala: 3, limites: { xMax: 88 } },
+  s3_mochila: { x: 22, y: 84, zona: 'chao', sala: 3 },
+  s3_kit: { x: 53, y: 68, zona: 'chao', sala: 3 },
+  s3_cadeira: { x: 36, y: 73, zona: 'chao', sala: 3 },
+  s3_estante: { x: 75, y: 68, zona: 'chao', sala: 3 },
+  s3_painel: { x: 65, y: 41, zona: 'parede', sala: 3 },
+  s3_calendario: { x: 82, y: 51, zona: 'parede', sala: 3, limites: { xMax: 88, yMax: 55 } },
+  s3_livros: { x: 50, y: 80, zona: 'chao', sala: 3 },
+  s3_puff: { x: 63, y: 81, zona: 'tapete', sala: 3 },
+  s3_tapete: { x: 44, y: 85, zona: 'tapete', sala: 3 },
+  s3_vaso: { x: 18, y: 68, zona: 'chao', sala: 3 },
+  s3_luzes: { x: 50, y: 29, zona: 'pendurado', sala: 3 },
+  s3_caixa: { x: 81, y: 80, zona: 'chao', sala: 3 },
 });
 
 function executar(sql, args = []) {
@@ -117,7 +134,8 @@ async function personalizarItem(usuarioId, itemId, dados) {
   }
   let x = null, y = null;
   if (dados.x !== undefined || dados.y !== undefined) {
-    const limite = LIMITES[ITENS[itemId].zona];
+    // Alguns móveis possuem altura própria para encaixar na parede ou no teto.
+    const limite = { ...LIMITES[ITENS[itemId].zona], ...(ITENS[itemId].limites || {}) };
     if (!Number.isFinite(dados.x) || !Number.isFinite(dados.y) ||
       dados.x < limite.xMin || dados.x > limite.xMax ||
       dados.y < limite.yMin || dados.y > limite.yMax) {

@@ -255,3 +255,42 @@ test('Terrário: quatro novos itens da Sala 2 exigem desbloqueio, têm preços e
   await assert.rejects(model.personalizarItem(1,'s2_avisos',{ equipado:true,x:29,y:80 }), /Posição inválida/);
   banco.close();
 });
+
+test('Terrário: mesa e luzes da Sala 2 podem subir mais alto sem liberar zonas de outros itens', async () => {
+  const { banco, model } = novoBanco();
+  await model.buscarEstado(1);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2, sementes=150 WHERE usuario_id=1').run();
+  for (const id of ['s2_mesa', 's2_luzes', 's2_planta', 's2_mural']) await model.comprarItem(1, id);
+  await model.personalizarItem(1, 's2_mesa', { equipado:true, x:50, y:44 });
+  await model.personalizarItem(1, 's2_luzes', { equipado:true, x:49, y:13 });
+  await model.personalizarItem(1, 's2_planta', { equipado:true, x:17, y:19 });
+  const estado = await model.buscarEstado(1);
+  assert.equal(estado.inventario.find(item => item.id === 's2_mesa').y, 44);
+  assert.equal(estado.inventario.find(item => item.id === 's2_luzes').y, 13);
+  assert.equal(estado.inventario.find(item => item.id === 's2_planta').x, 17);
+  await assert.rejects(model.personalizarItem(1, 's2_mesa', { equipado:true, x:50, y:42 }), /Posição inválida/);
+  await assert.rejects(model.personalizarItem(1, 's2_luzes', { equipado:true, x:49, y:11 }), /Posição inválida/);
+  await assert.rejects(model.personalizarItem(1, 's2_mural', { equipado:true, x:49, y:20 }), /Posição inválida/);
+  banco.close();
+});
+
+test('Terrário: a Sala 3 vende seus oito itens exclusivos, com limites e compra protegidos', async () => {
+  const { banco, model } = novoBanco();
+  await model.buscarEstado(1);
+  banco.prepare('UPDATE terrario_usuario SET sementes=200 WHERE usuario_id=1').run();
+  await assert.rejects(model.comprarItem(1,'s3_lousa'),/Desbloqueie a Sala 3/);
+  assert.equal((await model.buscarEstado(1)).sementes,200);
+  banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=3 WHERE usuario_id=1').run();
+  const ids=['s3_mesa','s3_lousa','s3_relogio','s3_mochila','s3_kit','s3_calendario','s3_painel','s3_tapete'];
+  for (const id of ids) await model.comprarItem(1,id);
+  await assert.rejects(model.comprarItem(1,'s3_mesa'),/já possui/);
+  await model.personalizarItem(1,'s3_lousa',{equipado:true,x:30,y:40,escala:1.3});
+  await model.personalizarItem(1,'s3_mochila',{equipado:true,x:26,y:77});
+  await assert.rejects(model.personalizarItem(1,'s3_lousa',{equipado:true,x:30,y:80}),/Posição inválida/);
+  await assert.rejects(model.personalizarItem(1,'s3_mochila',{equipado:true,x:26,y:34}),/Posição inválida/);
+  const estado=await model.buscarEstado(1);
+  assert.equal(estado.sementes,85);
+  assert.equal(estado.inventario.filter(item=>ids.includes(item.id)).length,8);
+  assert.equal(estado.inventario.find(i=>i.id==='s3_lousa').escala,1.3);
+  banco.close();
+});

@@ -24,7 +24,7 @@ test('ao conquistar a sala 2, as duas salas ficam visíveis no modo foco', () =>
   assert.equal(formatoMapa(visiveis), 'base');
 });
 
-test('a sala 3 não surge antes de existir o desbloqueio real no servidor', () => {
-  const { salas } = construirJornada({ salaDesbloqueada: 6, sessoesValidas: 100 });
-  assert.deepEqual(salasVisiveisNoMapa(salas, false).map(sala => sala.numero), [1, 2]);
+test('a sala 3 surge depois do desbloqueio informado pelo servidor', () => {
+  const { salas } = construirJornada({ salaDesbloqueada: 3, sessoesValidas: 10 });
+  assert.deepEqual(salasVisiveisNoMapa(salas, false).map(sala => sala.numero), [1, 2, 3]);
 });

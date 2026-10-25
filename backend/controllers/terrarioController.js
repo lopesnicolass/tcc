@@ -1,7 +1,7 @@
 const terrario = require('../models/terrarioModel');
 
 // Mantém a rota /terrario/jornada alinhada com o mapa de três salas do frontend.
-// O critério de desbloqueio da terceira sala ainda não foi implementado.
+// Sala 2: cinco sessões válidas; Sala 3: dez sessões válidas.
 const SALAS = [
   ['Ninho Inicial', 'Onde tudo começa'],
   ['Refúgio do Conhecimento', 'Seu cantinho de evolução'],
@@ -46,9 +46,9 @@ async function jornada(req, res) {
     const estadoAtual = await terrario.buscarEstado(req.usuario.id);
     return res.json({ salas: SALAS.map(([nome, descricao], index) => ({
       numero: index + 1, nome, descricao,
-      desbloqueada: index < 2 && index + 1 <= estadoAtual.salaDesbloqueada,
-      disponivelNestaVersao: index === 0,
-      requisito: index === 1 ? '5 sessões completas de pelo menos 15 minutos' : index === 2 ? 'Critério a definir em uma próxima etapa' : null
+      desbloqueada: index + 1 <= estadoAtual.salaDesbloqueada,
+      disponivelNestaVersao: true,
+      requisito: index === 1 ? '5 sessões completas de pelo menos 15 minutos' : index === 2 ? '10 sessões completas de pelo menos 15 minutos' : null
     })), progressoParaSala2: Math.min(5, estadoAtual.sessoesValidas) });
   } catch (erro) { return erroResposta(res, erro); }
 }

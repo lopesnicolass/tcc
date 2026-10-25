@@ -813,3 +813,323 @@ html[data-theme='dark'] .terr-world-room-buttons button:not(.active) { color:#ba
 .terr-inventory-empty > span { font-size:35px; }
 .terr-inventory-empty > strong { color:var(--terr-strong); font-size:19px; }
 .terr-inventory-empty > p { max-width:420px; margin:0 0 8px; color:var(--terr-text-soft); font-size:13px; line-height:1.65; }
+
+/* Refinamento visual da página do terrário: menos blocos longos,
+   mais respiro e uma separação mais clara entre foco, jornada e decoração. */
+.terr-header {
+  min-height: 156px;
+  margin-bottom: 18px;
+  padding: 28px clamp(24px, 2.5vw, 40px);
+}
+.terr-header h1 { margin-bottom: 8px; }
+.terr-header p { max-width: 520px; }
+
+.terr-test-banner {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: var(--terr-shadow);
+}
+.terr-test-banner-copy strong { font-size: 13px; }
+.terr-test-banner-copy span { max-width: 760px; }
+
+.terr-layout { gap: 18px; }
+.terr-scene-topbar {
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--terr-line);
+}
+.terr-scene-topbar h2, .terr-inventory h2, .terr-timer-card h2 { font-size: 22px; }
+.terr-scene-heading p { max-width: 560px; }
+.terr-scene-shell { padding: 14px 18px 16px; }
+.terr-scene-bottom {
+  padding: 16px 22px 18px;
+  border-top: 1px solid var(--terr-line);
+}
+
+.terr-world-toolbar {
+  padding: 0 2px 12px;
+  border-bottom: 1px solid rgba(185, 220, 241, .55);
+  margin-bottom: 12px;
+}
+.terr-world-hint { font-size: 10.5px; }
+.terr-world-room-buttons button {
+  min-height: 34px;
+  padding: 8px 11px;
+  border-radius: 11px;
+}
+.terr-world-room-heading {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 10.5px;
+}
+
+.terr-journey {
+  margin-top: 18px;
+  padding: 22px 24px;
+}
+.terr-journey-header {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--terr-line);
+}
+.terr-journey-header p { max-width: 560px; }
+.terr-journey-count {
+  min-width: 126px;
+  padding: 12px 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+.terr-journey-navigation-tip {
+  margin: 0 0 12px;
+  font-size: 11px;
+}
+.terr-journey-detail {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+  margin-top: 0;
+  padding: 18px 20px;
+}
+.terr-journey-detail h3 { margin-bottom: 8px; }
+.terr-journey-goal { max-width: 620px; }
+.terr-journey-back {
+  align-self: start;
+  border-radius: 12px;
+}
+
+.terr-catalog-preview,
+.terr-inventory {
+  margin-top: 18px;
+  border: 1px solid var(--terr-border);
+  border-radius: 22px;
+  background: var(--terr-surface);
+  box-shadow: var(--terr-shadow);
+}
+.terr-catalog-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 24px;
+}
+.terr-catalog-preview-copy { min-width: 0; }
+.terr-catalog-preview h2 {
+  margin: 5px 0 6px;
+  color: var(--terr-strong);
+  font-family: 'Inter', sans-serif;
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -.027em;
+}
+.terr-catalog-preview p {
+  margin: 0;
+  color: var(--terr-text-soft);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.terr-catalog-preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.terr-catalog-preview-meta > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 1px solid #d7e9fb;
+  border-radius: 999px;
+  background: var(--terr-surface-muted);
+  color: #1656ac;
+  font-size: 11.5px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.terr-inventory {
+  padding: 24px 24px 20px;
+}
+.terr-inventory-header {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--terr-line);
+}
+.terr-inventory h2 { font-size: 23px; }
+.terr-inventory-header p {
+  max-width: 700px;
+  margin-top: 4px;
+}
+.terr-items-grid {
+  gap: 14px;
+}
+.terr-item-card {
+  border-radius: 16px;
+  overflow: hidden;
+}
+.terr-item-preview {
+  min-height: 148px;
+}
+.terr-inventory-foot {
+  margin-top: 16px;
+  padding: 12px 14px;
+}
+.terr-inventory-foot button {
+  min-height: 36px;
+  padding: 0 6px;
+}
+.terr-inventory-empty {
+  padding: 34px 18px 38px;
+  border-top: 0;
+}
+
+.terr-prototype-note {
+  margin: 14px 4px 0;
+  text-align: center;
+  font-size: 10.5px;
+}
+
+@media (max-width: 980px) {
+  .terr-journey-detail {
+    grid-template-columns: 48px minmax(0,1fr);
+  }
+  .terr-journey-back {
+    grid-column: 2;
+    justify-self: flex-start;
+  }
+  .terr-catalog-preview {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .terr-catalog-preview-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 720px) {
+  .terr-header {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+  .terr-test-banner,
+  .terr-journey,
+  .terr-catalog-preview,
+  .terr-inventory {
+    border-radius: 18px;
+  }
+  .terr-catalog-preview,
+  .terr-inventory {
+    padding: 18px 16px;
+  }
+  .terr-scene-topbar {
+    padding: 18px 16px;
+  }
+  .terr-scene-shell {
+    padding: 12px 12px 14px;
+  }
+  .terr-journey-detail {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .terr-journey-detail-icon {
+    width: 46px;
+    height: 46px;
+  }
+  .terr-catalog-preview-meta {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+}
+
+/* Sala 2 — os móveis participam da iluminação do mesmo cenário do Ninho Inicial.
+   Sombras de contato suaves ajudam as peças de chão a parecerem apoiadas na toca. */
+.terr-world-room-2 .terr-sala2-item { filter:drop-shadow(0 5px 4px rgba(71,38,17,.21)); }
+.terr-world-room-2 .terr-sala2-item[data-zona='chao']::before,
+.terr-world-room-2 .terr-sala2-item[data-zona='tapete']::before {
+  content:'';
+  position:absolute;
+  width:75%;
+  height:8%;
+  bottom:5%;
+  left:12.5%;
+  border-radius:50%;
+  background:rgba(93,48,19,.20);
+  filter:blur(8px);
+  pointer-events:none;
+}
+.terr-world-room-2 .terr-sala2-item[data-zona='parede'] { filter:drop-shadow(2px 5px 3px rgba(67,31,11,.21)); }
+.terr-world-room-2 .terr-sala2-item[data-zona='pendurado'] { filter:drop-shadow(0 2px 5px rgba(255,184,67,.18)); }
+/* No modo de personalização, mostre a marcação apenas na peça selecionada
+   ou sob o cursor; os 14 retângulos pontilhados deixavam o cenário poluído. */
+.terr-world-board .terr-scene-item.movable:not(:hover):not(.selected):not(:focus-visible) { outline:none; }
+
+/* Calendário da Sala 2 levemente inclinado para acompanhar a parede direita. */
+.terr-world-room-2 .terr-sala2-item[data-item-id='s2_calendario'] {
+  transform: translate(-50%, -90%) rotate(9deg);
+  transform-origin: 50% 72%;
+}
+
+/* Sala 3: a carteira aparece na frente do ninho; Tenna fica ao lado dela. */
+.terr-world-room-3 .terr-character { left:73%; top:78%; width:25%; }
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_mesa'] { filter:drop-shadow(0 6px 4px rgba(74,42,16,.2)); }
+
+/* Sala 3: molduras de madeira discretas acompanhando a curva da toca.
+   A inclinação pertence ao item visual, sem alterar hitbox ou coordenadas
+   usadas para arrastar, redimensionar ou salvar o objeto. */
+.terr-world-room-3 .terr-scene-item[data-zona="parede"] {
+  filter: drop-shadow(2px 4px 2px rgba(73,39,19,.22));
+}
+.terr-world-room-3 .terr-scene-item[data-item-id="s3_lousa"] {
+  transform: translate(-50%, -90%) rotate(-5deg);
+  transform-origin: 55% 68%;
+}
+.terr-world-room-3 .terr-scene-item[data-item-id="s3_painel"] {
+  transform: translate(-50%, -90%) rotate(2deg);
+  transform-origin: 48% 70%;
+}
+.terr-world-room-3 .terr-scene-item[data-item-id="s3_relogio"] {
+  transform: translate(-50%, -90%) rotate(5deg);
+  transform-origin: 48% 65%;
+}
+.terr-world-room-3 .terr-scene-item[data-item-id="s3_calendario"] {
+  transform: translate(-50%, -90%) rotate(9deg);
+  transform-origin: 50% 70%;
+}
+.terr-world-room-3 .terr-scene-item[data-item-id="s3_kit"] {
+  filter: drop-shadow(0 3px 2px rgba(57,35,18,.15));
+}
+
+/* Sala 3: teto permanece fechado, sem etiqueta flutuando sobre as raízes. */
+.terr-world-room-3 .terr-scene-story { display:none; }
+/* Contraste e sombras iguais aos móveis de madeira das outras salas. */
+.terr-world-room-3 .terr-scene-item[data-zona='parede'] {
+  filter: drop-shadow(3px 6px 2px rgba(68,37,19,.29));
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_lousa'] {
+  transform: translate(-50%,-90%) rotate(-3deg);
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_painel'] {
+  transform: translate(-50%,-90%) rotate(2deg);
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_relogio'] {
+  transform: translate(-50%,-90%) rotate(3deg);
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_calendario'] {
+  transform: translate(-50%,-90%) rotate(8deg);
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_mesa'] {
+  filter: drop-shadow(0 6px 5px rgba(66,35,19,.24));
+}
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_tapete'] {
+  filter: drop-shadow(0 3px 3px rgba(78,49,23,.16));
+}
+
+/* A arte "Meu progresso" já traz a perspectiva da parede direita.
+   Não aplicar outra rotação: preserva a orientação das duas bordas. */
+.terr-world-room-3 .terr-scene-item[data-item-id='s3_painel'] {
+  transform: translate(-50%, -90%) rotate(0deg);
+  transform-origin: 50% 70%;
+}

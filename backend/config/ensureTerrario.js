@@ -67,6 +67,13 @@ const statements = [
   // Complementos exclusivos: cadastrados na abertura do backend, sem mexer nos anteriores.
   `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
     ('s2_tapete_redondo',11),('s2_vaso',8),('s2_livros',6),('s2_avisos',12)` ,
+  // Sala 3: disponíveis para compra ao alcançar a etapa de prova.
+  // INSERT OR IGNORE não altera preço, inventário ou saldo de compras anteriores.
+  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
+    ('s3_mesa',28),('s3_lousa',18),('s3_relogio',11),('s3_mochila',13),
+    ('s3_kit',9),('s3_calendario',9),('s3_painel',15),('s3_tapete',12),
+    ('s3_cadeira',12),('s3_estante',24),('s3_livros',7),('s3_puff',13),
+    ('s3_vaso',9),('s3_luzes',16),('s3_caixa',8)`,
   // A inserção do item e o desconto acontecem atomicamente na mesma instrução.
   // INSERT OR IGNORE de um item já adquirido não executa este gatilho.
   `CREATE TRIGGER IF NOT EXISTS trg_terrario_comprar_item

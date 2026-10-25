@@ -25,10 +25,12 @@ import tapeteImg from './assets/11_tapete_de_folha.webp';
 import mesaRedondaImg from './assets/12_mesa_redonda_com_planta.webp';
 import almofadaImg from './assets/13_almofada_de_folhas.webp';
 import bancoTroncoImg from './assets/14_banquinho_de_tronco.webp';
-import { limitesParaItem, posicionarNaZona, posicionarItemNaZona, ESCALA_MIN, ESCALA_MAX, ajustarEscala, posicaoEncostada } from './posicionamentoItens.js';
-import { ITEMS_SALA2 } from './sala2Itens.js';
+import guardaRoupaImg from './assets/15_guarda_roupa_de_folhas.webp';
+import { limitesParaItem, posicionarItemNaZona, ESCALA_MIN, ESCALA_MAX, ajustarEscala, posicaoEncostada } from './posicionamentoItens.js';
+import { ITEMS_SALA2, DESTAQUES_SALA2 } from './sala2Itens.js';
+import { ITEMS_SALA3, ITEMS_SALA3_LEGADOS } from './sala3Itens.js';
 import { distribuirMoveis, ehMovelDeEstudoAntigo } from './catalogoSalas.js';
-import { TEST_STORAGE_PREFIX, baseTeste, lerTeste, alternarItemTeste, moverItemTeste, redimensionarItemTeste } from './modoTeste.js';
+import { TEST_STORAGE_PREFIX, baseTeste, lerTeste, alternarItemTeste, moverItemTeste, redimensionarItemTeste, prepararPreviaCompletaSala3 } from './modoTeste.js';
 
 // IDs e preços existentes preservados: as compras antigas continuam valendo.
 // As coordenadas são percentuais da imagem original, não da janela do usuário.
@@ -47,12 +49,13 @@ const ITEMS = [
   { id: 'mesa_redonda', name: 'Mesa redonda com planta', price: 18, img: mesaRedondaImg, width: 20, x: 76, y: 73, zone: 'chao', subtitle: 'Natureza e decoração' },
   { id: 'almofada', name: 'Almofada de folhas', price: 7, img: almofadaImg, width: 15, x: 63, y: 80, zone: 'tapete', subtitle: 'Um descanso macio' },
   { id: 'banquinho_tronco', name: 'Banquinho de tronco', price: 7, img: bancoTroncoImg, width: 12, x: 82, y: 80, zone: 'chao', subtitle: 'Assento feito de tronco' },
+  { id: 'guarda_roupa', name: 'Guarda-roupa de folhas', price: 20, img: guardaRoupaImg, width: 27, x: 59, y: 51, zone: 'chao', subtitle: 'Madeira aconchegante com detalhes de folhas' },
 ];
 
 const DURATIONS = [1, 15, 25, 45];
 const MATERIAS = ['Português', 'Matemática', 'História', 'Geografia', 'Ciências'];
 const REWARDS = { 1: { sementes: 2, xp: 0 }, 15: { sementes: 5, xp: 10 }, 25: { sementes: 8, xp: 15 }, 45: { sementes: 12, xp: 20 } };
-const TODOS_ITENS = [...ITEMS, ...ITEMS_SALA2];
+const TODOS_ITENS = [...ITEMS, ...ITEMS_SALA2, ...ITEMS_SALA3, ...ITEMS_SALA3_LEGADOS];
 // ALTERAÇÃO TEMPORÁRIA: salas visíveis e acessíveis só no modo de teste.
 // Para restaurar os bloqueios originais, altere para false ou remova esta condição.
 // Não altera o banco de dados, as sessões, o XP, as sementes nem os desbloqueios reais.
@@ -109,14 +112,50 @@ export default function Terrario() {
   const [modoTeste, setModoTeste] = useState(true);
   const chaveTeste = useMemo(() => `${TEST_STORAGE_PREFIX}${userKey()}`, []);
   const [testeSalvo, setTesteSalvo] = useState(() => {
-    try { return lerTeste(window.localStorage, `${TEST_STORAGE_PREFIX}${userKey()}`, ITEMS); }
-    catch { return { iniciado: false, visible: [], positions: {} }; }
+    try {
+      const chave = `${TEST_STORAGE_PREFIX}${userKey()}`;
+      const storage = window.localStorage;
+      const salvo = lerTeste(storage, chave, ITEMS);
+      // Exibe o guarda-roupa uma vez também para quem já tinha a sala salva.
+      // Depois respeita se o usuário guardar ou reposicionar o móvel.
+      const versaoChave = `${chave}_guarda_roupa_v1`;
+      const novaPrevia = storage.getItem(versaoChave) !== '1';
+      if (novaPrevia) {
+        try { storage.setItem(versaoChave, '1'); } catch { /* Armazenamento opcional. */ }
+      }
+      const visibilidade = novaPrevia && salvo.iniciado
+        ? [...new Set([...salvo.visible, 'guarda_roupa'])]
+        : salvo.visible;
+      // Migração visual pontual: se o móvel estava no antigo limite superior
+      // (56%), sobe para 51%. Posições personalizadas fora desse limite ficam intactas.
+      const alturaChave = `${chave}_guarda_roupa_altura_v2`;
+      const migrarAltura = storage.getItem(alturaChave) !== '1';
+      const anterior = salvo.positions?.guarda_roupa;
+      const posicoes = migrarAltura && salvo.iniciado && anterior?.y === 56
+        ? { ...salvo.positions, guarda_roupa: { ...anterior, y: 51 } }
+        : salvo.positions;
+      const atualizado = { ...salvo, visible: visibilidade, positions: posicoes };
+      if (migrarAltura) {
+        try {
+          // Persiste antes da marca de versão: evita reaplicar a migração
+          // na dupla inicialização de desenvolvimento do React.
+          if (posicoes !== salvo.positions) storage.setItem(chave, JSON.stringify(atualizado));
+          storage.setItem(alturaChave, '1');
+        } catch { /* Armazenamento opcional. */ }
+      }
+      return atualizado;
+    } catch { return { iniciado: false, visible: [], positions: {}, scales: {} }; }
   });
   // A Sala 2 tem uma decoração de teste independente da Sala 1.
   const chaveTeste2 = useMemo(() => `${TEST_STORAGE_PREFIX}sala2_${userKey()}`, []);
   const [testeSalvo2, setTesteSalvo2] = useState(() => {
     try { return lerTeste(window.localStorage, `${TEST_STORAGE_PREFIX}sala2_${userKey()}`, ITEMS_SALA2); }
     catch { return { iniciado: false, visible: [], positions: {}, scales: {} }; }
+  });
+  const chaveTeste3 = useMemo(() => `${TEST_STORAGE_PREFIX}sala3_${userKey()}`, []);
+  const [testeSalvo3, setTesteSalvo3] = useState(() => {
+    try { return prepararPreviaCompletaSala3(lerTeste(window.localStorage, `${TEST_STORAGE_PREFIX}sala3_${userKey()}`, [...ITEMS_SALA3, ...ITEMS_SALA3_LEGADOS]), ITEMS_SALA3); }
+    catch { return prepararPreviaCompletaSala3({ iniciado: false, visible: [], positions: {}, scales: {} }, ITEMS_SALA3); }
   });
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(1);
@@ -126,6 +165,7 @@ export default function Terrario() {
   const scaleDraftRef = useRef(null);
   const stageRef = useRef(null);
   const stageRef2 = useRef(null);
+  const stageRef3 = useRef(null);
   const viewportRef = useRef(null);
   const salasRefs = useRef({});
   const panRef = useRef(null);
@@ -188,11 +228,12 @@ export default function Terrario() {
   const jornada = previaLiberada ? {
     ...jornadaReal,
     segundaConquistada: true,
+    terceiraConquistada: true,
     totalConquistadas: 3,
     salas: jornadaReal.salas.map((sala) => ({
       ...sala, conquistada: true,
-      jogavel: sala.numero < 3,
-      estado: sala.numero === 3 ? 'previa' : 'conquistada',
+      jogavel: true,
+      estado: 'conquistada',
     })),
   } : jornadaReal;
   const sessionsUntilNextRoom = jornadaReal.faltam;
@@ -216,8 +257,10 @@ export default function Terrario() {
   }, [selectedRoom, formatoDoMapa, jornada.totalConquistadas]);
 
   function alternarDecoracao() {
+    // Entrar no modo decoração não deve voltar à Sala 1 quando o usuário
+    // está organizando a Sala 2 ou a Sala 3.
     setDecorate((atual) => !atual);
-    setSelectedRoom(1);
+    if (decorate && !roomDetail.conquistada) setSelectedRoom(1);
     setDrag(null);
   }
 
@@ -314,26 +357,51 @@ export default function Terrario() {
     () => distribuirMoveis(ITEMS, ITEMS_SALA2, ownedInventory, jornada.segundaConquistada),
     [ownedInventory, jornada.segundaConquistada]
   );
-  const itensDaSala = (numero) => numero === 2 ? catalogoSala2 : catalogoSala1;
-  const salaDoItem = (id) => salaPorId[id] ?? (ehMovelDeEstudoAntigo(id)
-    ? (jornada.segundaConquistada ? 2 : 1) : id.startsWith('s2_') ? 2 : 1);
+  // Protótipos antigos da Sala 3 só permanecem disponíveis para quem já os comprou.
+  const catalogoSala3 = useMemo(() => [
+    ...ITEMS_SALA3,
+    ...ITEMS_SALA3_LEGADOS.filter((item) => ownedInventory.some((owned) => owned.id === item.id)),
+  ], [ownedInventory]);
+  const itensDaSala = (numero) => numero === 3 ? catalogoSala3 : numero === 2 ? catalogoSala2 : catalogoSala1;
+  const salaSelecionadaPodeDecorar = selectedRoom === 1 || ((selectedRoom === 2 || selectedRoom === 3) && roomDetail.conquistada);
+  const totalItensSalaSelecionada = itensDaSala(selectedRoom).length;
+  const tituloCatalogo = selectedRoom === 1 ? 'Catálogo do Ninho Inicial' : `Catálogo · ${roomDetail.nome}`;
+  const resumoCatalogo = selectedRoom === 1
+    ? 'Itens aconchegantes para montar o primeiro cantinho da Tenna.'
+    : roomDetail.conquistada
+      ? totalItensSalaSelecionada === 1 ? 'Conheça o primeiro móvel exclusivo desta sala.' : `Veja os ${totalItensSalaSelecionada} itens exclusivos desta sala.`
+      : 'Continue estudando para desbloquear a decoração desta sala.';
+  const salaDoItem = (id) => {
+    if (id.startsWith('s3_')) return 3;
+    return salaPorId[id] ?? (ehMovelDeEstudoAntigo(id)
+      ? (jornada.segundaConquistada ? 2 : 1) : id.startsWith('s2_') ? 2 : 1);
+  };
   const decorOficial = useMemo(() => baseTeste(catalogoSala1, ownedInventory), [catalogoSala1, ownedInventory]);
   const decorOficial2 = useMemo(() => baseTeste(catalogoSala2, ownedInventory), [catalogoSala2, ownedInventory]);
+  const decorOficial3 = useMemo(() => baseTeste(catalogoSala3, ownedInventory), [catalogoSala3, ownedInventory]);
   // Testes de versões anteriores podem não ter todas as posições. Preenche-se
   // somente o que estiver ausente, sem sobrescrever a decoração do usuário.
+  // Na primeira prévia, o novo guarda-roupa já aparece na parede da Sala 1.
+  // Depois de personalizar, o estado salvo é respeitado (inclusive se for guardado).
   const decorTeste = testeSalvo.iniciado ? {
     ...decorOficial, ...testeSalvo,
     positions: { ...decorOficial.positions, ...testeSalvo.positions },
     scales: { ...decorOficial.scales, ...testeSalvo.scales }
-  } : decorOficial;
+  } : { ...decorOficial, visible: [...new Set([...decorOficial.visible, 'guarda_roupa'])] };
   const decorTeste2 = testeSalvo2.iniciado ? {
     ...decorOficial2, ...testeSalvo2,
     positions: { ...decorOficial2.positions, ...testeSalvo2.positions },
     scales: { ...decorOficial2.scales, ...testeSalvo2.scales }
   } : decorOficial2;
+  const decorTeste3 = testeSalvo3.iniciado ? {
+    ...decorOficial3, ...testeSalvo3,
+    positions: { ...decorOficial3.positions, ...testeSalvo3.positions },
+    scales: { ...decorOficial3.scales, ...testeSalvo3.scales }
+  } : { ...decorOficial3, visible: ITEMS_SALA3.map((item) => item.id) };
   const decorSala1 = modoTeste ? decorTeste : decorOficial;
   const decorSala2 = modoTeste ? decorTeste2 : decorOficial2;
-  const decor = selectedRoom === 2 ? decorSala2 : decorSala1;
+  const decorSala3 = modoTeste ? decorTeste3 : decorOficial3;
+  const decor = selectedRoom === 3 ? decorSala3 : selectedRoom === 2 ? decorSala2 : decorSala1;
   useEffect(() => {
     if (!testeSalvo.iniciado) return;
     try { localStorage.setItem(chaveTeste, JSON.stringify({ visible: testeSalvo.visible, positions: testeSalvo.positions, scales: testeSalvo.scales })); }
@@ -341,31 +409,51 @@ export default function Terrario() {
   }, [chaveTeste, testeSalvo]);
   useEffect(() => {
     if (!testeSalvo2.iniciado) return;
-    try { localStorage.setItem(chaveTeste2, JSON.stringify({ visible: testeSalvo2.visible, positions: testeSalvo2.positions, scales: testeSalvo2.scales })); }
+    try { localStorage.setItem(chaveTeste2, JSON.stringify({ visible: testeSalvo2.visible, positions: testeSalvo2.positions, scales: testeSalvo2.scales, layoutV3: true, layoutV4: true })); }
     catch { /* O teste continua disponível mesmo sem armazenamento. */ }
   }, [chaveTeste2, testeSalvo2]);
-  const atualizarTeste = (fn) => setTesteSalvo((atual) => fn(atual.iniciado ? {
-    ...baseTeste(catalogoSala1, ownedInventory), ...atual,
-    positions: { ...baseTeste(catalogoSala1, ownedInventory).positions, ...atual.positions },
-    scales: { ...baseTeste(catalogoSala1, ownedInventory).scales, ...atual.scales }
-  } : baseTeste(catalogoSala1, ownedInventory)));
+  useEffect(() => {
+    if (!testeSalvo3.iniciado) return;
+    try { localStorage.setItem(chaveTeste3, JSON.stringify({ visible: testeSalvo3.visible, positions: testeSalvo3.positions, scales: testeSalvo3.scales, layoutSala3Completo: true })); }
+    catch { /* O teste continua disponível mesmo sem armazenamento. */ }
+  }, [chaveTeste3, testeSalvo3]);
+  const atualizarTeste = (fn) => setTesteSalvo((atual) => {
+    const base = baseTeste(catalogoSala1, ownedInventory);
+    const estadoAtual = atual.iniciado ? {
+      ...base, ...atual,
+      positions: { ...base.positions, ...atual.positions },
+      scales: { ...base.scales, ...atual.scales }
+    } : { ...base, visible: [...new Set([...base.visible, 'guarda_roupa'])] };
+    return fn(estadoAtual);
+  });
   const atualizarTeste2 = (fn) => setTesteSalvo2((atual) => fn(atual.iniciado ? {
     ...baseTeste(catalogoSala2, ownedInventory), ...atual,
     positions: { ...baseTeste(catalogoSala2, ownedInventory).positions, ...atual.positions },
     scales: { ...baseTeste(catalogoSala2, ownedInventory).scales, ...atual.scales }
   } : baseTeste(catalogoSala2, ownedInventory)));
-  const atualizarSalaDeTeste = (id, fn) => salaDoItem(id) === 2 ? atualizarTeste2(fn) : atualizarTeste(fn);
-  const decorDoItem = (id) => salaDoItem(id) === 2 ? decorSala2 : decorSala1;
+  const atualizarTeste3 = (fn) => setTesteSalvo3((atual) => fn(atual.iniciado ? {
+    ...baseTeste(catalogoSala3, ownedInventory), ...atual,
+    positions: { ...baseTeste(catalogoSala3, ownedInventory).positions, ...atual.positions },
+    scales: { ...baseTeste(catalogoSala3, ownedInventory).scales, ...atual.scales }
+  } : prepararPreviaCompletaSala3(baseTeste(catalogoSala3, ownedInventory), ITEMS_SALA3)));
+  const atualizarSalaDeTeste = (id, fn) => salaDoItem(id) === 3 ? atualizarTeste3(fn) : salaDoItem(id) === 2 ? atualizarTeste2(fn) : atualizarTeste(fn);
+  const decorDoItem = (id) => salaDoItem(id) === 3 ? decorSala3 : salaDoItem(id) === 2 ? decorSala2 : decorSala1;
   const selectedItem = TODOS_ITENS.find((item) => item.id === selected) || ITEMS[0];
-  const isOwned = (id) => (salaDoItem(id) !== 2 || jornada.segundaConquistada) && (modoTeste || ownedInventory.some((item) => item.id === id));
+  const isOwned = (id) => {
+    const sala = salaDoItem(id);
+    return (sala === 1 || (sala === 2 && jornada.segundaConquistada) || (sala === 3 && jornada.terceiraConquistada))
+      && (modoTeste || ownedInventory.some((item) => item.id === id));
+  };
   const selectedVisible = itensDaSala(selectedRoom).some((item) => item.id === selected)
     && salaDoItem(selected) === selectedRoom && isOwned(selected) && decor.visible.includes(selected);
   const selectedScale = scalePreview?.id === selected ? scalePreview.scale : ajustarEscala(decor.scales?.[selected] ?? 1);
   const canAttachWall = !!posicaoEncostada(selected);
   const roomItems = catalogoSala1.filter((item) => decorSala1.visible.includes(item.id));
   const roomItems2 = catalogoSala2.filter((item) => decorSala2.visible.includes(item.id));
+  const roomItems3 = catalogoSala3.filter((item) => decorSala3.visible.includes(item.id));
   const sortedItems = [...roomItems].sort((a, b) => decorSala1.positions[a.id].y - decorSala1.positions[b.id].y);
   const sortedItems2 = [...roomItems2].sort((a, b) => decorSala2.positions[a.id].y - decorSala2.positions[b.id].y);
+  const sortedItems3 = [...roomItems3].sort((a, b) => decorSala3.positions[a.id].y - decorSala3.positions[b.id].y);
 
   async function sendDecorAction(path, options, mensagem) {
     if (busyRef.current || !server) return false;
@@ -389,7 +477,7 @@ export default function Terrario() {
   }
 
   function comprar(item) {
-    if (salaDoItem(item.id) === 2 && !jornada.segundaConquistada) return;
+    if ((salaDoItem(item.id) === 2 && !jornada.segundaConquistada) || (salaDoItem(item.id) === 3 && !jornada.terceiraConquistada)) return;
     if (modoTeste) { guardarOuColocar(item); return; }
     setSelected(item.id);
     void sendDecorAction(`/terrario/loja/${item.id}/comprar`, { method: 'POST' },
@@ -397,7 +485,7 @@ export default function Terrario() {
   }
 
   function guardarOuColocar(item) {
-    if (salaDoItem(item.id) === 2 && !jornada.segundaConquistada) return;
+    if ((salaDoItem(item.id) === 2 && !jornada.segundaConquistada) || (salaDoItem(item.id) === 3 && !jornada.terceiraConquistada)) return;
     const colocar = !decorDoItem(item.id).visible.includes(item.id);
     setSelected(item.id);
     if (modoTeste) {
@@ -462,11 +550,11 @@ export default function Terrario() {
     const ponto = posicaoEncostada(item.id);
     if (!ponto) return;
     setSelected(item.id);
-    void moverItem(item.id, posicionarNaZona(ponto, item.zone));
+    void moverItem(item.id, posicionarItemNaZona(ponto, item, decorDoItem(item.id).scales?.[item.id] ?? 1));
   }
 
   function startDragging(evt, itemId) {
-    if (!decorate || (busy && !modoTeste) || !isOwned(itemId) || selectedRoom !== salaDoItem(itemId) || evt.button !== 0) return;
+    if (!(decorate || (modoTeste && salaDoItem(itemId) === 3)) || (busy && !modoTeste) || !isOwned(itemId) || (selectedRoom !== salaDoItem(itemId) && !(modoTeste && salaDoItem(itemId) === 3)) || evt.button !== 0) return;
     evt.preventDefault();
     evt.currentTarget.setPointerCapture(evt.pointerId);
     draggingRef.current = {
@@ -477,7 +565,7 @@ export default function Terrario() {
     setSelected(itemId);
   }
   function pointForDrag(track, evt) {
-    const bounds = (salaDoItem(track.id) === 2 ? stageRef2.current : stageRef.current)?.getBoundingClientRect();
+    const bounds = (salaDoItem(track.id) === 3 ? stageRef3.current : salaDoItem(track.id) === 2 ? stageRef2.current : stageRef.current)?.getBoundingClientRect();
     if (!bounds) return null;
     return moverComDeslocamento(track.original,
       evt.clientX - track.startX, evt.clientY - track.startY,
@@ -504,7 +592,7 @@ export default function Terrario() {
     else setDrag(null);
   }
   function updateWithKeyboard(evt, item) {
-    if (!decorate || (busy && !modoTeste) || !isOwned(item.id) || selectedRoom !== salaDoItem(item.id)) return;
+    if (!(decorate || (modoTeste && salaDoItem(item.id) === 3)) || (busy && !modoTeste) || !isOwned(item.id) || (selectedRoom !== salaDoItem(item.id) && !(modoTeste && salaDoItem(item.id) === 3))) return;
     const moves = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] };
     const movement = moves[evt.key];
     if (!movement) return;
@@ -537,12 +625,12 @@ export default function Terrario() {
       <section className={`terr-test-banner ${modoTeste ? 'is-active' : ''}`} aria-label="Modo de teste da decoração">
         <div className="terr-test-banner-copy">
           <strong>🛠️ {modoTeste ? 'Decoração livre para testes' : 'Decoração com sementes'}</strong>
-          <span>{previaLiberada ? 'PRÉVIA TEMPORÁRIA: as três salas aparecem liberadas para visualização. Experimente as decorações distintas das Salas 1 e 2 sem gastar sementes; seu progresso real não muda.' : modoTeste ? 'A Sala 1 tem móveis para descansar; a Sala 2 tem móveis de estudo. Explore sem gastar sementes.' : 'Loja oficial ativada: as compras usam sementes e as posições são salvas na sua conta.'}</span>
+          <span>{previaLiberada ? 'Prévia temporária ativa: você pode visualizar as salas e testar a decoração sem alterar seu progresso real.' : modoTeste ? 'Teste a decoração livremente, sem gastar sementes.' : 'Compras e posições salvas na sua conta.'}</span>
         </div>
         <div className="terr-test-banner-actions">
           {modoTeste && <>
-            <button type="button" onClick={() => { const update = selectedRoom === 2 ? atualizarTeste2 : atualizarTeste; update((atual) => ({ ...atual, iniciado: true, visible: itensDaSala(selectedRoom).map((item) => item.id) })); setDecorate(true); }} disabled={selectedRoom === 3 || (selectedRoom === 2 && !jornada.segundaConquistada)}>Colocar todos</button>
-            <button type="button" onClick={() => { (selectedRoom === 2 ? atualizarTeste2 : atualizarTeste)((atual) => ({ ...atual, iniciado: true, visible: [] })); setDrag(null); }} disabled={selectedRoom === 3 || (selectedRoom === 2 && !jornada.segundaConquistada)}>Esvaziar sala</button>
+            <button type="button" onClick={() => { const update = selectedRoom === 3 ? atualizarTeste3 : selectedRoom === 2 ? atualizarTeste2 : atualizarTeste; update((atual) => ({ ...atual, iniciado: true, visible: selectedRoom === 2 ? [...DESTAQUES_SALA2] : itensDaSala(selectedRoom).map((item) => item.id), ...(selectedRoom===2 ? { positions: Object.fromEntries(ITEMS_SALA2.map((item) => [item.id, {x:item.x,y:item.y}])), layoutV3:true, layoutV4:true } : selectedRoom===3 ? { positions: { ...atual.positions, ...Object.fromEntries(ITEMS_SALA3.map((item) => [item.id, { x:item.x, y:item.y }])) }, scales: { ...atual.scales, ...Object.fromEntries(ITEMS_SALA3.map((item) => [item.id, 1])) }, layoutSala3Completo:true } : {}) })); setDecorate(true); }} disabled={(selectedRoom === 2 && !jornada.segundaConquistada) || (selectedRoom === 3 && !jornada.terceiraConquistada)}>{selectedRoom === 2 || selectedRoom === 3 ? 'Montar ambiente' : 'Preencher sala'}</button>
+            <button type="button" onClick={() => { (selectedRoom === 3 ? atualizarTeste3 : selectedRoom === 2 ? atualizarTeste2 : atualizarTeste)((atual) => ({ ...atual, iniciado: true, visible: [] })); setDrag(null); }} disabled={(selectedRoom === 2 && !jornada.segundaConquistada) || (selectedRoom === 3 && !jornada.terceiraConquistada)}>Limpar sala</button>
           </>}
           <button type="button" className="terr-test-mode-toggle" aria-pressed={modoTeste} onClick={() => { setModoTeste((ativo) => !ativo); setSelectedRoom(1); setDrag(null); }}>
             {modoTeste ? 'Desativar teste' : 'Ativar teste'}
@@ -552,7 +640,7 @@ export default function Terrario() {
       <div className="terr-layout">
         <section className="terr-scene-card" aria-labelledby="terr-scene-title">
           <div className="terr-scene-topbar">
-            <div className="terr-scene-heading"><span className="terr-kicker">SEU FORMIGUEIRO · {decorate ? 'MODO DE PERSONALIZAÇÃO' : 'MODO FOCO'}</span><h2 id="terr-scene-title">{decorate ? 'Decore seu formigueiro' : 'O cantinho da Tenna'}</h2><p>{previaLiberada ? 'Visualização temporária das três salas do formigueiro.' : decorate ? 'Explore as três salas. As bloqueadas aparecem como prévia.' : 'Navegue pelos ambientes que você já conquistou.'}</p></div>
+            <div className="terr-scene-heading"><span className="terr-kicker">SEU FORMIGUEIRO · {decorate ? 'MODO DE PERSONALIZAÇÃO' : 'MODO FOCO'}</span><h2 id="terr-scene-title">{decorate ? 'Decore seu formigueiro' : 'O cantinho da Tenna'}</h2><p>{previaLiberada ? 'Selecione uma sala e navegue pelo formigueiro da Tenna.' : decorate ? 'Selecione uma sala e organize os móveis com mais calma.' : 'Navegue pelos ambientes da sua jornada e estude com a Tenna.'}</p></div>
             <div className="terr-scene-actions">
               <span className={`terr-status ${status === 'running' ? 'is-working' : ''}`}><span />{status === 'running' ? 'Tenna focada' : status === 'paused' ? 'Foco pausado' : 'Tenna em casa'}</span>
               <button type="button" className={`terr-decorate-button ${decorate ? 'active' : ''}`} onClick={alternarDecoracao} disabled={!modoTeste && (busy || loading)} aria-pressed={decorate}>
@@ -580,13 +668,13 @@ export default function Terrario() {
           )}
           <div className="terr-scene-shell">
             <div className="terr-world-toolbar" aria-label="Navegação do formigueiro">
-              <span className="terr-world-hint">↔ Arraste para explorar · role ou deslize a tela</span>
+              <span className="terr-world-hint">{modoTeste && selectedRoom === 3 ? 'Sala 3 · Arraste os móveis para organizá-los; use “Decorar sala” para mudar o tamanho' : '↔ Arraste para explorar · role ou deslize a tela'}</span>
               <div className="terr-world-room-buttons" role="group" aria-label="Ir para uma sala visível">
                 {salasDoMapa.map((sala) => (
                   <button key={sala.numero} type="button"
                     className={selectedRoom === sala.numero ? 'active' : ''}
                     onClick={() => setSelectedRoom(sala.numero)} aria-pressed={selectedRoom === sala.numero}>
-                    {sala.numero === 3 && previaLiberada ? '👁' : sala.conquistada ? '◉' : '🔒'} Sala {sala.numero}
+                    {previaLiberada ? '👁' : sala.conquistada ? '◉' : '🔒'} Sala {sala.numero}
                   </button>
                 ))}
               </div>
@@ -604,7 +692,7 @@ export default function Terrario() {
                     aria-label={`Sala ${sala.numero}, ${sala.nome}: ${sala.conquistada ? 'liberada' : 'bloqueada'}`}>
                     <div className="terr-world-room-heading">
                       <span>SALA {String(sala.numero).padStart(2, '0')} · {sala.nome}</span>
-                      <span>{sala.numero === 3 && previaLiberada ? '👁 Prévia' : sala.conquistada ? '✓ Liberada' : '🔒 Bloqueada'}</span>
+                      <span>{previaLiberada ? '👁 Prévia' : sala.conquistada ? '✓ Liberada' : '🔒 Bloqueada'}</span>
                     </div>
                     {sala.numero === 1 ? (
                       <div className={`terr-scene ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef}>
@@ -636,7 +724,7 @@ export default function Terrario() {
                           const pos = drag?.id === item.id ? drag : decorSala2.positions[item.id];
                           return (
                             <button type="button" key={item.id}
-                              className={`terr-scene-item ${decorate && selectedRoom === 2 ? 'movable' : ''} ${selected === item.id && decorate && selectedRoom === 2 ? 'selected' : ''}`}
+                              className={`terr-scene-item terr-sala2-item ${decorate && selectedRoom === 2 ? 'movable' : ''} ${selected === item.id && decorate && selectedRoom === 2 ? 'selected' : ''}`} data-zona={item.zone} data-item-id={item.id}
                               style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: `${item.width * (scalePreview?.id === item.id ? scalePreview.scale : ajustarEscala(decorSala2.scales?.[item.id] ?? 1))}%`, zIndex: item.zone === 'parede' || item.zone === 'pendurado' ? 12 : item.zone === 'tapete' ? 14 : Math.round(pos.y) }}
                               onPointerDown={(evt) => startDragging(evt, item.id)} onPointerMove={moveDragging}
                               onPointerUp={finishDragging} onPointerCancel={finishDragging}
@@ -651,6 +739,30 @@ export default function Terrario() {
                         {roomItems2.length === 0 && <span className="terr-empty-room-message">Um novo cantinho para construir 🌱</span>}
                         {decorate && selectedRoom === 2 && <div className="terr-decor-hint">{modoTeste ? 'TESTE LIVRE · ' : ''}Arraste os móveis ou use as setas para mover</div>}
                       </div>
+                    ) : sala.numero === 3 && sala.conquistada ? (
+                      <div className={`terr-scene terr-scene-empty ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef3} aria-label="Sala 3 — Sala do Desafio Final">
+                        <img className="terr-scene-background" src={salaImg} alt="Câmara de terra e raízes da sala do vestibulinho" loading="lazy" draggable="false" />
+                        <div className="terr-scene-story" aria-hidden="true">Teto fechado · a abertura virá na conquista final</div>
+                        {sortedItems3.map((item) => {
+                          const pos = drag?.id === item.id ? drag : decorSala3.positions[item.id];
+                          return (
+                            <button type="button" key={item.id}
+                              data-item-id={item.id} data-zona={item.zone}
+                              className={`terr-scene-item ${((decorate && selectedRoom === 3) || modoTeste) ? 'movable' : ''} ${selected === item.id && decorate && selectedRoom === 3 ? 'selected' : ''}`}
+                              style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: `${item.width * (scalePreview?.id === item.id ? scalePreview.scale : ajustarEscala(decorSala3.scales?.[item.id] ?? 1))}%`, zIndex: item.id === 's3_kit' ? 86 : item.zone === 'parede' || item.zone === 'pendurado' ? 12 : item.zone === 'tapete' ? 14 : Math.round(pos.y) }}
+                              onPointerDown={(evt) => startDragging(evt, item.id)} onPointerMove={moveDragging}
+                              onPointerUp={finishDragging} onPointerCancel={finishDragging}
+                              onKeyDown={(evt) => updateWithKeyboard(evt, item)} onClick={() => { setSelectedRoom(3); setSelected(item.id); }}
+                              aria-label={`${item.name}${(decorate || modoTeste) ? ', arraste ou use as setas para reposicionar' : ''}`}
+                              title={(decorate || modoTeste) ? `Mover ${item.name}` : item.name}>
+                              <img src={item.img} alt="" draggable="false" />
+                            </button>
+                          );
+                        })}
+                        <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt /></div>
+                        {roomItems3.length === 0 && <span className="terr-empty-room-message">Escolha os móveis para montar sua sala de prova 📝</span>}
+                        {decorate && selectedRoom === 3 && <div className="terr-decor-hint">{modoTeste ? 'TESTE LIVRE · ' : ''}Arraste os móveis ou use as setas para mover</div>}
+                      </div>
                     ) : (
                       <div className={`terr-world-preview ${sala.conquistada ? 'is-unlocked' : 'is-locked'}`}>
                         <img src={salaImg} alt="" loading="lazy" draggable="false" />
@@ -658,7 +770,7 @@ export default function Terrario() {
                         <div className="terr-world-gate">
                           <span className="terr-world-gate-symbol" aria-hidden="true">{sala.conquistada ? '👁' : '🔒'}</span>
                           <strong>{sala.nome}</strong>
-                          <small>{sala.conquistada ? 'Prévia da terceira sala · decoração em desenvolvimento' : sala.numero === 2 ? `Faltam ${jornadaReal.faltam} sessões válidas para liberar` : 'Reta final · desbloqueio em uma próxima etapa'}</small>
+                          <small>{sala.numero === 2 ? `Faltam ${jornadaReal.faltamSala2} sessões válidas para liberar` : `Faltam ${jornadaReal.faltamSala3} sessões válidas para liberar`}</small>
                         </div>
                       </div>
                     )}
@@ -666,10 +778,10 @@ export default function Terrario() {
                 ))}
               </div>
             </div>
-            <p className="terr-world-footnote">{previaLiberada ? 'Visualização temporária: todas as salas aparecem no mapa. A Sala 2 pode ser decorada em modo de teste; a Sala 3 ainda é uma prévia. Desative o teste para retornar aos bloqueios reais.' : decorate ? 'No modo decoração, as salas bloqueadas ficam visíveis para mostrar o caminho, mas não podem ser personalizadas.' : 'No modo foco, somente salas liberadas aparecem. Use Decorar sala para visualizar as próximas.'}</p>
+            <p className="terr-world-footnote">{previaLiberada ? 'Visualização temporária: todas as salas aparecem no mapa. No modo de teste, você pode decorar as três salas sem consumir sementes. Desative o teste para retornar aos bloqueios reais.' : decorate ? 'No modo decoração, as salas bloqueadas ficam visíveis para mostrar o caminho, mas não podem ser personalizadas.' : 'No modo foco, somente salas liberadas aparecem. Use Decorar sala para visualizar as próximas.'}</p>
           </div>
           <div className="terr-scene-bottom">
-            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMA SALA</span><strong>Refúgio do Conhecimento</strong><small>{previaLiberada ? 'Disponível para experimentar no modo de teste.' : jornada.segundaConquistada ? 'Sala 2 liberada! Decore com itens exclusivos.' : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar`}</small></div></div>
+            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMA SALA</span><strong>{jornada.terceiraConquistada ? 'Todas as salas liberadas' : jornada.segundaConquistada ? 'Sala do Desafio Final' : 'Refúgio do Conhecimento'}</strong><small>{previaLiberada ? 'Disponível para experimentar no modo de teste.' : jornada.terceiraConquistada ? 'As três salas já foram conquistadas.' : jornada.segundaConquistada ? `Faltam ${jornada.faltamSala3} sessões válidas para liberar a Sala 3` : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar`}</small></div></div>
             <div className="terr-room-progress"><div><span>{jornada.progresso} de {jornada.objetivo} sessões</span><strong>{jornada.percentual}%</strong></div><div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }}/></div></div>
           </div>
         </section>
@@ -738,49 +850,60 @@ export default function Terrario() {
         </aside>
       </div>
 
+      {!decorate && (
       <section className="terr-journey" id="jornada" aria-labelledby="terr-journey-title">
         <div className="terr-journey-header">
           <div>
             <span className="terr-kicker">O MAPA DO FORMIGUEIRO</span>
             <h2 id="terr-journey-title">A jornada da Tenna <span aria-hidden="true">✦</span></h2>
-            <p>As salas formam uma pirâmide. Elas aparecem no próprio cenário conforme seu progresso; no modo decoração, você também pode ver as bloqueadas.</p>
+            <p>As salas aparecem conforme seu progresso. Aqui você acompanha em qual etapa da jornada a Tenna está.</p>
           </div>
           <span className="terr-journey-count" aria-label={`${jornada.totalConquistadas} de ${jornada.salas.length} salas ${previaLiberada ? 'visíveis temporariamente' : 'liberadas'}`}>
             <strong>{jornada.totalConquistadas}<span>/{jornada.salas.length}</span></strong>
             <small>{previaLiberada ? 'salas em prévia' : 'salas liberadas'}</small>
           </span>
         </div>
-        <p className="terr-journey-navigation-tip">Selecione uma sala nos controles do cenário para ver seus detalhes aqui.</p>
+        <p className="terr-journey-navigation-tip">Selecione uma sala no cenário para acompanhar seus detalhes.</p>
         <div className="terr-journey-detail" role="region" aria-label={`Detalhes da sala ${roomDetail.numero}`}>
           <div className="terr-journey-detail-icon" aria-hidden="true">{roomDetail.simbolo}</div>
           <div className="terr-journey-detail-copy">
-            <span>SALA {String(roomDetail.numero).padStart(2, '0')} · {roomDetail.numero === 3 && previaLiberada ? 'PRÉVIA DISPONÍVEL' : previaLiberada ? 'VISUALIZAÇÃO TEMPORÁRIA' : roomDetail.jogavel ? 'DISPONÍVEL AGORA' : roomDetail.conquistada ? 'DESBLOQUEIO CONQUISTADO' : roomDetail.numero === 2 ? 'EM PROGRESSO' : 'NO TOPO DO FORMIGUEIRO'}</span>
+            <span>SALA {String(roomDetail.numero).padStart(2, '0')} · {previaLiberada ? 'VISUALIZAÇÃO TEMPORÁRIA' : roomDetail.jogavel ? 'DISPONÍVEL AGORA' : roomDetail.conquistada ? 'DESBLOQUEIO CONQUISTADO' : roomDetail.numero === 2 ? 'EM PROGRESSO' : roomDetail.numero === 3 && jornada.segundaConquistada ? 'EM PROGRESSO' : 'NO TOPO DO FORMIGUEIRO'}</span>
             <h3>{roomDetail.nome}</h3>
             <p>{roomDetail.descricao}</p>
             {roomDetail.numero === 2 && (
               <div className="terr-journey-goal">
-                <div><span>{previaLiberada ? 'Prévia liberada · progresso real' : jornada.segundaConquistada ? '✓ Meta alcançada' : 'Sua meta: 5 sessões de pelo menos 15 min'}</span><strong>{jornadaReal.progresso}/{jornadaReal.objetivo}</strong></div>
-                <div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }} /></div>
-                <small>{previaLiberada ? 'Sala 2 disponível temporariamente para você testar a decoração; o requisito real continua sendo cinco sessões válidas.' : jornada.segundaConquistada ? 'Sala 2 liberada! Personalize com os móveis exclusivos do Refúgio do Conhecimento.' : `Faltam ${jornada.faltam} ${jornada.faltam === 1 ? 'sessão válida' : 'sessões válidas'}. Sessões de demonstração não contam.`}</small>
+                <div><span>{previaLiberada ? 'Prévia liberada · progresso real' : jornada.segundaConquistada ? '✓ Meta alcançada' : 'Sua meta: 5 sessões de pelo menos 15 min'}</span><strong>{Math.min(5, jornadaReal.progresso)}/5</strong></div>
+                <div className="terr-progress-track"><span style={{ width: `${Math.round((Math.min(5, jornadaReal.progresso) / 5) * 100)}%` }} /></div>
+                <small>{previaLiberada ? 'Sala 2 disponível temporariamente para você testar a decoração; o requisito real continua sendo cinco sessões válidas.' : jornada.segundaConquistada ? 'Sala 2 liberada! Personalize com os móveis exclusivos do Refúgio do Conhecimento.' : `Faltam ${jornada.faltamSala2} ${jornada.faltamSala2 === 1 ? 'sessão válida' : 'sessões válidas'}. Sessões de demonstração não contam.`}</small>
               </div>
             )}
-            {roomDetail.numero === 3 && <p className="terr-journey-future-note">A Sala 3 e a transformação do teto são etapas futuras. Nenhuma aprovação real é determinada pelo terrário.</p>}
+            {roomDetail.numero === 3 && (
+              <div className="terr-journey-goal">
+                <div><span>{previaLiberada ? 'Prévia liberada · progresso real' : jornada.terceiraConquistada ? '✓ Meta alcançada' : 'Sua meta: 10 sessões de pelo menos 15 min'}</span><strong>{Math.min(10, jornadaReal.progresso)}/10</strong></div>
+                <div className="terr-progress-track"><span style={{ width: `${Math.round((Math.min(10, jornadaReal.progresso) / 10) * 100)}%` }} /></div>
+                <small>{previaLiberada ? 'Sala 3 disponível temporariamente para você testar a decoração; o requisito real continua sendo dez sessões válidas.' : jornada.terceiraConquistada ? 'Sala 3 liberada! A Tenna chegou ao ambiente do vestibulinho.' : `Faltam ${jornada.faltamSala3} ${jornada.faltamSala3 === 1 ? 'sessão válida' : 'sessões válidas'}. A abertura do teto virá em uma etapa futura.`}</small>
+              </div>
+            )}
+            {roomDetail.numero === 3 && <p className="terr-journey-future-note">O teto continua fechado nesta etapa. A abertura rumo à ETECAMP será uma conquista visual futura; ela não representa aprovação real.</p>}
           </div>
           <a className="terr-journey-back" href="#terr-scene-title">Ver formigueiro ↑</a>
         </div>
       </section>
 
+      )}
+
+      {decorate ? (
       <section className="terr-inventory" aria-labelledby="terr-inventory-heading">
         <div className="terr-inventory-header"><div>
           <span className="terr-kicker">SALA {String(selectedRoom).padStart(2, '0')} · PERSONALIZAÇÃO</span>
           <h2 id="terr-inventory-heading">{selectedRoom === 1 ? 'Crie seu cantinho' : roomDetail.nome}</h2>
           <p>{selectedRoom === 1
-            ? modoTeste ? 'Decore o Ninho Inicial com cama, plantas, iluminação e objetos aconchegantes. O modo de teste não gasta sementes.' : 'Seu Ninho Inicial é um espaço de descanso. Compre móveis aconchegantes e salve a decoração na sua conta.'
-            : selectedRoom === 2 && roomDetail.conquistada
-              ? previaLiberada ? 'Experimente os móveis de estudo exclusivos da Sala 2. A decoração de teste não altera o servidor.' : 'Escolha móveis de estudo exclusivos do Refúgio do Conhecimento. Suas compras antigas de estudo são preservadas e aparecem aqui quando a sala é liberada.'
-              : selectedRoom === 3 && previaLiberada ? 'Visite a prévia da Sala 3 no mapa. Os móveis deste ambiente serão feitos em outra etapa.' : 'Esta sala ainda está bloqueada. Continue estudando para avançar na jornada.'}</p>
-        </div><span className="terr-inventory-balance">{selectedRoom === 3 && previaLiberada ? '👁 Prévia da Sala 3' : modoTeste && roomDetail.conquistada ? `✦ ${itensDaSala(selectedRoom).length} itens para testes` : `🌱 ${seeds} sementes`}</span></div>
-        {(selectedRoom === 1 || (selectedRoom === 2 && roomDetail.conquistada)) ? <>
+            ? (modoTeste ? 'Decore o Ninho Inicial livremente no modo de teste.' : 'Compre móveis aconchegantes e salve a decoração na sua conta.')
+            : roomDetail.conquistada
+              ? (modoTeste ? `Experimente os ${totalItensSalaSelecionada} itens desta sala sem gastar sementes.` : 'Escolha e organize os móveis exclusivos desta sala.')
+              : 'Esta sala ainda está bloqueada. Continue estudando para avançar na jornada.'}</p>
+        </div><span className="terr-inventory-balance">{modoTeste && roomDetail.conquistada ? `✦ ${totalItensSalaSelecionada} itens para testes` : `🌱 ${seeds} sementes`}</span></div>
+        {salaSelecionadaPodeDecorar ? <>
         <div className="terr-items-grid">
           {itensDaSala(selectedRoom).map((item) => {
             const itemOwned = isOwned(item.id);
@@ -801,17 +924,32 @@ export default function Terrario() {
           })}
         </div>
         <div className="terr-inventory-foot">
-          <span role="status">{selectedVisible && decorate ? `${selectedItem.name}: arraste ou use as setas para mover; ajuste o tamanho no painel acima do cenário.` : modoTeste ? 'Teste à vontade: os itens desta sala ficam apenas neste navegador, sem consumir sementes.' : 'Compre com sementes e decore chão e paredes. Tudo é salvo na sua conta.'}</span>
-          <button type="button" onClick={() => setDecorate(true)}>Organizar decorações →</button>
+          <span role="status">{selectedVisible ? `${selectedItem.name}: arraste, use as setas e ajuste o tamanho no painel acima do cenário.` : modoTeste ? 'Teste à vontade: os itens desta sala ficam apenas neste navegador.' : 'Compre com sementes e salve a organização da sua sala.'}</span>
+          <button type="button" onClick={alternarDecoracao}>Concluir decoração</button>
         </div>
         </> : <div className="terr-inventory-empty">
-          <span aria-hidden="true">{selectedRoom === 3 ? '⭐' : roomDetail.conquistada ? '🌱' : '🔒'}</span>
-          <strong>{selectedRoom === 3 ? 'Sala 3 em construção' : roomDetail.conquistada ? 'Sua sala começa vazia' : 'Sala bloqueada'}</strong>
-          <p>{selectedRoom === 3 ? 'Você já pode conhecer a posição desta sala no mapa. Os móveis e a abertura no teto serão construídos na próxima etapa.' : roomDetail.conquistada ? 'A Sala 2 é um ambiente independente, com móveis exclusivos de estudo.' : 'A decoração ficará disponível quando esta sala for desbloqueada.'}</p>
-          <button type="button" className="terr-secondary" onClick={() => { setSelectedRoom(1); setDecorate(true); }}>Voltar à Sala 1</button>
+          <span aria-hidden="true">{roomDetail.conquistada ? '🌱' : '🔒'}</span>
+          <strong>{roomDetail.conquistada ? 'Sua sala começa vazia' : 'Sala bloqueada'}</strong>
+          <p>{roomDetail.conquistada ? 'Esta sala possui um catálogo próprio e você poderá organizá-la quando estiver disponível neste fluxo.' : 'A decoração ficará disponível quando esta sala for desbloqueada.'}</p>
+          <button type="button" className="terr-secondary" onClick={() => { setSelectedRoom(1); setDecorate(false); }}>Voltar ao foco</button>
         </div>}
       </section>
-      <p className="terr-prototype-note">{modoTeste ? 'Modo de teste: as posições de teste ficam só neste navegador. Sementes, XP, compras e progresso da jornada não são alterados pela decoração livre.' : 'Sessões, XP, sementes, compras e decorações das Salas 1 e 2 ficam vinculados à sua conta, separadamente. A Sala 3 continua em desenvolvimento.'}</p>
+      ) : (
+      <section className="terr-catalog-preview" aria-labelledby="terr-inventory-heading">
+        <div className="terr-catalog-preview-copy">
+          <span className="terr-kicker">PERSONALIZAÇÃO DA SALA</span>
+          <h2 id="terr-inventory-heading">{tituloCatalogo}</h2>
+          <p>{resumoCatalogo}</p>
+        </div>
+        <div className="terr-catalog-preview-meta">
+          <span>{salaSelecionadaPodeDecorar ? `${totalItensSalaSelecionada} itens disponíveis` : 'Decoração bloqueada'}</span>
+          <button type="button" className="terr-decorate-button" onClick={() => { if (salaSelecionadaPodeDecorar) setDecorate(true); }}>
+            {salaSelecionadaPodeDecorar ? 'Abrir catálogo' : 'Continuar jornada'}
+          </button>
+        </div>
+      </section>
+      )}
+      <p className="terr-prototype-note">{modoTeste ? 'Modo de teste ativo: suas experiências de decoração ficam apenas neste navegador.' : 'Compras, sessões e decoração ficam salvas na sua conta.'}</p>
     </main>
   );
 }
