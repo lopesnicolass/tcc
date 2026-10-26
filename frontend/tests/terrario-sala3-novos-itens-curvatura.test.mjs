@@ -11,10 +11,10 @@ const backend=readFileSync(path.resolve(root,'../../../backend/models/terrarioMo
 const items=[
   ['s3_mesa','carteira_vestibulinho.png',30,43,80,'chao'],
   ['s3_lousa','lousa_instrucoes.png',24,29,43,'parede'],
-  ['s3_relogio','relogio_prova.png',9,82,31,'parede'],
+  ['s3_relogio','relogio_prova.png',9,51,29,'parede'],
   ['s3_mochila','mochila_tenna.png',13,22,84,'chao'],
   ['s3_kit','kit_prova.png',7,53,68,'chao'],
-  ['s3_calendario','calendario_vestibulinho.png',11,82,51,'parede'],
+  ['s3_calendario','calendario_vestibulinho.png',9,86,54,'parede'],
   ['s3_painel','painel_desempenho.png',25,65,41,'parede'],
   ['s3_tapete','tapete_desafio.png',41,44,85,'tapete']
 ];

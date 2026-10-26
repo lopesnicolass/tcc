@@ -13,10 +13,10 @@ const catalogo=fs.readFileSync(path.join(root,'sala3Itens.js'),'utf8');
 const itens = [
   {id:'s3_mesa',x:43,y:80,width:30,zone:'chao'},
   {id:'s3_lousa',x:29,y:43,width:24,zone:'parede'},
-  {id:'s3_relogio',x:82,y:31,width:9,zone:'parede'},
+  {id:'s3_relogio',x:51,y:29,width:9,zone:'parede'},
   {id:'s3_mochila',x:22,y:84,width:13,zone:'chao'},
   {id:'s3_kit',x:53,y:68,width:7,zone:'chao'},
-  {id:'s3_calendario',x:82,y:51,width:11,zone:'parede'},
+  {id:'s3_calendario',x:86,y:54,width:9,zone:'parede'},
   {id:'s3_painel',x:65,y:41,width:25,zone:'parede'},
   {id:'s3_tapete',x:44,y:85,width:41,zone:'tapete'}
 ];

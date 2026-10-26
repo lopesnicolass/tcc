@@ -12,10 +12,10 @@ const ANTIGO_PADRAO_SALA3 = Object.freeze({
   s3_mesa: [[42,76],[38,66],[44,79],[43,80]],
   // Somente posições exatas usadas nas versões antigas são migradas.
   s3_lousa: [[32,44],[30,48],[29,44],[30,47],[30,41]],
-  s3_relogio: [[77,33],[78,31],[80,33],[77,32],[78,32]],
+  s3_relogio: [[77,33],[78,31],[80,33],[77,32],[78,32],[82,31]],
   s3_mochila: [[23,79],[24,83],[22,84]],
   s3_kit: [[81,80],[62,85],[52,67],[53,68]],
-  s3_calendario: [[77,50],[67,36],[78,50],[80,49],[77,49]],
+  s3_calendario: [[77,50],[67,36],[78,50],[80,49],[77,49],[82,51]],
   s3_painel: [[57,44],[46,35],[58,43],[57,43],[59,45],[59,39]],
   s3_tapete: [[53,83],[49,85],[43,85]],
 });
@@ -144,5 +144,19 @@ export function prepararPreviaCompletaSala3(estado, itensNovos) {
     iniciado: true,
     layoutSala3Completo: true,
     visible: [...new Set([...(estado?.visible || []), ...itensNovos.filter((item) => item.id !== 's3_kit').map((item) => item.id)])],
+  };
+}
+
+// A montagem de teste reúne só a decoração principal aprovada. O kit de
+// materiais é opcional porque a própria carteira já tem lápis e prova.
+// Compras e posições personalizadas são preservadas fora do comando explícito.
+export function montarAmbienteSala3(estado, itensNovos) {
+  return {
+    ...estado,
+    iniciado: true,
+    layoutSala3Completo: true,
+    visible: itensNovos.filter((item) => item.id !== 's3_kit').map((item) => item.id),
+    positions: { ...estado.positions, ...Object.fromEntries(itensNovos.map((item) => [item.id, { x: item.x, y: item.y }])) },
+    scales: { ...estado.scales, ...Object.fromEntries(itensNovos.map((item) => [item.id, 1])) },
   };
 }

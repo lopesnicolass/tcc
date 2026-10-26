@@ -1333,3 +1333,155 @@
     border-color: #1259b6;
   }
 }
+
+/* =========================================================
+   MURAL — RESPONSIVIDADE PELA LARGURA REAL DO CONTEÚDO
+   Importante: o menu lateral reduz a largura útil mesmo em
+   notebooks com viewport acima de 1050px. Container queries
+   evitam filtros/pesquisa apertados e rolagem horizontal da página.
+   ========================================================= */
+.mural-page {
+  min-width: 0;
+  container: mural / inline-size;
+}
+.mural-page .mural-hero {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.mural-page .mural-hero-content,
+.mural-page .mural-hero h1,
+.mural-page .mural-hero p { min-width: 0; overflow-wrap: break-word; }
+
+/* Desktop grande: filtros à esquerda, busca e criação à direita. */
+.mural-page .mural-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(355px, 43%);
+  align-items: center;
+  gap: 14px 20px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+.mural-page .materia-tabs {
+  order: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: initial;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+}
+.mural-page .materia-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+.mural-page .mural-toolbar-top {
+  order: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  flex: initial;
+}
+.mural-page .mural-search { width: 100%; max-width: none; min-width: 0; margin: 0; }
+.mural-page .mural-add-inline { min-width: 0; white-space: nowrap; padding-inline: 15px; }
+
+/* Notebooks e tablets: a busca fica em uma linha dedicada,
+   com os filtros abaixo. Não depende da largura da janela. */
+@container mural (max-width: 1190px) {
+  .mural-page .mural-toolbar { grid-template-columns: minmax(0, 1fr); gap: 13px; }
+  .mural-page .mural-toolbar-top { order: -1; grid-template-columns: minmax(0, 1fr) auto; }
+  .mural-page .materia-tabs { order: 0; flex-wrap: wrap; }
+}
+
+/* Tablets pequenos: filtros em trilho horizontal deslizável.
+   Mantém os nomes sempre legíveis, inclusive via teclado. */
+@container mural (max-width: 720px) {
+  .mural-page .mural-hero { min-height: 0; padding: 25px 24px; margin-bottom: 20px; }
+  .mural-page .mural-hero h1 { font-size: clamp(27px, 4.3vw, 35px); }
+  .mural-page .mural-hero p { font-size: 13px; line-height: 1.55; }
+  .mural-page .mural-toolbar { gap: 13px; padding: 0; }
+  .mural-page .materia-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #b8d3f3 transparent;
+    scroll-padding-inline: 4px;
+    gap: 8px;
+    padding: 4px 3px 10px;
+  }
+  .mural-page .materia-tab {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 8px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    box-shadow: none;
+    color: var(--color-text-muted);
+    font-size: 12px;
+  }
+  .mural-page .materia-tab.active {
+    background: var(--color-primary-800);
+    border-color: var(--color-primary-800);
+    color: #fff;
+  }
+  .mural-page .materia-tab-label { display: inline; }
+  .mural-page .materia-tab-count {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    flex: 0 0 24px;
+    font-size: 11px;
+    border-width: 1px;
+    transform: none;
+    outline: none;
+    box-shadow: none;
+  }
+  .mural-page .materia-tab.active .materia-tab-count {
+    transform: none;
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+/* Celulares: controles de busca e filtros empilhados. */
+@container mural (max-width: 540px) {
+  .mural-page .mural-hero { padding: 23px 20px; margin-bottom: 17px; border-radius: 18px; }
+  .mural-page .mural-hero h1 { font-size: clamp(26px, 7vw, 31px); }
+  .mural-page .mural-hero-eyebrow { font-size: 10px; }
+  .mural-page .mural-toolbar-top { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .mural-page .mural-add-inline { width: 100%; min-height: 44px; }
+  .mural-page .mural-search { min-height: 44px; height: 44px; }
+  .mural-page .mural-picker { padding-inline: 16px; }
+  .mural-page .mural-picker-option-name { overflow-wrap: anywhere; }
+}
+
+@container mural (max-width: 340px) {
+  .mural-page .mural-hero { padding: 20px 16px; }
+  .mural-page .mural-toolbar { gap: 10px; }
+}
+
+/* Telas com pouco espaço vertical: editor não deve esconder ações. */
+@media (max-height: 560px) {
+  .mural-page .mural-create-overlay,
+  .mural-page .mural-edit-overlay { align-items: flex-start; overflow-y: auto; }
+  .mural-page .mural-create-flow,
+  .mural-page .mural-edit-form { max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mural-page .postit,
+  .mural-page .materia-tab,
+  .mural-page .mural-add-inline { animation: none; transition: none; }
+}

@@ -8,7 +8,7 @@ const RECOMPENSAS = Object.freeze({
   25: { sementes: 8, xp: 15 },
   45: { sementes: 12, xp: 20 }
 });
-const MATERIAS = MATERIAS_FIXAS.map(({ nome }) => nome);
+const MATERIAS = [...MATERIAS_FIXAS.map(({ nome }) => nome), 'Estudo livre'];
 const LIMITES = Object.freeze({
   chao: { xMin: 12, xMax: 88, yMin: 56, yMax: 86 },
   tapete: { xMin: 22, xMax: 78, yMin: 66, yMax: 85 },
@@ -50,13 +50,13 @@ const ITENS = Object.freeze({
   // Sala 3: reta final, ainda dentro do formigueiro, sem abertura no teto por enquanto.
   s3_mesa: { x: 43, y: 80, zona: 'chao', sala: 3 },
   s3_lousa: { x: 29, y: 43, zona: 'parede', sala: 3 },
-  s3_relogio: { x: 82, y: 31, zona: 'parede', sala: 3, limites: { xMax: 88 } },
+  s3_relogio: { x: 51, y: 29, zona: 'parede', sala: 3, limites: { xMax: 88 } },
   s3_mochila: { x: 22, y: 84, zona: 'chao', sala: 3 },
   s3_kit: { x: 53, y: 68, zona: 'chao', sala: 3 },
   s3_cadeira: { x: 36, y: 73, zona: 'chao', sala: 3 },
   s3_estante: { x: 75, y: 68, zona: 'chao', sala: 3 },
   s3_painel: { x: 65, y: 41, zona: 'parede', sala: 3 },
-  s3_calendario: { x: 82, y: 51, zona: 'parede', sala: 3, limites: { xMax: 88, yMax: 55 } },
+  s3_calendario: { x: 86, y: 54, zona: 'parede', sala: 3, limites: { xMax: 88, yMax: 55 } },
   s3_livros: { x: 50, y: 80, zona: 'chao', sala: 3 },
   s3_puff: { x: 63, y: 81, zona: 'tapete', sala: 3 },
   s3_tapete: { x: 44, y: 85, zona: 'tapete', sala: 3 },

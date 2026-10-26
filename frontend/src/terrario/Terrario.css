@@ -727,9 +727,10 @@ html[data-theme='dark'] .terr-wall-snap { background:#234568; color:#d4eaff; bor
 }
 .terr-world-viewport:active { cursor:grabbing; }
 .terr-world-viewport:focus-visible { outline:3px solid #288bee; outline-offset:3px; }
-.terr-world-viewport.is-individual { height:auto; max-height:none; overflow:auto; }
+.terr-world-viewport.is-individual { height:auto; max-height:none; overflow:hidden; cursor:default; }
+.terr-world-viewport.is-individual:active { cursor:default; }
 .terr-world-board { position:relative; isolation:isolate; margin:0 auto; }
-.terr-world-board.is-individual { width:min(100%,650px); padding:8px; }
+.terr-world-board.is-individual { width:min(100%,780px); padding:8px; }
 /* As três câmaras compartilham a borda de terra, sem túneis artificiais.
    O posicionamento usa uma pequena sobreposição entre os contornos orgânicos
    do PNG transparente: a pirâmide forma um único formigueiro compacto. */
@@ -1133,3 +1134,361 @@ html[data-theme='dark'] .terr-world-room-buttons button:not(.active) { color:#ba
   transform: translate(-50%, -90%) rotate(0deg);
   transform-origin: 50% 70%;
 }
+
+/* Refinamento visual: menos informação concorrendo ao mesmo tempo. */
+.terr-focus-ritual {
+  margin: 0 0 16px;
+  padding: 14px 15px;
+  border: 1px solid #e3eef9;
+  border-radius: 14px;
+  background: #f8fbff;
+}
+.terr-focus-ritual strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--terr-strong);
+  font-size: 12px;
+  font-weight: 850;
+}
+.terr-focus-ritual ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--terr-text-soft);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+.terr-focus-ritual li + li { margin-top: 4px; }
+
+.terr-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+}
+.terr-overview-card {
+  padding: 22px 24px;
+  border: 1px solid var(--terr-border);
+  border-radius: 22px;
+  background: var(--terr-surface);
+  box-shadow: var(--terr-shadow);
+}
+.terr-overview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.terr-overview-head h3 {
+  margin: 5px 0 0;
+  color: var(--terr-strong);
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -.03em;
+}
+.terr-overview-card > p {
+  margin: 12px 0 0;
+  color: var(--terr-text-soft);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+.terr-overview-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--terr-surface-muted);
+  color: var(--terr-accent);
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.terr-overview-progress {
+  margin-top: 18px;
+}
+.terr-overview-progress > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  color: var(--terr-text-soft);
+  font-size: 11px;
+}
+.terr-overview-progress strong {
+  color: var(--terr-accent);
+  font-size: 13px;
+  font-weight: 900;
+}
+.terr-overview-progress small,
+.terr-overview-actions small {
+  display: block;
+  margin-top: 10px;
+  color: var(--terr-text-soft);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.terr-overview-actions {
+  margin-top: 18px;
+}
+.terr-overview-actions .terr-decorate-button {
+  min-width: 160px;
+}
+
+.terr-page.is-focusing .terr-header,
+.terr-page.is-focusing .terr-test-banner,
+.terr-page.is-focusing .terr-overview-grid,
+.terr-page.is-focusing .terr-prototype-note {
+  display: none;
+}
+.terr-page.is-focusing {
+  padding-top: 18px;
+}
+.terr-page.is-focusing .terr-layout {
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, .8fr);
+}
+.terr-page.is-focusing .terr-sidebar {
+  position: sticky;
+  top: 18px;
+}
+.terr-page.is-focusing .terr-scene-topbar {
+  padding-bottom: 18px;
+}
+.terr-page.is-focusing .terr-scene-bottom {
+  border-top: 1px solid var(--terr-line);
+}
+
+@media(max-width:1020px) {
+  .terr-overview-grid { grid-template-columns: minmax(0, 1fr); }
+  .terr-page.is-focusing .terr-layout { grid-template-columns: minmax(0, 1fr); }
+  .terr-page.is-focusing .terr-sidebar { position: static; }
+}
+
+@media(max-width:720px) {
+  .terr-overview-card { padding: 18px 16px; border-radius: 18px; }
+  .terr-overview-head { flex-direction: column; align-items: flex-start; }
+  .terr-overview-head h3 { font-size: 20px; }
+  .terr-focus-ritual { padding: 12px 13px; }
+}
+
+html[data-theme='dark'] .terr-focus-ritual {
+  border-color: #36516d;
+  background: #21384f;
+}
+
+/* O cenário pertence à terra, não ao fundo azul da página. O ninho é uma
+   imagem com transparência, por isso estas camadas aparecem em volta dele. */
+.terr-page .terr-scene-shell {
+  background: linear-gradient(160deg, #dfb98e 0%, #c48d5b 60%, #b07649 100%);
+  border-color: #c6966d;
+}
+.terr-page .terr-world-viewport,
+html[data-theme='dark'] .terr-page .terr-world-viewport {
+  background: radial-gradient(ellipse at 47% 38%, #dfb083 0%, #bd8455 60%, #94603e 100%);
+  border-color: #b37f58;
+  box-shadow: inset 0 4px 26px rgba(76, 42, 22, .14);
+  scrollbar-color: #98613e #d3a37d;
+}
+html[data-theme='dark'] .terr-page .terr-scene-shell {
+  background: linear-gradient(160deg, #ae794f, #845232);
+  border-color: #906141;
+}
+
+/* O editor passa a ser uma janela, com cenário e catálogo em painéis vizinhos. */
+.terr-decor-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(15, 31, 46, .68);
+  backdrop-filter: blur(6px);
+}
+.terr-page .terr-decor-dialog {
+  position: fixed;
+  inset: clamp(8px, 2.4vh, 28px) clamp(8px, 2vw, 32px);
+  z-index: 3001;
+  width: min(1480px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 29vw, 420px);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.75);
+  border-radius: 23px;
+  background: #f0e1d1;
+  box-shadow: 0 26px 80px rgba(16, 31, 53, .32);
+  overflow: hidden;
+}
+.terr-decor-dialog-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding: 2px 4px 4px;
+}
+.terr-decor-dialog-header h2 {
+  margin: 4px 0 3px;
+  color: #56331f;
+  font-size: clamp(20px, 1.8vw, 27px);
+  font-weight: 850;
+  letter-spacing: -.03em;
+}
+.terr-decor-dialog-header p { margin: 0; color: #87644a; font-size: 12px; }
+.terr-decor-close {
+  flex: 0 0 auto;
+  min-height: 43px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 12px;
+  background: #185bb2;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 850;
+}
+.terr-decor-close:hover { background: #104889; }
+.terr-page .terr-decor-dialog .terr-layout {
+  grid-column: 1;
+  grid-row: 2;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+.terr-decor-dialog .terr-sidebar,
+.terr-decor-dialog .terr-scene-bottom,
+.terr-decor-dialog .terr-scene-actions {
+  display: none;
+}
+.terr-page .terr-decor-dialog .terr-scene-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-color: #d8b99b;
+  border-radius: 18px;
+}
+.terr-decor-dialog .terr-scene-topbar {
+  padding: 13px 19px;
+  flex-shrink: 0;
+}
+.terr-decor-dialog .terr-scene-topbar h2 { font-size: 19px; }
+.terr-decor-dialog .terr-scene-heading p { font-size: 11px; }
+.terr-decor-dialog .terr-size-toolbar { flex-shrink: 0; }
+.terr-page .terr-decor-dialog .terr-scene-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px;
+  overflow: hidden;
+}
+.terr-decor-dialog .terr-world-toolbar { flex-shrink: 0; }
+.terr-decor-dialog .terr-world-hint { color: #704d32; }
+.terr-page .terr-decor-dialog .terr-world-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  overflow: auto;
+  border-radius: 13px;
+}
+.terr-decor-dialog .terr-world-footnote { display: none; }
+.terr-page .terr-decor-dialog .terr-inventory {
+  grid-column: 2;
+  grid-row: 2;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  margin: 0;
+  padding: 17px 14px;
+  border-color: #dfc8b2;
+  border-radius: 18px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c5a58b transparent;
+}
+.terr-decor-dialog .terr-inventory-header { gap: 10px; flex-wrap: wrap; margin-bottom: 13px; }
+.terr-decor-dialog .terr-inventory h2 { font-size: 20px; }
+.terr-decor-dialog .terr-inventory-header p { font-size: 11px; }
+.terr-decor-dialog .terr-inventory-balance { padding: 7px 10px; }
+.terr-decor-dialog .terr-items-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.terr-decor-dialog .terr-item-preview { height: 113px; min-height: 113px; padding: 9px; }
+.terr-decor-dialog .terr-item-desc { min-height: 57px; padding: 9px 10px 6px; }
+.terr-decor-dialog .terr-item-desc strong { font-size: 11px; }
+.terr-decor-dialog .terr-item-desc small { font-size: 10px; }
+.terr-decor-dialog .terr-item-bottom { padding: 8px 9px; flex-wrap: wrap; gap: 6px; }
+.terr-decor-dialog .terr-item-bottom button { min-height: 30px; flex: 1 1 auto; }
+.terr-decor-dialog .terr-inventory-foot { flex-direction: column; align-items: stretch; }
+.terr-decor-dialog .terr-inventory-foot button { border-radius: 9px; background: #e9f3ff; }
+
+/* Tablets e celulares: os painéis viram duas faixas da mesma janela. */
+@media (max-width: 900px) {
+  .terr-page .terr-decor-dialog {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1.3fr) minmax(190px, .8fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .terr-page .terr-decor-dialog .terr-layout { grid-column: 1; grid-row: 2; }
+  .terr-page .terr-decor-dialog .terr-inventory { grid-column: 1; grid-row: 3; }
+  .terr-decor-dialog .terr-items-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .terr-decor-dialog .terr-scene-topbar { padding: 10px 14px; }
+  .terr-decor-dialog .terr-scene-heading p { display: none; }
+}
+@media (max-width: 560px) {
+  .terr-page .terr-decor-dialog { inset: 5px; width: calc(100vw - 10px); max-height: calc(100dvh - 10px); border-radius: 14px; }
+  .terr-decor-dialog-header { gap: 7px; }
+  .terr-decor-dialog-header h2 { font-size: 17px; }
+  .terr-decor-dialog-header p { display: none; }
+  .terr-decor-close { min-height: 38px; padding: 7px 9px; font-size: 10px; }
+  .terr-decor-dialog .terr-items-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .terr-page .terr-decor-dialog .terr-scene-shell { padding: 8px; }
+  .terr-decor-dialog .terr-world-toolbar { gap: 6px; padding-bottom: 7px; }
+  .terr-decor-dialog .terr-world-hint { display: none; }
+}
+html[data-theme='dark'] .terr-page .terr-decor-dialog {
+  background: #30281f;
+  border-color: #594733;
+}
+html[data-theme='dark'] .terr-decor-dialog-header h2 { color: #fff3e2; }
+html[data-theme='dark'] .terr-decor-dialog-header p { color: #c8b29c; }
+html[data-theme='dark'] .terr-decor-dialog .terr-world-hint { color: #fff1e2; }
+
+.terr-decor-quick-actions {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.terr-decor-quick-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 1px solid #c5d9ec;
+  border-radius: 10px;
+  background: #f3f8ff;
+  color: #17549c;
+  font-size: 11px;
+  font-weight: 850;
+}
+.terr-decor-quick-actions button:hover { background: #e6f2ff; }
+html[data-theme='dark'] .terr-decor-quick-actions button {
+  border-color: #4f6680;
+  background: #25435d;
+  color: #e1f2ff;
+}
+
+/* O controle de retorno ao foco fica sempre visível na janela de decoração. */
+.terr-decor-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
+.terr-decor-to-focus { min-height: 43px; padding: 10px 14px; border: 1px solid #b5c5d4; border-radius: 12px; background: #fffaf4; color: #18549e; font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
+.terr-decor-to-focus:hover { background: #eaf5ff; }
+@media(max-width:560px) { .terr-decor-header-actions { gap: 5px; } .terr-decor-to-focus { min-height: 38px; padding: 7px 9px; font-size: 10px; } }
+html[data-theme='dark'] .terr-decor-to-focus { background: #304960; color: #e4f2ff; border-color: #4b6885; }

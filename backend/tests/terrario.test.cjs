@@ -294,3 +294,20 @@ test('Terrário: a Sala 3 vende seus oito itens exclusivos, com limites e compra
   assert.equal(estado.inventario.find(i=>i.id==='s3_lousa').escala,1.3);
   banco.close();
 });
+
+
+test('Terrário: estudo livre funciona sem escolher matéria no cronômetro', async () => {
+  const { banco, model } = novoBanco();
+  const inicio = Date.now();
+  const sessao = await model.iniciar(1, 'Estudo livre', 15, inicio);
+  let estado = await model.buscarEstado(1, inicio + 1000);
+  assert.equal(estado.sessao.materia, 'Estudo livre');
+  assert.equal(estado.sessao.estado, 'em_andamento');
+  assert.equal((await model.acao(1, sessao.lastID, 'pausar', inicio + 2000)).status, 200);
+  estado = await model.buscarEstado(1, inicio + 3000);
+  assert.equal(estado.sessao.estado, 'pausada');
+  assert.equal((await model.acao(1, sessao.lastID, 'continuar', inicio + 4000)).status, 200);
+  estado = await model.buscarEstado(1, inicio + 5000);
+  assert.equal(estado.sessao.estado, 'em_andamento');
+  banco.close();
+});

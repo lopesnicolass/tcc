@@ -1,12 +1,15 @@
-// A vitrine do formigueiro é diferente do progresso salvo: salas bloqueadas
-// só aparecem na navegação quando o jogador entra no modo de decoração.
-export function salasVisiveisNoMapa(salas, decorando) {
-  return salas.filter((sala) => decorando || sala.conquistada);
+// Em modo foco mostramos somente a câmara escolhida. No modo decorar,
+// o mapa completo aparece para navegar entre salas (inclusive bloqueadas).
+export function salasVisiveisNoMapa(salas, decorando, salaSelecionada = 1) {
+  if (decorando) return salas;
+  const atual = salas.find((sala) => sala.numero === salaSelecionada && sala.conquistada);
+  const primeiraLiberada = salas.find((sala) => sala.conquistada);
+  return atual ? [atual] : primeiraLiberada ? [primeiraLiberada] : [];
 }
 
-// Mantém a mesma disposição de três salas: 1 e 2 na base, 3 no topo.
-// Com somente uma sala desbloqueada, a área navegável não exibe espaços vazios.
+// Com uma só sala, o cenário ocupa a área sem rolagem horizontal.
+// Durante a decoração, as duas salas inferiores e a superior formam a pirâmide.
 export function formatoMapa(salasVisiveis) {
-  if (salasVisiveis.length === 1) return 'individual';
+  if (salasVisiveis.length <= 1) return 'individual';
   return salasVisiveis.some((sala) => sala.numero === 3) ? 'piramide' : 'base';
 }

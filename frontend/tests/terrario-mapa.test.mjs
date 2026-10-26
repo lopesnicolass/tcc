@@ -3,28 +3,39 @@ import assert from 'node:assert/strict';
 import { construirJornada } from '../src/terrario/jornada.js';
 import { salasVisiveisNoMapa, formatoMapa } from '../src/terrario/mapaSalas.js';
 
-test('no modo foco aparece apenas a sala inicial quando nenhuma outra foi liberada', () => {
+const numeros = (salas) => salas.map((sala) => sala.numero);
+
+test('modo foco mostra somente o Ninho Inicial antes dos desbloqueios', () => {
   const { salas } = construirJornada({ salaDesbloqueada: 1, sessoesValidas: 0 });
-  assert.deepEqual(salasVisiveisNoMapa(salas, false).map(sala => sala.numero), [1]);
-  assert.equal(formatoMapa(salasVisiveisNoMapa(salas, false)), 'individual');
+  const visiveis = salasVisiveisNoMapa(salas, false, 1);
+  assert.deepEqual(numeros(visiveis), [1]);
+  assert.equal(formatoMapa(visiveis), 'individual');
 });
 
-test('no modo decorar, a pirâmide mostra as três salas e mantém duas bloqueadas', () => {
+test('modo foco mostra uma sala por vez depois que todas foram liberadas', () => {
+  const { salas } = construirJornada({ salaDesbloqueada: 3, sessoesValidas: 10 });
+  for (const numero of [1, 2, 3]) {
+    const visiveis = salasVisiveisNoMapa(salas, false, numero);
+    assert.deepEqual(numeros(visiveis), [numero]);
+    assert.equal(formatoMapa(visiveis), 'individual');
+  }
+});
+
+test('modo foco nao renderiza sala bloqueada selecionada na decoracao', () => {
   const { salas } = construirJornada({ salaDesbloqueada: 1, sessoesValidas: 1 });
-  const visiveis = salasVisiveisNoMapa(salas, true);
-  assert.deepEqual(visiveis.map(sala => sala.numero), [1, 2, 3]);
-  assert.deepEqual(visiveis.filter(sala => !sala.conquistada).map(sala => sala.numero), [2, 3]);
+  assert.deepEqual(numeros(salasVisiveisNoMapa(salas, false, 3)), [1]);
+});
+
+test('modo decorar exibe as tres salas em piramide, incluindo bloqueadas', () => {
+  const { salas } = construirJornada({ salaDesbloqueada: 1, sessoesValidas: 1 });
+  const visiveis = salasVisiveisNoMapa(salas, true, 1);
+  assert.deepEqual(numeros(visiveis), [1, 2, 3]);
+  assert.deepEqual(numeros(visiveis.filter((sala) => !sala.conquistada)), [2, 3]);
   assert.equal(formatoMapa(visiveis), 'piramide');
 });
 
-test('ao conquistar a sala 2, as duas salas ficam visíveis no modo foco', () => {
-  const { salas } = construirJornada({ salaDesbloqueada: 2, sessoesValidas: 5 });
-  const visiveis = salasVisiveisNoMapa(salas, false);
-  assert.deepEqual(visiveis.map(sala => sala.numero), [1, 2]);
-  assert.equal(formatoMapa(visiveis), 'base');
-});
-
-test('a sala 3 surge depois do desbloqueio informado pelo servidor', () => {
+test('sair da decoracao deixa apenas a sala 2 escolhida em foco', () => {
   const { salas } = construirJornada({ salaDesbloqueada: 3, sessoesValidas: 10 });
-  assert.deepEqual(salasVisiveisNoMapa(salas, false).map(sala => sala.numero), [1, 2, 3]);
+  assert.equal(formatoMapa(salasVisiveisNoMapa(salas, true, 2)), 'piramide');
+  assert.deepEqual(numeros(salasVisiveisNoMapa(salas, false, 2)), [2]);
 });

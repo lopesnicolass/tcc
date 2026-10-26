@@ -13,10 +13,10 @@ const migracao = fs.readFileSync(path.resolve(dir, '../../backend/config/ensureT
 const itens = [
   ['s3_mesa','carteira_vestibulinho.png',43,80,'chao'],
   ['s3_lousa','lousa_instrucoes.png',29,43,'parede'],
-  ['s3_relogio','relogio_prova.png',82,31,'parede'],
+  ['s3_relogio','relogio_prova.png',51,29,'parede'],
   ['s3_mochila','mochila_tenna.png',22,84,'chao'],
   ['s3_kit','kit_prova.png',53,68,'chao'],
-  ['s3_calendario','calendario_vestibulinho.png',82,51,'parede'],
+  ['s3_calendario','calendario_vestibulinho.png',86,54,'parede'],
   ['s3_painel','painel_desempenho.png',65,41,'parede'],
   ['s3_tapete','tapete_desafio.png',44,85,'tapete'],
 ];
@@ -66,7 +66,7 @@ test('versão antiga de prévia recebe móveis novos uma vez e conserva ajustes'
 test('posições padrão antigas de painel e calendário migram sem alterar personalizações',()=>{
   const salvo=lerTeste({getItem:()=>JSON.stringify({ visible:['s3_painel','s3_calendario'], positions:{s3_painel:{x:46,y:35},s3_calendario:{x:67,y:36}}})},'chave',itensMock);
   assert.deepEqual(salvo.positions.s3_painel,{x:65,y:41});
-  assert.deepEqual(salvo.positions.s3_calendario,{x:82,y:51});
+  assert.deepEqual(salvo.positions.s3_calendario,{x:86,y:54});
   const personalizado=lerTeste({getItem:()=>JSON.stringify({ visible:['s3_painel'],positions:{s3_painel:{x:60,y:42}}})},'chave',itensMock);
   assert.deepEqual(personalizado.positions.s3_painel,{x:60,y:42});
 });

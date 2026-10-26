@@ -11,8 +11,8 @@ const model=fs.readFileSync(path.resolve(dir,'../../backend/models/terrarioModel
 const wall=[
  {id:'s3_lousa',img:'lousa_instrucoes.png',width:24,x:29,y:43},
  {id:'s3_painel',img:'painel_desempenho.png',width:25,x:65,y:41},
- {id:'s3_relogio',img:'relogio_prova.png',width:9,x:82,y:31},
- {id:'s3_calendario',img:'calendario_vestibulinho.png',width:11,x:82,y:51},
+ {id:'s3_relogio',img:'relogio_prova.png',width:9,x:51,y:29},
+ {id:'s3_calendario',img:'calendario_vestibulinho.png',width:9,x:86,y:54},
 ];
 test('novas artes de parede são PNGs transparentes, independentes e com posições coerentes',()=>{
  for(const item of wall){
