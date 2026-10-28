@@ -445,7 +445,7 @@ html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active svg 
 .student-area .student-sidebar .sidebar-link.active,
 html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active {
   /* Azul principal da identidade Tenna, também usado nas demais telas. */
-  background: var(--color-primary-600, #176dcc);
+  background: #176dcc;
   border-color: transparent;
   color: #fff;
   font-weight: 700;
@@ -643,5 +643,224 @@ html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wra
     width: 42px;
     height: 42px;
     flex-basis: 42px;
+  }
+}
+
+
+/* TENNA | A sidebar do aluno tem a MESMA paleta nos dois temas.
+   O tema altera o conteúdo, não o menu; não afeta a sidebar administrativa. */
+html[data-theme='dark'] .student-area .student-sidebar,
+html[data-theme='dark'] .student-area .student-sidebar.sidebar-collapsed {
+  background: #092a53;
+  border-right-color: rgba(255, 255, 255, .08);
+}
+html[data-theme='dark'] .student-area .student-sidebar .student-sidebar-brand,
+html[data-theme='dark'] .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+  background: #092a53;
+  border-bottom: 0;
+}
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link svg {
+  color: #d1e2fc;
+}
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover {
+  background: #1a5098;
+  border-color: transparent;
+  color: #fff;
+}
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active {
+  background: #176dcc;
+  border-color: transparent;
+  color: #fff;
+  box-shadow: none;
+}
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover svg {
+  color: #fff;
+  background: transparent;
+  border-color: transparent;
+}
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle-icon {
+  background: rgba(232, 244, 255, .96);
+  color: #1658b0;
+}
+
+/* ============================================================
+   TENNA | Sidebar compacta em notebooks com pouca altura útil.
+   Mantém todas as opções visíveis sem alterar as cores do menu.
+   A barra só volta a rolar se a janela ficar pequena demais.
+   ============================================================ */
+@media (min-width: 761px) and (max-height: 900px) {
+  .student-area .student-sidebar:not(.sidebar-collapsed) {
+    gap: 0;
+    padding: 0 12px 8px;
+  }
+
+  .student-area .student-sidebar:not(.sidebar-collapsed) .student-sidebar-brand {
+    flex: 0 0 72px;
+    height: 72px;
+    min-height: 72px;
+    margin: 0;
+    width: 100%;
+    padding: 6px 8px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-logo-full {
+    width: min(160px, calc(100% - 45px));
+    height: auto;
+    max-height: 62px;
+    padding: 0;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-collapse-btn {
+    width: 29px;
+    height: 29px;
+    flex-basis: 29px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-nav {
+    margin: 3px 0 4px;
+    gap: 2px;
+    padding: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin; /* Reserva rolagem apenas em janelas muito baixas. */
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-link,
+  html[data-theme='dark'] .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-link {
+    flex: 0 0 auto;
+    min-height: 36px;
+    height: 36px;
+    padding: 0 11px;
+    gap: 11px;
+    border-radius: 9px;
+    font-size: 12.5px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-link svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .student-area .student-sidebar:not(.sidebar-collapsed) .tenna-sidebar-focus {
+    min-height: 25px;
+    padding: 0 4px;
+    margin: 0 0 3px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .tenna-sidebar-focus-open {
+    padding: 2px 0;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .student-theme-toggle-wrap {
+    margin: 0 0 5px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .student-theme-toggle-wrap .theme-toggle,
+  html[data-theme='dark'] .student-area .student-sidebar:not(.sidebar-collapsed) .student-theme-toggle-wrap .theme-toggle {
+    min-height: 34px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .student-theme-toggle-wrap .theme-toggle-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 7px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak {
+    height: 72px;
+    min-height: 72px;
+    padding: 6px 8px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-visual {
+    width: 31px;
+    height: 36px;
+    flex-basis: 31px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-visual::before {
+    width: 29px;
+    height: 32px;
+    flex-basis: 29px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-heading strong {
+    font-size: 24px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-label {
+    margin-top: 1px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-progress {
+    margin-top: 4px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-streak-message {
+    margin-top: 3px;
+  }
+}
+
+/* Na janela normal e em F11, o mesmo tamanho de links e logo.
+   A troca entre os dois modos nao pode causar saltos de espaco. */
+@media (min-width: 761px) and (max-height: 630px) {
+  .student-area .student-sidebar:not(.sidebar-collapsed) .student-sidebar-brand {
+    flex-basis: 68px;
+    height: 68px;
+    min-height: 68px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-logo-full {
+    width: min(155px, calc(100% - 45px));
+    max-height: 58px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-link,
+  html[data-theme='dark'] .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-link {
+    height: 32px;
+    min-height: 32px;
+    font-size: 12px;
+  }
+  .student-area .student-sidebar:not(.sidebar-collapsed) .sidebar-nav {
+    gap: 2px;
+  }
+}
+
+/* Sidebar recolhida: também cabe por inteiro no notebook. */
+@media (min-width: 761px) and (max-height: 900px) {
+  .student-area .student-sidebar.sidebar-collapsed {
+    gap: 0;
+    padding: 0 9px 8px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .student-sidebar-brand {
+    flex: 0 0 60px;
+    height: 60px;
+    min-height: 60px;
+    width: 100%;
+    margin: 0;
+    padding: 6px 0;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-nav {
+    min-height: 0;
+    margin: 4px 0;
+    padding: 0;
+    gap: 1px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-link,
+  html[data-theme='dark'] .student-area .student-sidebar.sidebar-collapsed .sidebar-link {
+    flex: 0 0 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    border-radius: 9px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .tenna-sidebar-focus {
+    min-height: 25px;
+    margin: 0 0 3px;
+    padding: 0;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap {
+    margin: 0 0 5px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle,
+  html[data-theme='dark'] .student-area .student-sidebar.sidebar-collapsed .student-theme-toggle-wrap .theme-toggle {
+    min-height: 34px;
+    height: 34px;
+  }
+  .student-area .student-sidebar.sidebar-collapsed .sidebar-streak {
+    min-height: 54px;
+    height: 54px;
+    margin: 0;
   }
 }

@@ -3234,3 +3234,79 @@ html[data-theme='dark'] .flashcards-finished .flashcards-result-stat.is-correct 
 html[data-theme='dark'] .flashcards-finished .flashcards-result-stat.is-wrong .flashcards-stat-dot { background: #51333b; color: #ffc3c3; }
 html[data-theme='dark'] .flashcards-finished .flashcards-result-secondary { background: #223b55; color: #e7f3ff; border-color: #486885; }
 html[data-theme='dark'] .flashcards-finished .flashcards-result-secondary:hover { background: #2c4b6a; }
+
+
+/* TENNA — Flashcards: ajustes finais sem modificar o modo claro.
+   Unifica as regras que antes se sobrepunham no final da folha. */
+html[data-theme='dark'] .flashcards-page button.flashcards-deck {
+  background: #192a3d;
+  border: 1px solid #32485f;
+  box-shadow: none;
+}
+html[data-theme='dark'] .flashcards-page button.flashcards-deck:hover {
+  background: #20344b;
+  border-color: #476784;
+  box-shadow: none;
+}
+/* A ilustração fica solta no card, como no modelo original,
+   sem uma segunda placa escura ou faixa colorida na lateral. */
+html[data-theme='dark'] .flashcards-page .flashcards-deck-illustration {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-deck-sheet {
+  border-color: rgba(40, 74, 112, .15);
+}
+html[data-theme='dark'] .flashcards-page .flashcards-deck-glyph {
+  color: var(--deck-color);
+}
+html[data-theme='dark'] .flashcards-page .flashcards-deck-title {
+  color: #f0f5fc;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-deck-action {
+  color: color-mix(in srgb, var(--deck-color) 78%, white);
+}
+html[data-theme='dark'] .flashcards-page .flashcards-content-title {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+  color: #eff6ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-content-title::before,
+html[data-theme='dark'] .flashcards-page .flashcards-content-title::after {
+  content: none;
+}
+/* Perguntas e respostas mantêm superfícies distintas e legíveis. */
+html[data-theme='dark'] .flashcards-page .flashcard-face.front {
+  background: #1c3048;
+  border-color: #39536d;
+  color: #f3f8ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcard-face.back {
+  background: #2165b1;
+  border-color: #4a8ccd;
+  color: #fff;
+}
+/* A rodada rápida usa uma cor de matéria definida pelo próprio card,
+   sem sobreposição de azul-escuro ou filtro opaco. */
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-card .flashcard-game-front {
+  background: var(--game-subject-color, #2687db);
+  border: 1px solid color-mix(in srgb, var(--game-subject-color, #2687db) 75%, #d9ecff);
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0, 10, 30, .18);
+}
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-card .flashcard-game-back {
+  background: #2470bf;
+  border-color: #5e9bd8;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0, 10, 30, .18);
+}
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-face p,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-front .flashcard-game-flip-hint,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-back .flashcard-game-flip-hint {
+  color: #fff;
+}

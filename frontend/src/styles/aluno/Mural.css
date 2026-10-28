@@ -1593,3 +1593,57 @@ html[data-theme='dark'] .student-area .mural-page .mural-search:focus-within {
 .student-area .mural-page .mural-search input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
+
+/* Mural: filtros e pesquisa lado a lado em telas de notebook.
+   Evita que a busca ocupe toda a linha e jogue os filtros para baixo. */
+@container mural (min-width: 880px) {
+  .mural-page .mural-toolbar {
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+  .mural-page .materia-tabs {
+    order: 0;
+    width: max-content;
+    max-width: 100%;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+  .mural-page .materia-tab {
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+  .mural-page .materia-tab-count {
+    flex: 0 0 21px;
+    width: 21px;
+    min-width: 21px;
+    height: 21px;
+    font-size: 10px;
+  }
+  .mural-page .mural-toolbar-top {
+    order: 0;
+    grid-template-columns: minmax(120px, 1fr) auto;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+  }
+  .mural-page .mural-search {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .mural-page .mural-add-inline {
+    padding-inline: 11px;
+    font-size: 12px;
+  }
+}
+
+/* Em larguras pequenas, os filtros aparecem primeiro, com a busca abaixo.
+   A busca não ocupa uma linha inteira quando há espaço para os dois grupos. */
+@container mural (max-width: 879px) {
+  .mural-page .mural-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mural-page .materia-tabs { order: 0; }
+  .mural-page .mural-toolbar-top { order: 1; }
+}

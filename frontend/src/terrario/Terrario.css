@@ -3017,3 +3017,17 @@ html[data-theme='dark'] .terr-page .terr-duration-session,
 html[data-theme='dark'] .terr-page .terr-focus-one-status { background: #303d44; border-color: #50616a; color: #dce8f4; }
 html[data-theme='dark'] .terr-page .terr-duration-presets button:not(.active) { background: #2c404e; border-color: #4a6171; color: #e6eff9; }
 html[data-theme='dark'] .terr-page .terr-timer-inner { background: #202f40; border-color: #485d71; }
+
+
+/* TENNA | Campo de minutos do foco: remove o retângulo escuro
+   criado pelo estilo global de inputs do tema escuro. */
+html[data-theme='dark'] .student-area .terr-page .terr-focus-controls .terr-duration-value input,
+html[data-theme='dark'] .student-area .terr-page .terr-focus-controls .terr-duration-value input:focus,
+html[data-theme='dark'] .student-area .terr-page .terr-focus-controls .terr-duration-value input:active {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  border: 0;
+  box-shadow: none;
+  color: #f1f8ff;
+}

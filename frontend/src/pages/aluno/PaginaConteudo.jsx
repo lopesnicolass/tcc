@@ -1160,7 +1160,22 @@ export default function PaginaConteudo() {
             materiaStyle.bg,
         }}
       >
-
+        <div className="pagina-hero-top">
+          <nav className="pagina-breadcrumb" aria-label="Navegação da aula">
+            <button
+              type="button"
+              className="pagina-breadcrumb-link"
+              onClick={() => navigate('/conteudos')}
+              aria-label="Voltar para Conteúdos"
+            >
+              Conteúdos
+            </button>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+            <span aria-current="page">{pagina.materia || 'Material de estudo'}</span>
+          </nav>
+        </div>
 
         <div className="pagina-hero-content">
 
