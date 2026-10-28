@@ -12,6 +12,11 @@ let insercoesManuais = 0;
 let controller;
 try {
   Module._load = function (name, parent, isMain) {
+    if (name === '../models/planoPessoalModel') {
+      return { buscar(_id, done) {
+        done(null, { configuracao: JSON.stringify({ plan: [{ semanas: [{ inicio: '2020-10-01', fim: '2020-10-07', days: [{ items: [{ key: 'programado:4:9', topicoId: 123, topico: 'Interpretação de texto' }] }] }] }] }) });
+      } };
+    }
     if (name === '../models/cronogramaModel') {
       return {
         adicionarSessoesPlano(_usuarioId, atividades, done) {
@@ -72,6 +77,22 @@ test('rota do plano recusa atividades sem origem de sessão', () => {
 test('rota do plano continua validando datas impossíveis', () => {
   const res = resposta();
   controller.agendarPlano(pedido({ atividades: [{ ...sessao, data: '2020-02-31' }] }), res);
+  assert.equal(res.statusCode, 400);
+  assert.equal(insercoesEmLote, 1);
+});
+
+
+test('rejeita sessão antiga fora da semana prevista', () => {
+  const res = resposta();
+  controller.agendarPlano(pedido({ atividades: [{ ...sessao, data: '2020-10-08' }] }), res);
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.mensagem, /data histórica inválida/);
+  assert.equal(insercoesEmLote, 1);
+});
+
+test('rejeita origem verdadeira quando o conteúdo não corresponde ao plano salvo', () => {
+  const res = resposta();
+  controller.agendarPlano(pedido({ atividades: [{ ...sessao, topicoId: 999 }] }), res);
   assert.equal(res.statusCode, 400);
   assert.equal(insercoesEmLote, 1);
 });

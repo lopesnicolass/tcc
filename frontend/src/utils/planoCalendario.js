@@ -132,3 +132,60 @@ export function prepararAgendamentoCompleto(plano, { diasSemana, horarioInicial,
     concluidas, anteriores, total, inicio: novas[0]?.data || redistribuido[0].inicio,
     inicioPlano: redistribuido[0].inicio, diasSemana: [...diasSemana] };
 }
+
+
+// O calendário pode conter um plano parcialmente agendado. Recupera os dias e
+// o horário conhecido, sem inventar dias extras nem trazer dados de outro plano.
+export function recuperarConfiguracaoAgenda(plano, atividades = [], quantidadeDias = 0) {
+  const origens = new Set((plano || []).flatMap((mes) => mes.semanas.flatMap((semana) =>
+    semana.days.flatMap((dia, diaIndex) => dia.items.map((item, itemIndex) =>
+      chaveSessaoPlano(item, mes, semana, diaIndex, itemIndex))))));
+  const encontradas = (atividades || []).filter((a) => origens.has(a.origem) && lerDataLocal(a.data) &&
+    /^([01]\d|2[0-3]):[0-5]\d$/.test(a.horario || ''));
+  const diasSemana = [];
+  for (const atividade of encontradas) {
+    const dia = lerDataLocal(atividade.data).getDay();
+    if (!diasSemana.includes(dia) && diasSemana.length < quantidadeDias) diasSemana.push(dia);
+  }
+  const horarios = encontradas.map((a) => a.horario).sort();
+  return { diasSemana: diasSemana.sort((a, b) => a - b), horario: horarios[0] || null };
+}
+
+// Progresso (conteúdo estudado) e agendamento (sessão no Calendário) são independentes.
+export function resumoSemanaPlano(mes, semana, atividades = [], topicosEstudados = {}) {
+  const itens = semana.days.flatMap((dia, diaIndex) => dia.items.map((item, itemIndex) =>
+    ({ item, origem: chaveSessaoPlano(item, mes, semana, diaIndex, itemIndex) })));
+  const ids = [...new Set(itens.filter(({ item }) => item.topicoId).map(({ item }) => String(item.topicoId)))];
+  const estudados = ids.filter((id) => Boolean(topicosEstudados[id])).length;
+  const origensAgendadas = new Set((atividades || []).map((a) => a.origem).filter(Boolean));
+  const agendadas = itens.filter(({ origem }) => origensAgendadas.has(origem)).length;
+  const progresso = itens.length === 0 ? 'Sem atividades'
+    : ids.length > 0 && estudados === ids.length ? 'Concluída'
+      : estudados > 0 ? 'Em andamento' : 'Pendente';
+  const agendamento = itens.length === 0 ? 'Sem sessões'
+    : agendadas === 0 ? 'Sem agendamento'
+      : agendadas === itens.length ? 'Agendada'
+        : `${agendadas} de ${itens.length} agendadas`;
+  return { progresso, agendamento, total: itens.length, agendadas, estudados };
+}
+
+// Move apenas a sessão escolhida; a chave do ADM permanece igual para persistência
+// e para a sincronização, sem modificar o cadastro administrativo.
+export function moverSessaoNaSemana(plano, mesNumero, semanaNumero, diaOrigem, itemIndex, diaDestino) {
+  const mesIndex = plano?.findIndex((mes) => mes.numero === mesNumero) ?? -1;
+  const semanaIndex = plano?.[mesIndex]?.semanas?.findIndex((semana) => semana.number === semanaNumero) ?? -1;
+  const semana = plano?.[mesIndex]?.semanas?.[semanaIndex];
+  if (!semana || !Number.isInteger(diaOrigem) || !Number.isInteger(itemIndex) ||
+    !Number.isInteger(diaDestino) || diaDestino < 0 || diaDestino >= semana.days.length ||
+    diaOrigem < 0 || diaOrigem >= semana.days.length || diaOrigem === diaDestino ||
+    !semana.days[diaOrigem].items[itemIndex]) return plano;
+  return plano.map((mes, indiceMes) => indiceMes !== mesIndex ? mes : {
+    ...mes, semanas: mes.semanas.map((atual, indiceSemana) => indiceSemana !== semanaIndex ? atual : {
+      ...atual, days: atual.days.map((dia, i) => {
+        if (i === diaOrigem) return { ...dia, items: dia.items.filter((_, index) => index !== itemIndex) };
+        if (i === diaDestino) return { ...dia, items: [...dia.items, semana.days[diaOrigem].items[itemIndex]] };
+        return dia;
+      }),
+    }),
+  });
+}

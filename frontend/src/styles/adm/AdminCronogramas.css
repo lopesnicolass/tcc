@@ -1501,3 +1501,18 @@
 .admin-cronogramas .cronograma-semanas-card {
   margin-bottom: 24px;
 }
+
+/* Prévia e diagnóstico administrativo: usa as cores do tema, sem alterar o restante da página. */
+.admin-cronogramas .tenna-admin-avisos {
+  margin-top: 18px; padding: 17px; border: 1px solid var(--border, #cbdcf0);
+  background: var(--card, #fff); color: var(--text, #164174); border-radius: 12px;
+  font-size: .9rem; line-height: 1.5;
+}
+.admin-cronogramas .tenna-admin-avisos > p { margin: 5px 0; color: var(--muted, #6482a6); }
+.admin-cronogramas .tenna-admin-avisos ul { padding-left: 22px; max-height: 136px; overflow: auto; }
+.admin-cronogramas .tenna-admin-previa { margin-top: 12px; display: grid; gap: 10px; }
+.admin-cronogramas .tenna-admin-previa > div {
+  padding: 12px; border: 1px solid var(--border, #cbdcf0); border-radius: 9px;
+  background: var(--bg-secondary, rgba(85,135,190,.08));
+}
+.admin-cronogramas .tenna-admin-previa p { margin: 5px 0; }

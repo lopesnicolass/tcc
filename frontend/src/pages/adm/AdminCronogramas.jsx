@@ -236,6 +236,8 @@ export default function AdminCronogramas() {
 
   const [modalExclusao, setModalExclusao] =
     useState(false);
+  const [mostrandoPrevia, setMostrandoPrevia] = useState(false);
+  const [alterandoPublicacao, setAlterandoPublicacao] = useState(false);
 
   const opcoesConteudo =
     useMemo(
@@ -277,6 +279,19 @@ export default function AdminCronogramas() {
     grade[
       mesSelecionado - 1
     ];
+  const alertasDistribuicao = useMemo(() => {
+    const avisos = [];
+    for (const mes of grade) for (const semana of mes.semanas) {
+      const quantidade = Array.from({ length: frequenciaSelecionada }, (_, i) =>
+        semana.itens.filter(item => Number(item.diaEstudo || 1) === i + 1).length);
+      const sem = quantidade.filter(valor => !valor).length;
+      if (sem) avisos.push(`Mês ${mes.mes}, semana ${semana.semana}: ${sem} ${sem === 1 ? 'dia sem conteúdo' : 'dias sem conteúdo'}.`);
+      quantidade.forEach((total, indice) => {
+        if (total > 2) avisos.push(`Mês ${mes.mes}, semana ${semana.semana}, dia ${indice + 1}: ${total * 45} minutos de estudo estimados.`);
+      });
+    }
+    return avisos;
+  }, [grade, frequenciaSelecionada]);
 
   async function carregarTudo() {
     setCarregando(true);
@@ -601,6 +616,40 @@ export default function AdminCronogramas() {
     );
   }
 
+  function duplicarSemana(mesNumero, semanaNumero) {
+    const indiceDestino = semanaNumero < 4 ? { mes: mesNumero, semana: semanaNumero + 1 }
+      : { mes: mesNumero + 1, semana: 1 };
+    const origem = grade[mesNumero - 1]?.semanas[semanaNumero - 1];
+    const destino = grade[indiceDestino.mes - 1]?.semanas[indiceDestino.semana - 1];
+    if (!origem?.itens.length || !destino) return;
+    if (destino.itens.length && !window.confirm('A próxima semana já tem conteúdos. Deseja substituí-los pela cópia?')) return;
+    setGrade(atual => atual.map(mes => mes.mes !== indiceDestino.mes ? mes : ({
+      ...mes, semanas: mes.semanas.map(semana => semana.semana !== indiceDestino.semana ? semana : ({
+        ...semana, itens: origem.itens.map((item, index) => ({ ...item, ordem: index + 1 }))
+      }))
+    })));
+    setMensagem(`Semana ${semanaNumero} copiada para o mês ${indiceDestino.mes}, semana ${indiceDestino.semana}. Salve para confirmar.`);
+  }
+
+  async function alterarPublicacao(publicar) {
+    if (!editandoId || alterandoPublicacao) return;
+    const texto = publicar ? 'Publicar este modelo para os estudantes?' : 'Arquivar este modelo? Os planos individuais existentes serão mantidos.';
+    if (!window.confirm(texto)) return;
+    setAlterandoPublicacao(true);
+    setErro(''); setMensagem('');
+    try {
+      const resposta = await fetch(`${API_URL}/cronogramas-modelos/${editandoId}/${publicar ? 'ativar' : 'arquivar'}`, {
+        method: 'PUT', headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      const dados = await resposta.json();
+      if (!resposta.ok) throw new Error(dados.mensagem || 'Erro ao alterar publicação.');
+      setCronograma(dados.cronograma);
+      setModelos(atuais => atuais.map(m => m.id === editandoId ? dados.cronograma : m));
+      setMensagem(dados.mensagem);
+    } catch (e) { setErro(e.message); }
+    finally { setAlterandoPublicacao(false); }
+  }
+
   function limparSemana(
     mesNumero,
     semanaNumero
@@ -880,7 +929,7 @@ export default function AdminCronogramas() {
       );
 
       setMensagem(
-        `Cronograma salvo. ${dados.cronograma.sessoes_preenchidas} conteúdos organizados em ${contarSemanasPreenchidas(
+        `Cronograma salvo ${dados.cronograma.ativo ? 'como revisão (publique as alterações para novos estudantes)' : 'como rascunho (publique para disponibilizar aos estudantes)'}. ${dados.cronograma.sessoes_preenchidas} conteúdos organizados em ${contarSemanasPreenchidas(
           preencherGrade(
             dados.cronograma
           )
@@ -1035,7 +1084,7 @@ export default function AdminCronogramas() {
 
             {editandoId && (
               <span className="cronograma-status-chip">
-                Configurado
+                {cronograma?.ativo ? (Number(cronograma.versaoPublicada) < Number(cronograma.versao) ? 'Alterações não publicadas' : 'Publicado') : (cronograma?.versaoPublicada ? 'Arquivado' : 'Rascunho')}
               </span>
             )}
 
@@ -1048,7 +1097,7 @@ export default function AdminCronogramas() {
                 <button key={m.id} type="button"
                   className={editandoId === m.id ? 'ativo' : ''}
                   onClick={() => abrirVariacao(m.meses, m.frequencia_dias)}>
-                  {m.meses} {m.meses === 1 ? 'mês' : 'meses'} · {m.frequencia_dias} {m.frequencia_dias === 1 ? 'dia' : 'dias'}
+                  {m.meses} {m.meses === 1 ? 'mês' : 'meses'} · {m.frequencia_dias} {m.frequencia_dias === 1 ? 'dia' : 'dias'} {m.ativo ? (Number(m.versao) > Number(m.versaoPublicada) ? '· revisão pendente' : '✓') : (m.versaoPublicada ? '· arquivado' : '· rascunho')}
                 </button>
               )) : <span>Nenhuma programação cadastrada ainda.</span>}
             </div>
@@ -1355,6 +1404,12 @@ export default function AdminCronogramas() {
                           + Adicionar conteúdo
                         </button>
 
+                        <button type="button" className="cronograma-btn secundario small"
+                          disabled={!semana.itens.length || (semana.semana === 4 && mesSelecionado === mesesSelecionados)}
+                          onClick={() => duplicarSemana(mesSelecionado, semana.semana)}>
+                          Copiar para próxima semana
+                        </button>
+
                         <button
                           type="button"
                           className="cronograma-btn texto small"
@@ -1494,6 +1549,26 @@ export default function AdminCronogramas() {
 
           )}
 
+          {!!grade.length && <div className="tenna-admin-avisos" role="status">
+            <strong>Verificação de distribuição</strong>
+            <p>{totalItens} conteúdos · aproximadamente {totalItens * 45} minutos no plano · {alertasDistribuicao.length} avisos.</p>
+            {alertasDistribuicao.length > 0 && <ul>{alertasDistribuicao.slice(0, 5).map((aviso, indice) => <li key={indice}>{aviso}</li>)}</ul>}
+            {alertasDistribuicao.length > 5 && <small>Mais {alertasDistribuicao.length - 5} avisos nas outras semanas.</small>}
+            <button className="cronograma-btn secundario small" type="button" onClick={() => setMostrandoPrevia(!mostrandoPrevia)}>
+              {mostrandoPrevia ? 'Ocultar prévia' : 'Visualizar mês como estudante'}
+            </button>
+            {mostrandoPrevia && mesAtual && <div className="tenna-admin-previa">
+              <strong>Prévia · Mês {mesSelecionado}</strong>
+              {mesAtual.semanas.map((semana) => <div key={semana.semana}>
+                <b>Semana {semana.semana}</b>
+                {semana.itens.length ? semana.itens.map(item => {
+                  const conteudo = opcoesConteudo.find(op => op.topicoId === String(item.topicoId));
+                  return <p key={item.ordem}>Dia {item.diaEstudo || 1}: {conteudo?.materia || 'Matéria pendente'} — {conteudo?.topico || 'Selecione um conteúdo'} · 45 min</p>;
+                }) : <p>Nenhum conteúdo programado.</p>}
+              </div>)}
+            </div>}
+          </div>}
+
           <div className="cronograma-programacao-acoes">
 
           <button
@@ -1551,6 +1626,13 @@ export default function AdminCronogramas() {
                 conteúdos
               </span>
 
+              <button type="button" className="cronograma-btn principal small"
+                disabled={alterandoPublicacao || salvando || (cronograma.ativo && Number(cronograma.versao) <= Number(cronograma.versaoPublicada))}
+                onClick={() => alterarPublicacao(true)}>
+                {cronograma.versaoPublicada ? 'Publicar alterações' : 'Publicar modelo'}
+              </button>
+              {cronograma.ativo && <button type="button" className="cronograma-btn secundario small"
+                disabled={alterandoPublicacao || salvando} onClick={() => alterarPublicacao(false)}>Arquivar</button>}
               <button
                 type="button"
                 className="cronograma-btn perigo small"

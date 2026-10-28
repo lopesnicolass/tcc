@@ -1,0 +1,483 @@
+/* TENNA — consistência exclusiva do painel administrativo.
+   As dimensões abaixo são idênticas em modo claro e escuro: trocar o tema
+   não muda a posição do logo, da navegação nem dos botões do rodapé. */
+
+html[data-theme] .admin-area .admin-sidebar {
+  width: 272px;
+  min-width: 272px;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  gap: 0;
+  padding: 0 13px 16px;
+  overflow: hidden;
+  background: #0b294e;
+  color: #e5f1ff;
+  border-right: 1px solid rgba(190, 220, 255, .12);
+  box-shadow: none;
+  transition: none;
+}
+
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-brand {
+  flex: 0 0 96px;
+  min-height: 96px;
+  height: 96px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 16px 8px;
+  background: #0b294e;
+  border: 0;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-brand-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-logo {
+  display: block;
+  width: min(170px, 100%);
+  max-height: 60px;
+  object-fit: contain;
+}
+
+/* Não incluir título "MENU" ou reservar altura para ele. */
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation::before {
+  content: none;
+  display: none;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 10px 0 6px;
+  gap: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation::-webkit-scrollbar { display: none; }
+
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link {
+  box-sizing: border-box;
+  flex: 0 0 40px;
+  width: 100%;
+  min-height: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #d3e3fa;
+  font: 650 12.5px/1.2 Inter, system-ui, sans-serif;
+  text-decoration: none;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-icon,
+html[data-theme] .admin-area .admin-sidebar .admin-preview-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: currentColor;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link:hover {
+  background: rgba(255, 255, 255, .10);
+  border-color: transparent;
+  color: #fff;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link.active {
+  background: #1b6dca;
+  border-color: rgba(170, 220, 255, .16);
+  color: #fff;
+  font-weight: 750;
+  box-shadow: none;
+}
+
+/* Rodapé sempre apoiado na base, sem mudar de altura conforme o tema. */
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 100%;
+  gap: 7px;
+  padding: 6px 0 0;
+  margin: auto 0 0;
+  border: 0;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap,
+html[data-theme] .admin-area .admin-sidebar .admin-preview-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap .theme-toggle,
+html[data-theme] .admin-area .admin-sidebar .admin-preview-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 4px 9px;
+  gap: 11px;
+  border: 1px solid rgba(195,220,255,.20);
+  border-radius: 10px;
+  background: #203e62;
+  color: #e5efff;
+  box-shadow: none;
+  font: 650 12px/1.2 Inter, system-ui, sans-serif;
+  text-align: left;
+  transform: none;
+  transition: none;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap .theme-toggle-icon {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e6f2ff;
+  color: #1658b0;
+}
+html[data-theme] .admin-area .admin-sidebar .admin-preview-link:hover,
+html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap .theme-toggle:hover,
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-collapse-btn:hover { background: #294d76; }
+html[data-theme] .admin-area .admin-sidebar .admin-sidebar-collapse-btn {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  color: #d5e9ff;
+  background: #203e62;
+  border-color: rgba(195,220,255,.23);
+  transition: none;
+}
+
+/* Sidebar fechada: mesmos tamanhos nos dois temas. */
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed {
+  width: 76px;
+  min-width: 76px;
+  padding: 0 9px 12px;
+}
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-brand {
+  flex-basis: 82px;
+  min-height: 82px;
+  height: 82px;
+  justify-content: center;
+  padding: 12px 0;
+}
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-navigation { gap: 4px; }
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-link {
+  flex-basis: 40px;
+  height: 40px;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-theme-toggle-wrap .theme-toggle,
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-preview-link {
+  justify-content: center;
+  gap: 0;
+  padding: 3px;
+}
+html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-preview-link .label { display: none; }
+
+/* Notebook de altura reduzida: as mesmas regras para claro e escuro.
+   Antes a maior especificidade do escuro anulava este @media. */
+@media (min-width: 761px) and (max-height: 780px) {
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-brand {
+    flex-basis: 86px;
+    min-height: 86px;
+    height: 86px;
+    padding: 11px 8px;
+  }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-logo { width: 160px; max-height: 57px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation { gap: 4px; padding: 9px 0 3px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link {
+    flex-basis: 38px;
+    min-height: 38px;
+    height: 38px;
+  }
+  html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap .theme-toggle,
+  html[data-theme] .admin-area .admin-sidebar .admin-preview-link { min-height: 38px; height: 38px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-footer { gap: 5px; padding-top: 4px; }
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-brand {
+    flex-basis: 74px;
+    min-height: 74px;
+    height: 74px;
+  }
+}
+@media (min-width: 761px) and (max-height: 540px) {
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-brand {
+    flex-basis: 68px; min-height: 68px; height: 68px; padding: 6px 8px;
+  }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-logo { max-height: 48px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation { gap: 1px; padding-top: 4px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-link { flex-basis: 33px; min-height: 33px; height: 33px; }
+  html[data-theme] .admin-area .admin-sidebar .admin-theme-toggle-wrap .theme-toggle,
+  html[data-theme] .admin-area .admin-sidebar .admin-preview-link { min-height: 34px; height: 34px; }
+}
+@media (max-width: 760px) {
+  html[data-theme] .admin-area .admin-sidebar,
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed {
+    width: min(272px, 88vw);
+    min-width: 0;
+    height: 100dvh;
+    padding: 0 13px 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: transform 200ms ease, visibility 200ms ease;
+  }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-brand,
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-brand {
+    flex: 0 0 80px;
+    width: 100%;
+    height: 80px;
+    min-height: 80px;
+    padding: 10px 8px;
+    justify-content: flex-start;
+  }
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-brand-shell { display: flex; }
+  html[data-theme] .admin-area .admin-sidebar .admin-sidebar-navigation { flex: 1 0 auto; overflow: visible; }
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-link {
+    justify-content: flex-start; gap: 11px; padding: 0 11px;
+  }
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-sidebar-link .label,
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-preview-link .label,
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-theme-toggle-wrap .theme-toggle-label { display: inline; }
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-theme-toggle-wrap .theme-toggle,
+  html[data-theme] .admin-area .admin-sidebar.admin-sidebar-collapsed .admin-preview-link {
+    justify-content: flex-start; gap: 11px; padding: 4px 9px;
+  }
+}
+
+/* Dashboard: rótulos por extenso, sem as reticências observadas nos cards. */
+.admin-area .admin-overview-stat-top { align-items: flex-start; }
+.admin-area .admin-stat-detail {
+  min-width: 0;
+  max-width: calc(100% - 50px);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: right;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* Contraste de formulários, listas e modais: restrito ao tema escuro do admin. */
+html[data-theme='dark'] .admin-area {
+  --ink: #e8f1fc;
+  --ink-soft: #c0d1e5;
+  --muted: #adc3db;
+  --card: #192c43;
+  --paper: #122239;
+  --line: #34516c;
+  --accent-dark: #83bfff;
+  --accent-light: #203f60;
+  --error: #ff9c9d;
+  --dark-surface: #192c43;
+  --dark-surface-2: #233a53;
+  --dark-surface-3: #2c4763;
+  --dark-text: #e8f1fc;
+  --dark-text-soft: #b7cce2;
+  --dark-border: #34516c;
+}
+html[data-theme='dark'] .admin-area .dashboard-content { color: #e8f1fc; background: #101a2a; }
+html[data-theme='dark'] .admin-area .dashboard-content :is(h1,h2,h3,h4) { color: #eef5ff; }
+html[data-theme='dark'] .admin-area .admin-overview-hero :is(h1,h2),
+html[data-theme='dark'] .admin-area .admin-overview-hero .admin-eyebrow { color: #fff; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-overview-stat, .admin-overview-card, .admin-quick-action,
+  .admin-users-panel, .admin-users-row, .admin-users-stats>div,
+  .admin-simulados-materia, .admin-simulado-card,
+  .admin-provas-card, .admin-flashcard-materia-section,
+  .admin-calendar-month-card, .admin-calendar-form-card,
+  .cronograma-admin-card, .cronograma-semana-block, .cronograma-item-row,
+  .editor-block, .editor-related-item
+) { background: #192c43; border-color: #34516c; color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-quick-action:hover, .admin-users-row:hover,
+  .admin-simulado-card:hover, .admin-flashcard-item:hover
+) { background: #243b56; border-color: #446584; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-overview-stat-icon, .admin-quick-icon, .admin-users-stat-icon,
+  .admin-users-avatar, .admin-simulado-details span,
+  .admin-section-hint, .admin-role-badge, .admin-users-role,
+  .cronograma-status-chip, .cronograma-item-numero
+) { box-shadow: none; background: #294563; color: #d9eaff; }
+html[data-theme='dark'] .admin-area .admin-overview-stat-accent { opacity: .9; }
+html[data-theme='dark'] .admin-area :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  textarea, select, .admin-users-filter-trigger, .cronograma-seletor-trigger,
+  .cronograma-seletor-busca input, .admin-users-filter-options,
+  .cronograma-seletor-menu, .modal-card
+) { background: #122239; border-color: #416080; color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(input, textarea)::placeholder { color: #96b1cc; opacity: 1; }
+html[data-theme='dark'] .admin-area :is(input, textarea, select):disabled { background: #182b40; color: #98aec6; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-form-group>span, .cronograma-card-header p,
+  .admin-cronogramas-header p, .cronograma-section-kicker,
+  .admin-simulados-conteudo-heading span, .admin-simulado-details span,
+  .admin-users-identity span, .admin-overview-stat-label,
+  .admin-stat-detail
+) { color: #b7cce2; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-resumo-card, .cronograma-periodo-card, .cronograma-semanas-card,
+  .cronograma-configurado-card, .cronograma-modal,
+  .admin-modal, .editor-modal, .admin-flashcard-modal
+) { color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-seletor-opcao, .admin-users-filter-options button
+) { color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-seletor-opcao:hover, .cronograma-seletor-opcao.em-foco,
+  .admin-users-filter-options button:hover, .admin-users-filter-options button.is-selected
+) { background: #294563; color: #fff; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-alerta.sucesso, .admin-users-message.is-success
+) { background: #173f38; border-color: #28735a; color: #a9f0d0; }
+html[data-theme='dark'] .admin-area :is(
+  .cronograma-alerta.erro, .admin-flashcard-error, .admin-users-message.is-error
+) { background: #4a2735; border-color: #96506a; color: #ffd6d9; }
+html[data-theme='dark'] .admin-area .admin-dashboard-alert { background: #443529; border-color: #906b3a; color: #ffe4b0; }
+html[data-theme='dark'] .admin-area .admin-dashboard-alert .admin-alert-icon { background: #694e2c; color: #ffe4b0; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-simulado-card .admin-edit-btn, .simulado-editor-modal .simulado-footer-actions .ghost,
+  .simulado-questao-modal .modal-actions .ghost,
+  .admin-users-reload, .admin-calendar-secondary
+) { background: #294563; color: #e3f1ff; border-color: #42658a; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-simulado-card .admin-edit-btn:hover,
+  .simulado-editor-modal .simulado-footer-actions .ghost:hover,
+  .simulado-questao-modal .modal-actions .ghost:hover
+) { background: #365675; border-color: #6690b5; }
+html[data-theme='dark'] .admin-area .admin-simulados-conteudo-heading span { background: #294563; color: #d2eaff; }
+html[data-theme='dark'] .admin-area .admin-simulado-details span { background: #20374f; color: #c9dff4; }
+html[data-theme='dark'] .admin-area .cronograma-seletor-trigger:hover { background: #294563; }
+html[data-theme='dark'] .admin-area .cronograma-seletor-opcao.selecionada { background: #214f80; color: #fff; }
+html[data-theme='dark'] .admin-area .cronograma-seletor-menu,
+html[data-theme='dark'] .admin-area .admin-users-filter-options { box-shadow: 0 15px 30px rgba(0,0,0,.27); }
+html[data-theme='dark'] .admin-area .admin-refresh-btn { background: #e5f2ff; border-color: #c0ddff; color: #114b91; }
+html[data-theme='dark'] .admin-area .admin-refresh-btn:hover { background: #fff; }
+html[data-theme='dark'] .admin-area .admin-connection-badge { color: #fff; }
+html[data-theme='dark'] .admin-area .admin-connection-badge :is(strong,small) { color: #fff; }
+html[data-theme='dark'] .admin-area .admin-overview-stat-value { color: #edf6ff; }
+html[data-theme='dark'] .admin-area .admin-users-role.is-admin { background: #3b355d; color: #e3d9ff; }
+html[data-theme='dark'] .admin-area .admin-users-delete { color: #ffaaa7; border-color: #8b4657; }
+html[data-theme='dark'] .admin-area .admin-users-delete:hover:not(:disabled) { color: #fff; background: #a63d50; }
+
+/* Modais abertos em portais fora do layout precisam acompanhar o mesmo tema. */
+html[data-theme='dark'] :is(.simulado-editor-modal, .simulado-questao-modal) {
+  --ink: #e8f1fc; --muted: #adc3db; --card: #192c43;
+  --paper: #122239; --line: #34516c; --accent-dark: #83bfff;
+  background: #192c43; border-color: #34516c; color: #e8f1fc;
+}
+html[data-theme='dark'] :is(.simulado-editor-modal, .simulado-questao-modal) :is(input,textarea,select) {
+  background: #122239; color: #e8f1fc; border-color: #42627e;
+}
+html[data-theme='dark'] :is(.simulado-editor-modal, .simulado-questao-modal) :is(.simulado-imagem-grupo, .simulado-question-item) {
+  background: #203750; border-color: #42627e; color: #e8f1fc;
+}
+html[data-theme='dark'] :is(.simulado-editor-modal, .simulado-questao-modal) :is(.simulado-add-question, .primary) { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-area :is(button,a,input,select,textarea,[role='button']) { transition: none; animation: none; }
+}
+
+.admin-area .admin-users-self { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:0 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); color:var(--muted); font-size:12px; font-weight:750; white-space:nowrap; }
+/* Detalhes que ainda usavam fundos claros literais nas ferramentas administrativas. */
+html[data-theme='dark'] .admin-area :is(
+  .admin-content-info-bar, .admin-content-stats .admin-content-stat,
+  .admin-content-manager, .admin-content-search,
+  .admin-topic-row.inactive, .admin-content-topic-row,
+  .admin-calendar-weekdays, .admin-calendar-selected-card,
+  .admin-calendar-selected-event, .admin-calendar-list-item,
+  .admin-calendar-dropdown, .admin-calendar-field-button,
+  .admin-calendar-day, .admin-calendar-event,
+  .admin-flashcard-filters, .admin-flashcard-content-section,
+  .admin-flashcard-item, .admin-flashcard-search-box,
+  .admin-flashcard-modal, .flash-custom-trigger,
+  .flash-custom-options, .flash-custom-options button,
+  .cronograma-seletor-busca, .cronograma-form-group input,
+  .cronograma-form-group textarea, .cronograma-form-group select,
+  .cronograma-item-select-wrap select, .cronograma-seletor-opcoes,
+  .editor-layout .editor-panel, .editor-sidebar, .editor-preview,
+  .editor-modal, .editor-publication-status
+) { background-color: #192c43; border-color: #34516c; color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-day.outside, .admin-calendar-day:disabled,
+  .admin-topic-row.inactive, .admin-subject-card.inactive,
+  .admin-flashcard-field select:disabled
+) { background: #17263a; color: #a7bcd3; opacity: .83; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-day:hover:not(:disabled),
+  .admin-calendar-list-item:hover, .admin-flashcard-item:hover,
+  .flash-custom-options button:hover
+) { background: #2a4562; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-status.active, .admin-calendar-feedback.success
+) { background: #193c37; color: #9cedc9; border-color: #31715d; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-status.inactive
+) { background: #304156; color: #c5d5e6; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-feedback.error, .editor-error
+) { background: #492a38; color: #ffd2d5; border-color: #8c4c64; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-field-button, .admin-calendar-month-actions button,
+  .admin-flashcard-filter-field select, .admin-flashcard-search-box input,
+  .flash-custom-trigger, .cronograma-seletor-trigger
+) { background: #122239; border-color: #416080; color: #e8f1fc; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-day.chosen, .admin-calendar-day.selected,
+  .admin-calendar-primary, .cronograma-btn.principal,
+  .editor-primary-button
+) { background: #1968bf; border-color: #408fe1; color: #fff; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-subject-icon.blue, .admin-subject-icon.green,
+  .admin-subject-icon.orange, .admin-subject-icon.cyan,
+  .admin-subject-icon.purple, .admin-subject-icon.pink
+) { background: #294563; }
+html[data-theme='dark'] .admin-area :is(
+  .admin-calendar-list-heading span, .admin-calendar-toolbar span,
+  .admin-flashcard-search label, .admin-flashcard-filter-field>span,
+  .admin-flashcard-conteudo, .admin-calendar-stats span
+) { color: #b7cce2; }
+html[data-theme='dark'] .admin-area .cronograma-status-chip { background: #244e43; color: #a9f0d0; }
+html[data-theme='dark'] .admin-area .cronograma-seletor-opcao:hover { background: #2a4562; }
+html[data-theme='dark'] .admin-area :is(.admin-flashcard-clear-search,.admin-flashcard-clear-filters,.admin-flashcard-empty-action) { color: #a9d4ff; }
+/* Impede botões secundários com fundo quase branco e texto claro no tema escuro. */
+html[data-theme='dark'] .admin-area :is(
+  .admin-content-action, .admin-icon-btn,
+  .editor-secondary-button, .editor-icon-button,
+  .cronograma-btn.secundario, .file-button,
+  .admin-provas-refresh, .admin-provas-search,
+  .admin-delete-prova
+) { border-color: #416080; color: #dcecff; }

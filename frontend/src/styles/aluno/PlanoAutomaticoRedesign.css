@@ -1643,3 +1643,65 @@ html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-summary { background: #
 }
 
 .tenna-auto-plan .studyplan-hero-links .studyplan-bulk-calendar-button { grid-column: 1 / -1; width: 100%; }
+
+
+/* Cronograma: melhorias incrementais, sem alterar o tema global. */
+.tenna-auto-plan .studyplan-counts-hint {
+  margin: -8px 0 16px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--sp-muted);
+}
+.tenna-auto-plan .studyplan-week-choice { min-height: 114px; }
+.tenna-auto-plan .studyplan-week-choice .studyplan-week-calendar-status {
+  display: block;
+  font-size: 10px;
+  font-weight: 650;
+  color: #577995;
+  line-height: 1.3;
+}
+.tenna-auto-plan .studyplan-week-organize {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 2px 8px;
+  color:var(--sp-muted); font-size:11px;line-height:1.4;
+}
+.tenna-auto-plan .studyplan-week-organize button {
+  flex:0 0 auto; border:1px solid #c9def5; border-radius:9px;
+  background:var(--sp-surface); color:#175aa9;
+  padding:8px 11px; font-size:11px; font-weight:750; cursor:pointer;
+}
+.tenna-auto-plan .studyplan-week-organize button:hover {border-color:#65a3e8;}
+.tenna-auto-plan .studyplan-week-organize button[aria-pressed='true'] {background:#eaf4ff;}
+.tenna-auto-plan .studyplan-lesson-move {
+  display:flex;align-items:center;gap:7px;
+  color:var(--sp-muted);font-size:11px;font-weight:700;
+}
+.tenna-auto-plan .studyplan-lesson-move select {
+  max-width:150px;min-height:37px;padding:6px 9px;
+  background:var(--sp-surface);color:var(--sp-ink);
+  border:1px solid var(--sp-line);border-radius:9px;
+  font:inherit;cursor:pointer;
+}
+.tenna-auto-plan .studyplan-lesson-move select:disabled {opacity:.5;cursor:not-allowed;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice .studyplan-week-calendar-status,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-organize {color:#a8c4de;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-organize button {
+  background:#233b56;border-color:#486683;color:#dbeeff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-organize button[aria-pressed='true'] {
+  background:#204c7b;border-color:#5d9ddc;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson-move select {
+  background:#20374f;border-color:#47627e;color:#e9f2ff;
+}
+@media(max-width:730px) {
+  .tenna-auto-plan .studyplan-week-organize {align-items:flex-start;flex-direction:column;}
+  .tenna-auto-plan .studyplan-lesson-move {width:100%;justify-content:space-between;}
+  .tenna-auto-plan .studyplan-lesson-move select {max-width:65%;}
+}
+
+.tenna-auto-plan .studyplan-lesson-scheduled {
+  display:inline-flex; align-items:center; gap:4px; margin-top:6px;
+  font-size:10px; font-weight:750; color:#237454;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson-scheduled {color:#92e0b4;}

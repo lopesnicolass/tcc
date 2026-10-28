@@ -1,3 +1,4 @@
+const planoPessoal = require('../models/planoPessoalModel');
 const {
     listarAtividades,
     buscarAtividadePorId,
@@ -703,6 +704,38 @@ function criarEmLote(
 
 
 
+// Confere que cada origem pertence a um plano salvo pelo próprio estudante.
+// Datas passadas só são permitidas dentro da semana original do cronograma.
+function verificarSessoesDoPlano(usuarioId, atividades, callback) {
+    planoPessoal.buscar(usuarioId, (erro, registro) => {
+        if (erro) return callback(erro);
+        if (!registro) return callback(new Error('Sincronize seu cronograma antes de agendar.'));
+        let plano;
+        try { plano = JSON.parse(registro.configuracao).plan; }
+        catch { return callback(new Error('Plano pessoal inválido.')) }
+        const sessaoPorOrigem = new Map();
+        for (const mes of plano || []) for (const semana of mes.semanas || []) {
+            for (const dia of semana.days || []) for (const item of dia.items || []) {
+                if (!item.key) continue;
+                sessaoPorOrigem.set(`plano-automatico:${item.key}`, {
+                    topicoId: Number(item.topicoId), nome: item.topico,
+                    inicio: semana.inicio, fim: semana.fim,
+                });
+            }
+        }
+        for (const atividade of atividades) {
+            const original = sessaoPorOrigem.get(atividade.origem);
+            if (!original || original.topicoId !== Number(atividade.topicoId) ||
+                original.nome !== atividade.nome ||
+                (horarioDeAgendamentoPassou(atividade.data, atividade.horario) &&
+                 (atividade.data < original.inicio || atividade.data > original.fim))) {
+                return callback(new Error('Sessão não pertence ao cronograma salvo ou data histórica inválida.'));
+            }
+        }
+        callback(null);
+    });
+}
+
 // Confirma um plano inteiro sem duplicar sessões de mesma origem.
 // A confirmação é explícita no frontend; a transação protege contra salvamento parcial.
 function agendarPlano(req, res) {
@@ -728,12 +761,15 @@ function agendarPlano(req, res) {
         origens.add(origem);
         preparadas.push(prepararAtividade(atividade));
     }
-    adicionarSessoesPlano(usuarioId, preparadas, (erro, resultado) => {
-        if (erro) {
-            console.error('Erro ao adicionar cronograma ao Calendário:', erro);
-            return res.status(500).json({ mensagem: 'Não foi possível agendar o cronograma.' });
-        }
-        return res.status(201).json({ mensagem: 'Cronograma adicionado ao Calendário.', ...resultado });
+    verificarSessoesDoPlano(usuarioId, preparadas, (erroValidacao) => {
+        if (erroValidacao) return res.status(400).json({ mensagem: erroValidacao.message });
+        adicionarSessoesPlano(usuarioId, preparadas, (erro, resultado) => {
+            if (erro) {
+                console.error('Erro ao adicionar cronograma ao Calendário:', erro);
+                return res.status(500).json({ mensagem: 'Não foi possível agendar o cronograma.' });
+            }
+            return res.status(201).json({ mensagem: 'Cronograma adicionado ao Calendário.', ...resultado });
+        });
     });
 }
 

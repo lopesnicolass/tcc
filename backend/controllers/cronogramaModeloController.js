@@ -167,8 +167,10 @@ function ativo(req, res) {
 function disponiveis(req, res) {
   modelo.listarModelos((erro, cronogramas) => {
     if (erro) return res.status(500).json({ mensagem: 'Não foi possível consultar os cronogramas disponíveis.' });
-    return res.json({ opcoes: cronogramas.filter((c) => c.ativo).map((c) => ({
-      id: c.id, meses: c.meses, dias: c.frequencia_dias, total: c.sessoes_preenchidas, atualizadoEm: c.atualizado_em,
+    return res.json({ opcoes: cronogramas.filter((c) => c.ativo && c.publicado).map((c) => ({
+      id: c.id, meses: c.meses, dias: c.frequencia_dias,
+      total: c.publicado.sessoes_preenchidas, atualizadoEm: c.publicado.atualizado_em,
+      versao: c.versaoPublicada,
     })) });
   });
 }
@@ -347,6 +349,15 @@ function excluir(req, res) {
 // ATIVAR
 // =====================================================
 
+function arquivar(req, res) {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ mensagem: 'Modelo inválido.' });
+  modelo.arquivarModelo(id, (erro, cronograma) => {
+    if (erro) return res.status(400).json({ mensagem: erro.message });
+    res.json({ mensagem: 'Modelo arquivado. Os planos dos alunos foram preservados.', cronograma });
+  });
+}
+
 function ativar(req, res) {
 
   const id =
@@ -398,5 +409,6 @@ module.exports = {
   criar,
   atualizar,
   excluir,
-  ativar
+  ativar,
+  arquivar
 };

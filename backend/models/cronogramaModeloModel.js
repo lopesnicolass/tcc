@@ -12,6 +12,12 @@ function diasDaChave(chave) {
 }
 
 const CONFIG_TABLE = 'cronogramas_programados_config';
+const VERSION_TABLE = 'cronogramas_programados_versoes';
+const PUBLISHED_TABLE = 'cronogramas_programados_publicados';
+function garantirVersoes(callback) {
+  db.run(`CREATE TABLE IF NOT EXISTS ${VERSION_TABLE} (programacao_id INTEGER PRIMARY KEY, versao INTEGER NOT NULL DEFAULT 1, FOREIGN KEY(programacao_id) REFERENCES cronogramas_programados(id) ON DELETE CASCADE)`, callback);
+}
+
 
 function ensureConfigTable(callback) {
   db.run(
@@ -22,8 +28,47 @@ function ensureConfigTable(callback) {
         atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `,
-    callback
+    (erro) => erro ? callback(erro) : garantirVersoes((erroVersoes) =>
+      erroVersoes ? callback(erroVersoes) : garantirPublicacoes(callback))
   );
+}
+
+// Migração não destrutiva: captura uma cópia dos modelos já publicados antes
+// de qualquer edição no painel. Novos rascunhos não entram aqui.
+function garantirPublicacoes(callback) {
+  db.run(`CREATE TABLE IF NOT EXISTS ${PUBLISHED_TABLE} (
+    programacao_id INTEGER PRIMARY KEY, modelo_json TEXT NOT NULL,
+    versao INTEGER NOT NULL, publicado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (programacao_id) REFERENCES cronogramas_programados(id) ON DELETE CASCADE
+  )`, (erroTabela) => {
+    if (erroTabela) return callback(erroTabela);
+    db.all(`SELECT cp.id, cp.frequencia_dias, cp.nome, cp.descricao, cp.ativo,
+      cp.criado_em, cp.atualizado_em, COALESCE(cfg.meses, 12) AS meses,
+      COALESCE(v.versao, 1) AS versao FROM cronogramas_programados cp
+      LEFT JOIN ${CONFIG_TABLE} cfg ON cfg.programacao_id = cp.id
+      LEFT JOIN ${VERSION_TABLE} v ON v.programacao_id = cp.id
+      WHERE cp.ativo = 1 AND cp.frequencia_dias BETWEEN 11 AND 127
+        AND (cp.frequencia_dias % 10) BETWEEN 1 AND 7`, [], (erro, linhas) => {
+      if (erro) return callback(erro);
+      let indice = 0;
+      function proximo() {
+        if (indice >= linhas.length) return callback(null);
+        const linha = linhas[indice++];
+        db.get(`SELECT programacao_id FROM ${PUBLISHED_TABLE} WHERE programacao_id = ?`, [linha.id], (erroBusca, existente) => {
+          if (erroBusca) return callback(erroBusca);
+          if (existente) return proximo();
+          const base = mapearModelo(linha);
+          anexarItens(base, (erroItens, completo) => {
+            if (erroItens) return callback(erroItens);
+            db.run(`INSERT OR IGNORE INTO ${PUBLISHED_TABLE}(programacao_id, modelo_json, versao) VALUES (?, ?, ?)`,
+              [linha.id, JSON.stringify(completo), completo.versao], (erroInsercao) =>
+                erroInsercao ? callback(erroInsercao) : proximo());
+          });
+        });
+      }
+      proximo();
+    });
+  });
 }
 
 function mapearModelo(linha) {
@@ -31,6 +76,9 @@ function mapearModelo(linha) {
 
   return {
     id: linha.id,
+    versao: Number(linha.versao || 1),
+    versaoPublicada: Number(linha.versao_publicada || 0),
+    publicado: linha.modelo_publicado ? JSON.parse(linha.modelo_publicado) : null,
     frequencia_dias: diasDaChave(linha.frequencia_dias),
     meses,
     nome: linha.nome,
@@ -93,9 +141,13 @@ function selectModelo(baseWhere, params, callback) {
         cp.ativo,
         cp.criado_em,
         cp.atualizado_em,
-        COALESCE(cfg.meses, 12) AS meses
+        COALESCE(cfg.meses, 12) AS meses,
+        COALESCE(v.versao, 1) AS versao,
+        pub.versao AS versao_publicada, pub.modelo_json AS modelo_publicado
       FROM cronogramas_programados cp
       LEFT JOIN ${CONFIG_TABLE} cfg ON cfg.programacao_id = cp.id
+      LEFT JOIN ${VERSION_TABLE} v ON v.programacao_id = cp.id
+      LEFT JOIN ${PUBLISHED_TABLE} pub ON pub.programacao_id = cp.id
       WHERE ${baseWhere}
       LIMIT 1
     `,
@@ -112,7 +164,14 @@ function buscarModeloPorCombinacao(meses, dias, callback) {
   ensureConfigTable((erro) => {
     if (erro) return callback(erro);
     selectModelo('cp.frequencia_dias = ? AND cp.ativo = 1',
-      [chaveVariacao(meses, dias)], callback);
+      [chaveVariacao(meses, dias)], (erroConsulta, modelo) => {
+        if (erroConsulta || !modelo) return callback(erroConsulta, modelo);
+        // Estudantes recebem apenas a versão publicada, não alterações em rascunho.
+        const publicado = modelo.publicado;
+        if (!publicado) return callback(null, null);
+        callback(null, { ...publicado, ativo: true, versao: modelo.versaoPublicada,
+          versaoPublicada: modelo.versaoPublicada, atualizado_em: publicado.atualizado_em });
+      });
   });
 }
 
@@ -120,9 +179,12 @@ function listarModelos(callback) {
   ensureConfigTable((erro) => {
     if (erro) return callback(erro);
     db.all(`SELECT cp.id, cp.frequencia_dias, cp.nome, cp.descricao, cp.ativo,
-      cp.criado_em, cp.atualizado_em, COALESCE(cfg.meses, 12) AS meses
+      cp.criado_em, cp.atualizado_em, COALESCE(cfg.meses, 12) AS meses, COALESCE(v.versao, 1) AS versao, pub.versao AS versao_publicada,
+      pub.modelo_json AS modelo_publicado
       FROM cronogramas_programados cp
       LEFT JOIN ${CONFIG_TABLE} cfg ON cfg.programacao_id = cp.id
+      LEFT JOIN ${VERSION_TABLE} v ON v.programacao_id = cp.id
+      LEFT JOIN ${PUBLISHED_TABLE} pub ON pub.programacao_id = cp.id
       WHERE cp.frequencia_dias BETWEEN 11 AND 127
         AND (cp.frequencia_dias % 10) BETWEEN 1 AND 7
         AND (cp.frequencia_dias / 10) = COALESCE(cfg.meses, 12)
@@ -258,6 +320,46 @@ function inserirItens(programacaoId, sessoes, callback) {
   proximo();
 }
 
+// Reaproveita o ID na mesma posição; assim a chave estável de uma sessão
+// não muda só porque o administrador salvou o modelo novamente.
+function atualizarItensSemPerderIds(id, sessoes, callback) {
+  const chavesNovas = new Set(sessoes.map(s => `${s.mes}:${s.semana}:${s.sessao}`));
+  db.all('SELECT id, mes, semana, sessao, materia_id, topico_id FROM cronogramas_programados_sessoes WHERE programacao_id = ?', [id], (erro, antigos) => {
+    if (erro) return callback(erro);
+    const remover = (antigos || []).filter(s => !chavesNovas.has(`${s.mes}:${s.semana}:${s.sessao}`));
+    const existentesPorPosicao = new Map((antigos || []).map(a => [`${a.mes}:${a.semana}:${a.sessao}`, a]));
+    let indice = 0;
+    function inserir() {
+      if (indice >= sessoes.length) return excluir(0);
+      const item = sessoes[indice++];
+      const antigo = existentesPorPosicao.get(`${item.mes}:${item.semana}:${item.sessao}`);
+      // Alterar o conteúdo exige uma nova identidade; do contrário o Calendário
+      // poderia associar uma sessão antiga a outra matéria/conteúdo.
+      if (antigo && (Number(antigo.topico_id) !== item.topicoId || Number(antigo.materia_id) !== item.materiaId)) {
+        return db.run('DELETE FROM cronogramas_programados_sessoes WHERE id = ?', [antigo.id],
+          erroExcluir => erroExcluir ? callback(erroExcluir) : gravarItem(item));
+      }
+      gravarItem(item);
+    }
+    function gravarItem(item) {
+      db.run(`INSERT INTO cronogramas_programados_sessoes
+        (programacao_id, mes, semana, sessao, dia_estudo, materia_id, topico_id, atualizado_em)
+        VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(programacao_id, mes, semana, sessao) DO UPDATE SET
+        dia_estudo=excluded.dia_estudo, materia_id=excluded.materia_id,
+        topico_id=excluded.topico_id, atualizado_em=CURRENT_TIMESTAMP`,
+      [id, item.mes, item.semana, item.sessao, item.diaEstudo, item.materiaId, item.topicoId],
+      e => e ? callback(e) : inserir());
+    }
+    function excluir(indiceRemocao) {
+      if (indiceRemocao >= remover.length) return callback(null);
+      db.run('DELETE FROM cronogramas_programados_sessoes WHERE id = ?', [remover[indiceRemocao].id],
+        e => e ? callback(e) : excluir(indiceRemocao + 1));
+    }
+    inserir();
+  });
+}
+
 function criarModelo(dados, callback) {
   ensureConfigTable((erroTabela) => {
     if (erroTabela) return callback(erroTabela);
@@ -289,7 +391,7 @@ function criarModelo(dados, callback) {
               `
                 INSERT INTO cronogramas_programados
                   (frequencia_dias, nome, descricao, ativo, atualizado_em)
-                VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)
+                VALUES (?, ?, ?, 0, CURRENT_TIMESTAMP)
               `,
               [chaveVariacao(meses, dias), dados.nome, dados.descricao || ''],
               function (erroInsercao) {
@@ -352,8 +454,7 @@ function atualizarModelo(id, dados, callback) {
             UPDATE cronogramas_programados
             SET nome = ?,
                 descricao = ?,
-                ativo = 1,
-                atualizado_em = CURRENT_TIMESTAMP
+                atualizado_em = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
             WHERE id = ?
               AND frequencia_dias = ?
           `,
@@ -375,26 +476,17 @@ function atualizarModelo(id, dados, callback) {
                   return db.run('ROLLBACK', () => callback(erroConfiguracao));
                 }
 
-                db.run(
-                  `DELETE FROM cronogramas_programados_sessoes WHERE programacao_id = ?`,
-                  [id],
-                  (erroExclusao) => {
-                    if (erroExclusao) {
-                      return db.run('ROLLBACK', () => callback(erroExclusao));
-                    }
-
-                    inserirItens(id, sessoes, (erroItens) => {
-                      if (erroItens) {
-                        return db.run('ROLLBACK', () => callback(erroItens));
-                      }
-
-                      db.run('COMMIT', (erroCommit) => {
-                        if (erroCommit) return callback(erroCommit);
-                        buscarModeloPorId(id, callback);
-                      });
+                atualizarItensSemPerderIds(id, sessoes, (erroItens) => {
+                  if (erroItens) return db.run('ROLLBACK', () => callback(erroItens));
+                  db.run(`INSERT INTO ${VERSION_TABLE}(programacao_id, versao) VALUES (?, 2)
+                    ON CONFLICT(programacao_id) DO UPDATE SET versao = versao + 1`, [id], (erroVersao) => {
+                    if (erroVersao) return db.run('ROLLBACK', () => callback(erroVersao));
+                    db.run('COMMIT', (erroCommit) => {
+                      if (erroCommit) return callback(erroCommit);
+                      buscarModeloPorId(id, callback);
                     });
-                  }
-                );
+                  });
+                });
               }
             );
           }
@@ -427,16 +519,37 @@ function excluirModelo(id, callback) {
   });
 }
 
+function arquivarModelo(id, callback) {
+  db.run(`UPDATE cronogramas_programados SET ativo = 0 WHERE id = ? AND frequencia_dias BETWEEN 11 AND 127`, [id], function(erro) {
+    if (erro) return callback(erro);
+    if (!this.changes) return callback(new Error('Cronograma não encontrado.'));
+    buscarModeloPorId(id, callback);
+  });
+}
+
 function ativarModelo(id, callback) {
-  db.run(
-    `UPDATE cronogramas_programados SET ativo = 1, atualizado_em = CURRENT_TIMESTAMP WHERE id = ? AND frequencia_dias BETWEEN 11 AND 127`,
-    [id],
-    function (erro) {
-      if (erro) return callback(erro);
-      if (this.changes === 0) return callback(new Error('Cronograma não encontrado.'));
-      buscarModeloPorId(id, callback);
-    }
-  );
+  // Salva a nova versão publicada somente quando o administrador confirma.
+  buscarModeloPorId(id, (erroBusca, base) => {
+    if (erroBusca || !base) return callback(erroBusca || new Error('Cronograma não encontrado.'));
+    const { publicado, versaoPublicada, ...snapshot } = base;
+    db.serialize(() => {
+      db.run('BEGIN TRANSACTION');
+      db.run(`INSERT INTO ${PUBLISHED_TABLE} (programacao_id, modelo_json, versao, publicado_em)
+          VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(programacao_id) DO UPDATE SET
+          modelo_json = excluded.modelo_json, versao = excluded.versao,
+          publicado_em = CURRENT_TIMESTAMP`, [id, JSON.stringify(snapshot), base.versao], (erroPub) => {
+        if (erroPub) return db.run('ROLLBACK', () => callback(erroPub));
+        db.run(`UPDATE cronogramas_programados SET ativo = 1 WHERE id = ?`, [id], (erroAtivar) => {
+          if (erroAtivar) return db.run('ROLLBACK', () => callback(erroAtivar));
+          db.run('COMMIT', (erroCommit) => {
+            if (erroCommit) return callback(erroCommit);
+            buscarModeloPorId(id, callback);
+          });
+        });
+      });
+    });
+  });
 }
 
 module.exports = {
@@ -447,5 +560,6 @@ module.exports = {
   criarModelo,
   atualizarModelo,
   excluirModelo,
-  ativarModelo
+  ativarModelo,
+  arquivarModelo
 };

@@ -6,6 +6,7 @@ import '../styles/dashboard.css';
 import '../styles/adm/AdminArea.css';
 import '../styles/mobile-responsive.css';
 import '../styles/adm/AdminPolish.css';
+import '../styles/adm/AdminConsistency.css';
 
 export default function AdminLayout() {
   const location = useLocation();

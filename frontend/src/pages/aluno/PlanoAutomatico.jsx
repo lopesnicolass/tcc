@@ -3,6 +3,7 @@ import '../../styles/aluno/PlanoAutomaticoRedesign.css';
 import {
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import {
@@ -12,11 +13,11 @@ import SubjectIcon
   from '../../components/SubjectIcon.jsx';
 import Icon
   from '../../components/Icon.jsx';
-import { API_URL, request } from '../../services/api.js';
+import { API_URL, request, obterToken } from '../../services/api.js';
 import { gerarPlanoProgramado, reagendarDatasPlano, avaliarPrazoPlanoReal,
   diasPadrao, validarDiasSemana, NOMES_DIAS, formatarPeriodo, dataCivil, inicioDoMes } from '../../utils/planoProgramado.js';
 import { getSubjectStyle } from '../../utils/subjects.js';
-import { chaveSessaoPlano, sugerirDataSessao, sessaoJaAgendada, dataPermitidaSessaoPlano, prepararAgendamentoCompleto } from '../../utils/planoCalendario.js';
+import { chaveSessaoPlano, sugerirDataSessao, sessaoJaAgendada, dataPermitidaSessaoPlano, agendamentoNoFuturo, prepararAgendamentoCompleto, recuperarConfiguracaoAgenda, resumoSemanaPlano, moverSessaoNaSemana } from '../../utils/planoCalendario.js';
 import { enviarPlanoCalendario } from '../../utils/enviarPlanoCalendario.js';
 // Paleta exclusiva da trilha: preserva a identidade do Tenna e diferencia as matérias.
 const PALETTE_STUDY = {
@@ -57,9 +58,10 @@ function getUserKey() {
     'anonimo'
   );
 }
-function carregarPlanoSalvo() {
+function carregarPlanoSalvo(valorExterno = undefined) {
   try {
-    const valor = JSON.parse(localStorage.getItem(`${STORAGE_KEY}_${getUserKey()}`) || 'null');
+    const valor = valorExterno === undefined
+      ? JSON.parse(localStorage.getItem(`${STORAGE_KEY}_${getUserKey()}`) || 'null') : valorExterno;
     const plano = Array.isArray(valor) ? valor : valor?.plan;
     if (!valor?.modeloId || !Array.isArray(plano) || plano.length === 0 || !plano.every((mes) =>
       Array.isArray(mes?.semanas) && mes.semanas.every((semana) =>
@@ -80,6 +82,8 @@ function carregarPlanoSalvo() {
       days: Number(valor.days || 3),
       modeloId: Number(valor.modeloId),
       modeloAtualizadoEm: valor.modeloAtualizadoEm || null,
+      modeloVersao: valor.modeloVersao || null,
+      salvoEm: Number(valor.salvoEm || 0),
       diasSemana: diasSalvos,
       diasPersonalizados: Boolean(valor.diasPersonalizados),
       inicio,
@@ -88,13 +92,37 @@ function carregarPlanoSalvo() {
     return null;
   }
 }
-function savePlan(plan, months, days, modeloId, modeloAtualizadoEm, diasSemana, inicio, diasPersonalizados = false) {
-  try {
-    localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify({ plan, months, days, modeloId, modeloAtualizadoEm, diasSemana, inicio, diasPersonalizados }));
-  } catch (erro) {
-    console.warn('Não foi possível salvar o plano neste navegador.', erro);
-  }
+let ultimaGravacao = 0;
+function gravarNoNavegador(dados) {
+  try { localStorage.setItem(`${STORAGE_KEY}_${getUserKey()}`, JSON.stringify(dados)); }
+  catch (erro) { console.warn('Não foi possível salvar localmente:', erro); }
 }
+function enviarPlanoServidor(dados) {
+  if (!obterToken() || !(getUser().id || getUser().usuarioId)) return Promise.resolve();
+  return request('/cronogramas-modelos/meu-plano', {
+    method: 'PUT', body: JSON.stringify({ plano: dados, salvoEm: dados.salvoEm }),
+  }, 'Não foi possível sincronizar o cronograma.');
+}
+function savePlan(plan, months, days, modeloId, modeloAtualizadoEm, diasSemana, inicio, diasPersonalizados = false, modeloVersao = null) {
+  ultimaGravacao = Math.max(Date.now(), ultimaGravacao + 1);
+  const anterior = carregarPlanoSalvo();
+  const dados = { plan, months, days, modeloId, modeloAtualizadoEm,
+    modeloVersao: modeloVersao ?? (anterior?.modeloId === modeloId ? anterior.modeloVersao : null),
+    diasSemana, inicio, diasPersonalizados, salvoEm: ultimaGravacao };
+  gravarNoNavegador(dados);
+  return enviarPlanoServidor(dados).catch(erro => {
+    window.dispatchEvent(new CustomEvent('tenna-plano-nao-sincronizado', { detail: erro.message }));
+  });
+}
+async function sincronizarAntesDeAgendar(plan, config) {
+  const local = carregarPlanoSalvo();
+  if (!plan || !local) throw new Error('Salve seu cronograma antes de agendar.');
+  const salvoEm = Math.max(Number(local.salvoEm || 0), Date.now());
+  await request('/cronogramas-modelos/meu-plano', { method: 'PUT',
+    body: JSON.stringify({ plano: { ...local, plan, salvoEm }, salvoEm }),
+  }, 'Não foi possível sincronizar o cronograma antes do agendamento.');
+}
+
 export default function PlanoAutomatico() {
   const navigate =
     useNavigate();
@@ -119,6 +147,7 @@ export default function PlanoAutomatico() {
     inicio: planoAnterior?.inicio || null,
     modeloId: planoAnterior?.modeloId || null,
     modeloAtualizadoEm: planoAnterior?.modeloAtualizadoEm || null,
+    modeloVersao: planoAnterior?.modeloVersao || null,
   }));
   const [selected, setSelected] = useState(() => {
     try { return Number(sessionStorage.getItem(`tenna_mes_plano_${getUserKey()}`)) || 1; }
@@ -162,6 +191,7 @@ export default function PlanoAutomatico() {
   const [loadingProgress, setLoadingProgress] = useState(false);
   const [savingTopicId, setSavingTopicId] = useState(null);
   const usuarioId = Number(getUser().id || getUser().usuarioId || 0);
+  const planoHidratadoRemotamente = useRef(false);
   const [atividadesAgenda, setAtividadesAgenda] = useState([]);
   const [carregandoAgenda, setCarregandoAgenda] = useState(false);
   const [erroAgenda, setErroAgenda] = useState('');
@@ -177,6 +207,48 @@ export default function PlanoAutomatico() {
   const [horaAgendaPlano, setHoraAgendaPlano] = useState('19:00');
   const [salvandoPlanoAgenda, setSalvandoPlanoAgenda] = useState(false);
   const [erroPlanoAgenda, setErroPlanoAgenda] = useState('');
+  const [organizandoSemana, setOrganizandoSemana] = useState(null);
+
+
+  // Restaura o plano em qualquer dispositivo, sem perder alterações locais mais recentes.
+  useEffect(() => {
+    if (!usuarioId || !obterToken()) return;
+    let ativo = true;
+    const erroSync = evento => { if (ativo) setAvisoPlano('Plano salvo neste navegador, mas ainda não sincronizado. Confira a conexão.'); };
+    window.addEventListener('tenna-plano-nao-sincronizado', erroSync);
+    request('/cronogramas-modelos/meu-plano', {}, 'Não foi possível consultar seu plano salvo.')
+      .then(({ plano: remoto, salvoEm }) => {
+        if (!ativo) return;
+        const local = carregarPlanoSalvo();
+        const validoRemoto = carregarPlanoSalvo(remoto);
+        if (validoRemoto && Number(salvoEm || 0) > Number(local?.salvoEm || 0)) {
+          const dados = { ...remoto, salvoEm: Number(salvoEm) };
+          gravarNoNavegador(dados);
+          planoHidratadoRemotamente.current = true;
+          setPlan(validoRemoto.plan);
+          setMonths(validoRemoto.months);
+          setDays(validoRemoto.days);
+          setDiasSemana(validoRemoto.diasSemana);
+          setInicioPlano(validoRemoto.inicio);
+          setConfigSalva({ months: validoRemoto.months, days: validoRemoto.days,
+            inicio: validoRemoto.inicio, modeloId: validoRemoto.modeloId,
+            modeloAtualizadoEm: validoRemoto.modeloAtualizadoEm,
+            modeloVersao: validoRemoto.modeloVersao,
+            diasSemana: validoRemoto.diasSemana,
+            diasPersonalizados: validoRemoto.diasPersonalizados });
+          setAvisoPlano('Seu cronograma foi recuperado da sua conta.');
+        } else if (local && (!validoRemoto || Number(local.salvoEm || 0) > Number(salvoEm || 0))) {
+          ultimaGravacao = Math.max(Date.now(), ultimaGravacao + 1);
+          const dados = { ...local, salvoEm: Math.max(Number(local.salvoEm || 0), ultimaGravacao) };
+          gravarNoNavegador(dados);
+          enviarPlanoServidor(dados).catch(() => {
+            if (ativo) setAvisoPlano('Cronograma local mantido. Não foi possível sincronizá-lo com sua conta.');
+          });
+        }
+      })
+      .catch(() => { if (ativo && !carregarPlanoSalvo()) setAvisoPlano('Não foi possível consultar o plano salvo na sua conta.'); });
+    return () => { ativo = false; window.removeEventListener('tenna-plano-nao-sincronizado', erroSync); };
+  }, [usuarioId]);
 
   function selecionarSemana(mes, semana) {
     const chave = `${mes}-${semana}`;
@@ -220,9 +292,20 @@ export default function PlanoAutomatico() {
     return () => window.removeEventListener('keydown', fecharComEscape);
   }, [sessaoSelecionada, salvandoAgenda]);
 
-  function abrirAgendamentoCompleto() {
-    setDiasAgendaPlano(configSalva.diasPersonalizados ? [...configSalva.diasSemana] : []);
+  async function abrirAgendamentoCompleto() {
     setErroPlanoAgenda('');
+    let atividades = atividadesAgenda;
+    try {
+      if (usuarioId) atividades = await carregarAtividadesAgenda();
+    } catch {
+      // Continua com os dados locais, mas informa a falha no modal.
+      setErroPlanoAgenda('Não foi possível atualizar o Calendário. Confira sua conexão antes de confirmar.');
+    }
+    const anterior = recuperarConfiguracaoAgenda(plan, atividades, configSalva.days);
+    setDiasAgendaPlano(configSalva.diasPersonalizados
+      ? [...configSalva.diasSemana]
+      : anterior.diasSemana);
+    setHoraAgendaPlano(anterior.horario || '19:00');
     setAgendandoPlano(true);
   }
   function alternarDiaDaAgenda(indice) {
@@ -254,6 +337,7 @@ export default function PlanoAutomatico() {
         return;
       }
       if (resultado.atividades.length > 500) throw new Error('Este plano tem mais de 500 atividades pendentes. Agende parte dele antes de continuar.');
+      await sincronizarAntesDeAgendar(plan, configSalva);
       const resposta = await enviarPlanoCalendario({
         usuarioId,
         atividades: resultado.atividades,
@@ -272,7 +356,7 @@ export default function PlanoAutomatico() {
       setInicioPlano(resultado.inicioPlano);
       setConfigSalva((anterior) => ({ ...anterior, diasSemana: selecionados, inicio: resultado.inicioPlano, diasPersonalizados: true }));
       savePlan(resultado.plano, configSalva.months, configSalva.days,
-        configSalva.modeloId, configSalva.modeloAtualizadoEm, selecionados, resultado.inicioPlano, true);
+        configSalva.modeloId, configSalva.modeloAtualizadoEm, selecionados, resultado.inicioPlano, true, configSalva.modeloVersao);
       const novas = Number(resposta.adicionadas ?? resultado.atividades.length);
       const duplicadas = Number(resposta.ignoradas ?? 0) + resultado.jaAgendadas;
       setMensagemAgenda(`${novas} ${novas === 1 ? 'atividade adicionada' : 'atividades adicionadas'} ao Calendário.` +
@@ -287,58 +371,81 @@ export default function PlanoAutomatico() {
   }
 
   function abrirAdicionarSessao(item, mes, semana, dia, diaIndex, itemIndex) {
+    const origem = chaveSessaoPlano(item, mes, semana, diaIndex, itemIndex);
+    const atividade = atividadesAgenda.find((a) => a.origem === origem);
+    const dataPrevista = sugerirDataSessao(mes, semana, dia);
     setMensagemAgenda('');
     setErroSalvarAgenda('');
-    setDataAgenda(sugerirDataSessao(mes, semana, dia));
-    setHorarioAgenda('18:00');
-    setSessaoSelecionada({
-      item,
-      origem: chaveSessaoPlano(item, mes, semana, diaIndex, itemIndex),
-      dia: dia.day,
-      dataPrevista: sugerirDataSessao(mes, semana, dia),
-    });
+    setDataAgenda(atividade?.data || dataPrevista);
+    setHorarioAgenda(atividade?.horario || '18:00');
+    setSessaoSelecionada({ item, origem, atividade: atividade || null, dia: dia.day, dataPrevista });
+  }
+
+  function moverSessao(item, mesNumero, semanaNumero, diaOrigem, itemIndex, diaDestino) {
+    if (sessaoJaAgendada(atividadesAgenda, chaveSessaoPlano(item, { numero: mesNumero }, { number: semanaNumero }, diaOrigem, itemIndex))) {
+      setMensagemAgenda('Para alterar uma sessão que está no Calendário, use Reagendar.');
+      return;
+    }
+    const novoPlano = moverSessaoNaSemana(plan, mesNumero, semanaNumero, diaOrigem, itemIndex, diaDestino);
+    if (novoPlano === plan) return;
+    setPlan(novoPlano);
+    savePlan(novoPlano, configSalva.months, configSalva.days, configSalva.modeloId,
+      configSalva.modeloAtualizadoEm, configSalva.diasSemana, inicioPlano, configSalva.diasPersonalizados, configSalva.modeloVersao);
+    setMensagemAgenda('Sessão movida. A ordem do plano foi salva neste navegador.');
   }
 
   async function confirmarAdicionarSessao(evento) {
     evento.preventDefault();
     if (!sessaoSelecionada || !usuarioId || salvandoAgenda) return;
     const { item, origem } = sessaoSelecionada;
-    if (!dataPermitidaSessaoPlano(dataAgenda, horarioAgenda, sessaoSelecionada.dataPrevista)) {
-      setErroSalvarAgenda('Você pode manter a data prevista pelo cronograma ou escolher uma data futura.');
+    const atividadeAtual = sessaoSelecionada.atividade;
+    const semAlteracao = atividadeAtual && atividadeAtual.data === dataAgenda && atividadeAtual.horario === horarioAgenda;
+    const valido = atividadeAtual
+      ? semAlteracao || agendamentoNoFuturo(dataAgenda, horarioAgenda)
+      : dataPermitidaSessaoPlano(dataAgenda, horarioAgenda, sessaoSelecionada.dataPrevista);
+    if (!valido) {
+      setErroSalvarAgenda(atividadeAtual
+        ? 'Para reagendar, escolha uma data e horário futuros. Você também pode manter o horário original.'
+        : 'Você pode manter a data prevista pelo cronograma ou escolher uma data futura.');
       return;
     }
     try {
       setSalvandoAgenda(true);
       setErroSalvarAgenda('');
-      // Verifica novamente no servidor antes de criar para reduzir duplicações.
+      // Revalida a origem no servidor para evitar duplicações e alterar a sessão correta.
       const existentes = await carregarAtividadesAgenda();
-      if (sessaoJaAgendada(existentes, origem)) {
-        setSessaoSelecionada(null);
-        setMensagemAgenda('Essa sessão já está no calendário.');
-        return;
+      const registrada = existentes.find((a) => a.origem === origem);
+      if (registrada) {
+        if (registrada.data === dataAgenda && registrada.horario === horarioAgenda) {
+          setSessaoSelecionada(null);
+          setMensagemAgenda('Esta sessão já está agendada nesse horário.');
+          return;
+        }
+        if (!agendamentoNoFuturo(dataAgenda, horarioAgenda)) {
+          throw new Error('Para mudar uma sessão já agendada, escolha um horário futuro.');
+        }
+        await request(`/cronograma/${usuarioId}/${registrada.id}`, {
+          method: 'PUT', body: JSON.stringify({ data: dataAgenda, horario: horarioAgenda }),
+        }, 'Não foi possível reagendar a sessão.');
+      } else if (atividadeAtual) {
+        throw new Error('A sessão não está mais no Calendário. Atualize a página antes de reagendar.');
+      } else {
+        // A rota exclusiva do cronograma permite manter a data histórica prevista.
+        await sincronizarAntesDeAgendar(plan, configSalva);
+        await enviarPlanoCalendario({
+          usuarioId,
+          atividades: [{ nome: item.topico, materia: item.materia || 'Outro',
+            data: dataAgenda, horario: horarioAgenda, topicoId: item.topicoId || null,
+            done: false, origem }],
+          requisitar: request, consultarAtividades: carregarAtividadesAgenda,
+        });
       }
-      // Usa a rota específica do Cronograma: ela aceita datas históricas,
-      // mas a inclusão manual no Calendário permanece restrita a datas futuras.
-      await enviarPlanoCalendario({
-        usuarioId,
-        atividades: [{
-          nome: item.topico,
-          materia: item.materia || 'Outro',
-          data: dataAgenda,
-          horario: horarioAgenda,
-          topicoId: item.topicoId || null,
-          done: false,
-          origem,
-        }],
-        requisitar: request,
-        consultarAtividades: carregarAtividadesAgenda,
-      });
       try {
         await carregarAtividadesAgenda();
       } catch {
         setErroAgenda('A sessão foi salva, mas não foi possível atualizar a lista agora. Confira no Calendário.');
       }
-      setMensagemAgenda(`“${item.topico}” foi adicionado ao calendário.`);
+      setMensagemAgenda(`“${item.topico}” ${atividadeAtual ? 'foi reagendado' : 'foi adicionado'} ao Calendário.`);
       setSessaoSelecionada(null);
     } catch (erro) {
       setErroSalvarAgenda(erro.message || 'Não foi possível adicionar a sessão.');
@@ -377,25 +484,27 @@ export default function PlanoAutomatico() {
           setCronogramaModelo({ nome: 'Cronogramas definidos pelo administrador', sessoes: [],
             sessoes_preenchidas: opcoes.length });
           const salvo = opcoes.find((c) => Number(c.id) === planoAnterior?.modeloId &&
-            Number(c.meses) === planoAnterior?.months && Number(c.dias) === planoAnterior?.days &&
-            c.atualizadoEm === planoAnterior?.modeloAtualizadoEm);
+            Number(c.meses) === planoAnterior?.months && Number(c.dias) === planoAnterior?.days);
           const padrao = salvo || opcoes[0];
-          setMonths(Number(padrao.meses));
-          setDays(Number(padrao.dias));
-          if (!salvo) setDiasSemana(diasPadrao(Number(padrao.dias)));
-          if (planoAnterior?.plan && !salvo) {
-            setPlan(null);
+          // Jamais apagar o plano pessoal porque o ADM editou/arquivou o modelo.
+          if (!planoAnterior?.plan && !planoHidratadoRemotamente.current) {
+            setMonths(Number(padrao.meses));
+            setDays(Number(padrao.dias));
+            setDiasSemana(diasPadrao(Number(padrao.dias)));
+          }
+          if (salvo && planoAnterior?.plan &&
+            ((planoAnterior.modeloVersao && Number(salvo.versao) > Number(planoAnterior.modeloVersao)) ||
+             (!planoAnterior.modeloVersao && salvo.atualizadoEm !== planoAnterior.modeloAtualizadoEm))) {
+            setAvisoPlano('O administrador atualizou este modelo. Seu cronograma continua preservado; use Ajustar plano se quiser gerar uma nova versão.');
           }
         } else {
           setCronogramaModelo(null);
-          setPlan(null);
-          setModeloError('O administrador ainda não publicou nenhum cronograma de estudos.');
+          if (!planoAnterior?.plan && !planoHidratadoRemotamente.current) setModeloError('O administrador ainda não publicou nenhum cronograma de estudos.');
         }
       } catch (error) {
         if (ativo) {
           setCronogramaModelo(null);
-          setPlan(null);
-          setModeloError(error.message || 'Não foi possível carregar as programações.');
+          if (!planoAnterior?.plan && !planoHidratadoRemotamente.current) setModeloError(error.message || 'Não foi possível carregar as programações.');
         }
       } finally {
         if (ativo) setCarregandoModelo(false);
@@ -582,11 +691,21 @@ export default function PlanoAutomatico() {
 
       const pendentes = allItems.filter((item) =>
         !item.topicoId || !studiedTopics[String(item.topicoId)]);
-      const hoje = dataCivil(new Date());
-      return pendentes.find((item) => item.data && item.data >= hoje) ||
-        pendentes[0] || null;
+      const agora = new Date();
+      const hoje = dataCivil(agora);
+      const agendadas = pendentes.map((item) => {
+        const origem = chaveSessaoPlano(item, { numero: item.monthNumber }, { number: item.weekNumber }, 0, 0);
+        const atividade = atividadesAgenda.find((a) => a.origem === origem);
+        return atividade ? { ...item, atividadeAgendada: atividade } : null;
+      }).filter(Boolean).sort((a, b) =>
+        `${a.atividadeAgendada.data}T${a.atividadeAgendada.horario}`.localeCompare(`${b.atividadeAgendada.data}T${b.atividadeAgendada.horario}`));
+      const proximas = agendadas.find((item) =>
+        `${item.atividadeAgendada.data}T${item.atividadeAgendada.horario}` >=
+        `${hoje}T${pad(agora.getHours())}:${pad(agora.getMinutes())}`);
+      return proximas || pendentes.find((item) => item.data && item.data >= hoje) ||
+        agendadas[0] || pendentes[0] || null;
     },
-    [plan, studiedTopics]
+    [plan, studiedTopics, atividadesAgenda]
   );
 
   const combinacaoDisponivel = variacoesDisponiveis.find((c) =>
@@ -629,9 +748,9 @@ export default function PlanoAutomatico() {
     setInicioPlano(inicio);
     setDiasSemana(diasDaGeracao);
     setConfigSalva({ months: mesesDoPlano, days, diasSemana: [...diasDaGeracao], diasPersonalizados: false, inicio,
-      modeloId: programacao.id, modeloAtualizadoEm: programacao.atualizado_em });
+      modeloId: programacao.id, modeloAtualizadoEm: programacao.atualizado_em, modeloVersao: programacao.versao });
     selecionarSemana(1, 1);
-    savePlan(planoGerado, mesesDoPlano, days, programacao.id, programacao.atualizado_em, diasDaGeracao, inicio);
+    savePlan(planoGerado, mesesDoPlano, days, programacao.id, programacao.atualizado_em, diasDaGeracao, inicio, false, programacao.versao);
     setAvisoPlano('O cronograma começa no dia 1º do mês atual. Ao adicioná-lo ao Calendário, as sessões mantêm as datas previstas, mesmo as que já passaram.');
     setEditandoPlano(false);
     // Gerar o plano NÃO adiciona todas as sessões ao calendário.
@@ -655,6 +774,8 @@ export default function PlanoAutomatico() {
     focoItem?.materia;
   const focoTopico =
     focoItem?.topico;
+  const focoAgendado = focoItem?.atividadeAgendada || (focoItem?.key
+    ? atividadesAgenda.find((a) => a.origem === `plano-automatico:${focoItem.key}`) : null);
   function cancelarAjuste() {
     setMonths(configSalva.months);
     setDays(configSalva.days);
@@ -692,7 +813,7 @@ export default function PlanoAutomatico() {
     if (selecionados.join(',') === anteriores.join(',')) {
       setConfigSalva((anterior) => ({ ...anterior, diasPersonalizados: true }));
       savePlan(plan, configSalva.months, configSalva.days, configSalva.modeloId,
-        configSalva.modeloAtualizadoEm, selecionados, inicioPlano, true);
+        configSalva.modeloAtualizadoEm, selecionados, inicioPlano, true, configSalva.modeloVersao);
       setPersonalizandoDias(false);
       setAvisoPlano('Dias de estudo confirmados.');
       return;
@@ -711,7 +832,7 @@ export default function PlanoAutomatico() {
     setInicioPlano(inicio);
     setConfigSalva((anterior) => ({ ...anterior, diasSemana: selecionados, inicio, diasPersonalizados: true }));
     savePlan(reorganizado, configSalva.months, configSalva.days, configSalva.modeloId,
-      configSalva.modeloAtualizadoEm, selecionados, inicio, true);
+      configSalva.modeloAtualizadoEm, selecionados, inicio, true, configSalva.modeloVersao);
     selecionarSemana(1, 1);
     setAvisoPlano('Seus dias de estudo foram atualizados. Conteúdos concluídos e atividades do Calendário foram preservados.');
     setPersonalizandoDias(false);
@@ -847,9 +968,9 @@ export default function PlanoAutomatico() {
           </section>
 
           {avisoPlano && <div className="studyplan-calendar-feedback" role="status"><Icon name="check" size={17}/>{avisoPlano}</div>}
-          {(pendentesAtrasados || planoSemDatas) && (
+          {(pendentesAtrasados || planoSemDatas) && !avisoPlano && (
             <div className="tenna-auto-replan-notice" role="status">
-              <span>{planoSemDatas ? 'Algumas sessões precisam de uma data definida.' : 'O cronograma inclui o mês inteiro, mesmo os dias que já passaram.'} Ao adicionar ao Calendário, cada sessão mantém a data original, inclusive datas anteriores a hoje.</span>
+              <span>O cronograma começa no dia 1º do mês e mantém as datas originais, mesmo as que já passaram.</span>
               <button type="button" onClick={abrirAgendamentoCompleto}>Agendar pendentes</button>
             </div>
           )}
@@ -877,7 +998,9 @@ export default function PlanoAutomatico() {
                   {progress === 100 && topicoIdsDoPlano.length > 0
                     ? 'Excelente progresso! Continue revisando os assuntos e praticando.'
                     : focoItem?.topicoId
-                      ? `${configSalva.diasPersonalizados && focoItem.data ? new Date(`${focoItem.data}T12:00:00`).toLocaleDateString('pt-BR') + ' · ' : ''}${configSalva.diasPersonalizados ? focoItem.dayLabel : 'Dia a definir'} · ${focoItem.tempoEstimado || 45} min`
+                      ? `${focoItem.tempoEstimado || 45} min · ${focoAgendado
+                        ? `Agendado para ${new Date(`${focoAgendado.data}T12:00:00`).toLocaleDateString('pt-BR')} às ${focoAgendado.horario}`
+                        : 'Aguardando agendamento'}`
                       : focoItem?.tipo === 'pratica'
                         ? 'Hora de colocar seu conhecimento em prática.'
                         : 'Siga as etapas para avançar no seu ritmo.'}
@@ -900,11 +1023,11 @@ export default function PlanoAutomatico() {
           <div className="studyplan-stats" aria-label="Resumo da sua preparação">
             <div className="studyplan-stat">
               <span className="studyplan-stat-icon"><Icon name="check" size={18} /></span>
-              <div><strong>{studiedPlanTopics} <small>/ {topicoIdsDoPlano.length}</small></strong><span>conteúdos concluídos</span></div>
+              <div><strong>{studiedPlanTopics} <small>/ {topicoIdsDoPlano.length}</small></strong><span>conteúdos únicos estudados</span></div>
             </div>
             <div className="studyplan-stat">
               <span className="studyplan-stat-icon"><Icon name="book" size={18} /></span>
-              <div><strong>{totalPlanSessions}</strong><span>sessões planejadas</span></div>
+              <div><strong>{totalPlanSessions}</strong><span>sessões de estudo previstas</span></div>
             </div>
             <div className="studyplan-stat">
               <span className="studyplan-stat-icon"><Icon name="calendar" size={18} /></span>
@@ -921,6 +1044,7 @@ export default function PlanoAutomatico() {
               </div>
               <span className="studyplan-stage-count"><Icon name="layers" size={15} /> Mês {current.numero} de {plan.length}</span>
             </div>
+            <p className="studyplan-counts-hint">Um conteúdo pode aparecer em mais de uma sessão. O progresso conta os conteúdos únicos estudados, enquanto as sessões representam os momentos de estudo planejados.</p>
             {mensagemAgenda && <div className="studyplan-calendar-feedback" role="status"><Icon name="check" size={17}/>{mensagemAgenda}</div>}
             {erroAgenda && <div className="studyplan-calendar-error" role="alert">{erroAgenda} <button type="button" onClick={() => { setCarregandoAgenda(true); carregarAtividadesAgenda().then(() => setErroAgenda('')).catch((erro) => setErroAgenda(erro.message)).finally(() => setCarregandoAgenda(false)); }}>Tentar novamente</button></div>}
             <div className="studyplan-month-tabs" role="tablist" aria-label="Escolher mês do cronograma">
@@ -966,19 +1090,19 @@ export default function PlanoAutomatico() {
                 {current.semanas.map((week) => {
                   const key = `${current.numero}-${week.number}`;
                   const open = openWeeks.has(key);
-                  const items = week.days.flatMap(day => day.items).filter(item => item.topicoId);
-                  const done = items.filter(item => studiedTopics[String(item.topicoId)]).length;
-                  const status = items.length === 0 ? 'Sem atividades' : done === items.length ? "Concluída" : done > 0 ? "Em andamento" : "Pendente";
-                  return <button key={key} type="button" className={`studyplan-week-choice${open ? ' active' : ''} status-${status === "Concluída" ? "done" : status === "Em andamento" ? "ongoing" : "pending"}`} aria-pressed={open} onClick={() => selecionarSemana(current.numero, week.number)}><span>SEMANA {week.number}</span><small>{configSalva.diasPersonalizados ? formatarPeriodo(week.inicio, week.fim) : 'Dias a definir'}</small><strong>{status}</strong></button>;
+                  const resumo = resumoSemanaPlano(current, week, atividadesAgenda, studiedTopics);
+                  const status = resumo.progresso;
+                  return <button key={key} type="button" className={`studyplan-week-choice${open ? ' active' : ''} status-${status === "Concluída" ? "done" : status === "Em andamento" ? "ongoing" : "pending"}`} aria-pressed={open} onClick={() => selecionarSemana(current.numero, week.number)}><span>SEMANA {week.number}</span><small>{configSalva.diasPersonalizados ? formatarPeriodo(week.inicio, week.fim) : 'Dias a definir'}</small><strong>{status}</strong><small className="studyplan-week-calendar-status">{resumo.agendamento}</small></button>;
                 })}
                 </div>
                 {current.semanas.filter(week => openWeeks.has(`${current.numero}-${week.number}`)).map((week) => {
                   const key = `${current.numero}-${week.number}`;
                   const open = openWeeks.has(key);
                   const weekItems = week.days.flatMap((day) => day.items);
-                  const weekStudyItems = weekItems.filter((item) => item.topicoId);
-                  const weekDoneCount = weekStudyItems.filter((item) => studiedTopics[String(item.topicoId)]).length;
+                  const weekStudyItems = [...new Set(weekItems.filter((item) => item.topicoId).map((item) => String(item.topicoId)))];
+                  const weekDoneCount = weekStudyItems.filter((id) => studiedTopics[id]).length;
                   const weekPercent = weekStudyItems.length ? Math.round(weekDoneCount / weekStudyItems.length * 100) : 0;
+                  const resumoSemana = resumoSemanaPlano(current, week, atividadesAgenda, studiedTopics);
                   return (
                     <article className={`studyplan-week${open ? ' open' : ''}`} key={key}>
                       <button
@@ -991,13 +1115,17 @@ export default function PlanoAutomatico() {
                         })}
                       >
                         <span className="studyplan-week-number">{pad(week.number)}</span>
-                        <span className="studyplan-week-title"><strong>Semana {week.number} {configSalva.diasPersonalizados && week.inicio && `· ${formatarPeriodo(week.inicio, week.fim)}`}</strong><small>{week.days.filter((dia) => dia.items.length).length} dias de estudo <span aria-hidden="true">·</span> {weekDoneCount} de {weekStudyItems.length} concluídos</small></span>
+                        <span className="studyplan-week-title"><strong>Semana {week.number} {configSalva.diasPersonalizados && week.inicio && `· ${formatarPeriodo(week.inicio, week.fim)}`}</strong><small>{week.days.filter((dia) => dia.items.length).length} dias de estudo · {weekDoneCount} de {weekStudyItems.length} conteúdos estudados · {resumoSemana.agendamento.toLowerCase()}</small></span>
                         <span className="studyplan-week-progress" role="progressbar" aria-label={`Semana ${week.number}: ${weekPercent}% concluído`} aria-valuenow={weekPercent} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${weekPercent}%` }} /></span>
                         <span className="studyplan-week-chevron"><Icon name="chevron" size={19} /></span>
                       </button>
                       {open && (
                         <div id={`studyplan-week-${key}`} className="studyplan-week-body">
-                          {week.days.filter((day) => day.items.length > 0).map((day, i) => (
+                          <div className="studyplan-week-organize">
+                            <span>Você pode organizar as sessões desta semana sem alterar os conteúdos definidos pelo administrador.</span>
+                            <button type="button" aria-pressed={organizandoSemana === key} onClick={() => setOrganizandoSemana((anterior) => anterior === key ? null : key)}>{organizandoSemana === key ? 'Concluir organização' : 'Organizar semana'}</button>
+                          </div>
+                          {week.days.map((day, i) => day.items.length > 0 && (
                             <div className="studyplan-day" key={`${key}-${day.day}-${i}`}>
                               <div className="studyplan-day-label"><span>{configSalva.diasPersonalizados ? day.day.slice(0, 3).toUpperCase() : `DIA ${i + 1}`}</span><strong>{configSalva.diasPersonalizados ? day.day : `Estudo ${i + 1}`}</strong>{configSalva.diasPersonalizados && day.data && <small>{new Date(`${day.data}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</small>}</div>
                               <div className="studyplan-lessons">
@@ -1006,7 +1134,8 @@ export default function PlanoAutomatico() {
                                   const studied = item.topicoId ? Boolean(studiedTopics[String(item.topicoId)]) : false;
                                   const isSaving = savingTopicId === Number(item.topicoId);
                                   const origemSessao = chaveSessaoPlano(item, current, week, i, itemIndex);
-                                  const agendada = sessaoJaAgendada(atividadesAgenda, origemSessao);
+                                  const atividadeAgendada = atividadesAgenda.find((a) => a.origem === origemSessao);
+                                  const agendada = Boolean(atividadeAgendada);
                                   return (
                                     <article className={`studyplan-lesson${studied ? ' completed' : ''}${agendada ? ' scheduled' : ''}`} key={`${key}-${day.day}-${i}-${itemIndex}`} style={{ '--study-color': style.color, '--study-bg': style.bg }}>
                                       <div className="studyplan-lesson-details">
@@ -1015,15 +1144,27 @@ export default function PlanoAutomatico() {
                                         <span className="studyplan-lesson-meta">
                                           {item.tipo === 'pratica' ? (item.key?.startsWith('revisao:') ? 'Revisão · questões anteriores' : 'Prática e revisão') : `${item.tempoEstimado || 45} min`}
                                         </span>
+                                        {agendada && <span className="studyplan-lesson-scheduled"><Icon name="check" size={13} /> No calendário · {new Date(`${atividadeAgendada.data}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às {atividadeAgendada.horario}</span>}
                                       </div>
                                       <div className="studyplan-lesson-actions">
+                                        {organizandoSemana === key && (
+                                          <label className="studyplan-lesson-move">
+                                            <span>Mover para</span>
+                                            <select aria-label={`Mover ${item.topico} para outro dia de estudo`}
+                                              value={i} disabled={agendada}
+                                              title={agendada ? 'Reagende a sessão antes de trocar de dia' : 'Escolha outro dia desta semana'}
+                                              onChange={(evento) => moverSessao(item, current.numero, week.number, i, itemIndex, Number(evento.target.value))}>
+                                              {week.days.map((destino, posicao) => <option key={posicao} value={posicao}>Dia {posicao + 1} · {destino.day}</option>)}
+                                            </select>
+                                          </label>
+                                        )}
                                         {item.topicoId && (
                                           <button type="button" className={`studyplan-complete-button${studied ? ' active' : ''}`} onClick={() => alternarEstudoItem(item)} disabled={isSaving} aria-label={`${studied ? 'Desmarcar' : 'Marcar'} ${item.topico} como ${studied ? 'pendente' : 'concluído'}`}>
                                             <Icon name="check" size={15} /> {isSaving ? 'Salvando...' : studied ? 'Concluído' : 'Concluir'}
                                           </button>
                                         )}
-                                        <button type="button" className={`studyplan-add-calendar${agendada ? ' is-added' : ''}`} onClick={() => abrirAdicionarSessao(item, current, week, day, i, itemIndex)} disabled={agendada || carregandoAgenda || Boolean(erroAgenda) || !usuarioId} title={agendada ? 'Sessão já adicionada ao calendário' : 'Agendar somente esta sessão'}>
-                                          <Icon name={agendada ? 'check' : 'calendar'} size={15} /> {agendada ? 'No calendário' : 'Agendar'}
+                                        <button type="button" className={`studyplan-add-calendar${agendada ? ' is-added' : ''}`} onClick={() => abrirAdicionarSessao(item, current, week, day, i, itemIndex)} disabled={carregandoAgenda || Boolean(erroAgenda) || !usuarioId} title={agendada ? 'Alterar data e horário desta sessão' : 'Agendar somente esta sessão'}>
+                                          <Icon name={agendada ? 'edit' : 'calendar'} size={15} /> {agendada ? 'Reagendar' : 'Agendar'}
                                         </button>
                                         <button type="button" className="studyplan-open-button" onClick={() => abrirDestinoItem(item)}>
                                           {item.topicoId ? 'Estudar' : 'Praticar'}
@@ -1140,8 +1281,10 @@ export default function PlanoAutomatico() {
           <div className="studyplan-schedule-modal" role="dialog" aria-modal="true" aria-labelledby="studyplan-schedule-title">
             <button className="studyplan-schedule-close" type="button" aria-label="Fechar" disabled={salvandoAgenda} onClick={() => setSessaoSelecionada(null)}><span aria-hidden="true">×</span></button>
             <span className="studyplan-eyebrow"><Icon name="calendar" size={15}/> AGENDAMENTO INDIVIDUAL</span>
-            <h2 id="studyplan-schedule-title">Adicionar ao calendário</h2>
-            <p className="studyplan-schedule-description">Somente esta sessão será adicionada. Você pode manter a data prevista pelo cronograma, mesmo que já tenha passado.</p>
+            <h2 id="studyplan-schedule-title">{sessaoSelecionada.atividade ? 'Reagendar sessão' : 'Adicionar ao calendário'}</h2>
+            <p className="studyplan-schedule-description">{sessaoSelecionada.atividade
+              ? 'Altere a data ou o horário desta sessão. Para reagendar, escolha um horário futuro; a atividade original continuará identificada no Calendário.'
+              : 'Somente esta sessão será adicionada. Você pode manter a data prevista pelo cronograma, mesmo que já tenha passado.'}</p>
             <div className="studyplan-schedule-topic">
               <span>{sessaoSelecionada.item.materia || 'Atividade'} · {sessaoSelecionada.dia}</span>
               <strong>{sessaoSelecionada.item.topico}</strong>
@@ -1155,7 +1298,9 @@ export default function PlanoAutomatico() {
               {erroSalvarAgenda && <p className="studyplan-calendar-error" role="alert">{erroSalvarAgenda}</p>}
               <div className="studyplan-schedule-actions">
                 <button type="button" className="studyplan-schedule-cancel" onClick={() => setSessaoSelecionada(null)} disabled={salvandoAgenda}>Cancelar</button>
-                <button type="submit" className="studyplan-schedule-submit" disabled={salvandoAgenda || !dataPermitidaSessaoPlano(dataAgenda, horarioAgenda, sessaoSelecionada.dataPrevista)}><Icon name="calendar" size={16}/>{salvandoAgenda ? 'Adicionando...' : 'Confirmar atividade'}</button>
+                <button type="submit" className="studyplan-schedule-submit" disabled={salvandoAgenda || !(sessaoSelecionada.atividade
+                  ? ((sessaoSelecionada.atividade.data === dataAgenda && sessaoSelecionada.atividade.horario === horarioAgenda) || agendamentoNoFuturo(dataAgenda, horarioAgenda))
+                  : dataPermitidaSessaoPlano(dataAgenda, horarioAgenda, sessaoSelecionada.dataPrevista))}><Icon name="calendar" size={16}/>{salvandoAgenda ? 'Salvando...' : sessaoSelecionada.atividade ? 'Salvar novo horário' : 'Confirmar atividade'}</button>
               </div>
             </form>
           </div>

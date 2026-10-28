@@ -1999,3 +1999,120 @@ html[data-theme='dark'] .landing-nav-links a.is-active {
 @media (max-width: 650px) {
   .landing-feature-card p, .landing-step p { font-size: 15px; }
 }
+
+
+/* ============================================================
+   TENNA | acabamento do modo escuro na área pública
+   Escopo restrito à landing: o modo claro não é modificado.
+   ============================================================ */
+html[data-theme='dark'] .landing {
+  background: #0f1928;
+  color: #eef5ff;
+}
+
+/* A navegação flutuante mantém o mesmo formato nos dois temas. */
+html[data-theme='dark'] .landing .landing-nav-shell,
+html[data-theme='dark'] .landing .landing-mobile-nav {
+  background: rgba(20, 35, 55, .97);
+  border-color: #38536e;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, .22);
+}
+html[data-theme='dark'] .landing .landing-nav-links a,
+html[data-theme='dark'] .landing .landing-mobile-nav a {
+  color: #d7e6f9;
+}
+html[data-theme='dark'] .landing .landing-nav-links a:hover,
+html[data-theme='dark'] .landing .landing-nav-links a.is-active {
+  color: #ffffff;
+}
+html[data-theme='dark'] .landing .landing-mobile-nav a:hover,
+html[data-theme='dark'] .landing .landing-mobile-nav a.is-active {
+  color: #ffffff;
+  background: #254a73;
+}
+html[data-theme='dark'] .landing .landing-nav-login {
+  color: #e7f2ff;
+}
+html[data-theme='dark'] .landing .landing-nav-login:hover {
+  color: #ffffff;
+  background: #254a73;
+}
+
+/* Os textos da área de recursos tinham cores azuis fixas do tema claro. */
+html[data-theme='dark'] .landing .landing-features {
+  background: #101b2b;
+}
+html[data-theme='dark'] .landing .landing-section-heading h2,
+html[data-theme='dark'] .landing .landing-feature-card h3,
+html[data-theme='dark'] .landing .landing-step h3 {
+  color: #edf5ff;
+}
+html[data-theme='dark'] .landing .landing-section-heading p,
+html[data-theme='dark'] .landing .landing-feature-card p,
+html[data-theme='dark'] .landing .landing-step p {
+  color: #b6c9df;
+}
+html[data-theme='dark'] .landing .landing-section-label {
+  color: #8bc9ff;
+}
+html[data-theme='dark'] .landing .landing-feature-card,
+html[data-theme='dark'] .landing .landing-step {
+  background: #1b2c41;
+  border-color: #36516c;
+  box-shadow: 0 8px 24px rgba(2, 9, 20, .14);
+}
+html[data-theme='dark'] .landing .landing-feature-card:hover,
+html[data-theme='dark'] .landing .landing-step:hover {
+  background: #223750;
+  border-color: #6597c8;
+  box-shadow: 0 14px 30px rgba(2, 9, 20, .22);
+}
+/* As ilustrações permanecem claras e reconhecíveis, sem filtro de escurecimento. */
+html[data-theme='dark'] .landing .landing-feature-art {
+  background: #eaf4ff;
+}
+html[data-theme='dark'] .landing .landing-steps {
+  background: #121e2f;
+}
+html[data-theme='dark'] .landing .landing-steps-row::before {
+  background: #416383;
+}
+
+/* Prévia do progresso: rótulos e barras com contraste legível. */
+html[data-theme='dark'] .landing .landing-subject-card {
+  background: #1b2d43;
+  border-color: #456282;
+  color: #eaf4ff;
+}
+html[data-theme='dark'] .landing .landing-subject-card:hover {
+  background: #233b56;
+  border-color: #7ab6ef;
+}
+html[data-theme='dark'] .landing .landing-subject-card .subject-name {
+  color: #edf5ff;
+}
+html[data-theme='dark'] .landing .landing-subject-card .subject-name .pct {
+  color: #b6d8fa;
+}
+html[data-theme='dark'] .landing .landing-subject-card .subject-bar {
+  background: #334d68;
+}
+html[data-theme='dark'] .landing .landing-subject-card .subject-check.pending {
+  color: #cce7ff;
+  background: #273e57;
+  border-color: #75b6ee;
+}
+
+/* Faixa de chamada final segue azul, enquanto o rodapé acompanha o tema. */
+html[data-theme='dark'] .landing .landing-footer {
+  background: #101b2b;
+  color: #b7cbe2;
+  border-top: 1px solid #314861;
+}
+html[data-theme='dark'] .landing .landing-footer .landing-footer-inner span {
+  color: #b7cbe2;
+}
+html[data-theme='dark'] .landing :is(a,button):focus-visible {
+  outline: 2px solid #94d1ff;
+  outline-offset: 3px;
+}

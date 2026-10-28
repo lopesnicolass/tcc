@@ -2,12 +2,22 @@ import '../../styles/adm/AdminUsuarios.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { request } from '../../services/api.js';
 
+function obterIdDaContaAtual() {
+  try {
+    const conta = JSON.parse(localStorage.getItem('etecamp_usuario') || 'null');
+    return conta?.id == null ? null : Number(conta.id);
+  } catch {
+    return null;
+  }
+}
+
 function normalizarTexto(valor) {
   return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 export default function AdminUsuarios() {
   const [users, setUsers] = useState([]);
+  const [contaAtualId] = useState(obterIdDaContaAtual);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [mensagem, setMensagem] = useState('');
@@ -52,6 +62,10 @@ export default function AdminUsuarios() {
     if (excluindo !== null) return;
     const usuario = users.find((user) => user.id === id);
     if (!usuario) return;
+    if (contaAtualId !== null && Number(id) === contaAtualId) {
+      setErro('Você não pode excluir a conta que está usando.');
+      return;
+    }
     const confirmar = window.confirm(`Excluir definitivamente o usuário "${usuario.nome || usuario.email}"? Essa ação não pode ser desfeita.`);
     if (!confirmar) return;
     setExcluindo(id);
@@ -128,9 +142,13 @@ export default function AdminUsuarios() {
                     <span>{usuario.email || 'E-mail não informado'}</span>
                   </div>
                   <span className={`admin-users-role ${usuario.tipo === 'admin' ? 'is-admin' : ''}`}>{usuario.tipo === 'admin' ? 'Administrador' : 'Estudante'}</span>
-                  <button type="button" className="admin-users-delete" onClick={() => handleDelete(usuario.id)} disabled={excluindo !== null} aria-label={`Excluir ${usuario.nome || 'usuário'}`}>
-                    {excluindo === usuario.id ? 'Excluindo...' : 'Excluir'}
-                  </button>
+                  {contaAtualId !== null && Number(usuario.id) === contaAtualId ? (
+                    <span className="admin-users-self" title="A conta atual não pode ser excluída">Sua conta</span>
+                  ) : (
+                    <button type="button" className="admin-users-delete" onClick={() => handleDelete(usuario.id)} disabled={excluindo !== null} aria-label={`Excluir ${usuario.nome || 'usuário'}`}>
+                      {excluindo === usuario.id ? 'Excluindo...' : 'Excluir'}
+                    </button>
+                  )}
                 </article>
               ))}
             </div>

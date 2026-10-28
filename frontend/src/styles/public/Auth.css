@@ -433,3 +433,98 @@
     margin-bottom: 0;
   }
 }
+
+
+/* ============================================================
+   TENNA | login / cadastro no modo escuro
+   Regras restritas ao formulário de autenticação.
+   ============================================================ */
+html[data-theme='dark'] .page:has(.panel-form) {
+  background: #101a2a;
+}
+html[data-theme='dark'] .page .app:has(.panel-form) {
+  background: #192a3f;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, .30);
+}
+html[data-theme='dark'] .page .panel-form {
+  background: #192a3f;
+  color: #edf5ff;
+}
+html[data-theme='dark'] .page .form-head .eyebrow {
+  color: #8fcaff;
+}
+html[data-theme='dark'] .page .form-head h2 {
+  color: #edf5ff;
+}
+html[data-theme='dark'] .page .form-head .sub,
+html[data-theme='dark'] .page .switch-line {
+  color: #b9cbe0;
+}
+html[data-theme='dark'] .page .field label {
+  color: #d3e3f6;
+}
+html[data-theme='dark'] .page .field input {
+  background: #111f31;
+  border-color: #3d5875;
+  color: #eff6ff;
+}
+html[data-theme='dark'] .page .field input::placeholder {
+  color: #a6bed9;
+  opacity: 1;
+}
+html[data-theme='dark'] .page .field input:focus {
+  background: #142940;
+  border-color: #73baff;
+  box-shadow: 0 0 0 3px rgba(92, 175, 255, .12);
+}
+html[data-theme='dark'] .page .toggle-eye {
+  color: #afc9e4;
+}
+html[data-theme='dark'] .page .toggle-eye:hover {
+  color: #edf6ff;
+}
+
+/* Corrige a aba ativa, que ficava branca com letras também brancas. */
+html[data-theme='dark'] .page .tab-switch {
+  background: #263d56;
+  border: 1px solid #3b5875;
+}
+html[data-theme='dark'] .page .tab-indicator {
+  background: #1d6ac6;
+  box-shadow: 0 3px 11px rgba(1, 9, 23, .22);
+}
+html[data-theme='dark'] .page .tab-btn {
+  color: #c4d9ef;
+}
+html[data-theme='dark'] .page .tab-btn.active,
+html[data-theme='dark'] .page .tab-btn[aria-selected='true'] {
+  color: #ffffff;
+}
+html[data-theme='dark'] .page .tab-btn:not(.active):hover {
+  color: #ffffff;
+}
+
+/* Botão de acesso mantém contraste mesmo com os tokens do modo escuro. */
+html[data-theme='dark'] .page .panel-form .btn-primary {
+  background: #1767cb;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(2, 12, 28, .18);
+}
+html[data-theme='dark'] .page .panel-form .btn-primary:hover:not(:disabled) {
+  background: #2582e4;
+  color: #ffffff;
+}
+html[data-theme='dark'] .page .panel-form .btn-primary:disabled {
+  background: #2c4560;
+  color: #c3d4e6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+html[data-theme='dark'] .page .panel-form .link-inline,
+html[data-theme='dark'] .page .panel-form .switch-line button {
+  color: #8dc7ff;
+}
+html[data-theme='dark'] .page :is(button,input,a):focus-visible {
+  outline: 2px solid #8dc7ff;
+  outline-offset: 3px;
+}
