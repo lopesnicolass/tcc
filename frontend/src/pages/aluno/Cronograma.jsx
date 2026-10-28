@@ -88,7 +88,124 @@ const dateKey = (date) =>
     date.getMonth() + 1
   )}-${pad(date.getDate())}`;
 
-const todayKey = dateKey(new Date());
+const getTodayKey = () => dateKey(new Date());
+
+// Compara data e hora no fuso local do navegador (não em UTC).
+function isPastDate(data, now = new Date()) {
+  return data < dateKey(now);
+}
+
+function suggestedTimeForDay(data, now = new Date()) {
+  if (isPastDate(data, now)) return null;
+  if (data !== dateKey(now)) return '08:00';
+
+  // O horário inicial sempre deve estar adiante do relógio atual.
+  const next = new Date(now.getTime() + 60_000);
+  next.setSeconds(0, 0);
+  return dateKey(next) === data
+    ? `${pad(next.getHours())}:${pad(next.getMinutes())}`
+    : null;
+}
+
+function canScheduleOnDate(data, now = new Date()) {
+  return Boolean(suggestedTimeForDay(data, now));
+}
+
+// Sugestões práticas: três momentos do dia em datas futuras ou os próximos
+// horários disponíveis (em intervalos de 15 minutos) quando for hoje.
+function quickTimesForDate(data, now = new Date()) {
+  if (isPastDate(data, now)) return [];
+  if (data !== dateKey(now)) return ['08:00', '14:00', '19:00'];
+
+  const next = new Date(now);
+  next.setSeconds(0, 0);
+  next.setMinutes(Math.ceil((next.getMinutes() + 1) / 15) * 15);
+
+  return [0, 30, 60]
+    .map((delta) => new Date(next.getTime() + delta * 60_000))
+    .filter((time) => dateKey(time) === data)
+    .map((time) => `${pad(time.getHours())}:${pad(time.getMinutes())}`);
+}
+
+function isPastDateTime(data, horario, now = new Date()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data) ||
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(horario)) return false;
+  const dateTime = new Date(`${data}T${horario}:00`);
+  return Number.isNaN(dateTime.getTime()) || dateTime < now;
+}
+
+function hasUnchangedSchedule(editing, form) {
+  return Boolean(editing && editing.data === form.data && editing.horario === form.horario);
+}
+
+// Sem menus flutuantes: as duas partes podem ser digitadas ou ajustadas pelas setas.
+function TimePartInput({ label, value, max, disabled, onChange }) {
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => setDraft(value), [value]);
+
+  function commit(raw = draft) {
+    if (!raw) {
+      setDraft(value);
+      return;
+    }
+    const number = Math.min(max, Math.max(0, Number(raw)));
+    const formatted = pad(number);
+    setDraft(formatted);
+    onChange(formatted);
+  }
+
+  function step(amount) {
+    const next = pad((Number(value) + amount + max + 1) % (max + 1));
+    setDraft(next);
+    onChange(next);
+  }
+
+  return (
+    <div className="tenna-time-part">
+      <span className="tenna-time-part-label">{label}</span>
+      <div className="tenna-time-part-entry">
+        <input
+          className="tenna-time-part-input"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={2}
+          aria-label={label}
+          autoComplete="off"
+          value={draft}
+          disabled={disabled}
+          onFocus={(event) => event.target.select()}
+          onChange={(event) => {
+            const next = event.target.value.replace(/\D/g, '').slice(0, 2);
+            setDraft(next);
+            if (next.length === 2 && Number(next) <= max) onChange(next);
+          }}
+          onBlur={() => commit()}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+              event.preventDefault();
+              step(event.key === 'ArrowUp' ? 1 : -1);
+            } else if (event.key === 'Enter') {
+              event.preventDefault();
+              event.currentTarget.blur();
+            }
+          }}
+        />
+        <div className="tenna-time-step-buttons">
+          <button type="button" className="tenna-time-step" disabled={disabled}
+            aria-label={`Aumentar ${label.toLowerCase()}`} onClick={() => step(1)}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+          </button>
+          <button type="button" className="tenna-time-step" disabled={disabled}
+            aria-label={`Diminuir ${label.toLowerCase()}`} onClick={() => step(-1)}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function getUsuario() {
   try {
@@ -142,7 +259,7 @@ function getLegacyActivities() {
 const emptyForm = {
   nome: '',
   materia: 'Matemática',
-  data: todayKey,
+  data: getTodayKey(),
   horario: '08:00'
 };
 
@@ -174,7 +291,14 @@ export default function Cronograma() {
     );
 
   const [selectedDate, setSelectedDate] =
-    useState(todayKey);
+    useState(getTodayKey);
+
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const [showCreate, setShowCreate] =
     useState(false);
@@ -187,8 +311,22 @@ export default function Cronograma() {
 
   const [form, setForm] =
     useState(emptyForm);
+  const [scheduleError, setScheduleError] = useState('');
+  const validFormTime = /^([01]\d|2[0-3]):[0-5]\d$/.test(form.horario);
+  const scheduleIsInPast = validFormTime &&
+    !hasUnchangedSchedule(editing, form) &&
+    isPastDateTime(form.data, form.horario, now);
+  const selectedDayAllowsCreation = canScheduleOnDate(selectedDate, now);
   const [subjectPickerOpen, setSubjectPickerOpen] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
+  function updateTimePart(part, value) {
+    setScheduleError('');
+    setForm((current) => {
+      const [hour, minute] = (current.horario || '08:00').split(':');
+      return { ...current, horario: part === 'hours' ? `${value}:${minute}` : `${hour}:${value}` };
+    });
+  }
+
   const [pickerMonth, setPickerMonth] = useState(() => new Date());
 
   const pickerDays = useMemo(() => {
@@ -203,7 +341,7 @@ export default function Cronograma() {
   }, [pickerMonth]);
 
   function openPickerForDate(value) {
-    const d = new Date(`${value || todayKey}T12:00:00`);
+    const d = new Date(`${value || getTodayKey()}T12:00:00`);
     setPickerMonth(Number.isNaN(d.getTime()) ? new Date() : new Date(d.getFullYear(), d.getMonth(), 1));
     setDatePickerOpen((previous) => !previous);
     setSubjectPickerOpen(false);
@@ -436,22 +574,38 @@ export default function Cronograma() {
     );
   }
 
-  function openCreate(
-    date = selectedDate
-  ) {
+  function openCreate(date = selectedDate) {
+    const currentNow = new Date();
+    const nextTime = suggestedTimeForDay(date, currentNow);
+    if (!nextTime) return;
+
+    setNow(currentNow);
     setEditing(null);
-
-    setForm({
-      ...emptyForm,
-      data: date
-    });
-
+    setScheduleError('');
+    setForm({ ...emptyForm, data: date, horario: nextTime });
     setSubjectPickerOpen(false);
     setDatePickerOpen(false);
     setShowCreate(true);
   }
 
+  function changeFormDate(date) {
+    const currentNow = new Date();
+    if (!canScheduleOnDate(date, currentNow) && date !== editing?.data) return;
+
+    setNow(currentNow);
+    setScheduleError('');
+    setForm((previous) => {
+      if (previous.data === date) return previous;
+      const horario = isPastDateTime(date, previous.horario, currentNow)
+        ? suggestedTimeForDay(date, currentNow) || previous.horario
+        : previous.horario;
+      return { ...previous, data: date, horario };
+    });
+    setDatePickerOpen(false);
+  }
+
   function openEdit(activity) {
+    setScheduleError('');
     setEditing(activity);
 
     setForm({
@@ -462,7 +616,7 @@ export default function Cronograma() {
         'Matemática',
       data:
         activity.data ||
-        todayKey,
+        getTodayKey(),
       horario:
         activity.horario ||
         '08:00'
@@ -488,6 +642,14 @@ export default function Cronograma() {
       return;
     }
 
+    // Validação final com a hora atual, inclusive se a janela ficou aberta.
+    if (!hasUnchangedSchedule(editing, form) &&
+        isPastDateTime(form.data, form.horario, new Date())) {
+      setScheduleError('Não é possível agendar atividades em datas ou horários que já passaram.');
+      return;
+    }
+
+    setScheduleError('');
     try {
       setSaving(true);
 
@@ -916,8 +1078,7 @@ export default function Cronograma() {
                   selectedDate;
 
                 const isToday =
-                  key ===
-                  todayKey;
+                  key === dateKey(now);
                 const hasEvents = quantidadeEventos > 0;
                 const allDone = dayActivities.length > 0 && dayActivities.every((activity) => activity.done);
 
@@ -998,13 +1159,22 @@ export default function Cronograma() {
             <button
               type="button"
               aria-label="Adicionar atividade neste dia"
-              title="Adicionar atividade neste dia"
               className="calendar-add-small"
+              disabled={!selectedDayAllowsCreation || saving}
+              title={selectedDayAllowsCreation
+                ? 'Adicionar atividade neste dia'
+                : 'Não é possível agendar atividades em datas ou horários que já passaram'}
               onClick={() => openCreate()}
             >
               <Icon name="plus" size={19} />
             </button>
           </div>
+
+          {!selectedDayAllowsCreation && (
+            <p className="calendar-past-day-hint">
+              Não é possível adicionar atividades em datas ou horários que já passaram.
+            </p>
+          )}
 
           {selectedImportantDates.length > 0 && (
             <div className="calendar-important-list">
@@ -1036,7 +1206,9 @@ export default function Cronograma() {
               <div className="calendar-empty-day">
                 <span className="calendar-empty-day-icon" aria-hidden="true"><Icon name="calendar" size={23} /></span>
                 <strong>Nenhuma atividade neste dia</strong>
-                <p>Use o botão + para planejar seus estudos.</p>
+                <p>{selectedDayAllowsCreation
+                  ? 'Use o botão + para planejar seus estudos.'
+                  : 'Esta data já passou. Você ainda pode consultar suas atividades.'}</p>
               </div>
 
             ) : (
@@ -1207,36 +1379,56 @@ export default function Cronograma() {
                           const key = dateKey(day);
                           return (
                             <button key={key} type="button"
-                              className={[day.getMonth() !== pickerMonth.getMonth() ? 'outside' : '', key === form.data ? 'selected' : '', key === todayKey ? 'today' : ''].join(' ')}
+                              className={[day.getMonth() !== pickerMonth.getMonth() ? 'outside' : '', key === form.data ? 'selected' : '', key === dateKey(now) ? 'today' : ''].join(' ')}
                               aria-label={day.toLocaleDateString('pt-BR', { dateStyle: 'full' })}
                               aria-pressed={key === form.data}
-                              onClick={() => { setForm({ ...form, data: key }); setDatePickerOpen(false); }}>
+                              disabled={!canScheduleOnDate(key, now) && key !== editing?.data}
+                              onClick={() => changeFormDate(key)}>
                               {day.getDate()}
                             </button>
                           );
                         })}
                       </div>
-                      <button type="button" className="tenna-date-today" onClick={() => { setForm({ ...form, data: todayKey }); setDatePickerOpen(false); }}>Selecionar hoje</button>
+                      <button type="button" className="tenna-date-today"
+                        disabled={!canScheduleOnDate(dateKey(now), now) && editing?.data !== dateKey(now)}
+                        onClick={() => changeFormDate(getTodayKey())}>Selecionar hoje</button>
                     </div>
                   )}
                 </div>
               </div>
 
               <div className="tenna-activity-field">
-                <label htmlFor="tenna-activity-hour">Horário</label>
-                <div className="tenna-time-control">
-                  <Icon name="clock" size={18} />
-                  <input id="tenna-activity-hour" type="text" inputMode="numeric" maxLength={2} aria-label="Hora"
+                <label id="tenna-activity-time-label">Horário</label>
+                <div className="tenna-time-control" role="group" aria-labelledby="tenna-activity-time-label">
+                  <span className="tenna-time-icon" aria-hidden="true"><Icon name="clock" size={19} /></span>
+                  <TimePartInput label="Horas" max={23} disabled={saving}
                     value={(form.horario || '08:00').split(':')[0]}
-                    onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0,2); setForm({ ...form, horario: `${v}:${(form.horario || '08:00').split(':')[1] || '00'}` }); }}
-                    onBlur={() => { const [h,m] = (form.horario || '08:00').split(':'); setForm((old) => ({ ...old, horario: `${pad(Math.min(23, Number(h) || 0))}:${pad(Math.min(59, Number(m) || 0))}` })); }} />
-                  <span className="tenna-time-separator">:</span>
-                  <input type="text" inputMode="numeric" maxLength={2} aria-label="Minutos"
-                    value={(form.horario || '08:00').split(':')[1] ?? '00'}
-                    onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0,2); setForm({ ...form, horario: `${(form.horario || '08:00').split(':')[0] || '08'}:${v}` }); }}
-                    onBlur={() => { const [h,m] = (form.horario || '08:00').split(':'); setForm((old) => ({ ...old, horario: `${pad(Math.min(23, Number(h) || 0))}:${pad(Math.min(59, Number(m) || 0))}` })); }} />
+                    onChange={(value) => updateTimePart('hours', value)} />
+                  <span className="tenna-time-separator" aria-hidden="true">:</span>
+                  <TimePartInput label="Minutos" max={59} disabled={saving}
+                    value={(form.horario || '08:00').split(':')[1]}
+                    onChange={(value) => updateTimePart('minutes', value)} />
                   <span className="tenna-time-hint">24h</span>
                 </div>
+                {quickTimesForDate(form.data, now).length > 0 && (
+                  <div className="tenna-time-suggestions" aria-label="Sugestões de horário">
+                    <span>Sugestões:</span>
+                    {quickTimesForDate(form.data, now).map((time) => (
+                      <button key={time} type="button" disabled={saving}
+                        className={time === form.horario ? 'active' : ''}
+                        aria-pressed={time === form.horario}
+                        onClick={() => {
+                          setScheduleError('');
+                          setForm((current) => ({ ...current, horario: time }));
+                        }}>{time}</button>
+                    ))}
+                  </div>
+                )}
+                {(scheduleError || scheduleIsInPast) && (
+                  <p className="tenna-schedule-error" role="alert">
+                    {scheduleError || 'Escolha uma data e um horário que ainda não passaram.'}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -1244,7 +1436,8 @@ export default function Cronograma() {
               {editing && <button type="button" className="tenna-activity-delete" onClick={deleteActivity} disabled={saving}>Excluir atividade</button>}
               <button type="button" className="tenna-activity-cancel" disabled={saving}
                 onClick={() => { setShowCreate(false); setEditing(null); }}>Cancelar</button>
-              <button type="submit" className="tenna-activity-submit" disabled={saving || !form.nome.trim() || !/^([01]\d|2[0-3]):[0-5]\d$/.test(form.horario)}>
+              <button type="submit" className="tenna-activity-submit"
+                disabled={saving || !form.nome.trim() || !validFormTime || scheduleIsInPast}>
                 {saving ? 'Salvando...' : editing ? 'Salvar alterações' : 'Adicionar atividade'}
               </button>
             </div>

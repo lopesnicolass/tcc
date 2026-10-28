@@ -606,6 +606,12 @@ export default function PaginaConteudo() {
       setEstudado(
         novoStatus
       );
+
+      // Só fecha a aula depois da confirmação de que o progresso foi salvo.
+      // Ao desmarcar uma aula já concluída, o estudante permanece na página.
+      if (novoStatus) {
+        navigate('/conteudos', { replace: true });
+      }
     } catch (error) {
       console.error(
         'Erro ao atualizar progresso:',

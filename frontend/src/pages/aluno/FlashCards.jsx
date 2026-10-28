@@ -1,8 +1,8 @@
 import '../../styles/aluno/FlashCards.css';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { API_URL, obterToken } from '../../services/api.js';
 import { obterTemasParaRevisar } from '../../utils/flashcardsReview.js';
-import { organizarMaterias } from '../../utils/flashcardsMaterias.js';
+import { MATERIAS_FLASHCARDS, organizarMaterias } from '../../utils/flashcardsMaterias.js';
 
 // Identidade própria para os baralhos: cartões ilustrados com CSS, sem capas dos Simulados.
 function slugMateria(nome = '') {
@@ -12,8 +12,110 @@ function slugMateria(nome = '') {
 
 const TOTAL_CARDS_SESSAO = 10;
 
+// Mantém a rodada ativa ao navegar por outras páginas da sidebar.
+// A chave inclui o usuário para não compartilhar uma rodada entre contas.
+const CHAVE_SESSAO_FLASHCARDS = 'tenna_hora_flashcards_sessao_v1';
+
+function obterChaveSessaoFlashcards() {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('etecamp_usuario') || 'null');
+    return usuario?.id ? `${CHAVE_SESSAO_FLASHCARDS}_${usuario.id}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function recuperarSessaoFlashcards() {
+  const chave = obterChaveSessaoFlashcards();
+  if (!chave) return null;
+
+  try {
+    const salva = JSON.parse(sessionStorage.getItem(chave) || 'null');
+    if (
+      !salva ||
+      !Number.isInteger(salva.sessaoId) ||
+      salva.sessaoId <= 0 ||
+      !Array.isArray(salva.cardsDaSessao) ||
+      salva.cardsDaSessao.length === 0 ||
+      !Number.isInteger(salva.indiceAtual) ||
+      salva.indiceAtual < 0 ||
+      salva.indiceAtual >= salva.cardsDaSessao.length ||
+      !Array.isArray(salva.respostasSessao)
+    ) {
+      sessionStorage.removeItem(chave);
+      return null;
+    }
+    return salva;
+  } catch {
+    return null;
+  }
+}
+
+function guardarSessaoFlashcards(sessao) {
+  const chave = obterChaveSessaoFlashcards();
+  if (!chave) return;
+  try {
+    sessionStorage.setItem(chave, JSON.stringify(sessao));
+  } catch {
+    // Se o armazenamento estiver indisponível, o jogo continua normalmente.
+  }
+}
+
+function apagarSessaoFlashcards() {
+  const chave = obterChaveSessaoFlashcards();
+  if (!chave) return;
+  try {
+    sessionStorage.removeItem(chave);
+  } catch {
+    // Navegação e saída continuam funcionando sem acesso ao armazenamento.
+  }
+}
+
+// Guarda a visualização dos baralhos independentemente da rodada gamificada.
+// O armazenamento da aba e a chave por conta evitam misturar alunos.
+const CHAVE_VISUALIZACAO_FLASHCARDS = 'tenna_flashcards_visualizacao_v1';
+
+function obterChaveVisualizacaoFlashcards() {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('etecamp_usuario') || 'null');
+    return usuario?.id ? `${CHAVE_VISUALIZACAO_FLASHCARDS}_${usuario.id}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function recuperarVisualizacaoFlashcards() {
+  const padrao = { materia: 'Todas', virados: [], scrollY: 0, modoDesafio: 'Geral' };
+  const chave = obterChaveVisualizacaoFlashcards();
+  if (!chave) return padrao;
+
+  try {
+    const anterior = JSON.parse(sessionStorage.getItem(chave) || 'null');
+    if (!anterior || typeof anterior.materia !== 'string') return padrao;
+    return {
+      materia: anterior.materia || 'Todas',
+      virados: Array.isArray(anterior.virados) ? anterior.virados.filter(Number.isFinite) : [],
+      scrollY: Number.isFinite(anterior.scrollY) ? Math.max(0, anterior.scrollY) : 0,
+      modoDesafio: typeof anterior.modoDesafio === 'string' ? anterior.modoDesafio : 'Geral',
+    };
+  } catch {
+    return padrao;
+  }
+}
+
+function guardarVisualizacaoFlashcards(visualizacao) {
+  const chave = obterChaveVisualizacaoFlashcards();
+  if (!chave) return;
+  try {
+    sessionStorage.setItem(chave, JSON.stringify(visualizacao));
+  } catch {
+    // A navegação continua disponível caso o armazenamento esteja bloqueado.
+  }
+}
+
 const MATERIA_ALIASES = {
   'Língua Portuguesa': 'Português',
+  'Portugues': 'Português',
   'Ciências da Natureza': 'Ciências',
 };
 
@@ -38,6 +140,57 @@ function embaralharCards(lista) {
   }
 
   return copia;
+}
+
+// Sorteia sempre dez posições. Caso haja menos de dez cartões na matéria,
+// faz novos embaralhamentos da mesma coleção, evitando repetições consecutivas.
+function completarDezCartoes(candidatos) {
+  if (!candidatos.length) return [];
+  const escolhidos = [];
+
+  while (escolhidos.length < TOTAL_CARDS_SESSAO) {
+    const rodada = embaralharCards(candidatos);
+    if (rodada.length > 1 && escolhidos.length &&
+        rodada[0].id === escolhidos[escolhidos.length - 1].id) {
+      const alternativo = rodada.findIndex((card) => card.id !== rodada[0].id);
+      if (alternativo > 0) [rodada[0], rodada[alternativo]] = [rodada[alternativo], rodada[0]];
+    }
+    escolhidos.push(...rodada.slice(0, TOTAL_CARDS_SESSAO - escolhidos.length));
+  }
+  return escolhidos;
+}
+
+// O desafio Geral inclui obrigatoriamente pelo menos uma pergunta de cada
+// uma das cinco matérias principais. As outras cinco vagas são sorteadas
+// dentre os demais cartões, sem repetições quando há 10 ou mais disponíveis.
+function sortearCardsDaRodada(cards, materia = 'Geral') {
+  if (materia !== 'Geral') {
+    return completarDezCartoes(cards.filter((card) => card.subject === materia));
+  }
+
+  const obrigatorios = MATERIAS_FLASHCARDS.map((nome) => {
+    const candidatos = cards.filter((card) => card.subject === nome);
+    return candidatos.length ? embaralharCards(candidatos)[0] : null;
+  });
+
+  // Não é possível garantir todas as matérias se alguma estiver vazia.
+  if (obrigatorios.some((card) => card === null)) return [];
+
+  const jaEscolhidos = new Set(obrigatorios.map((card) => card.id));
+  const disponiveis = embaralharCards(cards.filter((card) => !jaEscolhidos.has(card.id)));
+  const escolhidos = [
+    ...obrigatorios,
+    ...disponiveis.slice(0, TOTAL_CARDS_SESSAO - obrigatorios.length),
+  ];
+
+  // Caso ainda existam menos de dez cartões únicos no conjunto,
+  // complementa a rodada com novos sorteios, preservando a cobertura.
+  if (escolhidos.length < TOTAL_CARDS_SESSAO) {
+    const suplementares = completarDezCartoes(cards);
+    escolhidos.push(...suplementares.slice(0, TOTAL_CARDS_SESSAO - escolhidos.length));
+  }
+
+  return embaralharCards(escolhidos);
 }
 
 async function lerJsonSeguro(resposta) {
@@ -70,11 +223,15 @@ export default function FlashCards() {
   const [cards, setCards] =
     useState([]);
 
+  // Recupera a matéria e os cartões abertos quando a sidebar desmonta a página.
+  const [visualizacaoInicial] = useState(recuperarVisualizacaoFlashcards);
+  const scrollPendente = useRef(visualizacaoInicial.scrollY);
+
   const [flipped, setFlipped] =
-    useState(new Set());
+    useState(() => new Set(visualizacaoInicial.virados));
 
   const [filtro, setFiltro] =
-    useState('Todas');
+    useState(visualizacaoInicial.materia);
 
   const [carregando, setCarregando] =
     useState(true);
@@ -87,29 +244,44 @@ export default function FlashCards() {
   // HORA DOS FLASHCARDS
   // =====================================================
 
+  // Recupera a rodada quando o usuário volta à página pelo menu lateral.
+  const [sessaoRestaurada] = useState(recuperarSessaoFlashcards);
+
+  // A escolha da matéria vale para a rodada inteira, inclusive após navegar
+  // pela sidebar ou escolher jogar novamente no resultado.
+  const [materiaDoDesafio, setMateriaDoDesafio] = useState(
+    sessaoRestaurada?.materiaDoDesafio || visualizacaoInicial.modoDesafio || 'Geral'
+  );
+
   const [modoJogo, setModoJogo] =
-    useState(false);
+    useState(Boolean(sessaoRestaurada));
 
   const [cardsDaSessao, setCardsDaSessao] =
-    useState([]);
+    useState(sessaoRestaurada?.cardsDaSessao || []);
 
   const [indiceAtual, setIndiceAtual] =
-    useState(0);
+    useState(sessaoRestaurada?.indiceAtual || 0);
 
   const [cardVirado, setCardVirado] =
-    useState(false);
+    useState(Boolean(sessaoRestaurada?.cardVirado));
 
   const [sessaoId, setSessaoId] =
-    useState(null);
+    useState(sessaoRestaurada?.sessaoId || null);
 
   const [respostasSessao, setRespostasSessao] =
-    useState([]);
+    useState(sessaoRestaurada?.respostasSessao || []);
 
   const [finalizado, setFinalizado] =
-    useState(false);
+    useState(Boolean(sessaoRestaurada?.finalizado));
 
   const [iniciandoSessao, setIniciandoSessao] =
     useState(false);
+
+  // O desafio só mostra as opções depois de clicar em Iniciar desafio.
+  const [seletorDesafioAberto, setSeletorDesafioAberto] = useState(false);
+  const seletorDesafioRef = useRef(null);
+  const abrirDesafioRef = useRef(null);
+  const iniciandoSessaoRef = useRef(false);
 
   const [registrandoResposta, setRegistrandoResposta] =
     useState(false);
@@ -138,6 +310,91 @@ export default function FlashCards() {
     carregarFlashcards();
 
   }, []);
+
+  // A escolha acontece sobre a página, sem esconder nem perder os baralhos.
+  // Escape, foco e rolagem são tratados para usar também pelo teclado/celular.
+  useEffect(() => {
+    if (!seletorDesafioAberto) return undefined;
+
+    // Compensa a largura da barra de rolagem que desaparece com o modal.
+    // Assim, o conteúdo mantém a mesma largura e não salta para a direita.
+    const overflowAnterior = document.body.style.overflow;
+    const paddingAnterior = document.body.style.paddingRight;
+    const larguraDaBarra = window.innerWidth - document.documentElement.clientWidth;
+    if (larguraDaBarra > 0) {
+      const paddingAtual = parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
+      document.body.style.paddingRight = `${paddingAtual + larguraDaBarra}px`;
+    }
+    document.body.style.overflow = 'hidden';
+    seletorDesafioRef.current?.querySelector('.flashcards-challenge-close')?.focus();
+
+    function aoPressionarTecla(event) {
+      if (event.key === 'Escape' && !iniciandoSessaoRef.current) {
+        setSeletorDesafioAberto(false);
+      }
+      if (event.key !== 'Tab') return;
+      const botoes = Array.from(seletorDesafioRef.current?.querySelectorAll('button:not(:disabled)') || []);
+      if (!botoes.length) return;
+      const primeiro = botoes[0];
+      const ultimo = botoes[botoes.length - 1];
+      if (event.shiftKey && document.activeElement === primeiro) {
+        event.preventDefault();
+        ultimo.focus();
+      } else if (!event.shiftKey && document.activeElement === ultimo) {
+        event.preventDefault();
+        primeiro.focus();
+      }
+    }
+    document.addEventListener('keydown', aoPressionarTecla);
+    return () => {
+      document.body.style.overflow = overflowAnterior;
+      document.body.style.paddingRight = paddingAnterior;
+      document.removeEventListener('keydown', aoPressionarTecla);
+      abrirDesafioRef.current?.focus();
+    };
+  }, [seletorDesafioAberto]);
+
+  // Atualiza a rolagem da matéria aberta enquanto o aluno estuda.
+  useEffect(() => {
+    if (modoJogo) return undefined;
+    const guardarPosicao = () => {
+      guardarVisualizacaoFlashcards({
+        materia: filtro,
+        virados: [...flipped],
+        scrollY: window.scrollY,
+        modoDesafio: materiaDoDesafio,
+      });
+    };
+    window.addEventListener('scroll', guardarPosicao, { passive: true });
+    return () => window.removeEventListener('scroll', guardarPosicao);
+  }, [modoJogo, filtro, flipped, materiaDoDesafio]);
+
+  // Espera os baralhos chegarem antes de restaurar a posição: antes disso a
+  // página ainda não tem altura suficiente para retornar ao conteúdo anterior.
+  useEffect(() => {
+    if (modoJogo || carregando || scrollPendente.current === null) return;
+    const posicao = scrollPendente.current;
+    scrollPendente.current = null;
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: posicao, behavior: 'instant' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [modoJogo, carregando]);
+
+  // Salva o estado da rodada entre mudanças de rota (sem criar nova sessão).
+  useEffect(() => {
+    if (!modoJogo || !sessaoId || cardsDaSessao.length === 0) return;
+
+    guardarSessaoFlashcards({
+      sessaoId,
+      cardsDaSessao,
+      indiceAtual,
+      cardVirado,
+      respostasSessao,
+      finalizado,
+      materiaDoDesafio,
+    });
+  }, [modoJogo, sessaoId, cardsDaSessao, indiceAtual, cardVirado, respostasSessao, finalizado, materiaDoDesafio]);
 
 
   async function carregarFlashcards() {
@@ -261,30 +518,19 @@ export default function FlashCards() {
   // =====================================================
 
   function toggle(id) {
-
-    setFlipped(
-      (atual) => {
-
-        const novo =
-          new Set(atual);
-
-        if (
-          novo.has(id)
-        ) {
-
-          novo.delete(id);
-
-        } else {
-
-          novo.add(id);
-
-        }
-
-        return novo;
-
-      }
-    );
-
+    const novo = new Set(flipped);
+    if (novo.has(id)) {
+      novo.delete(id);
+    } else {
+      novo.add(id);
+    }
+    setFlipped(novo);
+    guardarVisualizacaoFlashcards({
+      materia: filtro,
+      virados: [...novo],
+      scrollY: window.scrollY,
+      modoDesafio: materiaDoDesafio,
+    });
   }
 
 
@@ -293,35 +539,23 @@ export default function FlashCards() {
   // =====================================================
 
   async function iniciarHoraDosFlashcards() {
+    if (iniciandoSessaoRef.current) return;
+    const selecionados = sortearCardsDaRodada(cards, materiaDoDesafio);
 
-    if (
-      cards.length <
-      TOTAL_CARDS_SESSAO
-    ) {
-
-      setErro(
-        `É necessário ter pelo menos ${TOTAL_CARDS_SESSAO} flashcards cadastrados.`
-      );
-
+    if (selecionados.length !== TOTAL_CARDS_SESSAO) {
+      setErro('Não há flashcards disponíveis para iniciar esta rodada.');
       return;
     }
 
     try {
 
+      iniciandoSessaoRef.current = true;
       setIniciandoSessao(true);
 
       setErro('');
 
       const token =
         obterToken();
-
-      const selecionados =
-        embaralharCards(
-          cards
-        ).slice(
-          0,
-          TOTAL_CARDS_SESSAO
-        );
 
       const resposta =
         await fetch(
@@ -419,6 +653,18 @@ export default function FlashCards() {
       setModoJogo(
         true
       );
+      setSeletorDesafioAberto(false);
+
+      // Registra a rodada imediatamente, mesmo se navegar antes do próximo render.
+      guardarSessaoFlashcards({
+        sessaoId: Number(dados.sessao.id),
+        cardsDaSessao: selecionados,
+        indiceAtual: 0,
+        cardVirado: false,
+        respostasSessao: [],
+        finalizado: false,
+        materiaDoDesafio,
+      });
 
     } catch (error) {
 
@@ -434,6 +680,7 @@ export default function FlashCards() {
 
     } finally {
 
+      iniciandoSessaoRef.current = false;
       setIniciandoSessao(
         false
       );
@@ -583,6 +830,11 @@ export default function FlashCards() {
 
                 acertou,
 
+                // Repetições só ocorrem quando há menos de 10 cartões da matéria.
+                permitirRepeticao: respostasSessao.some(
+                  (anterior) => anterior.flashcardId === cardAtual.id
+                ),
+
               }),
           }
         );
@@ -644,11 +896,31 @@ export default function FlashCards() {
 
         await finalizarSessao();
 
+        guardarSessaoFlashcards({
+          sessaoId,
+          cardsDaSessao,
+          indiceAtual,
+          cardVirado: true,
+          respostasSessao: novasRespostas,
+          finalizado: true,
+          materiaDoDesafio,
+        });
+
         setFinalizado(
           true
         );
 
       } else {
+
+        guardarSessaoFlashcards({
+          sessaoId,
+          cardsDaSessao,
+          indiceAtual: proximoIndice,
+          cardVirado: false,
+          respostasSessao: novasRespostas,
+          finalizado: false,
+          materiaDoDesafio,
+        });
 
         setIndiceAtual(
           proximoIndice
@@ -688,6 +960,8 @@ export default function FlashCards() {
   // =====================================================
 
   function sairDoJogo() {
+
+    apagarSessaoFlashcards();
 
     setModoJogo(
       false
@@ -739,6 +1013,8 @@ export default function FlashCards() {
   // =====================================================
 
   async function jogarNovamente() {
+
+    apagarSessaoFlashcards();
 
     setModoJogo(
       false
@@ -929,11 +1205,36 @@ export default function FlashCards() {
   // Também mantém matérias adicionais cadastradas pelo administrador.
   const materiasDisponiveis = useMemo(() => organizarMaterias(cards), [cards]);
   const materiaSelecionada = filtro === 'Todas' ? null : filtro;
+  const materiasFaltantesNoGeral = MATERIAS_FLASHCARDS.filter(
+    (materia) => !cards.some((card) => card.subject === materia)
+  );
+  const quantidadeNoDesafio = materiaDoDesafio === 'Geral'
+    ? cards.length
+    : cards.filter((card) => card.subject === materiaDoDesafio).length;
+  const podeIniciarDesafio = quantidadeNoDesafio > 0 &&
+    (materiaDoDesafio !== 'Geral' || materiasFaltantesNoGeral.length === 0);
+
+  function escolherMateriaDoDesafio(materia) {
+    setMateriaDoDesafio(materia);
+    setErro('');
+    guardarVisualizacaoFlashcards({
+      materia: filtro,
+      virados: [...flipped],
+      scrollY: window.scrollY,
+      modoDesafio: materia,
+    });
+  }
 
   function selecionarMateria(materia) {
+    scrollPendente.current = null;
     setFiltro(materia);
     setFlipped(new Set());
+    guardarVisualizacaoFlashcards({ materia, virados: [], scrollY: 0, modoDesafio: materiaDoDesafio });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function voltarAosBaralhos() {
+    selecionarMateria('Todas');
   }
 
   // Apenas os cartões da matéria selecionada; sem painel de busca ou resumos extras.
@@ -1147,359 +1448,202 @@ export default function FlashCards() {
   // RESULTADO DA SESSÃO
   // =====================================================
 
-  if (
-    modoJogo &&
-    finalizado
-  ) {
-
+  if (modoJogo && finalizado) {
     return (
+      <div className="flashcards-game-page flashcards-finished">
+        <div className="flashcards-session-layout">
+          <section className="flashcards-result" aria-labelledby="flashcards-result-title">
+            <div className="flashcards-result-summary">
+              <div className="flashcards-result-intro">
+                <span className="flashcards-result-status"><span aria-hidden="true">✓</span> Sessão concluída</span>
+                <h2 id="flashcards-result-title">Você concluiu o desafio!</h2>
+                <p>
+                  {materiaDoDesafio === 'Geral' ? 'Rodada geral' : materiaDoDesafio} · {cardsDaSessao.length} flashcards revisados.
+                  Confira seus resultados e o que vale reforçar.
+                </p>
+              </div>
+              <div className="flashcards-result-score" role="img" aria-label={`${porcentagem}% de aproveitamento`}>
+                <div className="flashcards-result-ring" style={{ '--score': `${porcentagem}%` }}>
+                  <div className="flashcards-result-ring-inner">
+                    <strong>{porcentagem}%</strong>
+                    <span>aproveitamento</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      <div className="flashcards-game-page">
+            <div className="flashcards-result-stats">
+              <div className="flashcards-result-stat is-correct">
+                <span><span className="flashcards-stat-dot" aria-hidden="true">✓</span> Acertei</span>
+                <strong>{acertos}</strong>
+              </div>
+              <div className="flashcards-result-stat is-wrong">
+                <span><span className="flashcards-stat-dot" aria-hidden="true">×</span> Errei</span>
+                <strong>{erros}</strong>
+              </div>
+            </div>
 
-        <div className="flashcards-game-header">
+            {erros > 0 ? (
+              <div className="flashcards-review-suggestion">
+                <div>
+                  <span className="flashcards-review-eyebrow">PRÓXIMOS PASSOS</span>
+                  <h3>Conteúdos para revisar</h3>
+                  <p>Estes temas apareceram nos cartões que você ainda pode reforçar:</p>
+                </div>
+                <div className="flashcards-review-topics">
+                  {obterTemasParaRevisar(respostasSessao, cardsDaSessao).map((tema) => (
+                    <span key={tema}>{tema}</span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flashcards-review-suggestion flashcards-review-success">
+                <span className="flashcards-review-eyebrow">ÓTIMO RESULTADO</span>
+                <h3>Você acertou todos os cartões!</h3>
+                <p>Continue revisando para manter o conteúdo em dia.</p>
+              </div>
+            )}
 
-          <button
-            type="button"
-            className="flashcards-back-button"
-            onClick={
-              sairDoJogo
-            }
-          >
-            ← Voltar para os flashcards
-          </button>
-
-          <div className="flashcards-game-title">
-
-            <span>
-              Hora dos Flashcards
-            </span>
-
-            <strong>
-              Resultado da sessão
-            </strong>
-
-          </div>
-
+            <div className="flashcards-result-actions">
+              <button type="button" className="flashcards-result-primary" onClick={jogarNovamente}>
+                Jogar novamente <span aria-hidden="true">↻</span>
+              </button>
+              <button type="button" className="flashcards-result-secondary" onClick={sairDoJogo}>
+                Voltar aos flashcards
+              </button>
+            </div>
+          </section>
         </div>
-
-
-        <section className="flashcards-result">
-
-          <div className="flashcards-result-intro">
-            <div className="flashcards-result-icon" aria-hidden="true">✓</div>
-            <span className="flashcards-result-eyebrow">HORA DO FLASHCARD</span>
-            <h1>Desafio concluído!</h1>
-            <p>Você finalizou sua rodada de {cardsDaSessao.length} flashcards.</p>
-          </div>
-
-          <div className="flashcards-result-score" role="img" aria-label={`${porcentagem}% de aproveitamento`}>
-            <div className="flashcards-result-ring" style={{ '--score': `${porcentagem}%` }}>
-              <div className="flashcards-result-ring-inner">
-                <strong>{porcentagem}%</strong>
-                <span>de aproveitamento</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flashcards-result-stats">
-
-            <div className="flashcards-result-stat is-correct"><span>Acertos</span><strong>{acertos}</strong></div>
-            <div className="flashcards-result-stat is-wrong"><span>Erros</span><strong>{erros}</strong></div>
-          </div>
-
-
-          {erros > 0 && (
-            <div className="flashcards-review-suggestion">
-              <h2>Vale revisar</h2>
-              <p>Reforce os conteúdos em que você teve dificuldade:</p>
-              <div className="flashcards-review-topics">
-                {obterTemasParaRevisar(respostasSessao, cardsDaSessao).map((tema) => (
-                  <span key={tema}>{tema}</span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flashcards-result-actions">
-
-            <button
-              type="button"
-              className="flashcards-result-primary"
-              onClick={
-                jogarNovamente
-              }
-            >
-              Jogar novamente
-            </button>
-
-            <button
-              type="button"
-              className="flashcards-result-secondary"
-              onClick={
-                sairDoJogo
-              }
-            >
-              Voltar
-            </button>
-
-          </div>
-
-        </section>
-
       </div>
-
     );
-
   }
-
 
   // =====================================================
   // TELA DA HORA DOS FLASHCARDS
   // =====================================================
 
-  if (
-    modoJogo
-  ) {
-
-    const cardAtual =
-      cardsDaSessao[
-        indiceAtual
-      ];
-
-    const progresso =
-      cardsDaSessao.length > 0
-        ? Math.round(
-            (
-              indiceAtual /
-              cardsDaSessao.length
-            ) * 100
-          )
-        : 0;
+  if (modoJogo) {
+    const cardAtual = cardsDaSessao[indiceAtual];
+    const progresso = cardsDaSessao.length > 0
+      ? Math.round((indiceAtual / cardsDaSessao.length) * 100)
+      : 0;
 
     return (
-
-      <div className="flashcards-game-page">
-
-        <div className="flashcards-game-header">
-
-          <button
-            type="button"
-            className="flashcards-back-button"
-            onClick={
-              sairDoJogo
-            }
-            disabled={
-              registrandoResposta
-            }
-          >
-            ← Sair
-          </button>
-
-          <div className="flashcards-game-title">
-
-            <span>
-              Hora dos Flashcards
-            </span>
-
-            <strong>
-              {indiceAtual + 1} de{' '}
-              {cardsDaSessao.length}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div className="flashcards-progress-caption">
-          <span>{indiceAtual} respondidos de {cardsDaSessao.length}</span>
-          <strong>{progresso}% concluído</strong>
-        </div>
-        <div
-          className="flashcards-progress"
-          role="progressbar"
-          aria-label="Progresso da sessão"
-          aria-valuemin={0}
-          aria-valuemax={cardsDaSessao.length}
-          aria-valuenow={indiceAtual}
+      <div className="flashcards-game-page flashcards-playing">
+        <button
+          type="button"
+          className="flashcards-session-back-arrow"
+          onClick={sairDoJogo}
+          disabled={registrandoResposta}
+          aria-label="Voltar aos flashcards"
+          title="Voltar aos flashcards"
         >
-          <div
-            className="flashcards-progress-bar"
-            style={{ width: `${Math.max(0, progresso)}%` }}
-          />
-        </div>
-
-
-        <div className="flashcards-game-content">
-
-          <div className="flashcards-game-context">
-            <span className="flashcards-game-subject">{cardAtual.subject}</span>
-            <p className="flashcards-game-subtitle">
-              Leia a pergunta, vire o cartão e avalie sua resposta.
-            </p>
+          <svg
+            aria-hidden="true"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="flashcards-session-layout">
+          <div className="flashcards-session-progress">
+            <div className="flashcards-session-progress-top">
+              <span className="flashcards-session-progress-label">HORA DOS FLASHCARDS</span>
+            </div>
+            <div className="flashcards-session-progress-heading">
+              <strong>Cartão {indiceAtual + 1} de {cardsDaSessao.length}</strong>
+              <div className="flashcards-session-progress-meta">
+                <span>{indiceAtual} respondidos</span>
+                <span className="flashcards-session-progress-percent">{progresso}%</span>
+              </div>
+            </div>
+            <div
+              className="flashcards-progress"
+              role="progressbar"
+              aria-label="Progresso da sessão"
+              aria-valuemin={0}
+              aria-valuemax={cardsDaSessao.length}
+              aria-valuenow={indiceAtual}
+            >
+              <div className="flashcards-progress-bar" style={{ width: `${progresso}%` }} />
+            </div>
           </div>
 
-
-          <div
-            className={
-              `flashcard-game-card ${
-                cardVirado
-                  ? 'is-flipped'
-                  : ''
-              }`
-            }
-
-            style={{
-              transform:
-                `translateX(${deslocamento}px) rotate(${deslocamento * 0.04}deg)`,
-            }}
-
-            onClick={
-              virarCardDoJogo
-            }
-
-            onPointerDown={
-              iniciarArrasto
-            }
-
-            onPointerMove={
-              moverArrasto
-            }
-
-            onPointerUp={
-              finalizarArrasto
-            }
-
-            onPointerCancel={
-              cancelarArrasto
-            }
-
-            role="button"
-
-            tabIndex={0}
-
-            onKeyDown={
-              (event) => {
-
-                if (
-                  event.key ===
-                    'Enter' ||
-                  event.key ===
-                    ' '
-                ) {
-
+          <section className="flashcards-game-content" aria-label={`Cartão de estudo de ${cardAtual.subject}`}>
+            <div
+              className={`flashcard-game-card flashcard-game-materia-${slugMateria(cardAtual.subject)} ${cardVirado ? 'is-flipped' : ''}`}
+              style={{ transform: `translateX(${deslocamento}px) rotate(${deslocamento * 0.04}deg)` }}
+              onClick={virarCardDoJogo}
+              onPointerDown={iniciarArrasto}
+              onPointerMove={moverArrasto}
+              onPointerUp={finalizarArrasto}
+              onPointerCancel={cancelarArrasto}
+              role="button"
+              tabIndex={0}
+              aria-label={cardVirado ? 'Resposta do flashcard. Ative para ver a pergunta' : 'Pergunta do flashcard. Ative para revelar a resposta'}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
-
                   virarCardDoJogo();
-
                 }
-
-              }
-            }
-
-          >
-
-            <div className="flashcard-game-inner">
-
-
-              <div className="flashcard-game-face flashcard-game-front">
-
-                <p>
-                  {cardAtual.front}
-                </p>
-
+              }}
+            >
+              <div className="flashcard-game-inner">
+                <div className="flashcard-game-face flashcard-game-front" aria-hidden={cardVirado}>
+                  <span className="flashcard-game-face-tag">PERGUNTA</span>
+                  <p>{cardAtual.front}</p>
+                  <span className="flashcard-game-flip-hint"><span aria-hidden="true">↻</span> Clique para ver a resposta</span>
+                </div>
+                <div className="flashcard-game-face flashcard-game-back" aria-hidden={!cardVirado}>
+                  <span className="flashcard-game-face-tag">RESPOSTA</span>
+                  <p>{cardAtual.back}</p>
+                  <span className="flashcard-game-flip-hint"><span aria-hidden="true">↻</span> Clique para rever a pergunta</span>
+                </div>
               </div>
-
-
-              <div className="flashcard-game-face flashcard-game-back">
-
-                <p>
-                  {cardAtual.back}
-                </p>
-
-              </div>
-
-
             </div>
 
-          </div>
-
-
-          <div className="flashcards-swipe-hint">
-
-            <span>
-              ← Acertei
-            </span>
-
-            <span>
-              Errei →
-            </span>
-
-          </div>
-
-
-          <div className="flashcards-game-actions">
-
-            <button
-              type="button"
-              className="flashcards-answer-button correct"
-              onClick={() =>
-                responderCard(true)
-              }
-              disabled={
-                !cardVirado ||
-                registrandoResposta
-              }
-            >
-              {
-                registrandoResposta
-                  ? 'Registrando...'
-                  : 'Acertei'
-              }
-            </button>
-
-
-            <button
-              type="button"
-              className="flashcards-answer-button wrong"
-              onClick={() =>
-                responderCard(false)
-              }
-              disabled={
-                !cardVirado ||
-                registrandoResposta
-              }
-            >
-              Errei
-            </button>
-
-          </div>
-
-
-          {!cardVirado && (
-
-            <p className="flashcards-game-error">
-              Vire o card para liberar
-              sua resposta.
+            <p className="flashcards-game-guidance" aria-live="polite">
+              {cardVirado
+                ? 'Como foi sua resposta? Escolha uma opção abaixo.'
+                : 'Vire o cartão para liberar sua avaliação.'}
             </p>
 
-          )}
+            <div className="flashcards-game-actions">
+              <button
+                type="button"
+                className="flashcards-answer-button correct"
+                onClick={() => responderCard(true)}
+                disabled={!cardVirado || registrandoResposta}
+              >
+                <span className="flashcards-answer-symbol" aria-hidden="true">✓</span>
+                {registrandoResposta ? 'Registrando...' : 'Acertei'}
+              </button>
+              <button
+                type="button"
+                className="flashcards-answer-button wrong"
+                onClick={() => responderCard(false)}
+                disabled={!cardVirado || registrandoResposta}
+              >
+                <span className="flashcards-answer-symbol" aria-hidden="true">×</span>
+                Errei
+              </button>
+            </div>
 
-
-          {erro && (
-
-            <p className="flashcards-game-error">
-              {erro}
-            </p>
-
-          )}
-
+            {cardVirado && (
+              <p className="flashcards-swipe-help">Você também pode arrastar o cartão para a esquerda ou direita.</p>
+            )}
+            {erro && <p className="flashcards-game-error" role="alert">{erro}</p>}
+          </section>
         </div>
-
       </div>
-
     );
-
   }
 
 
@@ -1535,26 +1679,122 @@ export default function FlashCards() {
               <div>
                 <span className="flashcards-game-eyebrow">DESAFIO RÁPIDO <span aria-hidden="true">✦</span></span>
                 <h2>Hora do FlashCard!</h2>
-                <p>
-                  Teste seus conhecimentos com 10 perguntas de diferentes matérias. Vire os cartões, confira as respostas e descubra seu resultado.
-                </p>
+                <p>Teste seus conhecimentos em uma rodada de 10 flashcards aleatórios. Você escolhe o tema antes de começar.</p>
               </div>
               <button
                 type="button"
+                ref={abrirDesafioRef}
                 className="flashcards-game-start"
-                onClick={iniciarHoraDosFlashcards}
-                disabled={iniciandoSessao || cards.length < TOTAL_CARDS_SESSAO}
+                onClick={() => {
+                  setErro('');
+                  setSeletorDesafioAberto(true);
+                }}
+                disabled={iniciandoSessao || cards.length === 0}
               >
-                {iniciandoSessao ? 'Iniciando...' : 'Iniciar desafio'}
+                Iniciar desafio
               </button>
             </div>
-            {cards.length < TOTAL_CARDS_SESSAO && (
-              <p className="flashcards-game-warning">
-                São necessários {TOTAL_CARDS_SESSAO} flashcards para começar uma rodada.
-                Atualmente, há {cards.length} disponíveis.
-              </p>
-            )}
           </section>
+
+          {seletorDesafioAberto && (
+            <div
+              className="flashcards-challenge-overlay"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget && !iniciandoSessaoRef.current) {
+                  setSeletorDesafioAberto(false);
+                }
+              }}
+            >
+              <section
+                className="flashcards-challenge-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="flashcards-challenge-title"
+                aria-describedby="flashcards-challenge-description"
+                ref={seletorDesafioRef}
+              >
+                <div className="flashcards-challenge-head">
+                  <div>
+                    <span className="flashcards-challenge-eyebrow">HORA DO FLASHCARD</span>
+                    <h2 id="flashcards-challenge-title">Escolha seu desafio</h2>
+                    <p id="flashcards-challenge-description">Prefere misturar as matérias ou revisar apenas uma?</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="flashcards-challenge-close"
+                    aria-label="Fechar escolha do desafio"
+                    onClick={() => setSeletorDesafioAberto(false)}
+                    disabled={iniciandoSessao}
+                  >
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flashcards-challenge-body">
+                  <div className="flashcards-challenge-options-heading">
+                    <strong id="flashcards-game-mode-label">Qual rodada você quer jogar?</strong>
+                    <span>10 cartões por rodada</span>
+                  </div>
+                  <div className="flashcards-game-options-list" role="group" aria-labelledby="flashcards-game-mode-label">
+                    <button
+                      type="button"
+                      className={`flashcards-game-mode is-general ${materiaDoDesafio === 'Geral' ? 'is-selected' : ''}`}
+                      aria-pressed={materiaDoDesafio === 'Geral'}
+                      onClick={() => escolherMateriaDoDesafio('Geral')}
+                      disabled={cards.length === 0 || iniciandoSessao}
+                    >
+                      <span className="flashcards-game-mode-dot" aria-hidden="true" />
+                      Geral
+                    </button>
+                    {materiasDisponiveis.map((materia) => {
+                      const disponivel = cards.some((card) => card.subject === materia);
+                      return (
+                        <button
+                          type="button"
+                          key={materia}
+                          className={`flashcards-game-mode flashcards-game-mode-${slugMateria(materia)} ${materiaDoDesafio === materia ? 'is-selected' : ''}`}
+                          aria-pressed={materiaDoDesafio === materia}
+                          title={!disponivel ? 'Ainda não há flashcards nesta matéria' : undefined}
+                          onClick={() => escolherMateriaDoDesafio(materia)}
+                          disabled={!disponivel || iniciandoSessao}
+                        >
+                          <span className="flashcards-game-mode-dot" aria-hidden="true" />
+                          {materia}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {podeIniciarDesafio && materiaDoDesafio !== 'Geral' && quantidadeNoDesafio < TOTAL_CARDS_SESSAO && (
+                    <p className="flashcards-challenge-note" role="status">
+                      Esta matéria tem {quantidadeNoDesafio} {quantidadeNoDesafio === 1 ? 'cartão' : 'cartões'}. Alguns podem se repetir para completar a rodada.
+                    </p>
+                  )}
+                  {materiaDoDesafio === 'Geral' && materiasFaltantesNoGeral.length > 0 && (
+                    <p className="flashcards-challenge-note" role="status">
+                      O desafio Geral precisa de pelo menos um flashcard de cada matéria. Faltam: {materiasFaltantesNoGeral.join(', ')}.
+                    </p>
+                  )}
+                  {!podeIniciarDesafio && materiaDoDesafio !== 'Geral' && (
+                    <p className="flashcards-challenge-note" role="status">Selecione uma opção com flashcards disponíveis.</p>
+                  )}
+                  {erro && <p className="flashcards-challenge-error" role="alert">{erro}</p>}
+                </div>
+
+                <div className="flashcards-challenge-footer">
+                  <button
+                    type="button"
+                    className="flashcards-challenge-confirm"
+                    onClick={iniciarHoraDosFlashcards}
+                    disabled={iniciandoSessao || !podeIniciarDesafio}
+                  >
+                    {iniciandoSessao ? 'Preparando rodada...' : 'Começar rodada'}
+                  </button>
+                </div>
+              </section>
+            </div>
+          )}
 
           <section className="flashcards-materias flashcards-materias-direta" aria-label="Baralhos disponíveis">
             <div className="flashcards-decks-grid">
@@ -1591,7 +1831,21 @@ export default function FlashCards() {
         <>
           <section className={`flashcards-materia-hero flashcards-materia-${slugMateria(materiaSelecionada)}`} aria-label={`Matéria: ${materiaSelecionada}`}>
             <div className="flashcards-materia-hero-content">
-              <span className="flashcards-materia-hero-label">REVISÃO POR MATÉRIA</span>
+              <nav className="flashcards-materia-trilha" aria-label="Navegação da matéria">
+                <button
+                  type="button"
+                  className="flashcards-materia-trilha-link"
+                  onClick={voltarAosBaralhos}
+                  aria-label="Voltar aos baralhos"
+                  title="Voltar aos baralhos"
+                >
+                  Baralhos
+                </button>
+                <svg className="flashcards-materia-trilha-separador" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+                <span className="flashcards-materia-hero-label" aria-current="page">Revisão por matéria</span>
+              </nav>
               <h1>{materiaSelecionada}</h1>
             </div>
             <span className="flashcards-materia-hero-art" aria-hidden="true"><span /><span /><span /></span>

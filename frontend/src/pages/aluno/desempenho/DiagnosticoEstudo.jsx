@@ -56,8 +56,8 @@ function ConteudoRevisoes({ sugestoes }) {
     <>
       <div className="desempenho-diagnostico-cabecalho">
         <div>
-          <h3>O que revisar agora</h3>
-          <p>Sugestões de estudo a partir das áreas com menor aproveitamento.</p>
+          <h3>Prioridades de revisão</h3>
+          <p>Comece pelos conteúdos que precisam de mais atenção.</p>
         </div>
       </div>
       {sugestoes.length === 0 ? (
@@ -88,7 +88,7 @@ function ConteudoRevisoes({ sugestoes }) {
       <div className="desempenho-diagnostico-acao">
         <Link to="/simulados">Praticar com simulados <span aria-hidden="true">→</span></Link>
       </div>
-      <p className="desempenho-diagnostico-nota">As sugestões por assunto consideram a nota do simulado associado, não uma análise individual das questões erradas.</p>
+      <p className="desempenho-diagnostico-nota">As sugestões usam o aproveitamento do simulado associado ao assunto; não identificam individualmente as questões erradas.</p>
     </>
   );
 }
@@ -110,19 +110,19 @@ export function DiagnosticoEstudo({ materias, sugestoes, possuiResultados }) {
   return (
     <section className="desempenho-diagnostico" aria-label="Análise do seu desempenho">
       <div className="desempenho-diagnostico-topo">
-        <h2>Análise por matéria e próximas revisões</h2>
+        <h2>Onde focar seus estudos</h2>
+        <p>Recomendações com base nas tentativas registradas.</p>
       </div>
 
       <div className="desempenho-diagnostico-grid">
+        <CartaoAmpliavel titulo="Prioridades de revisão" tamanho="grande">
+          <article className="desempenho-diagnostico-card desempenho-diagnostico-sugestoes desempenho-diagnostico-card--clicavel">
+            <ConteudoRevisoes sugestoes={sugestoes} />
+          </article>
+        </CartaoAmpliavel>
         <CartaoAmpliavel titulo="Desempenho por matéria" tamanho="grande">
           <article className="desempenho-diagnostico-card desempenho-diagnostico-card--clicavel">
             <ConteudoMaterias materias={materias} />
-          </article>
-        </CartaoAmpliavel>
-
-        <CartaoAmpliavel titulo="O que revisar agora" tamanho="grande">
-          <article className="desempenho-diagnostico-card desempenho-diagnostico-sugestoes desempenho-diagnostico-card--clicavel">
-            <ConteudoRevisoes sugestoes={sugestoes} />
           </article>
         </CartaoAmpliavel>
       </div>

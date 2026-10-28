@@ -219,6 +219,7 @@ function registrarResposta(
     usuarioId,
     flashcardId,
     acertou,
+    permitirRepeticao,
     callback
 ) {
 
@@ -346,7 +347,14 @@ function registrarResposta(
                             }
 
 
-                            verificarRespostaDuplicada(
+                            // Rodadas por matéria com menos de 10 cartões podem
+                            // revisitar um cartão para completar os 10 sorteados.
+                            // Nas demais situações mantém a proteção contra duplicatas.
+                            const verificarDuplicata = permitirRepeticao
+                                ? (_sessao, _card, concluido) => concluido(null, null)
+                                : verificarRespostaDuplicada;
+
+                            verificarDuplicata(
                                 sessaoId,
                                 flashcardId,
                                 (

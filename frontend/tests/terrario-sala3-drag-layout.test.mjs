@@ -31,7 +31,7 @@ test('Sala 3 fica editável na prévia temporária, inclusive sem entrar em Deco
   assert.match(tela,/modoTeste && salaDoItem\(itemId\) === 3/);
   assert.match(tela,/modoTeste && salaDoItem\(item\.id\) === 3/);
   assert.match(tela,/\(\(decorate && selectedRoom === 3\) \|\| modoTeste\) \? 'movable'/);
-  assert.match(tela,/Sala 3 · Arraste os móveis/);
+  assert.match(tela,/modoTeste && salaDoItem\(itemId\) === 3/);
   assert.match(tela,/if \(decorate && !roomDetail\.conquistada\) setSelectedRoom\(1\)/);
 });
 

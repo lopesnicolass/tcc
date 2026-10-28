@@ -9,6 +9,7 @@ import './styles/App.css';
 import App from './App.jsx';
 import './styles/dark-mode.css';
 import './styles/student-standard.css';
+import './styles/dark-polish.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

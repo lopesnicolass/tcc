@@ -353,13 +353,11 @@ export default function Perfil() {
   // =====================================================
 
   function toggleEdit(campo) {
-
-    setEditing((prev) => ({
-      ...prev,
-      [campo]:
-        !prev[campo]
-    }));
-
+    // Fechar a edição da senha descarta o preenchimento não salvo.
+    if (campo === 'senha' && editing.senha) {
+      setValues((prev) => ({ ...prev, senhaAtual: '', novaSenha: '' }));
+    }
+    setEditing((prev) => ({ ...prev, [campo]: !prev[campo] }));
   }
 
   // =====================================================
@@ -723,475 +721,305 @@ export default function Perfil() {
   }
 
   // =====================================================
-  // AVATAR
+  // EXIBIÇÃO DO PERFIL
   // =====================================================
 
-  const imagemAvatar =
-    previewFoto?.url ||
-    foto ||
-    null;
-
-  const primeiraLetra =
-    values.nome
-      ?.charAt(0)
-      ?.toUpperCase() || '?';
-
-  // =====================================================
-  // RENDER
-  // =====================================================
+  const imagemAvatar = previewFoto?.url || foto || null;
+  const primeiraLetra = values.nome?.trim()?.charAt(0)?.toUpperCase() || '?';
+  const porcentagemConquistas = conquistas.length
+    ? Math.round((totalDesbloqueadas / conquistas.length) * 100)
+    : 0;
+  const proximaConquista = conquistas.find((item) => item.verificado && !item.desbloqueada);
 
   return (
-
-    <div className="perfil-page">
-
-      {mensagem && (
-        <div className="perfil-alert perfil-alert-success">
-          <span className="perfil-alert-icon">✓</span>
-          <span>{mensagem}</span>
-        </div>
-      )}
-
-      {erro && (
-        <div className="perfil-alert perfil-alert-error">
-          <span className="perfil-alert-icon">!</span>
-          <span>{erro}</span>
-        </div>
-      )}
-
-      <section className="perfil-hero" aria-labelledby="perfil-titulo">
+    <main className="perfil-page">
+      <header className="perfil-hero" aria-labelledby="perfil-titulo">
         <div className="perfil-hero-intro">
-          <span className="perfil-hero-kicker"><Icon name="trophy" size={15} /> SUA JORNADA</span>
-          <h1 id="perfil-titulo">Seu espaço de conquistas</h1>
-          <p>Gerencie seu perfil e acompanhe suas conquistas.</p>
+          <span className="perfil-hero-kicker">MEU ESPAÇO</span>
+          <h1 id="perfil-titulo">Meu perfil</h1>
+          <p>Personalize sua conta e acompanhe o que você já conquistou na TENNA.</p>
         </div>
-      </section>
+      </header>
+
+      {mensagem && <div className="perfil-alert perfil-alert-success" role="status"><Icon name="check" size={18} />{mensagem}</div>}
+      {erro && <div className="perfil-alert perfil-alert-error" role="alert"><Icon name="question" size={18} />{erro}</div>}
 
       <div className="perfil-grid">
-
-        <form
-          className="panel-card perfil-form-card"
-          onSubmit={handleSave}
-        >
-
+        <form className="perfil-form-card" onSubmit={handleSave}>
           <div className="perfil-form-heading">
+            <span className="perfil-heading-icon"><Icon name="shield" size={21} /></span>
             <div>
-              <h2>Informações do perfil</h2>
+              <h2>Informações da conta</h2>
+              <p>Seus dados, do seu jeito.</p>
             </div>
           </div>
 
-          <div className="perfil-form-content">
-            <div className="perfil-account-avatar">          <div className="perfil-avatar-card perfil-profile-card">
-
-            <div className="perfil-side-heading">
-              <span className="perfil-section-kicker">SUA CONTA</span>
-              <h3>Foto de perfil</h3>
+          <div className="perfil-account-avatar">
+            <div className="avatar-circle">
+              {imagemAvatar ? <img src={imagemAvatar} alt="Foto de perfil" /> : <span>{primeiraLetra}</span>}
             </div>
-
-            <div
-              className="avatar-circle"
-              style={{
-                overflow: 'hidden',
-                position: 'relative'
-              }}
-            >
-
-              {imagemAvatar ? (
-
-                <img
-                  src={imagemAvatar}
-                  alt="Foto de perfil"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-
-              ) : (
-
-                primeiraLetra
-
-              )}
-
+            <div className="perfil-avatar-info">
+              <span className="perfil-eyebrow">FOTO DO PERFIL</span>
+              <strong>{values.nome?.trim() || 'Estudante TENNA'}</strong>
+              <span>Escolha uma foto para deixar seu perfil com a sua cara.</span>
             </div>
-
-
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              onChange={
-                handleSelecionarFoto
-              }
-              style={{
-                display: 'none'
-              }}
+              onChange={handleSelecionarFoto}
+              className="perfil-file-input"
+              aria-label="Selecionar foto de perfil"
             />
-
-            <button
-              type="button"
-              className="mural-btn"
-              onClick={() =>
-                fileInputRef.current?.click()
-              }
-            >
-              {foto
-                ? 'Alterar foto'
-                : 'Adicionar foto'}
-            </button>
-
-            {previewFoto && (
-
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '8px',
-                  width: '100%',
-                  justifyContent: 'center'
-                }}
-              >
-
-                <button
-                  type="button"
-                  className="mural-btn primary"
-                  onClick={
-                    handleSalvarFoto
-                  }
-                  disabled={salvandoFoto}
-                >
-                  {salvandoFoto
-                    ? 'Salvando...'
-                    : 'Salvar foto'}
+            <div className="perfil-photo-actions">
+              {previewFoto ? (
+                <>
+                  <button type="button" className="perfil-btn perfil-btn-primary" onClick={handleSalvarFoto} disabled={salvandoFoto}>
+                    {salvandoFoto ? 'Salvando...' : 'Salvar foto'}
+                  </button>
+                  <button type="button" className="perfil-btn perfil-btn-quiet" onClick={cancelarFoto} disabled={salvandoFoto}>Cancelar</button>
+                </>
+              ) : (
+                <button type="button" className="perfil-btn perfil-btn-outline" onClick={() => fileInputRef.current?.click()}>
+                  <Icon name="edit" size={16} /> {foto ? 'Trocar foto' : 'Adicionar foto'}
                 </button>
+              )}
+            </div>
+          </div>
 
-                <button
-                  type="button"
-                  className="mural-btn"
-                  onClick={
-                    cancelarFoto
-                  }
-                >
-                  Cancelar
-                </button>
-
+          <section className="perfil-account-fields" aria-labelledby="perfil-dados-titulo">
+            <div className="perfil-subheading">
+              <div>
+                <h3 id="perfil-dados-titulo">Dados pessoais</h3>
+                <p>Para alterar, clique no lápis ao lado do campo.</p>
               </div>
+            </div>
+            <div className="perfil-fields">
+              <div className="perfil-field">
+                <label htmlFor="perfil-nome">Nome</label>
+                <div className={`perfil-input-wrap ${editing.nome ? 'is-editing' : ''}`}>
+                  <input id="perfil-nome" type="text" value={values.nome} disabled={!editing.nome}
+                    autoComplete="name" onChange={(e) => handleChange('nome', e.target.value)} />
+                  <button type="button" className="perfil-edit-btn" onClick={() => toggleEdit('nome')}
+                    aria-label={editing.nome ? 'Concluir edição do nome' : 'Editar nome'}
+                    title={editing.nome ? 'Concluir edição' : 'Editar nome'} aria-pressed={editing.nome}>
+                    <Icon name={editing.nome ? 'check' : 'edit'} size={17} />
+                  </button>
+                </div>
+              </div>
+              <div className="perfil-field">
+                <label htmlFor="perfil-email">E-mail</label>
+                <div className={`perfil-input-wrap ${editing.email ? 'is-editing' : ''}`}>
+                  <input id="perfil-email" type="email" value={values.email} disabled={!editing.email}
+                    autoComplete="email" onChange={(e) => handleChange('email', e.target.value)} />
+                  <button type="button" className="perfil-edit-btn" onClick={() => toggleEdit('email')}
+                    aria-label={editing.email ? 'Concluir edição do e-mail' : 'Editar e-mail'}
+                    title={editing.email ? 'Concluir edição' : 'Editar e-mail'} aria-pressed={editing.email}>
+                    <Icon name={editing.email ? 'check' : 'edit'} size={17} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
 
+          <section className={`perfil-security ${editing.senha ? 'is-open' : ''}`} aria-labelledby="perfil-seguranca-titulo">
+            <div className="perfil-security-bar">
+              <span className="perfil-security-icon"><Icon name="shield" size={20} /></span>
+              <div className="perfil-security-copy">
+                <h3 id="perfil-seguranca-titulo">Senha e segurança</h3>
+                <p>{editing.senha ? 'Preencha os campos para definir uma nova senha.' : 'Sua senha fica protegida e não é exibida aqui.'}</p>
+              </div>
+              <button type="button" className="perfil-btn perfil-btn-outline perfil-security-toggle" onClick={() => toggleEdit('senha')}
+                aria-expanded={editing.senha} aria-controls="perfil-senha-campos">
+                <Icon name={editing.senha ? 'check' : 'edit'} size={15} />{editing.senha ? 'Fechar' : 'Alterar senha'}
+              </button>
+            </div>
+            {editing.senha && (
+              <div id="perfil-senha-campos" className="perfil-password-fields">
+                <div className="perfil-field">
+                  <label htmlFor="perfil-senha-atual">Senha atual</label>
+                  <div className="perfil-input-wrap"><input id="perfil-senha-atual" type="password" value={values.senhaAtual}
+                    autoComplete="current-password" placeholder="Digite sua senha atual"
+                    onChange={(e) => handleChange('senhaAtual', e.target.value)} /></div>
+                </div>
+                <div className="perfil-field">
+                  <label htmlFor="perfil-senha-nova">Nova senha</label>
+                  <div className="perfil-input-wrap"><input id="perfil-senha-nova" type="password" value={values.novaSenha}
+                    autoComplete="new-password" placeholder="Digite sua nova senha"
+                    onChange={(e) => handleChange('novaSenha', e.target.value)} /></div>
+                </div>
+              </div>
             )}
+          </section>
 
-
-
-          </div>
-
-            </div>
-            <div className="perfil-account-fields">
-          <div className="perfil-fields">
-
-          <div className="perfil-field">
-
-            <label>
-              Nome
-            </label>
-
-            <div className="perfil-input-wrap">
-
-              <input
-                type="text"
-                value={values.nome}
-                disabled={!editing.nome}
-                onChange={(e) =>
-                  handleChange(
-                    'nome',
-                    e.target.value
-                  )
-                }
-              />
-
-              <button
-                type="button"
-                className="perfil-edit-btn"
-                onClick={() =>
-                  toggleEdit('nome')
-                }
-                aria-label="Editar nome"
-              >
-                ✎
-              </button>
-
-            </div>
-
-          </div>
-
-          <div className="perfil-field">
-
-            <label>
-              E-mail
-            </label>
-
-            <div className="perfil-input-wrap">
-
-              <input
-                type="email"
-                value={values.email}
-                disabled={!editing.email}
-                onChange={(e) =>
-                  handleChange(
-                    'email',
-                    e.target.value
-                  )
-                }
-              />
-
-              <button
-                type="button"
-                className="perfil-edit-btn"
-                onClick={() =>
-                  toggleEdit('email')
-                }
-                aria-label="Editar e-mail"
-              >
-                ✎
-              </button>
-
-            </div>
-
-          </div>
-
-          <div className="perfil-field">
-
-            <label>
-              Senha atual
-            </label>
-
-            <div className="perfil-input-wrap">
-
-              <input
-                type="password"
-                value={values.senhaAtual}
-                disabled={!editing.senha}
-                placeholder={
-                  editing.senha
-                    ? 'Digite sua senha atual'
-                    : '••••••••'
-                }
-                onChange={(e) =>
-                  handleChange(
-                    'senhaAtual',
-                    e.target.value
-                  )
-                }
-              />
-
-              <button
-                type="button"
-                className="perfil-edit-btn"
-                onClick={() =>
-                  toggleEdit('senha')
-                }
-                aria-label="Editar senha"
-              >
-                ✎
-              </button>
-
-            </div>
-
-          </div>
-
-          {editing.senha && (
-
-            <div className="perfil-field">
-
-              <label>
-                Nova senha
-              </label>
-
-              <div className="perfil-input-wrap">
-
-                <input
-                  type="password"
-                  value={values.novaSenha}
-                  placeholder="Digite a nova senha"
-                  onChange={(e) =>
-                    handleChange(
-                      'novaSenha',
-                      e.target.value
-                    )
-                  }
-                />
-
-              </div>
-
-            </div>
-
-          )}
-
-          </div>
-
-            </div>
-          </div>
           <div className="perfil-form-footer">
-            <span>Suas alterações serão aplicadas à sua conta.</span>
-            <button
-              type="submit"
-              className="mural-btn primary"
-              disabled={salvando}
-            >
-              {salvando
-                ? 'Salvando...'
-                : 'Salvar alterações'}
+            <button type="submit" className="perfil-btn perfil-btn-primary perfil-save" disabled={salvando}>
+              <Icon name="check" size={17} />{salvando ? 'Salvando...' : 'Salvar alterações'}
             </button>
-                        <button
-              type="button"
-              className="btn-logout"
-              onClick={
-                handleLogout
-              }
-            >
-
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-
-              </svg>
-
-              Sair
-
+            <button type="button" className="perfil-btn perfil-logout" onClick={handleLogout}>
+              <Icon name="arrowRight" size={16} /> Sair da conta
             </button>
           </div>
-
         </form>
 
-        <div className="perfil-side-column">
-          <section className="perfil-ranking-card" aria-labelledby="perfil-ranking-titulo">
-            <div className="perfil-ranking-top">
-              <Icon name="trophy" size={22} />
-              <div>
-                <h3 id="perfil-ranking-titulo">Ranking da turma</h3>
-                <p>Apareça entre os destaques da turma.</p>
+        <aside className="perfil-side-column" aria-label="Seu progresso">
+          <section className="perfil-conquistas-resumo" aria-labelledby="perfil-resumo-titulo">
+            <div className="perfil-side-head">
+              <span className="perfil-side-icon perfil-side-icon-blue"><Icon name="trophy" size={21} /></span>
+              <span className="perfil-eyebrow">SUA JORNADA</span>
+            </div>
+            <h2 id="perfil-resumo-titulo">Minhas conquistas</h2>
+            <p className="perfil-side-description">Cada etapa de estudo é uma nova conquista.</p>
+            <div className="perfil-progress-main">
+              <div className="perfil-progress-ring" style={{ '--perfil-progress': `${porcentagemConquistas}%` }}
+                role="progressbar" aria-label="Conquistas desbloqueadas" aria-valuenow={totalDesbloqueadas}
+                aria-valuemin={0} aria-valuemax={conquistas.length}>
+                <div className="perfil-progress-ring-inner">
+                  <strong>{carregandoConquistas ? '—' : porcentagemConquistas}%</strong>
+                  <small>concluído</small>
+                </div>
+              </div>
+              <div className="perfil-progress-info">
+                <strong>{carregandoConquistas ? '—' : totalDesbloqueadas} <span>de {conquistas.length}</span></strong>
+                <span>conquistas desbloqueadas</span>
+                <div className="perfil-progress-divider" />
+                <small>{carregandoConquistas ? 'Carregando progresso...' : totalDesbloqueadas === conquistas.length ? 'Todas as conquistas alcançadas!' : `${conquistas.length - totalDesbloqueadas} para conquistar`}</small>
               </div>
             </div>
-            <div className="perfil-ranking-position"><strong>{participaRanking ? (posicaoRanking ? `${posicaoRanking}º` : '—') : '—'}</strong><span>{participaRanking ? (posicaoRanking ? 'Sua posição atual' : (erroPosicaoRanking ? 'Erro ao carregar o ranking' : 'Posição não disponível')) : 'Participe para aparecer no ranking'}</span></div>
-            <p className="perfil-ranking-description">
-              Seu nome, foto e XP ficam visíveis para outros estudantes enquanto você participar.
-            </p>
-            <button
-              type="button"
-              className={`perfil-ranking-toggle ${participaRanking ? 'is-active' : ''}`}
-              onClick={alternarRanking}
-              disabled={participaRanking === null || salvandoRanking}
-              aria-pressed={Boolean(participaRanking)}
-            >
-              {participaRanking === null ? 'Consultando...' : salvandoRanking ? 'Salvando...' : participaRanking ? 'Participando · Sair do ranking' : 'Participar do ranking'}
+            {/* Mantém a altura do resumo estável enquanto o progresso é buscado. */}
+            <div className={`perfil-next-goal ${carregandoConquistas ? 'perfil-next-goal-loading' : ''}`}
+              aria-hidden={carregandoConquistas ? 'true' : undefined}>
+              {!carregandoConquistas && (
+                <>
+                  <span className="perfil-next-goal-icon"><Icon name={proximaConquista ? 'target' : 'trophy'} size={17} /></span>
+                  <div>
+                    <span>{proximaConquista ? 'PRÓXIMO OBJETIVO' : 'SUAS CONQUISTAS'}</span>
+                    <strong>{proximaConquista?.titulo || (totalDesbloqueadas === conquistas.length ? 'Todos os objetivos alcançados!' : 'Próximo objetivo indisponível')}</strong>
+                  </div>
+                  {proximaConquista && <small>{proximaConquista.progresso}/{proximaConquista.meta}</small>}
+                </>
+              )}
+            </div>
+            <button type="button" className="perfil-btn perfil-btn-primary perfil-full-button" onClick={() => setModalConquistasAberto(true)}>
+              Ver minhas conquistas <Icon name="arrowRight" size={17} />
+            </button>
+          </section>
+
+          <section className="perfil-ranking-card" aria-labelledby="perfil-ranking-titulo">
+            <div className="perfil-side-head">
+              <span className="perfil-side-icon perfil-side-icon-gold"><Icon name="crown" size={21} /></span>
+              <span className="perfil-eyebrow">COMUNIDADE</span>
+            </div>
+            <div className="perfil-ranking-title-row">
+              <h2 id="perfil-ranking-titulo">Ranking da turma</h2>
+              <span className={`perfil-ranking-status ${participaRanking ? 'is-participating' : ''}`}>
+                {participaRanking === null ? 'Consultando' : participaRanking ? 'Participando' : 'Desativado'}
+              </span>
+            </div>
+            <p className="perfil-side-description">Acompanhe sua posição entre os estudantes.</p>
+            <div className="perfil-ranking-position">
+              <strong>{participaRanking && posicaoRanking ? `${posicaoRanking}º` : '—'}</strong>
+              <div>
+                <span>{participaRanking && posicaoRanking ? 'Sua posição atual' : 'Sua posição'}</span>
+                <small>{participaRanking
+                  ? posicaoRanking ? 'Continue avançando!' : erroPosicaoRanking ? 'Não foi possível consultar' : 'Ainda não disponível'
+                  : 'Entre para descobrir'}</small>
+              </div>
+            </div>
+            <div className="perfil-ranking-privacy"><Icon name="shield" size={16} />
+              <span>Ao participar, seu nome, foto e XP são vistos pelos outros estudantes.</span>
+            </div>
+            <button type="button" className={`perfil-btn perfil-ranking-toggle ${participaRanking ? 'is-active' : ''}`}
+              onClick={alternarRanking} disabled={participaRanking === null || salvandoRanking} aria-pressed={Boolean(participaRanking)}>
+              {participaRanking === null ? 'Consultando...' : salvandoRanking ? 'Salvando...' : participaRanking ? 'Sair do ranking' : 'Participar do ranking'}
             </button>
             {erroRanking && <p className="perfil-ranking-error" role="alert">{erroRanking}</p>}
           </section>
-          <section className="perfil-conquistas-resumo panel-card">
-            <div className="perfil-resumo-heading"><div><span className="perfil-section-kicker">SEU PROGRESSO</span><h3>Suas conquistas</h3></div><Icon name="award" size={22}/></div>
-            <div className="perfil-resumo-count"><strong>{carregandoConquistas ? '—' : totalDesbloqueadas}<span> / {conquistas.length}</span></strong><small>desbloqueadas</small></div>
-            <div className="perfil-resumo-track"><span style={{width: `${conquistas.length ? totalDesbloqueadas / conquistas.length * 100 : 0}%`}} /></div>
-            <button type="button" className="perfil-resumo-open" onClick={() => setModalConquistasAberto(true)}>Ver todas as conquistas</button>
-          </section>
-        </div>
-
+        </aside>
       </div>
 
       {modalConquistasAberto && (
         <div className="perfil-modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) setModalConquistasAberto(false); }}>
           <div className="perfil-modal-panel" role="dialog" aria-modal="true" aria-labelledby="perfil-conquistas-titulo">
-            <button type="button" className="perfil-modal-close" onClick={() => setModalConquistasAberto(false)} aria-label="Fechar conquistas"><span className="perfil-modal-x" aria-hidden="true" /></button>
-      <section className="perfil-achievements-section panel-card" aria-labelledby="perfil-conquistas-titulo">
-        <div className="perfil-achievements-heading">
-          <div>
-            <h2 id="perfil-conquistas-titulo">Suas conquistas</h2>
-            <p>Acompanhe os objetivos que você já alcançou.</p>
-          </div>
-          <div className="perfil-achievements-counter" aria-live="polite">
-            <strong>{carregandoConquistas ? '—' : totalDesbloqueadas} / {conquistas.length}</strong>
-            <span>desbloqueadas</span>
-          </div>
-        </div>
-
-        <div className="perfil-achievements-controls">
-          <div className="perfil-achievements-filters" aria-label="Filtrar conquistas">
-            {CATEGORIAS_CONQUISTAS.map((categoria) => (
-              <button key={categoria} type="button"
-                className={`perfil-achievements-filter ${filtroConquistas === categoria ? 'active' : ''}`}
-                aria-pressed={filtroConquistas === categoria}
-                onClick={() => setFiltroConquistas(categoria)}>
-                {categoria}
+            <div className="perfil-modal-header">
+              <div className="perfil-modal-title">
+                <span className="perfil-eyebrow"><Icon name="trophy" size={14} /> MINHA JORNADA</span>
+                <h2 id="perfil-conquistas-titulo">Minhas conquistas</h2>
+                <p>Descubra seus objetivos alcançados e os próximos desafios.</p>
+              </div>
+              <div className="perfil-modal-header-right">
+                <div className="perfil-achievements-counter" aria-live="polite">
+                  <strong>{carregandoConquistas ? '—' : totalDesbloqueadas}<span> / {conquistas.length}</span></strong>
+                  <small>desbloqueadas</small>
+                </div>
+                <button type="button" className="perfil-modal-close" onClick={() => setModalConquistasAberto(false)} aria-label="Fechar conquistas"><span className="perfil-modal-x" aria-hidden="true" /></button>
+              </div>
+            </div>
+            <div className="perfil-achievements-controls">
+              <div className="perfil-achievements-filters" aria-label="Filtrar conquistas">
+                {CATEGORIAS_CONQUISTAS.map((categoria) => (
+                  <button key={categoria} type="button"
+                    className={`perfil-achievements-filter ${filtroConquistas === categoria ? 'active' : ''}`}
+                    aria-pressed={filtroConquistas === categoria}
+                    onClick={() => setFiltroConquistas(categoria)}>{categoria}</button>
+                ))}
+              </div>
+              <button type="button" className="perfil-achievements-refresh"
+                onClick={() => setAtualizacaoConquistas((anterior) => anterior + 1)}
+                disabled={carregandoConquistas}>
+                <Icon name="refresh" size={15} /> {carregandoConquistas ? 'Atualizando...' : 'Atualizar'}
               </button>
-            ))}
-          </div>
-          <button type="button" className="perfil-achievements-refresh"
-            onClick={() => setAtualizacaoConquistas((anterior) => anterior + 1)}
-            disabled={carregandoConquistas}>
-            <Icon name="refresh" size={15} /> {carregandoConquistas ? 'Atualizando...' : 'Atualizar progresso'}
-          </button>
-        </div>
-
-        {faltandoVerificar && !carregandoConquistas && (
-          <p className="perfil-achievements-notice" role="status">
-            Algumas informações não puderam ser consultadas. Tente atualizar para verificar as medalhas pendentes.
-          </p>
-        )}
-
-        <div className="perfil-modal-scroll-region">
-        <div className="perfil-achievements-grid">
-          {conquistasVisiveis.map((conquista) => {
-            const status = !conquista.verificado ? 'Não verificada'
-              : conquista.desbloqueada ? 'Conquistada' : 'Bloqueada';
-            return (
-              <article key={conquista.id}
-                className={`perfil-badge-card ${conquista.desbloqueada ? 'perfil-badge-unlocked' : 'perfil-badge-locked'}`}>
-                <div className="perfil-badge-top">
-                  <div className="perfil-badge-icon" aria-hidden="true"><Icon name={conquista.icone} size={23} /></div>
-                  <span className={`perfil-badge-status ${conquista.desbloqueada ? 'is-unlocked' : ''}`}>
-                    {carregandoConquistas ? 'Carregando' : status}
-                  </span>
-                </div>
-                <span className="perfil-badge-category">{conquista.categoria}</span>
-                <h3>{conquista.titulo}</h3>
-                <p>{conquista.descricao}</p>
-                <div className="perfil-badge-bottom">
-                  <div className="perfil-badge-count">
-                    <span>{conquista.desbloqueada ? "Meta alcançada" : "Seu progresso"}</span>
-                    <strong>{conquista.verificado && !carregandoConquistas
-                      ? `${conquista.progresso} / ${conquista.meta}` : '—'}</strong>
-                  </div>
-                  <div className="perfil-badge-progress" role="progressbar"
-                    aria-label={`Progresso: ${conquista.titulo}`}
-                    aria-valuemin={0} aria-valuemax={conquista.meta}
-                    aria-valuenow={conquista.verificado ? conquista.progresso : 0}>
-                    <span style={{ width: `${!carregandoConquistas ? conquista.porcentagem : 0}%` }} />
-                  </div>
-                </div>
-                {!conquista.desbloqueada && conquista.verificado && !carregandoConquistas && (
-                  <button type="button" className="perfil-badge-link"
-                    onClick={() => navigate(conquista.destino)}>
-                    Continuar estudando
-                  </button>
-                )}
-              </article>
-            );
-          })}
-        </div>
-        <p className="perfil-achievements-explainer">
-          As conquistas acompanham seu progresso e não concedem XP adicional.
-        </p>
-        </div>
-      </section>
-
+            </div>
+            {faltandoVerificar && !carregandoConquistas && (
+              <p className="perfil-achievements-notice" role="status">Algumas informações não puderam ser consultadas. Atualize para verificar as conquistas pendentes.</p>
+            )}
+            <div className="perfil-modal-scroll-region">
+              <div className="perfil-achievements-grid">
+                {conquistasVisiveis.map((conquista) => {
+                  const status = !conquista.verificado ? 'Não verificada'
+                    : conquista.desbloqueada ? 'Conquistada' : 'Bloqueada';
+                  return (
+                    <article key={conquista.id} data-categoria={conquista.categoria}
+                      className={`perfil-badge-card ${conquista.desbloqueada ? 'perfil-badge-unlocked' : 'perfil-badge-locked'}`}>
+                      <div className="perfil-badge-top">
+                        <span className="perfil-badge-icon" aria-hidden="true"><Icon name={conquista.icone} size={23} /></span>
+                        <span className={`perfil-badge-status ${conquista.desbloqueada ? 'is-unlocked' : ''}`}>
+                          {conquista.desbloqueada && !carregandoConquistas && <Icon name="check" size={12} />}
+                          {carregandoConquistas ? 'Carregando' : status}
+                        </span>
+                      </div>
+                      <span className="perfil-badge-category">{conquista.categoria}</span>
+                      <h3>{conquista.titulo}</h3>
+                      <p>{conquista.descricao}</p>
+                      <div className="perfil-badge-bottom">
+                        <div className="perfil-badge-count">
+                          <span>{conquista.desbloqueada ? 'Meta alcançada' : 'Seu progresso'}</span>
+                          <strong>{conquista.verificado && !carregandoConquistas
+                            ? `${conquista.progresso} / ${conquista.meta}` : '—'}</strong>
+                        </div>
+                        <div className="perfil-badge-progress" role="progressbar"
+                          aria-label={`Progresso: ${conquista.titulo}`} aria-valuemin={0}
+                          aria-valuemax={conquista.meta} aria-valuenow={conquista.verificado ? conquista.progresso : 0}>
+                          <span style={{ width: `${!carregandoConquistas ? conquista.porcentagem : 0}%` }} />
+                        </div>
+                      </div>
+                      {!conquista.desbloqueada && conquista.verificado && !carregandoConquistas && (
+                        <button type="button" className="perfil-badge-link" onClick={() => navigate(conquista.destino)}>
+                          Continuar estudando <Icon name="arrowRight" size={14} />
+                        </button>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+            <footer className="perfil-modal-footer">
+              <p><Icon name="shield" size={14} /> As conquistas registram seu progresso e não concedem XP adicional.</p>
+              <span>{conquistasVisiveis.length} {conquistasVisiveis.length === 1 ? 'conquista' : 'conquistas'} nesta categoria</span>
+            </footer>
           </div>
         </div>
       )}
-
-    </div>
-
+    </main>
   );
 }

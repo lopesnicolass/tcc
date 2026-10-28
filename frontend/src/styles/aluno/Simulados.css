@@ -2196,3 +2196,428 @@ html[data-theme='dark'] .simulado-prova-lateral .simulado-prova-relogio { backgr
   .simulado-confirmacao-modal { padding:24px 20px; }
   .simulado-confirmacao-acoes { grid-template-columns:1fr; }
 }
+
+/* =============================================================
+   SIMULADOS — compatibilidade entre os indicadores atuais e o CSS
+   A listagem usa .simulados-indicador desde a atualização do JSX;
+   as regras antigas de .simulados-resumo-item não se aplicam a ele.
+   Mantido no CSS existente para não alterar outros componentes.
+   ============================================================= */
+.simulados-page .simulados-resumo-refinado {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.simulados-page .simulados-indicador {
+  min-width: 0;
+  min-height: 144px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  border: 1px solid #d9e5f3;
+  border-radius: 17px;
+  background: #fff;
+  color: #103b70;
+  box-shadow: 0 4px 12px rgba(28, 68, 110, .045);
+}
+.simulados-page .simulados-indicador-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.simulados-page .simulados-indicador-titulo {
+  color: #52729b;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+.simulados-page .simulados-indicador-icone {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #eaf4ff;
+  color: #1686ea;
+}
+.simulados-page .simulados-indicador-icone svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+  max-width: 19px;
+  max-height: 19px;
+}
+.simulados-page .simulados-indicador-melhor .simulados-indicador-icone {
+  background: #e7f6ee;
+  color: #1b9764;
+}
+.simulados-page .simulados-indicador-revisar .simulados-indicador-icone {
+  background: #fff1e4;
+  color: #da822c;
+}
+.simulados-page .simulados-indicador-valor {
+  display: block;
+  margin: -1px 0 7px;
+  color: #164b8e;
+  font-size: clamp(28px, 2.65vw, 37px);
+  line-height: 1;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.simulados-page .simulados-indicador-rodape {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 1;
+}
+.simulados-page .simulados-indicador-barra {
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5eff9;
+}
+.simulados-page .simulados-indicador-barra > span {
+  display: block;
+  height: 100%;
+  background: #2497ef;
+  border-radius: inherit;
+}
+.simulados-page .simulados-indicador-apoio {
+  color: #6683a3;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.4;
+}
+.simulados-page .simulados-indicador-materia {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 7px 11px;
+  border-radius: 9px;
+  background: #e9f6ef;
+  color: #26764d;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.simulados-page .simulados-indicador-ponto {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.simulados-page .simulados-indicador-revisar .simulados-indicador-materia {
+  background: #fff2e3;
+  color: #b96d23;
+}
+
+/* Cabeçalho de matérias e navegação interna seguem o azul da Tenna.
+   A classe por matéria existe para outros detalhes, mas não deve
+   redefinir a cor principal para roxo, verde ou laranja. */
+.simulados-page .simulados-hero,
+.simulados-page .simulados-hero.simulados-hero-materia,
+.simulados-page .simulados-hero[class*='simulados-hero-materia-'] {
+  background: #1a57a5;
+  background-image: none;
+  min-height: 170px;
+  height: auto;
+}
+.simulados-page .simulados-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 650;
+  color: #e2efff;
+}
+.simulados-page .simulados-breadcrumb > svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+.simulados-page .simulados-breadcrumb-voltar {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.simulados-page .simulados-breadcrumb-voltar:hover { color: #e2efff; }
+.simulados-page .simulados-breadcrumb-voltar:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+html[data-theme='dark'] .simulados-page .simulados-indicador {
+  background: #1a2b41;
+  border-color: #344c68;
+  color: #ecf3fc;
+  box-shadow: none;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-titulo,
+html[data-theme='dark'] .simulados-page .simulados-indicador-apoio {
+  color: #adbed4;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-valor {
+  color: #f0f6ff;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-barra {
+  background: #2c4560;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-icone {
+  background: #254969;
+  color: #79baff;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-melhor .simulados-indicador-icone {
+  background: #1d473f;
+  color: #71dfb4;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-revisar .simulados-indicador-icone {
+  background: #493a2b;
+  color: #ffc58a;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-materia {
+  background: #23483f;
+  color: #a5f1cf;
+}
+html[data-theme='dark'] .simulados-page .simulados-indicador-revisar .simulados-indicador-materia {
+  background: #47392d;
+  color: #ffd19c;
+}
+html[data-theme='dark'] .simulados-page .simulados-hero,
+html[data-theme='dark'] .simulados-page .simulados-hero.simulados-hero-materia,
+html[data-theme='dark'] .simulados-page .simulados-hero[class*='simulados-hero-materia-'] {
+  background: #1c5cab;
+  background-image: none;
+}
+@media (max-width: 850px) {
+  .simulados-page .simulados-resumo-refinado { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .simulados-page .simulados-indicador-revisar { grid-column: 1 / -1; }
+}
+@media (max-width: 550px) {
+  .simulados-page .simulados-resumo-refinado { grid-template-columns: minmax(0, 1fr); }
+  .simulados-page .simulados-indicador-revisar { grid-column: auto; }
+  .simulados-page .simulados-indicador { min-height: 123px; }
+}
+
+
+/* ==========================================================
+   TENNA — acabamento escuro das telas de Simulados (2026-10)
+   Apenas cores, dentro de html[data-theme='dark'].
+   Não substituir as regras dos indicadores restaurados acima.
+   ========================================================== */
+html[data-theme='dark'] .simulados-page .simulados-hero,
+html[data-theme='dark'] .simulados-page .simulados-hero.simulados-hero-materia,
+html[data-theme='dark'] .simulados-page .simulados-hero[class*='simulados-hero-materia-'],
+html[data-theme='dark'] .simulado-prova .simulado-prova-cabecalho,
+html[data-theme='dark'] .simulado-resultado-screen .simulado-resultado-cabecalho {
+  background: #1c5cab;
+  background-image: none;
+  color: #fff;
+}
+html[data-theme='dark'] .simulados-page .simulados-hero h1,
+html[data-theme='dark'] .simulados-page .simulados-hero p,
+html[data-theme='dark'] .simulado-prova .simulado-prova-cabecalho h1,
+html[data-theme='dark'] .simulado-prova .simulado-prova-cabecalho p,
+html[data-theme='dark'] .simulado-resultado-screen .simulado-resultado-cabecalho h1,
+html[data-theme='dark'] .simulado-resultado-screen .simulado-resultado-cabecalho p { color: #f4f8ff; }
+/* Componentes mais novos: preservar proporção e ícones do patch de recuperação. */
+html[data-theme='dark'] .simulados-page .simulados-resumo-refinado .simulados-indicador {
+  background: #192b40;
+  border-color: #35506d;
+  box-shadow: none;
+}
+html[data-theme='dark'] .simulados-page .simulados-resumo-refinado .simulados-indicador-valor { color: #edf5ff; }
+html[data-theme='dark'] .simulados-page .simulados-resumo-refinado .simulados-indicador-titulo,
+html[data-theme='dark'] .simulados-page .simulados-resumo-refinado .simulados-indicador-apoio { color: #aFC4df; }
+html[data-theme='dark'] .simulados-page .materia-simulado-card {
+  background: #19283b;
+  border-color: #35506a;
+}
+html[data-theme='dark'] .simulados-page .materia-simulado-card-content h3,
+html[data-theme='dark'] .simulados-page .simulados-conteudo-heading-main h3,
+html[data-theme='dark'] .simulados-page .simulados-detalhe-titulo h2,
+html[data-theme='dark'] .simulados-page .materias-simulados-heading h2 { color: #eaf2ff; }
+html[data-theme='dark'] .simulados-page .materia-simulado-card-footer,
+html[data-theme='dark'] .simulados-page .materia-simulado-card-footer span,
+html[data-theme='dark'] .simulados-page .simulados-detalhe-titulo p,
+html[data-theme='dark'] .simulados-page .simulados-resumo-materia { color: #afc3dc; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-heading {
+  border-bottom-color: #35506d;
+}
+html[data-theme='dark'] .simulados-page .simulados-conteudo-heading-main h3 { color: #eff5ff; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-label,
+html[data-theme='dark'] .simulados-page .simulado-card-topline .simulado-card-kicker { color: #94c6ff; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .simulado-card {
+  background: #1a3440;
+  background-image: none;
+  border-color: #386471;
+}
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .simulado-card:hover { border-color: #68a9bb; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .simulado-card h2 { color: #f0f8fc; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .simulado-meta span { color: #b8cedd; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .status-badge.em-progresso { background: #925b08; color: #fff; }
+html[data-theme='dark'] .simulados-page .simulados-conteudo-group .status-badge.concluido { background: #087648; color: #fff; }
+html[data-theme='dark'] .simulados-page .simulados-busca,
+html[data-theme='dark'] .simulados-page .simulados-situacao,
+html[data-theme='dark'] .simulados-page .simulados-situacao-trigger,
+html[data-theme='dark'] .simulados-page .simulados-situacao-menu {
+  background: #1a2c41;
+  border-color: #3b536e;
+  color: #e9f3ff;
+}
+html[data-theme='dark'] .simulados-page .simulados-busca::placeholder { color: #a2b7d0; }
+html[data-theme='dark'] .simulados-page .simulados-busca-label,
+html[data-theme='dark'] .simulados-page .simulados-situacao-label { color: #d8e9ff; }
+html[data-theme='dark'] .simulados-page .simulados-situacao-opcao { color: #dceaff; }
+html[data-theme='dark'] .simulados-page .simulados-situacao-opcao:hover,
+html[data-theme='dark'] .simulados-page .simulados-situacao-opcao.selecionada { background: #294a69; color: #fff; }
+html[data-theme='dark'] .simulados-page .simulados-busca-limpar { background: #294761; color: #cde7ff; }
+/* Prova em andamento: controles, bordas, cronômetro e estados. */
+html[data-theme='dark'] .simulado-fullscreen.simulado-prova,
+html[data-theme='dark'] .simulado-fullscreen.simulado-resultado-screen { background: #101a2a; color: #eaf1fb; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-relogio { background: #1b466f; border-color: #416d9d; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-relogio strong,
+html[data-theme='dark'] .simulado-prova .simulado-prova-relogio small { color: #f1f7ff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-relogio.critico { background: #4c2b32; border-color: #ba6a72; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-painel,
+html[data-theme='dark'] .simulado-prova .simulado-prova-questao,
+html[data-theme='dark'] .simulado-prova .simulado-prova-finalizacao,
+html[data-theme='dark'] .simulado-confirmacao-modal,
+html[data-theme='dark'] .simulado-resultado-resumo,
+html[data-theme='dark'] .simulado-resultado-questao {
+  background: #192a3e;
+  border-color: #36516e;
+  color: #e8f1fe;
+}
+html[data-theme='dark'] .simulado-prova .simulado-prova-questao-topo > span:first-child,
+html[data-theme='dark'] .simulado-prova .simulado-prova-progresso-titulos .simulado-prova-porcentagem,
+html[data-theme='dark'] .simulado-resultado-questao-topo { color: #8dc3ff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-questao h2,
+html[data-theme='dark'] .simulado-prova .simulado-prova-finalizacao strong,
+html[data-theme='dark'] .simulado-resultado-questao h3 { color: #f0f6ff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-questao-topo .pendente,
+html[data-theme='dark'] .simulado-prova .simulado-prova-questao-rodape small,
+html[data-theme='dark'] .simulado-prova .simulado-prova-finalizacao p,
+html[data-theme='dark'] .simulado-prova .simulado-prova-progresso-titulos span { color: #afc4de; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-trilha,
+html[data-theme='dark'] .simulado-resultado-barra { background: #2b4660; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-numero,
+html[data-theme='dark'] .simulado-prova .simulado-prova-proxima,
+html[data-theme='dark'] .simulado-prova .simulado-prova-opcao {
+  background: #20364f;
+  border-color: #405b78;
+  color: #e3efff;
+}
+html[data-theme='dark'] .simulado-prova .simulado-prova-numero.respondida { background: #226bb6; border-color: #3485d9; color: #fff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-opcao:hover:not(:disabled) { background: #274862; border-color: #78b8f1; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-opcao.selecionada { background: #1b507b; border-color: #79c0ff; color: #fff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-letra,
+html[data-theme='dark'] .simulado-resultado-letra { background: #31516e; color: #eef7ff; }
+html[data-theme='dark'] .simulado-prova .simulado-prova-opcao.selecionada .simulado-prova-letra { background: #287cce; color: #fff; }
+/* Modal de confirmação: aviso e botão secundário sem branco excessivo. */
+html[data-theme='dark'] .simulado-confirmacao-modal h2 { color: #edf5ff; }
+html[data-theme='dark'] .simulado-confirmacao-modal p { color: #c2d2e6; }
+html[data-theme='dark'] .simulado-confirmacao-modal .simulado-confirmacao-aviso {
+  background: #463a25;
+  color: #ffdda6;
+  border-color: #92713f;
+}
+html[data-theme='dark'] .simulado-confirmacao-modal .simulado-confirmacao-cancelar,
+html[data-theme='dark'] .simulado-resultado-botao.secundario,
+html[data-theme='dark'] .simulado-resultado-botao.discreto {
+  background: #243d57;
+  border-color: #466482;
+  color: #e6f2ff;
+}
+html[data-theme='dark'] .simulado-resultado-botao.principal { background: #1b68c6; border-color: #1b68c6; color: #fff; }
+/* Resultado e correção: legibilidade sem apagar as cores de acerto/erro. */
+html[data-theme='dark'] .simulado-resultado-sobretitulo,
+html[data-theme='dark'] .simulado-resultado-nota-legenda,
+html[data-theme='dark'] .simulado-resultado-principal p,
+html[data-theme='dark'] .simulado-resultado-questao-topo,
+html[data-theme='dark'] .simulado-resultado-explicacao { color: #aec9e3; }
+html[data-theme='dark'] .simulado-resultado-nota { color: #90c4ff; }
+html[data-theme='dark'] .simulado-resultado-numero { background: #203850; border-color: #43617d; }
+html[data-theme='dark'] .simulado-resultado-numero strong { color: #a3d2ff; }
+html[data-theme='dark'] .simulado-resultado-numero.acertos strong { color: #64dda3; }
+html[data-theme='dark'] .simulado-resultado-numero.erros strong { color: #ff868f; }
+html[data-theme='dark'] .simulado-resultado-numero span { color: #aec5df; }
+html[data-theme='dark'] .simulado-resultado-estado.certo { background: #214d3e; color: #a0f3c7; }
+html[data-theme='dark'] .simulado-resultado-estado.incorreto { background: #552d35; color: #ffb0b4; }
+html[data-theme='dark'] .simulado-resultado-alternativa { background: #20364f; border-color: #41607d; color: #e5effa; }
+html[data-theme='dark'] .simulado-resultado-alternativa.correta { background: #164535; border-color: #3ba37a; color: #e3fff1; }
+html[data-theme='dark'] .simulado-resultado-alternativa.errada { background: #512d39; border-color: #c46a78; color: #ffe7ea; }
+html[data-theme='dark'] .simulado-resultado-alternativa.correta .simulado-resultado-letra { background: #129269; color: #fff; }
+html[data-theme='dark'] .simulado-resultado-alternativa.errada .simulado-resultado-letra { background: #bb465e; color: #fff; }
+html[data-theme='dark'] .simulado-resultado-indicador-certo { color: #9cf2c3; }
+html[data-theme='dark'] .simulado-resultado-indicador-errado { color: #ffb4bf; }
+html[data-theme='dark'] .simulado-resultado-correcao-heading h2 { color: #edf5ff; }
+html[data-theme='dark'] .simulado-resultado-correcao-heading p { color: #aabfd9; }
+
+
+/* TENNA — retorno da prova: aparência de link, sem botão sobreposto.
+   Restrito à prova; não altera botões ou indicadores dos simulados. */
+.simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar,
+html[data-theme='dark'] .simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
+  min-height: 30px;
+  gap: 10px;
+  padding: 3px 0;
+  margin: 0 0 15px;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  color: #eff7ff;
+  text-decoration: none;
+  line-height: 1.35;
+  font-weight: 700;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+}
+.simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar:hover,
+html[data-theme='dark'] .simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+  color: #fff;
+  opacity: 1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar:focus:not(:focus-visible) {
+  outline: none;
+}
+.simulado-prova .simulado-prova-cabecalho .simulado-prova-voltar:focus-visible {
+  outline: 2px solid #b7dcff;
+  outline-offset: 5px;
+  border-radius: 2px;
+}
+

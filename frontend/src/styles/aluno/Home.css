@@ -1688,7 +1688,7 @@ html[data-theme='dark'] .home-page .home-ranking-message button { background: #1
 /* TENNA — refinamento do painel inicial (2026-10) */
 .home-page { gap: 22px; }
 .home-page .home-hero {
-  background: linear-gradient(112deg, #17478c 0%, #185db4 60%, #267fda 100%);
+  background: #2269be; /* Azul uniforme: sem degradê lateral. */
   box-shadow: 0 12px 28px rgba(19, 70, 133, .12);
   border-color: rgba(255,255,255,.13);
   border-radius: 22px;
@@ -3066,4 +3066,339 @@ html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-button:hover {
   .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score strong {
     font-size: 21px;
   }
+}
+
+
+/* Convite para o ranking: botão simples, sem seta ou animação de cor. */
+.home-page .home-bottom-grid .home-ranking-join {
+  position: static;
+  align-self: flex-start;
+  flex: 0 0 auto;
+  min-height: 43px;
+  margin: 0;
+  padding: 11px 19px;
+  border: 1px solid #155bb5;
+  border-radius: 12px;
+  background: #1767c5;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.25;
+  box-shadow: 0 3px 9px rgba(15, 78, 158, .13);
+  transform: none;
+  transition: none;
+}
+.home-page .home-bottom-grid .home-ranking-join:hover {
+  background: #135bb1;
+  border-color: #104e9c;
+  box-shadow: 0 3px 9px rgba(15, 78, 158, .13);
+  transform: none;
+}
+.home-page .home-bottom-grid .home-ranking-join:focus-visible {
+  outline: 3px solid #8bc5ff;
+  outline-offset: 3px;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-join {
+  background: #2476d0;
+  border-color: #3687dc;
+  color: #fff;
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-join:hover {
+  background: #2d83dd;
+  border-color: #4598ec;
+  box-shadow: none;
+}
+
+/* ==========================================================
+   TENNA — Ranking XP: cards horizontais, hierarquia mais clara
+   ========================================================== */
+.home-page .home-bottom-grid > .home-ranking {
+  padding: clamp(22px, 2.6vw, 32px);
+  border-radius: 22px;
+  background: var(--color-surface, #fff);
+}
+.home-page .home-bottom-grid .home-ranking-heading {
+  margin-bottom: clamp(20px, 2.3vw, 30px);
+  gap: 16px;
+}
+.home-page .home-bottom-grid .home-ranking-heading h2 {
+  font-size: clamp(24px, 2.3vw, 29px);
+  letter-spacing: -.035em;
+}
+.home-page .home-bottom-grid .home-ranking-heading p {
+  font-size: 13px;
+}
+.home-page .home-bottom-grid .home-ranking-list {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: clamp(12px, 1.4vw, 18px);
+  align-items: stretch;
+}
+.home-page .home-bottom-grid .home-ranking-player,
+.home-page .home-bottom-grid .home-ranking-place-1 {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 242px;
+  padding: 20px;
+  gap: 18px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid #d8e7f7;
+  border-top: 3px solid var(--rank-accent);
+  background: #f5f9fe;
+  text-align: left;
+  opacity: 1;
+  box-shadow: 0 4px 16px rgba(32, 80, 134, .045);
+  transform: none;
+  transition: none;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 {
+  --rank-accent: #ecb446;
+  background: #fff9ee;
+  border-color: #efdab0;
+  border-top-color: #e5ab38;
+  box-shadow: 0 6px 18px rgba(154, 106, 25, .075);
+}
+.home-page .home-bottom-grid .home-ranking-place-2 {
+  --rank-accent: #74a8e1;
+  background: #f3f8fe;
+}
+.home-page .home-bottom-grid .home-ranking-place-3 {
+  --rank-accent: #dc9e7c;
+  background: #fcf7f4;
+  border-color: #eadbd5;
+}
+.home-page .home-bottom-grid .home-ranking-player:hover,
+.home-page .home-bottom-grid .home-ranking-place-1:hover {
+  transform: none;
+  box-shadow: 0 4px 16px rgba(32, 80, 134, .045);
+  border-top-color: var(--rank-accent);
+}
+.home-page .home-bottom-grid .home-ranking-place-1:hover {
+  border-color: #efdab0;
+  border-top-color: #e5ab38;
+  box-shadow: 0 6px 18px rgba(154, 106, 25, .075);
+}
+.home-page .home-bottom-grid .home-ranking-player-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 32px;
+}
+.home-page .home-bottom-grid .home-ranking-medal {
+  position: static;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding-top: 7px;
+  border: 1px solid #cadef5;
+  border-radius: 11px;
+  background: #e5f0ff;
+  color: #275d9c;
+  font: 850 16px/1 var(--font-display);
+  text-shadow: none;
+  box-shadow: none;
+  transform: none;
+}
+.home-page .home-bottom-grid .home-ranking-medal small {
+  font-size: 10px;
+  font-weight: 850;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-medal {
+  border-color: #f1cd83;
+  background: #fff0cc;
+  color: #97620b;
+}
+.home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-medal {
+  border-color: #f0c8b5;
+  background: #fae8de;
+  color: #9d5738;
+}
+.home-page .home-bottom-grid .home-ranking-placement {
+  font: 800 12px/1.2 var(--font-body);
+  color: #5e7c9e;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-placement { color: #95640f; }
+.home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-placement { color: #a46850; }
+.home-page .home-bottom-grid .home-ranking-winner-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  border-radius: 11px;
+  background: #ffefca;
+  color: #c08415;
+}
+.home-page .home-bottom-grid .home-ranking-profile {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  margin: 2px 0;
+}
+.home-page .home-bottom-grid .home-ranking-avatar,
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  border: 3px solid #bfdaf6;
+  border-radius: 50%;
+  background: #e4f1ff;
+  color: #17569f;
+  font-size: 25px;
+  font-weight: 850;
+  box-shadow: none;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-avatar {
+  border-color: #efd49c;
+  background: #fff2d6;
+  color: #905d13;
+}
+.home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-avatar {
+  border-color: #f1cebf;
+  background: #fceee8;
+  color: #8b4d35;
+}
+.home-page .home-bottom-grid .home-ranking-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.home-page .home-bottom-grid .home-ranking-player-name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+  text-align: left;
+}
+.home-page .home-bottom-grid .home-ranking-player-name strong,
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name strong {
+  width: 100%;
+  font-size: clamp(15px, 1.3vw, 17px);
+  line-height: 1.28;
+  color: #183e6e;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.home-page .home-bottom-grid .home-ranking-player-name small {
+  display: inline-flex;
+  width: auto;
+  min-height: 23px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: #e3effd;
+  color: #2b609f;
+  font-size: 10px;
+  font-weight: 750;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name small {
+  background: #faebcc;
+  color: #936318;
+}
+.home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-player-name small {
+  background: #f7e8e1;
+  color: #9f5d44;
+}
+.home-page .home-bottom-grid .home-ranking-score {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding-top: 15px;
+  border-top: 1px solid #d7e5f4;
+  text-align: left;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score { border-top-color: #ecdcb9; }
+.home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-score { border-top-color: #eddcd5; }
+.home-page .home-bottom-grid .home-ranking-score-caption {
+  color: #6e88a8;
+  font-size: 11px;
+  font-weight: 650;
+}
+.home-page .home-bottom-grid .home-ranking-score-number {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+.home-page .home-bottom-grid .home-ranking-score-number strong,
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number strong {
+  color: #1757a7;
+  font: 850 clamp(23px, 2vw, 29px)/1 var(--font-display);
+  letter-spacing: -.03em;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number strong { color: #996411; }
+.home-page .home-bottom-grid .home-ranking-score-number small {
+  font-size: 10px;
+  font-weight: 850;
+  color: #6d8cab;
+  letter-spacing: .035em;
+}
+.home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number small { color: #987024; }
+
+@container ranking (max-width: 800px) {
+  .home-page .home-bottom-grid .home-ranking-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .home-page .home-bottom-grid .home-ranking-place-1,
+  .home-page .home-bottom-grid .home-ranking-place-2,
+  .home-page .home-bottom-grid .home-ranking-place-3 {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .home-page .home-bottom-grid .home-ranking-player,
+  .home-page .home-bottom-grid .home-ranking-place-1 {
+    min-height: 0;
+    gap: 14px;
+    padding: 17px;
+  }
+}
+@container ranking (max-width: 440px) {
+  .home-page .home-bottom-grid .home-ranking-player,
+  .home-page .home-bottom-grid .home-ranking-place-1 {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 13px;
+    min-height: 0;
+    padding: 15px;
+    border-left: 1px solid #d8e7f7;
+    border-top: 3px solid var(--rank-accent);
+  }
+  .home-page .home-bottom-grid .home-ranking-avatar,
+  .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-avatar {
+    flex-basis: 54px;
+    width: 54px;
+    height: 54px;
+    font-size: 21px;
+  }
+  .home-page .home-bottom-grid .home-ranking-player-name strong,
+  .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name strong {
+    font-size: 15px;
+  }
+  .home-page .home-bottom-grid .home-ranking-score { align-items: center; }
+  .home-page .home-bottom-grid .home-ranking-score-number strong,
+  .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number strong { font-size: 25px; }
 }

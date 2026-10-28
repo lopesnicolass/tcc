@@ -92,13 +92,6 @@ export default function RankingXP({ xp, usuarioId }) {
 
   return (
     <section className="home-ranking panel-card" aria-labelledby="home-ranking-title">
-      <div className="home-ranking-decor" aria-hidden="true">
-        <span className="home-ranking-decor-orb home-ranking-decor-orb-left" />
-        <span className="home-ranking-decor-orb home-ranking-decor-orb-right" />
-        <span className="home-ranking-decor-star home-ranking-decor-star-one">✦</span>
-        <span className="home-ranking-decor-star home-ranking-decor-star-two">✧</span>
-        <span className="home-ranking-decor-star home-ranking-decor-star-three">✦</span>
-      </div>
       <div className="home-ranking-heading">
         <div>
           
@@ -115,7 +108,7 @@ export default function RankingXP({ xp, usuarioId }) {
         )}
         {!participando && !carregando && !erro && (
           <button type="button" className="home-ranking-join" onClick={() => navigate('/perfil')}>
-            Participar do ranking →
+            Participar do ranking
           </button>
         )}
       </div>
@@ -135,31 +128,42 @@ export default function RankingXP({ xp, usuarioId }) {
         <ol className="home-ranking-list">
           {alunosExibidos.map((aluno) => (
             <li className={`home-ranking-player home-ranking-place-${aluno.posicao}`} key={aluno.id}>
-              {aluno.posicao === 1 && (
-                <span className="home-ranking-crown" aria-hidden="true"><Icon name="crown" size={27} /></span>
-              )}
-              <span className="home-ranking-medal" role="img" aria-label={POSICAO_LABEL[aluno.posicao - 1]}>
-                <span aria-hidden="true">{aluno.posicao}</span>
-              </span>
-              <span className="home-ranking-avatar">
-                {fotos[aluno.id] ? (
-                  <img src={fotos[aluno.id]} alt={`Foto de ${aluno.nome}`} />
-                ) : (
-                  <span aria-hidden="true">{aluno.nome?.trim()?.charAt(0)?.toUpperCase() || '?'}</span>
+              <div className="home-ranking-player-head">
+                <span className="home-ranking-medal" role="img" aria-label={POSICAO_LABEL[aluno.posicao - 1]}>
+                  {aluno.posicao}<small>º</small>
+                </span>
+                <span className="home-ranking-placement">{POSICAO_LABEL[aluno.posicao - 1]}</span>
+                {aluno.posicao === 1 && (
+                  <span className="home-ranking-winner-mark" aria-label="Líder do ranking">
+                    <Icon name="trophy" size={17} />
+                  </span>
                 )}
-              </span>
-              <span className="home-ranking-player-name">
-                <strong>{aluno.nome}</strong>
-                <small><Icon name="star" size={12} /> {String(aluno.id) === String(usuarioId) ? 'Você · ' : ''}Nível {nivelPorXp(aluno.xp)}</small>
-              </span>
-              <span className="home-ranking-score"><strong>{Number(aluno.xp).toLocaleString('pt-BR')}</strong><small>XP</small></span>
+              </div>
+
+              <div className="home-ranking-profile">
+                <span className="home-ranking-avatar">
+                  {fotos[aluno.id] ? (
+                    <img src={fotos[aluno.id]} alt={`Foto de ${aluno.nome}`} />
+                  ) : (
+                    <span aria-hidden="true">{aluno.nome?.trim()?.charAt(0)?.toUpperCase() || '?'}</span>
+                  )}
+                </span>
+                <span className="home-ranking-player-name">
+                  <strong>{aluno.nome}</strong>
+                  <small>{String(aluno.id) === String(usuarioId) ? 'Você · ' : ''}Nível {nivelPorXp(aluno.xp)}</small>
+                </span>
+              </div>
+
+              <div className="home-ranking-score">
+                <span className="home-ranking-score-caption">Pontuação</span>
+                <span className="home-ranking-score-number">
+                  <strong>{Number(aluno.xp).toLocaleString('pt-BR')}</strong><small>XP</small>
+                </span>
+              </div>
             </li>
           ))}
         </ol>
       )}
-      <p className="home-ranking-note">
-        Só aparecem nome e foto de estudantes que autorizaram a participação no Perfil.
-      </p>
     </section>
   );
 }

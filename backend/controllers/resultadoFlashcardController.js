@@ -191,6 +191,7 @@ function registrarResposta(
         usuarioId,
         flashcardId,
         acertou,
+        req.body?.permitirRepeticao === true,
         (
             erro,
             resposta

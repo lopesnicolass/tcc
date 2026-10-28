@@ -37,22 +37,53 @@ function obterCapaMateria(materia) {
 export function CategoriasSimulados({ indicadores, melhorDesempenho, piorDesempenho, materiasDisponiveis = MATERIAS_SIMULADOS, selecionarMateria }) {
   return (
     <>
-<section className="simulados-resumo" aria-label="Resumo dos simulados">
-            <div className="simulados-resumo-item">
-              <div className="simulados-resumo-topo"><strong>{indicadores.media === null ? '—' : `${indicadores.media}%`}</strong></div>
-              <span className="simulados-resumo-label">Taxa de acertos</span>
+<section className="simulados-resumo simulados-resumo-refinado" aria-label="Seu desempenho nos simulados">
+          <article className="simulados-indicador simulados-indicador-media">
+            <div className="simulados-indicador-topo">
+              <span className="simulados-indicador-titulo">Taxa de acertos</span>
+              <span className="simulados-indicador-icone" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" />
+                </svg>
+              </span>
             </div>
-            <div className="simulados-resumo-item">
-              <div className="simulados-resumo-topo"><strong>{melhorDesempenho ? `${melhorDesempenho.percentual}%` : '—'}</strong></div>
-              <span className="simulados-resumo-label">Melhor desempenho</span>
-              <span className="simulados-resumo-materia">{melhorDesempenho?.materia ?? 'Sem resultados por matéria'}</span>
+            <strong className="simulados-indicador-valor">{indicadores.media === null ? '—' : `${indicadores.media}%`}</strong>
+            <div className="simulados-indicador-rodape">
+              <div className="simulados-indicador-barra" role="progressbar" aria-label="Taxa média de acertos" aria-valuemin={0} aria-valuemax={100} aria-valuenow={indicadores.media === null ? 0 : Math.max(0, Math.min(100, Number(indicadores.media) || 0))}>
+                <span style={{ width: `${indicadores.media === null ? 0 : Math.max(0, Math.min(100, Number(indicadores.media) || 0))}%` }} />
+              </div>
+              <span className="simulados-indicador-apoio">Média dos simulados realizados</span>
             </div>
-            <div className="simulados-resumo-item">
-              <div className="simulados-resumo-topo"><strong>{piorDesempenho ? `${piorDesempenho.percentual}%` : '—'}</strong></div>
-              <span className="simulados-resumo-label">Pior desempenho</span>
-              <span className="simulados-resumo-materia">{piorDesempenho?.materia ?? 'Pratique mais matérias para comparar'}</span>
+          </article>
+          <article className="simulados-indicador simulados-indicador-melhor">
+            <div className="simulados-indicador-topo">
+              <span className="simulados-indicador-titulo">Melhor desempenho</span>
+              <span className="simulados-indicador-icone" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 4h8v7a4 4 0 0 1-8 0V4Z" /><path d="M8 6H5v2a4 4 0 0 0 4 4M16 6h3v2a4 4 0 0 1-4 4" /><path d="M12 15v4m-4 1h8" />
+                </svg>
+              </span>
             </div>
-          </section>
+            <strong className="simulados-indicador-valor">{melhorDesempenho ? `${melhorDesempenho.percentual}%` : '—'}</strong>
+            <div className="simulados-indicador-rodape">
+              <span className="simulados-indicador-materia"><span className="simulados-indicador-ponto" aria-hidden="true" />{melhorDesempenho?.materia ?? 'Sem resultados por matéria'}</span>
+            </div>
+          </article>
+          <article className="simulados-indicador simulados-indicador-revisar">
+            <div className="simulados-indicador-topo">
+              <span className="simulados-indicador-titulo">Ponto de atenção</span>
+              <span className="simulados-indicador-icone" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 6c-2.8-1.8-6.2-2-9-1v13c3-1 6.5-.7 9 1 2.5-1.7 6-2 9-1V5c-2.8-1-6.2-.8-9 1Z" /><path d="M12 6v13" />
+                </svg>
+              </span>
+            </div>
+            <strong className="simulados-indicador-valor">{piorDesempenho ? `${piorDesempenho.percentual}%` : '—'}</strong>
+            <div className="simulados-indicador-rodape">
+              <span className="simulados-indicador-materia"><span className="simulados-indicador-ponto" aria-hidden="true" />{piorDesempenho?.materia ?? 'Pratique mais matérias para comparar'}</span>
+            </div>
+          </article>
+        </section>
                 <section className="materias-simulados-section">
           <div className="materias-simulados-grid">
             {materiasDisponiveis.map((materia) => {

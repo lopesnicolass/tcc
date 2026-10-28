@@ -486,3 +486,36 @@ html[data-theme='dark'] .provas-page .prova-sheet-marks b {
   .provas-page .prova-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 html[data-theme='dark'] .provas-page .prova-pdf-icon { background: #1c416e; color: #b9d9ff; }
+
+
+/* TENNA — acabamento escuro da listagem de Provas.
+   Somente cores; layout e links existentes preservados. */
+html[data-theme='dark'] .provas-page .provas-header-card {
+  background: #1c5cab;
+  background-image: none;
+  color: #fff;
+}
+html[data-theme='dark'] .provas-page .provas-header-copy h1,
+html[data-theme='dark'] .provas-page .provas-header-copy p,
+html[data-theme='dark'] .provas-page .provas-eyebrow { color: #f1f7ff; }
+html[data-theme='dark'] .provas-page .prova-card,
+html[data-theme='dark'] .provas-page .provas-empty {
+  background: #192a3e;
+  border-color: #344d68;
+  box-shadow: none;
+}
+html[data-theme='dark'] .provas-page .prova-card:hover { border-color: #5d88b5; }
+html[data-theme='dark'] .provas-page .prova-card-kicker { color: #a2cdff; }
+html[data-theme='dark'] .provas-page .prova-card-copy h2,
+html[data-theme='dark'] .provas-page .prova-card-copy h2 strong { color: #e8f2ff; }
+html[data-theme='dark'] .provas-page .prova-card-description,
+html[data-theme='dark'] .provas-page .provas-feedback { color: #aec4de; }
+html[data-theme='dark'] .provas-page .prova-pdf-icon { background: #24466a; color: #acd4ff; }
+html[data-theme='dark'] .provas-page .prova-links a {
+  background: #263e58;
+  border-color: #486686;
+  color: #d8eaff;
+}
+html[data-theme='dark'] .provas-page .prova-links a:hover { background: #315575; border-color: #6c96bf; color: #fff; }
+html[data-theme='dark'] .provas-page .prova-links a:first-child { background: #206cc5; border-color: #206cc5; color: #fff; }
+html[data-theme='dark'] .provas-page .prova-links a:first-child:hover { background: #287edb; border-color: #287edb; }

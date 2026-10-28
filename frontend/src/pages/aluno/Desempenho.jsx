@@ -1,15 +1,12 @@
 import '../../styles/aluno/Desempenho.css';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { META } from './desempenho/constants.js';
 import { Hero } from './desempenho/Hero.jsx';
 import { CardsResumo } from './desempenho/CardsResumo.jsx';
 import { GraficoEvolucao } from './desempenho/GraficoEvolucao.jsx';
-import { ComparacaoAproveitamento } from './desempenho/ComparacaoAproveitamento.jsx';
-import { MetaConsistencia } from './desempenho/MetaConsistencia.jsx';
 import { Historico } from './desempenho/Historico.jsx';
 import { DiagnosticoEstudo } from './desempenho/DiagnosticoEstudo.jsx';
-import { analisarResultadosPorMateria, sugerirRevisoes, resumirEvolucao } from '../../utils/desempenhoInsights.js';
+import { analisarResultadosPorMateria, sugerirRevisoes } from '../../utils/desempenhoInsights.js';
 
 import { request } from '../../services/api.js';
 
@@ -203,26 +200,12 @@ export default function Desempenho() {
             desempenho?.mediaPorcentagem
         );
 
-    const totalQuestoes =
-        numero(
-            desempenho?.totalQuestoes
-        );
-
-    const totalAcertos =
-        numero(
-            desempenho?.totalAcertos
-        );
-
-    const totalErros =
-        numero(
-            desempenho?.totalErros
-        );
-
-    const totalSimulados =
-        numero(
-            desempenho?.totalSimulados
-        );
-
+    const totalQuestoes = numero(desempenho?.totalQuestoes);
+    const totalAcertos = numero(desempenho?.totalAcertos);
+    const totalErros = numero(desempenho?.totalErros);
+    const totalSimulados = numero(desempenho?.totalSimulados) || resultados.length;
+    const percentualAcertos = totalQuestoes > 0 ? (totalAcertos / totalQuestoes) * 100 : 0;
+    const percentualErros = totalQuestoes > 0 ? (totalErros / totalQuestoes) * 100 : 0;
 
     // =====================================================
     // MELHOR RESULTADO
@@ -246,55 +229,6 @@ export default function Desempenho() {
             );
 
         }, [resultados]);
-
-
-    // =====================================================
-    // MENOR RESULTADO
-    // =====================================================
-
-    const menorResultado =
-        useMemo(() => {
-
-            if (!resultados.length) {
-                return 0;
-            }
-
-
-            return Math.min(
-                ...resultados.map(
-                    (resultado) =>
-                        numero(
-                            resultado.porcentagem
-                        )
-                )
-            );
-
-        }, [resultados]);
-
-
-    const percentualAcertos =
-        totalQuestoes > 0
-            ? (
-                totalAcertos /
-                totalQuestoes
-            ) * 100
-            : 0;
-
-
-    const percentualErros =
-        totalQuestoes > 0
-            ? (
-                totalErros /
-                totalQuestoes
-            ) * 100
-            : 0;
-
-
-    const faltamParaMeta =
-        Math.max(
-            0,
-            META - mediaGeral
-        );
 
 
     const resultadosCronologicos =
@@ -343,208 +277,16 @@ export default function Desempenho() {
         );
 
 
-    const mediaRecente =
-        useMemo(() => {
-
-            if (
-                !resultadosCronologicos.length
-            ) {
-                return 0;
-            }
-
-
-            const ultimos =
-                resultadosCronologicos.slice(
-                    -3
-                );
-
-
-            return (
-                ultimos.reduce(
-                    (soma, resultado) =>
-                        soma +
-                        numero(
-                            resultado.porcentagem
-                        ),
-                    0
-                ) /
-                ultimos.length
-            );
-
-        }, [resultadosCronologicos]);
-
-
-    const tendencia =
-        useMemo(() => {
-
-            if (
-                resultadosCronologicos.length <
-                2
-            ) {
-                return 'neutra';
-            }
-
-
-            const ultimo =
-                numero(
-                    resultadosCronologicos[
-                        resultadosCronologicos.length - 1
-                    ]?.porcentagem
-                );
-
-
-            const anterior =
-                numero(
-                    resultadosCronologicos[
-                        resultadosCronologicos.length - 2
-                    ]?.porcentagem
-                );
-
-
-            if (
-                ultimo > anterior
-            ) {
-                return 'alta';
-            }
-
-
-            if (
-                ultimo < anterior
-            ) {
-                return 'baixa';
-            }
-
-
-            return 'neutra';
-
-        }, [resultadosCronologicos]);
-
-
-    const desvioMedio =
-        useMemo(() => {
-
-            if (
-                resultadosCronologicos.length <
-                2
-            ) {
-                return 0;
-            }
-
-
-            const media =
-                resultadosCronologicos.reduce(
-                    (soma, resultado) =>
-                        soma +
-                        numero(
-                            resultado.porcentagem
-                        ),
-                    0
-                ) /
-                resultadosCronologicos.length;
-
-
-            const variancia =
-                resultadosCronologicos.reduce(
-                    (
-                        soma,
-                        resultado
-                    ) => {
-
-                        const diferenca =
-                            numero(
-                                resultado.porcentagem
-                            ) -
-                            media;
-
-
-                        return (
-                            soma +
-                            diferenca *
-                            diferenca
-                        );
-
-                    },
-                    0
-                ) /
-                resultadosCronologicos.length;
-
-
-            return Math.sqrt(
-                variancia
-            );
-
-        }, [resultadosCronologicos]);
-
-
-    const consistencia =
-        useMemo(() => {
-
-            if (
-                resultadosCronologicos.length <
-                2
-            ) {
-                return 100;
-            }
-
-
-            return limitar(
-                100 -
-                desvioMedio * 2
-            );
-
-        }, [
-            resultadosCronologicos,
-            desvioMedio,
-            limitar
-        ]);
-
-
-    const mensagemConsistencia =
-        useMemo(() => {
-
-            if (
-                resultadosCronologicos.length <
-                2
-            ) {
-                return (
-                    'Faça mais simulados para medir sua consistência.'
-                );
-            }
-
-
-            if (
-                consistencia >=
-                80
-            ) {
-                return (
-                    'Seu desempenho está bem consistente.'
-                );
-            }
-
-
-            if (
-                consistencia >=
-                60
-            ) {
-                return (
-                    'Seu desempenho apresenta uma variação moderada.'
-                );
-            }
-
-
-            return (
-                'Seus resultados estão variando bastante entre os simulados.'
-            );
-
-        }, [
-            resultadosCronologicos,
-            consistencia
-        ]);
-
+    // Compara as duas últimas tentativas, como no cabeçalho original.
+    const tendencia = useMemo(() => {
+        if (resultadosCronologicos.length < 2) return 'neutra';
+        const ultimo = numero(resultadosCronologicos[resultadosCronologicos.length - 1]?.porcentagem);
+        const anterior = numero(resultadosCronologicos[resultadosCronologicos.length - 2]?.porcentagem);
+        return ultimo > anterior ? 'alta' : ultimo < anterior ? 'baixa' : 'neutra';
+    }, [resultadosCronologicos]);
 
     const materiasAnalisadas = useMemo(() => analisarResultadosPorMateria(resultados), [resultados]);
     const sugestoesRevisao = useMemo(() => sugerirRevisoes(resultados), [resultados]);
-    const evolucaoComparativa = useMemo(() => resumirEvolucao(resultadosCronologicos), [resultadosCronologicos]);
 
     // =====================================================
     // CARREGANDO
@@ -634,165 +376,39 @@ export default function Desempenho() {
 
 
     return (
-        <div className="desempenho-page">
-
+        <div className="desempenho-page desempenho-page--renovada">
             <Hero
-                mediaGeral={
-                    mediaGeral
-                }
-
-                tendencia={
-                    tendencia
-                }
-
-                melhorResultado={
-                    melhorResultado
-                }
-
+                mediaGeral={mediaGeral}
+                tendencia={tendencia}
+                melhorResultado={melhorResultado}
+                porcentagem={porcentagem}
                 possuiResultados={resultados.length > 0}
-
-                porcentagem={
-                    porcentagem
-                }
             />
-
-
             <CardsResumo
-                totalSimulados={
-                    totalSimulados
-                }
-
-                totalQuestoes={
-                    totalQuestoes
-                }
-
-                totalAcertos={
-                    totalAcertos
-                }
-
-                totalErros={
-                    totalErros
-                }
-
-                percentualAcertos={
-                    percentualAcertos
-                }
-
-                percentualErros={
-                    percentualErros
-                }
+                totalSimulados={totalSimulados}
+                totalQuestoes={totalQuestoes}
+                totalAcertos={totalAcertos}
+                totalErros={totalErros}
+                percentualAcertos={percentualAcertos}
+                percentualErros={percentualErros}
             />
-
-
+            <GraficoEvolucao
+                resultadosCronologicos={resultadosCronologicos}
+                obterNomeSimulado={obterNomeSimulado}
+                formatarData={formatarData}
+            />
             <DiagnosticoEstudo
                 materias={materiasAnalisadas}
                 sugestoes={sugestoesRevisao}
-                evolucao={evolucaoComparativa}
                 possuiResultados={resultados.length > 0}
             />
-
-            <GraficoEvolucao
-                resultadosCronologicos={
-                    resultadosCronologicos
-                }
-
-                obterNomeSimulado={
-                    obterNomeSimulado
-                }
-
-                formatarData={
-                    formatarData
-                }
-            />
-
-
-            <ComparacaoAproveitamento
-                mediaGeral={
-                    mediaGeral
-                }
-
-                melhorResultado={
-                    melhorResultado
-                }
-
-                menorResultado={
-                    menorResultado
-                }
-
-                totalQuestoes={
-                    totalQuestoes
-                }
-
-                percentualAcertos={
-                    percentualAcertos
-                }
-
-                totalAcertos={
-                    totalAcertos
-                }
-
-                totalErros={
-                    totalErros
-                }
-            />
-
-
-            <MetaConsistencia
-                porcentagem={
-                    porcentagem
-                }
-
-                mediaGeral={
-                    mediaGeral
-                }
-
-                faltamParaMeta={
-                    faltamParaMeta
-                }
-
-                consistencia={
-                    consistencia
-                }
-
-                mediaRecente={
-                    mediaRecente
-                }
-
-                mensagemConsistencia={
-                    mensagemConsistencia
-                }
-
-                possuiResultados={resultados.length > 0}
-                totalResultados={resultados.length}
-            />
-
-
             <Historico
-                resultados={
-                    resultados
-                }
-
-                mediaGeral={
-                    mediaGeral
-                }
-
-                limitar={
-                    limitar
-                }
-
-                obterNomeSimulado={
-                    obterNomeSimulado
-                }
-
-                formatarData={
-                    formatarData
-                }
-
-                porcentagem={
-                    porcentagem
-                }
+                resultados={resultados}
+                limitar={limitar}
+                obterNomeSimulado={obterNomeSimulado}
+                formatarData={formatarData}
+                porcentagem={porcentagem}
             />
-
         </div>
     );
 }

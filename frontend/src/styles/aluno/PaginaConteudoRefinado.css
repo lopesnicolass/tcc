@@ -935,3 +935,74 @@
   background: #0b469f;
   box-shadow: 0 7px 16px rgba(17, 78, 169, .25);
 }
+
+/* ============================================================
+   TENNA | LEITURA DAS AULAS NO MODO ESCURO
+   O tema claro mantém as cores originais. Algumas regras legadas
+   fixavam preto nos textos e branco no índice, ignorando o tema.
+   ============================================================ */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada {
+  color: var(--dark-text, #e8f0fb);
+}
+
+/* Títulos, parágrafos e listas devem acompanhar o fundo escuro. */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) h2,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-rich-text,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-rich-text *,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-list,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-list *,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-resource-block-copy h2,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-flashcards-block .pagina-resource-block-copy h2 {
+  color: var(--dark-text, #e8f0fb);
+}
+
+/* Texto didático com links e marcações facilmente identificáveis. */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block .pagina-rich-text a,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block .pagina-list a {
+  color: #8bc7ff;
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block .pagina-rich-text mark {
+  background: #f5d977;
+  color: #172536;
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-list-marker {
+  color: #add5ff;
+  background: var(--dark-surface-3, #283d55);
+}
+
+/* O índice antes tinha fundo branco com letras quase brancas. */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-card {
+  background: var(--dark-surface, #19283b) !important;
+  border-color: var(--dark-border, #2d4057);
+  box-shadow: none;
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-header {
+  border-bottom-color: var(--dark-border, #2d4057);
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-header strong,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a strong {
+  color: var(--dark-text, #e8f0fb);
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a:hover,
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-indice-items a:focus-visible {
+  background: var(--dark-surface-2, #203148);
+}
+
+/* Frente dos flashcards combina com o painel; verso segue azul. */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-face {
+  color: #e8f0fb;
+  background: #233850;
+  border-color: #37516b;
+  box-shadow: none;
+}
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-flashcard-grade-back {
+  color: #fff;
+  background: #165aa8;
+  border-color: #4285cf;
+}
+/* Prevalece também sobre a regra antiga que estiliza toda a lista. */
+html[data-theme='dark'] .pagina-experiencia.pagina-leitura-refinada .pagina-content-block:not(.pagina-flashcards-block) .pagina-list .pagina-list-marker {
+  color: #add5ff;
+  background: var(--dark-surface-3, #283d55);
+}

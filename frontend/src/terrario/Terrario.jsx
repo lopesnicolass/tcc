@@ -7,7 +7,9 @@ import { moverComDeslocamento, passouDoLimiteArrasto, clampPosition } from './dr
 import { construirJornada } from './jornada.js';
 import { salasVisiveisNoMapa, formatoMapa } from './mapaSalas.js';
 import { mensagemErroTerrario, validarEstadoTerrario } from './terrarioErrors.js';
+import GuiaTerrario, { chaveGuiaTerrario } from './GuiaTerrario.jsx';
 import './Terrario.css';
+import sementeTerrario from './assets/semente-terrario.png';
 
 import salaImg from './assets/ninho-atualizado.webp';
 import tennaAnimada from './assets/tenna-antenas.webp';
@@ -53,8 +55,10 @@ const ITEMS = [
   { id: 'guarda_roupa', name: 'Guarda-roupa de folhas', price: 20, img: guardaRoupaImg, width: 27, x: 59, y: 51, zone: 'chao', subtitle: 'Madeira aconchegante com detalhes de folhas' },
 ];
 
-const DURATIONS = [1, 15, 25, 45];
-const REWARDS = { 1: { sementes: 2, xp: 0 }, 15: { sementes: 5, xp: 10 }, 25: { sementes: 8, xp: 15 }, 45: { sementes: 12, xp: 20 } };
+const DURACOES_RAPIDAS = [15, 25, 45];
+const DURACAO_MINIMA = 1;
+const DURACAO_MAXIMA = 120;
+const ANEL_CIRCUNFERENCIA = 2 * Math.PI * 90;
 const TODOS_ITENS = [...ITEMS, ...ITEMS_SALA2, ...ITEMS_SALA3, ...ITEMS_SALA3_LEGADOS];
 // ALTERAÇÃO TEMPORÁRIA: salas visíveis e acessíveis só no modo de teste.
 // Para restaurar os bloqueios originais, altere para false ou remova esta condição.
@@ -104,12 +108,24 @@ export default function Terrario() {
   const [notice, setNotice] = useState('');
   const [now, setNow] = useState(() => Date.now());
   const [duration, setDuration] = useState(25);
+  const [durationDraft, setDurationDraft] = useState('25');
   const materia = 'Estudo livre';
   const [acknowledgedId, setAcknowledgedId] = useState(() => {
     try { return Number(localStorage.getItem(seenKey())) || null; }
     catch { return null; }
   });
   const [decorate, setDecorate] = useState(false);
+  // Guia simples na primeira visita, reaberto manualmente quando o aluno quiser.
+  const [guiaAberto, setGuiaAberto] = useState(false);
+  const [guiaEtapa, setGuiaEtapa] = useState(0);
+  const chaveGuia = useMemo(() => chaveGuiaTerrario(userKey()), []);
+  const verificouPrimeiraVisitaRef = useRef(false);
+  const abrirGuia = useCallback(() => { setGuiaEtapa(0); setGuiaAberto(true); }, []);
+  const fecharGuia = useCallback(() => {
+    setGuiaAberto(false);
+    try { window.localStorage.setItem(chaveGuia, '1'); } catch { /* Armazenamento opcional. */ }
+  }, [chaveGuia]);
+
   // Nesta versão de avaliação o modo livre já começa ativo.
   // Ao desligá-lo, a loja e o inventário oficiais continuam como antes.
   const [modoTeste, setModoTeste] = useState(true);
@@ -160,7 +176,6 @@ export default function Terrario() {
     try { return prepararPreviaCompletaSala3(lerTeste(window.localStorage, `${TEST_STORAGE_PREFIX}sala3_${userKey()}`, [...ITEMS_SALA3, ...ITEMS_SALA3_LEGADOS]), ITEMS_SALA3); }
     catch { return prepararPreviaCompletaSala3({ iniciado: false, visible: [], positions: {}, scales: {} }, ITEMS_SALA3); }
   });
-  const [confirmCancel, setConfirmCancel] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(1);
   const [selected, setSelected] = useState('vasinho');
   const [drag, setDrag] = useState(null);
@@ -170,9 +185,28 @@ export default function Terrario() {
   const stageRef2 = useRef(null);
   const stageRef3 = useRef(null);
   const viewportRef = useRef(null);
-  const decorDialogRef = useRef(null);
-  const decorCloseRef = useRef(null);
+  const sceneCardRef = useRef(null);
+  // A lista de móveis acompanha a altura real do terrário. A medição é da
+  // cena, não do catálogo, para que trocar de sala não faça o painel crescer.
+  const [alturaCatalogo, setAlturaCatalogo] = useState(0);
+  // O mapa é desenhado em 1280x1040; o zoom afeta somente a exibição,
+  // sem alterar as coordenadas percentuais nem as posições dos móveis.
+  const [zoomDecoracao, setZoomDecoracao] = useState(0.58);
   const salasRefs = useRef({});
+
+  useEffect(() => {
+    if (!decorate) return undefined;
+    const card = sceneCardRef.current;
+    if (!card) return undefined;
+    const atualizarAltura = () => {
+      const altura = Math.round(card.getBoundingClientRect().height);
+      if (altura > 0) setAlturaCatalogo((anterior) => anterior === altura ? anterior : altura);
+    };
+    atualizarAltura();
+    const observer = new ResizeObserver(atualizarAltura);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [decorate]);
   const panRef = useRef(null);
   const draggingRef = useRef(null);
 
@@ -219,7 +253,18 @@ export default function Terrario() {
     : session?.estado === 'pausada' ? 'paused'
     : completed ? 'completed' : 'idle';
   const active = status === 'running' || status === 'paused';
-  // Uma sessão restaurada pelo servidor tem prioridade sobre o editor modal.
+  useEffect(() => {
+    if (loading || !snapshot || verificouPrimeiraVisitaRef.current) return;
+    // Não interromper uma sessão já iniciada ou recuperada do servidor.
+    verificouPrimeiraVisitaRef.current = true;
+    if (status === 'running' || status === 'paused') return;
+    try {
+      if (window.localStorage.getItem(chaveGuia) === '1') return;
+    } catch { /* Se storage estiver bloqueado, o guia continua acessível. */ }
+    abrirGuia();
+  }, [loading, snapshot, status, chaveGuia, abrirGuia]);
+
+  // Uma sessão restaurada pelo servidor tem prioridade sobre a decoração.
   // Sem isso o cronômetro fica escondido por uma janela aberta anteriormente.
   useEffect(() => {
     if (!active) return;
@@ -230,7 +275,11 @@ export default function Terrario() {
   const remaining = active ? remainingFromServer(server, snapshot?.receivedAt, now)
     : status === 'completed' ? 0 : duration * 60;
   const progress = status === 'completed' ? 100
-    : clampPosition(Math.round((1 - remaining / (currentDuration * 60)) * 100), 0, 100);
+    : clampPosition((1 - remaining / (currentDuration * 60)) * 100, 0, 100);
+  const ringOffset = ANEL_CIRCUNFERENCIA * (1 - progress / 100);
+  const durationInputValida = /^\d+$/.test(durationDraft) &&
+    Number(durationDraft) >= DURACAO_MINIMA && Number(durationDraft) <= DURACAO_MAXIMA;
+  const podeEditarDuracao = !active && !busy && !loading && status !== 'completed';
   const animarTenna = deveAnimarTenna(status, decorate, remaining);
   const seeds = server?.sementes ?? 0;
   const validSessions = server?.sessoesValidas ?? 0;
@@ -256,10 +305,42 @@ export default function Terrario() {
   // uma delas é renderizada no modo foco. No modo decorar, incluem bloqueadas.
   const salasParaNavegacao = jornada.salas.filter((sala) => decorate || sala.conquistada);
   const formatoDoMapa = formatoMapa(salasDoMapa);
+  const mapaEmPiramide = decorate && formatoDoMapa === 'piramide';
+  const mapaDimensoes = mapaEmPiramide
+    ? { largura: 1280, altura: 1040 }
+    : { largura: 1280, altura: 605 };
+
+  // No editor, o mapa usa a largura útil do cenário e cresce verticalmente.
+  // Limitar pela altura da janela deixava as três salas pequenas demais em
+  // notebooks; a página pode rolar normalmente, sem barras dentro do mapa.
+  // Os móveis mantêm suas coordenadas percentuais em cada sala.
+  useEffect(() => {
+    if (!decorate || formatoDoMapa === 'individual') return undefined;
+    const viewport = viewportRef.current;
+    if (!viewport) return undefined;
+    const ajustarZoom = () => {
+      const larguraUtil = Math.max(0, viewport.clientWidth - 20);
+      if (!larguraUtil) return;
+      const proximoZoom = Math.max(0.1, Math.min(1, larguraUtil / mapaDimensoes.largura));
+      setZoomDecoracao((anterior) =>
+        Math.abs(anterior - proximoZoom) < 0.001 ? anterior : proximoZoom);
+    };
+    ajustarZoom();
+    const observer = new ResizeObserver(ajustarZoom);
+    observer.observe(viewport);
+    window.addEventListener('resize', ajustarZoom);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', ajustarZoom);
+    };
+  }, [decorate, formatoDoMapa, mapaDimensoes.largura]);
 
   // Centraliza a sala escolhida sem rolar a página inteira; há navegação
   // por botões, mouse, rolagem e toque (inclusive nas telas pequenas).
   useEffect(() => {
+    // No modo decorar o mapa inteiro fica à vista: não centralizar ou
+    // movimentar a janela ao selecionar outra sala.
+    if (decorate) return;
     const viewport = viewportRef.current;
     const sala = salasRefs.current[selectedRoom];
     if (!viewport || !sala) return;
@@ -270,10 +351,10 @@ export default function Terrario() {
       top: Math.max(0, margemSuperior),
       behavior: 'auto',
     });
-  }, [selectedRoom, formatoDoMapa, jornada.totalConquistadas]);
+  }, [decorate, selectedRoom, formatoDoMapa, jornada.totalConquistadas]);
 
   function alternarDecoracao() {
-    // Durante uma sessão ativa, o cronômetro não deve ficar atrás do editor.
+    // Uma sessão de foco ativa mantém o cronômetro disponível.
     if (active && !decorate) return;
     // Entrar no modo decoração não deve voltar à Sala 1 quando o usuário
     // está organizando a Sala 2 ou a Sala 3.
@@ -282,47 +363,8 @@ export default function Terrario() {
     setDrag(null);
   }
 
-  // A personalização se comporta como uma janela modal: bloqueia o scroll da
-  // página, recebe o foco e pode ser fechada por Escape sem perder posições.
-  useEffect(() => {
-    if (!decorate) return undefined;
-    const previousOverflow = document.body.style.overflow;
-    const previousFocus = document.activeElement;
-    document.body.style.overflow = 'hidden';
-    decorCloseRef.current?.focus();
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        setDecorate(false);
-        setDrag(null);
-        return;
-      }
-      if (event.key !== 'Tab') return;
-      const container = decorDialogRef.current;
-      if (!container) return;
-      const focusables = [...container.querySelectorAll('button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), [tabindex="0"]')]
-        .filter((node) => node.getClientRects().length > 0);
-      if (!focusables.length) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (event.shiftKey && (document.activeElement === first || !container.contains(document.activeElement))) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || !container.contains(document.activeElement))) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('keydown', onKeyDown);
-      if (previousFocus?.isConnected && typeof previousFocus.focus === 'function') previousFocus.focus();
-    };
-  }, [decorate]);
-
   function iniciarNavegacao(evt) {
-    if (evt.pointerType !== 'mouse' || evt.button !== 0 || evt.target.closest('button, a, input, select')) return;
+    if (decorate || evt.pointerType !== 'mouse' || evt.button !== 0 || evt.target.closest('button, a, input, select')) return;
     const viewport = evt.currentTarget;
     panRef.current = {
       id: evt.pointerId, x: evt.clientX, y: evt.clientY,
@@ -359,9 +401,11 @@ export default function Terrario() {
   useEffect(() => {
     const refresh = () => { if (!document.hidden) void loadStatus(); };
     window.addEventListener('focus', refresh);
+    window.addEventListener('tenna:focus-updated', refresh);
     document.addEventListener('visibilitychange', refresh);
     return () => {
       window.removeEventListener('focus', refresh);
+      window.removeEventListener('tenna:focus-updated', refresh);
       document.removeEventListener('visibilitychange', refresh);
     };
   }, [loadStatus]);
@@ -373,7 +417,6 @@ export default function Terrario() {
     if (action === 'iniciar' || action === 'continuar') setDecorate(false);
     busyRef.current = true;
     setBusy(true);
-    setConfirmCancel(false);
     setError('');
     const sequence = ++sequenceRef.current;
     try {
@@ -386,10 +429,10 @@ export default function Terrario() {
       const data = await request(path, options);
       if (sequence !== sequenceRef.current) return;
       applyResponse(data);
-      setNotice(action === 'pausar' ? 'A sessão foi pausada e seu tempo está guardado.'
-        : action === 'cancelar' ? 'Sessão encerrada sem perder suas conquistas.'
-        : action === 'continuar' ? 'Boa sessão! A Tenna voltou a estudar.'
-        : 'Sessão iniciada. Bons estudos!');
+      window.dispatchEvent(new CustomEvent('tenna:focus-updated', { detail: data }));
+      // O andamento do foco aparece uma só vez abaixo dos botões.
+      // Mensagens de ações não devem duplicar o estado do cronômetro.
+      setNotice('');
     } catch (e) {
       if (sequence === sequenceRef.current) setError(mensagemErroTerrario(e));
     } finally {
@@ -398,10 +441,33 @@ export default function Terrario() {
     }
   }
 
+  function ajustarDuracaoEscolhida(valor) {
+    const numero = Number(valor);
+    const minutos = Number.isFinite(numero)
+      ? Math.min(DURACAO_MAXIMA, Math.max(DURACAO_MINIMA, Math.trunc(numero)))
+      : duration;
+    setDuration(minutos);
+    setDurationDraft(String(minutos));
+  }
+
+  function editarDuracaoDigitada(valor) {
+    if (!/^\d*$/.test(valor)) return;
+    setDurationDraft(valor);
+    const minutos = Number(valor);
+    if (valor !== '' && minutos >= DURACAO_MINIMA && minutos <= DURACAO_MAXIMA) {
+      setDuration(minutos);
+    }
+  }
+
+  function confirmarDuracaoDigitada() {
+    ajustarDuracaoEscolhida(durationDraft === '' ? duration : Number(durationDraft));
+  }
+
   function acknowledgeCompletion() {
     if (!session?.id) return;
     setAcknowledgedId(session.id);
     setDuration(session.duracao);
+    setDurationDraft(String(session.duracao));
     setNotice('');
     try { localStorage.setItem(seenKey(), String(session.id)); } catch { /* Opcional */ }
   }
@@ -688,12 +754,12 @@ export default function Terrario() {
     <main className={`terr-page ${status === 'running' ? 'is-focusing' : ''} ${decorate ? 'is-decorating' : ''}`}>
       <header className="terr-header">
         <div className="terr-header-copy">
-          <span className="terr-eyebrow">UM CANTINHO SÓ SEU · TERRÁRIO DA TENNA</span>
+          <span className="terr-eyebrow">UM CANTINHO SÓ SEU</span>
           <h1>Um pequeno ninho. Grandes conquistas.</h1>
           <p>Estude com a Tenna, ganhe sementes e evolua ao longo da sua jornada.</p>
         </div>
         <div className="terr-header-stats">
-          <div className="terr-wallet"><span aria-hidden="true">🌱</span><div><strong>{seeds}</strong><small>Sementes</small></div></div>
+          <div className="terr-wallet"><span className="terr-seed-icon" aria-hidden="true"><img src={sementeTerrario} alt="" /></span><div><strong>{seeds}</strong><small>Sementes</small></div></div>
           <div className="terr-level"><span>NÍVEL DO ALUNO</span><strong>{level} · {title}</strong></div>
         </div>
       </header>
@@ -704,36 +770,17 @@ export default function Terrario() {
           <button type="button" onClick={() => { setError(''); void loadStatus(); }}>Tentar novamente</button>
         </div>
       )}
-      {decorate && <div className="terr-decor-backdrop" aria-hidden="true" onClick={alternarDecoracao} />}
-      <div className={decorate ? 'terr-decor-dialog' : 'terr-main-content'}
-        ref={decorDialogRef} role={decorate ? 'dialog' : undefined}
-        aria-modal={decorate ? 'true' : undefined}
-        aria-labelledby={decorate ? 'terr-decor-dialog-title' : undefined}>
-        {decorate && (
-          <header className="terr-decor-dialog-header">
-            <div>
-              <span className="terr-kicker">PERSONALIZE SEU FORMIGUEIRO</span>
-              <h2 id="terr-decor-dialog-title">Meu cantinho, meu jeito</h2>
-              <p>Escolha a sala, arraste os móveis e monte o seu ambiente.</p>
-            </div>
-            <div className="terr-decor-header-actions">
-              <button type="button" className="terr-decor-to-focus" onClick={() => { setDecorate(false); setDrag(null); }}>
-                ◷ Ir para o foco
-              </button>
-              <button type="button" className="terr-decor-close" ref={decorCloseRef} onClick={alternarDecoracao}>
-                ✓ Concluir decoração
-              </button>
-            </div>
-          </header>
-        )}
       <div className="terr-layout">
-        <section className="terr-scene-card" aria-labelledby="terr-scene-title">
+        <section className="terr-scene-card" ref={sceneCardRef} aria-labelledby="terr-scene-title">
           <div className="terr-scene-topbar">
-            <div className="terr-scene-heading"><span className="terr-kicker">SEU FORMIGUEIRO · {decorate ? 'MODO DE PERSONALIZAÇÃO' : status === 'running' ? 'MODO FOCO' : 'MODO DE VISUALIZAÇÃO'}</span><h2 id="terr-scene-title">{decorate ? 'Decore seu formigueiro' : 'O cantinho da Tenna'}</h2><p>{decorate ? 'Veja as três salas juntas e organize os móveis do seu formigueiro.' : status === 'running' ? 'Uma sala por vez, cronômetro ativo e menos distrações na tela.' : 'Escolha uma sala para visualizar o seu cantinho com a Tenna.'}</p></div>
+            <div className="terr-scene-heading"><h2 id="terr-scene-title">{decorate ? 'Organize seu cantinho' : 'O cantinho da Tenna'}</h2></div>
             <div className="terr-scene-actions">
-              <span className={`terr-status ${status === 'running' ? 'is-working' : ''}`}><span />{status === 'running' ? 'Tenna focada' : status === 'paused' ? 'Foco pausado' : 'Tenna em casa'}</span>
+              <button type="button" className="terr-guide-trigger" onClick={abrirGuia}
+                aria-haspopup="dialog" aria-controls="terr-guia-dialog" disabled={status === 'running'}>
+                <span aria-hidden="true">?</span> Como funciona?
+              </button>
               <button type="button" className={`terr-decorate-button ${decorate ? 'active' : ''}`} onClick={alternarDecoracao} disabled={status === 'running' || (!modoTeste && (busy || loading))} aria-pressed={decorate}>
-                {decorate ? '✓ Terminar decoração' : '✦ Decorar sala'}
+                {decorate ? 'Concluir decoração' : '✦ Decorar sala'}
               </button>
             </div>
           </div>
@@ -756,37 +803,47 @@ export default function Terrario() {
             </div>
           )}
           <div className="terr-scene-shell">
-            <div className="terr-world-toolbar" aria-label="Navegação do formigueiro">
-              <span className="terr-world-hint">{decorate ? '↔ Explore o formigueiro completo e selecione uma sala para decorar' : modoTeste && selectedRoom === 3 ? 'Sala 3 · Arraste os móveis; use “Decorar sala” para mudar o tamanho' : 'Uma sala por vez · escolha a sala nos botões ao lado'}</span>
-              <div className="terr-world-room-buttons" role="group" aria-label="Escolher uma sala do formigueiro">
-                {salasParaNavegacao.map((sala) => (
-                  <button key={sala.numero} type="button"
-                    className={selectedRoom === sala.numero ? 'active' : ''}
-                    onClick={() => setSelectedRoom(sala.numero)} aria-pressed={selectedRoom === sala.numero}>
-                    {previaLiberada ? '👁' : sala.conquistada ? '◉' : '🔒'} Sala {sala.numero}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={`terr-world-viewport is-${formatoDoMapa}`}
+            <div className={`terr-world-viewport is-${formatoDoMapa} ${decorate && formatoDoMapa !== 'individual' ? 'is-fitted' : ''}`}
+              style={decorate && formatoDoMapa !== 'individual' ? { height: `${Math.ceil(mapaDimensoes.altura * zoomDecoracao) + 8}px` } : undefined}
               tabIndex={0} role="region" aria-label={decorate ? 'Mapa do formigueiro para decoração' : `Sala ${selectedRoom} do formigueiro`}
               ref={viewportRef} onPointerDown={iniciarNavegacao}
               onPointerMove={moverNavegacao} onPointerUp={terminarNavegacao}
               onPointerCancel={terminarNavegacao}>
-              <div className={`terr-world-board is-${formatoDoMapa}`}>
+              <nav className="terr-world-toolbar" aria-label="Navegação entre as salas">
+                <span className="terr-world-hint">{decorate ? 'Selecione uma sala para decorar' : 'Escolha a sala para visualizar'}</span>
+                <div className="terr-world-room-buttons" role="group" aria-label="Selecionar sala">
+                  {salasParaNavegacao.map((sala) => (
+                    <button key={sala.numero} type="button"
+                      className={selectedRoom === sala.numero ? 'active' : ''}
+                      onClick={() => setSelectedRoom(sala.numero)}
+                      aria-label={`Sala ${sala.numero}: ${sala.nome}${sala.conquistada ? '' : ', bloqueada'}`}
+                      aria-pressed={selectedRoom === sala.numero}>
+                      <span className="terr-room-tab-index" aria-hidden="true">{String(sala.numero).padStart(2, '0')}</span>
+                      <span className="terr-room-tab-label" aria-hidden="true">{sala.numero === 1 ? 'Ninho' : sala.numero === 2 ? 'Estudos' : 'Prova'}</span>
+                      {!sala.conquistada && <span className="terr-room-tab-lock" aria-hidden="true">🔒</span>}
+                    </button>
+                  ))}
+                </div>
+              </nav>
+              <div className={decorate && formatoDoMapa !== 'individual' ? 'terr-world-fit' : 'terr-world-unscaled'}
+                style={decorate && formatoDoMapa !== 'individual' ? {
+                  width: `${mapaDimensoes.largura * zoomDecoracao}px`,
+                  height: `${mapaDimensoes.altura * zoomDecoracao}px`,
+                } : undefined}>
+                <div className={`terr-world-board is-${formatoDoMapa}`}
+                  style={decorate && formatoDoMapa !== 'individual' ? {
+                    transform: `scale(${zoomDecoracao})`,
+                    transformOrigin: 'top left',
+                    margin: 0,
+                  } : undefined}>
                 {salasDoMapa.map((sala) => (
                   <section key={sala.numero}
                     ref={(elemento) => { salasRefs.current[sala.numero] = elemento; }}
                     className={`terr-world-room terr-world-room-${sala.numero} ${sala.conquistada ? 'is-unlocked' : 'is-locked'} ${selectedRoom === sala.numero ? 'is-current' : ''}`}
                     aria-label={`Sala ${sala.numero}, ${sala.nome}: ${sala.conquistada ? 'liberada' : 'bloqueada'}`}>
-                    <div className="terr-world-room-heading">
-                      <span>SALA {String(sala.numero).padStart(2, '0')} · {sala.nome}</span>
-                      <span>{previaLiberada ? '👁 Prévia' : sala.conquistada ? '✓ Liberada' : '🔒 Bloqueada'}</span>
-                    </div>
                     {sala.numero === 1 ? (
                       <div className={`terr-scene ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef}>
                         <img className="terr-scene-background" src={salaImg} alt="Ninho subterrâneo com raízes e espaço para decoração" draggable="false" />
-                        <div className="terr-scene-story" aria-hidden="true">{status === 'running' ? 'Shhh... a Tenna está estudando!' : status === 'completed' ? 'Boa! Mais uma sessão concluída!' : status === 'paused' ? 'Descansar também faz parte!' : 'Nosso primeiro cantinho 🌱'}</div>
                         {sortedItems.map((item) => {
                           const pos = drag?.id === item.id ? drag : decorSala1.positions[item.id];
                           return (
@@ -802,9 +859,11 @@ export default function Terrario() {
                             </button>
                           );
                         })}
-                        <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
-                        {active && <div className="terr-inroom-timer" role="timer">{status === 'paused' ? 'Pausa' : 'Foco'} · {formatTime(remaining)}</div>}
-                        {decorate && <div className="terr-decor-hint">{modoTeste ? 'TESTE LIVRE · ' : ''}Toque em um móvel para ajustar o tamanho. Arraste ou use as setas para mover</div>}
+                        {selectedRoom === sala.numero && (
+                          <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
+                        )}
+
+                        
                       </div>
                     ) : sala.numero === 2 && sala.conquistada ? (
                       <div className={`terr-scene terr-scene-empty ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef2} aria-label="Sala 2 — Refúgio do Conhecimento">
@@ -824,9 +883,11 @@ export default function Terrario() {
                             </button>
                           );
                         })}
-                        <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
+                        {selectedRoom === sala.numero && (
+                          <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
+                        )}
                         {roomItems2.length === 0 && <span className="terr-empty-room-message">Um novo cantinho para construir 🌱</span>}
-                        {decorate && selectedRoom === 2 && <div className="terr-decor-hint">{modoTeste ? 'TESTE LIVRE · ' : ''}Arraste os móveis ou use as setas para mover</div>}
+                        
                       </div>
                     ) : sala.numero === 3 && sala.conquistada ? (
                       <div className={`terr-scene terr-scene-empty ${decorate ? 'in-decorating-mode' : ''}`} ref={stageRef3} aria-label="Sala 3 — Sala do Desafio Final">
@@ -848,9 +909,11 @@ export default function Terrario() {
                             </button>
                           );
                         })}
-                        <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
+                        {selectedRoom === sala.numero && (
+                          <div className="terr-character" style={{ zIndex: 68 }}><TennaAnt animar={animarTenna} /></div>
+                        )}
                         {roomItems3.length === 0 && <span className="terr-empty-room-message">Escolha os móveis para montar sua sala de prova 📝</span>}
-                        {decorate && selectedRoom === 3 && <div className="terr-decor-hint">{modoTeste ? 'TESTE LIVRE · ' : ''}Arraste os móveis ou use as setas para mover</div>}
+                        
                       </div>
                     ) : (
                       <div className={`terr-world-preview ${sala.conquistada ? 'is-unlocked' : 'is-locked'}`}>
@@ -865,130 +928,103 @@ export default function Terrario() {
                     )}
                   </section>
                 ))}
-              </div>
-            </div>
-            <p className="terr-world-footnote">{decorate ? (previaLiberada ? 'Modo de teste: o mapa mostra as três salas e permite decorar sem gastar sementes.' : 'Modo decoração: o formigueiro aparece completo; salas bloqueadas podem ser visualizadas, mas não decoradas.') : (previaLiberada ? 'Modo de teste: escolha Sala 1, 2 ou 3 para visualizar uma de cada vez. Use Decorar sala para ver o formigueiro completo.' : 'Modo visualização: somente a sala selecionada aparece. A Tenna se anima ao iniciar uma sessão de foco.')}</p>
-          </div>
-          <div className="terr-scene-bottom">
-            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMA SALA</span><strong>{jornada.terceiraConquistada ? 'Todas as salas liberadas' : jornada.segundaConquistada ? 'Sala do Desafio Final' : 'Refúgio do Conhecimento'}</strong><small>{previaLiberada ? 'Disponível para experimentar no modo de teste.' : jornada.terceiraConquistada ? 'As três salas já foram conquistadas.' : jornada.segundaConquistada ? `Faltam ${jornada.faltamSala3} sessões válidas para liberar a Sala 3` : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar`}</small></div></div>
-            <div className="terr-room-progress"><div><span>{jornada.progresso} de {jornada.objetivo} sessões</span><strong>{jornada.percentual}%</strong></div><div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }}/></div></div>
-          </div>
-        </section>
-
-        <aside className="terr-sidebar">
-          <section className="terr-sidecard terr-timer-card" aria-labelledby="terr-timer-heading">
-            <span className="terr-kicker">ESTUDE COM A TENNA</span>
-            <h2 id="terr-timer-heading">Hora do foco</h2>
-            <p>Sem seleção de matéria: escolha só o tempo e comece. O cronômetro salva o andamento da sessão. Você pode pausar e retomar quando precisar.</p>
-            <div className="terr-timer-clock" style={{ '--progress': `${progress}%` }} role="timer" aria-label={`Restam ${formatTime(remaining)}`}>
-              <div className="terr-timer-inner"><strong>{formatTime(remaining)}</strong><span>{loading ? 'CARREGANDO' : busy ? 'ATUALIZANDO' : status === 'running' ? 'FOCANDO' : status === 'paused' ? 'EM PAUSA' : status === 'completed' ? 'CONCLUÍDO!' : 'PRONTO PARA COMEÇAR'}</span></div>
-            </div>
-            <div className="terr-focus-ritual" aria-label="Preparação rápida para o foco">
-              <strong>Antes de começar</strong>
-              <ul>
-                <li>Deixe apenas o material necessário aberto.</li>
-                <li>Silencie notificações e distrações.</li>
-                <li>Use a Tenna como companhia e foque até o fim do tempo.</li>
-              </ul>
-            </div>
-            <div className="terr-duration-label">Duração da sessão</div>
-            <div className="terr-duration-options">
-              {DURATIONS.map((minutes) => <button key={minutes} type="button"
-                disabled={active || busy || loading || status === 'completed'} className={minutes === currentDuration ? 'active' : ''}
-                onClick={() => setDuration(minutes)}>{minutes} min</button>)}
-            </div>
-            <small className="terr-test-note">1 minuto: demonstração (+2 sementes, sem XP ou avanço de sala). Sessões de 15 min ou mais contam para a jornada.</small>
-            <div className="terr-timer-buttons">
-              {status === 'running' ? (
-                <button type="button" className="terr-primary" disabled={busy || loading} onClick={() => { void sendAction('pausar'); }}>Pausar sessão</button>
-              ) : status === 'paused' ? (
-                <button type="button" className="terr-primary" disabled={busy || loading} onClick={() => { void sendAction('continuar'); }}>Retomar sessão</button>
-              ) : status === 'completed' ? (
-                <button type="button" className="terr-primary" disabled={busy || loading} onClick={acknowledgeCompletion}>Preparar nova sessão</button>
-              ) : (
-                <button type="button" className="terr-primary" disabled={busy || loading || !server} onClick={() => { void sendAction('iniciar'); }}>Começar foco</button>
-              )}
-              {active && <button type="button" className="terr-secondary" disabled={busy || loading} onClick={() => setConfirmCancel(true)}>Encerrar</button>}
-            </div>
-            {confirmCancel && active && (
-              <div className="terr-confirm-cancel" role="group" aria-label="Confirmar encerramento da sessão">
-                <p>Encerrar esta sessão? O tempo atual não dará recompensa, mas suas conquistas anteriores continuam salvas.</p>
-                <div>
-                  <button type="button" className="terr-cancel-back" onClick={() => setConfirmCancel(false)}>Continuar estudando</button>
-                  <button type="button" className="terr-cancel-confirm" disabled={busy} onClick={() => { void sendAction('cancelar'); }}>Sim, encerrar</button>
                 </div>
               </div>
-            )}
-            {status === 'completed' ? (
-              <div className="terr-focus-summary" role="status">
-                <strong>🎉 Sessão concluída!</strong>
-                <span>{session.materia} · {session.duracao} minutos de foco</span>
-                <div><span>🌱 +{session.sementesRecebidas} sementes</span><span>✦ +{session.xpRecebido} XP</span></div>
-                <small>Recompensa registrada na sua conta.</small>
-              </div>
-            ) : (
-              <div className="terr-session-feedback" role="status">
-                {status === 'paused' ? 'Seu tempo está salvo no servidor. Volte quando quiser.'
-                  : status === 'running' ? `${session.materia} · Fique à vontade para sair e voltar: o progresso continua salvo.`
-                  : `Ao concluir: até +${REWARDS[duration].sementes} sementes${REWARDS[duration].xp ? ` e +${REWARDS[duration].xp} XP` : ''}, respeitando os limites diários.`}
-              </div>
-            )}
-            {notice && <div className="terr-inline-notice" role="status">{notice}</div>}
-          </section>
-          <section className="terr-sidecard terr-stats-card">
-            <div><span className="terr-stat-emoji">✦</span><strong>{validSessions}</strong><small>Sessões válidas</small></div>
-            <div><span className="terr-stat-emoji">◷</span><strong>{focusMinutes} min</strong><small>Tempo de foco</small></div>
-          </section>
-        </aside>
-      </div>
-
-      {!decorate && (
-      <section className="terr-overview-grid" aria-label="Resumo do foco e da sala">
-        <article className="terr-overview-card">
-          <div className="terr-overview-head">
-            <div>
-              <span className="terr-kicker">SALA ATUAL</span>
-              <h3>{roomDetail.nome}</h3>
             </div>
-            <span className="terr-overview-badge">Sala {roomDetail.numero}</span>
-          </div>
-          <p>{roomDetail.descricao}</p>
-          <div className="terr-overview-progress">
-            <div><span>Progresso da jornada</span><strong>{jornada.percentual}%</strong></div>
-            <div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }} /></div>
-            {!jornada.terceiraConquistada && <small>{jornada.segundaConquistada ? `Faltam ${jornada.faltamSala3} sessões válidas para a Sala 3.` : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar a próxima sala.`}</small>}
-          </div>
-        </article>
-        <article className="terr-overview-card terr-overview-card-focus">
-          <div className="terr-overview-head">
-            <div>
-              <span className="terr-kicker">PERSONALIZAÇÃO</span>
-              <h3>{tituloCatalogo}</h3>
-            </div>
-            <span className="terr-overview-badge">{salaSelecionadaPodeDecorar ? `${totalItensSalaSelecionada} itens` : 'Bloqueado'}</span>
-          </div>
-          <p>{resumoCatalogo}</p>
-          <div className="terr-overview-actions">
-            <button type="button" className="terr-decorate-button" onClick={() => { if (salaSelecionadaPodeDecorar) setDecorate(true); }}>
-              {salaSelecionadaPodeDecorar ? 'Abrir catálogo' : 'Continuar jornada'}
-            </button>
-          </div>
-        </article>
-      </section>
 
-      )}
+          </div>
+          {!decorate && !previaLiberada && !jornada.terceiraConquistada && <div className="terr-scene-bottom">
+            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMA SALA</span><strong>{jornada.terceiraConquistada ? 'Todas as salas liberadas' : jornada.segundaConquistada ? 'Sala do Desafio Final' : 'Refúgio do Conhecimento'}</strong><small>{previaLiberada ? 'Disponível para experimentar no modo de teste.' : jornada.terceiraConquistada ? 'As três salas já foram conquistadas.' : jornada.segundaConquistada ? `Faltam ${jornada.faltamSala3} sessões válidas para liberar a Sala 3` : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar`}</small></div></div>
+            <div className="terr-room-progress"><div><span>{jornada.progresso} de {jornada.objetivo} sessões</span><strong>{jornada.percentual}%</strong></div><div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }}/></div></div>
+          </div>}
+        </section>
+
+        {!decorate && <aside className="terr-sidebar">
+          <section className={`terr-sidecard terr-timer-card is-${status}`} aria-labelledby="terr-timer-heading">
+            <div className="terr-timer-heading">
+              <span className="terr-kicker">ESTUDE COM A TENNA</span>
+              <h2 id="terr-timer-heading">Hora do foco</h2>
+              <p>Escolha o tempo e comece a estudar.</p>
+            </div>
+            <div className={`terr-timer-clock is-${status}`} role="timer" aria-label={`Restam ${formatTime(remaining)}. ${Math.round(progress)}% da sessão concluído.`}>
+              <svg className="terr-timer-ring" viewBox="0 0 220 220" aria-hidden="true" focusable="false">
+                <circle className="terr-timer-ring-track" cx="110" cy="110" r="90" />
+                <circle className="terr-timer-ring-progress" cx="110" cy="110" r="90"
+                  strokeDasharray={ANEL_CIRCUNFERENCIA}
+                  strokeDashoffset={ringOffset} />
+              </svg>
+              <div className="terr-timer-inner"><strong>{formatTime(remaining)}</strong><span>{loading ? 'CARREGANDO' : busy ? 'ATUALIZANDO' : status === 'running' ? 'FOCANDO' : status === 'paused' ? 'EM PAUSA' : status === 'completed' ? 'CONCLUÍDO!' : 'PRONTO'}</span></div>
+            </div>
+            <div className={`terr-focus-controls ${active ? 'is-active-session' : ''}`}>
+              {!active && status !== 'completed' ? (
+                <div className="terr-duration-setup">
+                  <div className="terr-duration-label" id="terr-duration-heading">Duração da sessão</div>
+                  <div className="terr-duration-presets" role="group" aria-label="Durações rápidas">
+                    {DURACOES_RAPIDAS.map((minutes) => (
+                      <button key={minutes} type="button"
+                        aria-pressed={currentDuration === minutes}
+                        className={currentDuration === minutes ? 'active' : ''}
+                        disabled={!podeEditarDuracao}
+                        onClick={() => ajustarDuracaoEscolhida(minutes)}>{minutes} min</button>
+                    ))}
+                  </div>
+                  <div className="terr-duration-picker" role="group" aria-label="Personalizar duração">
+                    <button type="button" className="terr-duration-step" aria-label="Diminuir um minuto"
+                      disabled={!podeEditarDuracao || duration <= DURACAO_MINIMA}
+                      onClick={() => ajustarDuracaoEscolhida(duration - 1)}>−</button>
+                    <div className="terr-duration-value">
+                      <input type="number" min={DURACAO_MINIMA} max={DURACAO_MAXIMA} step="1"
+                        inputMode="numeric" aria-label="Minutos de foco" value={durationDraft}
+                        disabled={!podeEditarDuracao}
+                        onChange={(event) => editarDuracaoDigitada(event.target.value)}
+                        onBlur={confirmarDuracaoDigitada}
+                        onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur(); }} />
+                      <span>min</span>
+                    </div>
+                    <button type="button" className="terr-duration-step" aria-label="Aumentar um minuto"
+                      disabled={!podeEditarDuracao || duration >= DURACAO_MAXIMA}
+                      onClick={() => ajustarDuracaoEscolhida(duration + 1)}>+</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="terr-duration-session" aria-live="off">
+                  {status === 'completed' ? `${currentDuration} min de estudo concluídos` : `Sessão de ${currentDuration} min ${status === 'paused' ? '· em pausa' : '· em andamento'}`}
+                </div>
+              )}
+              {(status === 'completed' || status === 'paused') && (
+                <div className="terr-focus-status-slot" aria-live="polite">
+                  {status === 'completed' ? (
+                    <div className="terr-focus-summary" role="status">
+                      <strong>🎉 Sessão concluída!</strong>
+                      <div><span>🌱 +{session.sementesRecebidas} sementes</span><span>✦ +{session.xpRecebido} XP</span></div>
+                    </div>
+                  ) : (
+                    <p className="terr-focus-one-status" role="status">Sessão pausada. Seu tempo foi guardado.</p>
+                  )}
+                </div>
+              )}
+              <div className="terr-timer-buttons">
+                {status === 'running' ? (
+                  <button type="button" className="terr-primary" disabled={busy || loading} onClick={() => { void sendAction('pausar'); }}>Pausar</button>
+                ) : status === 'paused' ? (
+                  <button type="button" className="terr-primary" disabled={busy || loading} onClick={() => { void sendAction('continuar'); }}>Retomar</button>
+                ) : status === 'completed' ? (
+                  <button type="button" className="terr-primary" disabled={busy || loading} onClick={acknowledgeCompletion}>Nova sessão</button>
+                ) : (
+                  <button type="button" className="terr-primary" disabled={busy || loading || !server || !durationInputValida} onClick={() => { void sendAction('iniciar'); }}>Começar foco</button>
+                )}
+                {active && <button type="button" className="terr-secondary" disabled={busy || loading} onClick={() => { void sendAction('cancelar'); }}>Encerrar</button>}
+              </div>
+            </div>
+          </section>
+        </aside>}
 
       {decorate && (
-      <section className="terr-inventory" aria-labelledby="terr-inventory-heading">
+      <section className="terr-inventory" aria-labelledby="terr-inventory-heading"
+        style={decorate && alturaCatalogo > 0 ? { '--terr-catalog-height': `${alturaCatalogo}px` } : undefined}>
         <div className="terr-inventory-header"><div>
-          <span className="terr-kicker">SALA {String(selectedRoom).padStart(2, '0')} · PERSONALIZAÇÃO</span>
-          <h2 id="terr-inventory-heading">{selectedRoom === 1 ? 'Crie seu cantinho' : roomDetail.nome}</h2>
-          <p>{selectedRoom === 1
-            ? (modoTeste ? 'Decore o Ninho Inicial livremente no modo de teste.' : 'Compre móveis aconchegantes e salve a decoração na sua conta.')
-            : roomDetail.conquistada
-              ? (modoTeste ? `Experimente os ${totalItensSalaSelecionada} itens desta sala sem gastar sementes.` : 'Escolha e organize os móveis exclusivos desta sala.')
-              : 'Esta sala ainda está bloqueada. Continue estudando para avançar na jornada.'}</p>
-        </div><span className="terr-inventory-balance">{modoTeste && roomDetail.conquistada ? `✦ ${totalItensSalaSelecionada} itens para testes` : `🌱 ${seeds} sementes`}</span></div>
+          <h2 id="terr-inventory-heading">Móveis da {roomDetail.nome}</h2>
+        </div><span className="terr-inventory-balance">{modoTeste ? `${totalItensSalaSelecionada} itens` : `🌱 ${seeds} sementes`}</span></div>
         {modoTeste && salaSelecionadaPodeDecorar && (
           <div className="terr-decor-quick-actions" aria-label="Ferramentas de teste da sala">
             <button type="button" onClick={preencherSalaTeste}>{selectedRoom === 1 ? 'Preencher sala' : 'Montar ambiente'}</button>
@@ -996,14 +1032,15 @@ export default function Terrario() {
           </div>
         )}
         {salaSelecionadaPodeDecorar ? <>
-        <div className="terr-items-grid">
+        <div className="terr-items-scroll" tabIndex={0} role="region" aria-label={`Móveis disponíveis para ${roomDetail.nome}`}>
+          <div className="terr-items-grid">
           {itensDaSala(selectedRoom).map((item) => {
             const itemOwned = isOwned(item.id);
             const visible = decor.visible.includes(item.id);
             return (
               <article key={item.id} className={`terr-item-card ${selected === item.id ? 'active' : ''} ${itemOwned ? 'is-owned' : ''} ${visible ? 'is-placed' : ''}`}>
                 <button type="button" className="terr-item-preview" onClick={() => { setSelected(item.id); if (itemOwned) { setSelectedRoom(salaDoItem(item.id)); setDecorate(true); } }} aria-label={`Selecionar ${item.name}`}><img src={item.img} alt="" loading="lazy"/></button>
-                <div className="terr-item-desc"><strong>{item.name}</strong><small>{ehMovelDeEstudoAntigo(item.id) ? 'Item preservado de versões anteriores' : item.subtitle}</small></div>
+                <div className="terr-item-desc"><strong>{item.name}</strong></div>
                 <div className="terr-item-bottom"><span className={itemOwned ? 'terr-owned-label' : 'terr-cost-label'}>{ehMovelDeEstudoAntigo(item.id) ? '✓ Item preservado' : modoTeste ? '✦ Teste grátis' : itemOwned ? '✓ Desbloqueado' : `🌱 ${item.price}`}</span>
                   <button type="button" disabled={!modoTeste && (busy || loading || !server || (!itemOwned && seeds < item.price))}
                     title={!modoTeste && !itemOwned && seeds < item.price ? 'Sementes insuficientes' : undefined}
@@ -1014,11 +1051,9 @@ export default function Terrario() {
               </article>
             );
           })}
+          </div>
         </div>
-        <div className="terr-inventory-foot">
-          <span role="status">{selectedVisible ? `${selectedItem.name}: arraste, use as setas e ajuste o tamanho no painel acima do cenário.` : modoTeste ? 'Teste à vontade: os itens desta sala ficam apenas neste navegador.' : 'Compre com sementes e salve a organização da sua sala.'}</span>
-          <button type="button" onClick={alternarDecoracao}>Concluir decoração</button>
-        </div>
+
         </> : <div className="terr-inventory-empty">
           <span aria-hidden="true">{roomDetail.conquistada ? '🌱' : '🔒'}</span>
           <strong>{roomDetail.conquistada ? 'Sua sala começa vazia' : 'Sala bloqueada'}</strong>
@@ -1028,6 +1063,8 @@ export default function Terrario() {
       </section>
       )}
       </div>
+      {guiaAberto && <GuiaTerrario etapa={guiaEtapa} definirEtapa={setGuiaEtapa}
+        fechar={fecharGuia} modoTeste={modoTeste} />}
     </main>
   );
 }

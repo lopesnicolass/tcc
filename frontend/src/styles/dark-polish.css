@@ -1,0 +1,101 @@
+/* ============================================================
+   TENNA — MODO ESCURO REFINADO
+   Camada exclusivamente visual. Mantém o comportamento, layouts
+   e o modo claro sem alterações.
+   ============================================================ */
+
+html[data-theme='dark'] {
+  /* Fundo azul-grafite, sem preto puro e com superfícies graduais. */
+  --dark-bg: #101a2a;
+  --dark-surface: #19283b;
+  --dark-surface-2: #203148;
+  --dark-surface-3: #283d55;
+  --dark-text: #e8f0fb;
+  --dark-text-soft: #a8bad0;
+  --dark-border: #2d4057;
+  --dark-shadow: rgba(3, 10, 22, .36);
+
+  --color-background: #101a2a;
+  --color-surface: #19283b;
+  --color-surface-soft: #203148;
+  --color-surface-muted: #2b3f55;
+  --color-text: #e8f0fb;
+  --color-text-soft: #afc1d6;
+  --color-text-muted: #96abc3;
+  --color-border: rgba(145, 178, 211, .17);
+  --color-border-strong: rgba(145, 178, 211, .30);
+  --color-primary-800: #9bc8f7;
+  --color-primary-600: #69b2f2;
+  --color-primary-500: #4b9de9;
+  --color-primary-300: #345e86;
+  --color-primary-100: #213b55;
+  --ink: #e8f0fb;
+  --ink-soft: #b0c1d5;
+  --muted: #96abc3;
+  --paper: #101a2a;
+  --card: #19283b;
+  --surface: #19283b;
+  --surface-2: #203148;
+  --surface-3: #283d55;
+  --surface-muted: #2b3f55;
+  --text: #e8f0fb;
+  --line: rgba(145,178,211,.17);
+  --accent: #4b9de9;
+  --accent-dark: #9bc8f7;
+  --accent-light: #345e86;
+  --shadow-xs: 0 3px 12px rgba(3,10,22,.13);
+  --shadow-sm: 0 8px 18px rgba(3,10,22,.16);
+  --shadow-md: 0 13px 28px rgba(3,10,22,.22);
+  --shadow-lg: 0 18px 38px rgba(3,10,22,.26);
+  background: #101a2a;
+}
+
+html[data-theme='dark'] body,
+html[data-theme='dark'] .dashboard,
+html[data-theme='dark'] .dashboard-content,
+html[data-theme='dark'] .student-area .dashboard-content,
+html[data-theme='dark'] .page {
+  background: #101a2a;
+}
+
+/* Campos e seletores: superfícies claras o bastante para localizar controles. */
+html[data-theme='dark'] .dashboard-content input,
+html[data-theme='dark'] .dashboard-content textarea,
+html[data-theme='dark'] .dashboard-content select {
+  background-color: #18283b;
+  border-color: #39516c;
+  color: #ecf3fd;
+}
+html[data-theme='dark'] .dashboard-content input::placeholder,
+html[data-theme='dark'] .dashboard-content textarea::placeholder { color: #96abc3; }
+html[data-theme='dark'] .dashboard-content :is(button,a,input,textarea,select):focus-visible {
+  outline: 2px solid #81c4ff;
+  outline-offset: 3px;
+}
+
+/* Outros painéis que usam as cores globais ganham a mesma gradação. */
+html[data-theme='dark'] .student-area .panel-card,
+html[data-theme='dark'] .student-area .stat-card,
+html[data-theme='dark'] .student-area .modal-card:not(.levels-modal) {
+  border-color: #2d435a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme='dark'] .home-page .home-stats-row .stat-card,
+  html[data-theme='dark'] .home-page .home-hero { animation: none; }
+}
+
+/* Evita animações de troca de cor, mantendo apenas transições de
+   posição, tamanho ou opacidade necessárias à interação. Vale nos dois
+   temas para que a troca claro/escuro também seja instantânea. */
+.student-area :is(
+  .sidebar-link, .sidebar-link svg, .sidebar-collapse-btn,
+  .theme-toggle, .theme-toggle-icon, .sidebar-streak,
+  .panel-card, .stat-card, .home-hero-level,
+  .activity-item, .activity-placeholder, .performance-row,
+  .home-ranking-player, .home-ranking-avatar,
+  .home-extra-button, .home-next-card, .home-result-card,
+  .levels-row, a, button, input, textarea, select
+) {
+  transition-property: transform, opacity, width, height, max-height, flex-basis !important;
+}

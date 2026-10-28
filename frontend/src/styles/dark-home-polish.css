@@ -1,0 +1,353 @@
+/* TENNA — Ajustes finais do modo escuro da página inicial.
+   Importado após Home.css para também funcionar com carregamento lazy. */
+
+/* HERO — azul uniforme, sem mudança de tonalidade nas laterais. */
+html[data-theme='dark'] .home-page .home-hero {
+  background: #246ab9;
+  border-color: rgba(133,193,255,.36);
+  box-shadow: 0 12px 34px rgba(3,20,46,.25), inset 0 1px 0 rgba(255,255,255,.10);
+}
+html[data-theme='dark'] .home-page .home-hero-text h1,
+html[data-theme='dark'] .home-page .home-hero-level-text strong { color: #f8fbff; }
+html[data-theme='dark'] .home-page .home-hero-kicker,
+html[data-theme='dark'] .home-page .home-hero-text p,
+html[data-theme='dark'] .home-page .home-hero-level-text span,
+html[data-theme='dark'] .home-page .home-hero-xp-label { color: #dcecff; }
+html[data-theme='dark'] .home-page .home-hero-level {
+  background: rgba(219,239,255,.14);
+  border-color: rgba(212,236,255,.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.085);
+}
+html[data-theme='dark'] .home-page .home-hero-level-clickable:hover {
+  background: rgba(219,239,255,.20);
+  border-color: rgba(225,242,255,.43);
+}
+html[data-theme='dark'] .home-page .home-hero-level-badge {
+  background: linear-gradient(135deg, #ffd05b, #ffe792);
+  color: #553b08;
+  box-shadow: 0 5px 14px rgba(14,39,72,.17);
+}
+html[data-theme='dark'] .home-page .home-hero-xp-track {
+  background: rgba(7,30,64,.38);
+  box-shadow: inset 0 1px 2px rgba(3,17,38,.18);
+}
+html[data-theme='dark'] .home-page .home-hero-xp-fill {
+  background: linear-gradient(90deg, #ffc94e, #ffe38d);
+  box-shadow: 0 0 12px rgba(255,214,109,.18);
+}
+
+html[data-theme='dark'] .home-page .home-stats-row .stat-card,
+html[data-theme='dark'] .home-page .home-top-grid > .panel-card {
+  background: #19283b;
+  border-color: #2e425b;
+  box-shadow: 0 5px 18px rgba(5,14,27,.12);
+}
+html[data-theme='dark'] .home-page .home-stats-row .stat-card:hover,
+html[data-theme='dark'] .home-page .home-top-grid > .panel-card:hover {
+  border-color: #456582;
+  box-shadow: 0 10px 22px rgba(5,14,27,.18);
+}
+html[data-theme='dark'] .home-page .home-stats-row .stat-card::after { height: 2px; opacity: .85; }
+html[data-theme='dark'] .home-page .home-stats-row .stat-icon {
+  background: color-mix(in srgb,var(--stat-accent) 16%, #19283b);
+  color: color-mix(in srgb,var(--stat-accent) 65%, #e8f3ff);
+}
+html[data-theme='dark'] .home-page .home-stats-row .stat-value { color: #f1f6fe; }
+html[data-theme='dark'] .home-page .home-stats-row .stat-label { color: #a8bcd3; }
+
+html[data-theme='dark'] .home-page .home-panel-heading h3,
+html[data-theme='dark'] .home-page .performance-subject { color: #e5eefb; }
+html[data-theme='dark'] .home-page .home-panel-heading p,
+html[data-theme='dark'] .home-page .performance-count { color: #98adc6; }
+html[data-theme='dark'] .home-page .performance-value { color: #91c8ff; }
+html[data-theme='dark'] .home-page .performance-track,
+html[data-theme='dark'] .home-page .home-overall-progress-track {
+  background: #2a3c52;
+  box-shadow: inset 0 1px 2px rgba(4,12,22,.13);
+}
+html[data-theme='dark'] .home-page .home-subject-dot { box-shadow: 0 0 0 3px rgba(155,190,224,.09); }
+
+html[data-theme='dark'] .home-page .home-activities-card .activity-calendar-shortcut {
+  background: #243a53;
+  color: #a9d6ff;
+  border-color: #38536f;
+}
+html[data-theme='dark'] .home-page .home-activities-card .activity-calendar-shortcut:hover {
+  background: #2e4c6b;
+  border-color: #5b80a3;
+}
+html[data-theme='dark'] .home-page .home-activities-card .activity-item {
+  background: #213249;
+  border-color: #334960;
+  border-left: 3px solid var(--activity-accent,#5daefa);
+}
+html[data-theme='dark'] .home-page .home-activities-card .activity-item:hover {
+  background: #293d55;
+  border-color: #49657e;
+  border-left-color: var(--activity-accent,#5daefa);
+}
+html[data-theme='dark'] .home-page .home-activities-card .activity-name { color: #ebf2fd; }
+html[data-theme='dark'] .home-page .home-activities-card .activity-subject,
+html[data-theme='dark'] .home-page .home-activities-card .activity-item .time { color: #a4b8ce; }
+html[data-theme='dark'] .home-page .home-activities-card .activity-item .date,
+html[data-theme='dark'] .home-page .home-activities-card .activity-status { color: #9acbff; }
+html[data-theme='dark'] .home-page .home-activities-card .activity-placeholder {
+  background: #1a293b;
+  border: 1px dashed #344a62;
+  border-left: 3px solid #344a62;
+  color: #99aec5;
+}
+html[data-theme='dark'] .home-page .home-activities-card .activity-placeholder .activity-placeholder-label,
+html[data-theme='dark'] .home-page .home-activities-card .activity-placeholder .activity-placeholder-icon {
+  color: #9cb1c8;
+}
+
+/* RANKING — a primeira posição continua especial, mas sem blocos muito vivos. */
+html[data-theme='dark'] .home-page .home-bottom-grid > .home-ranking {
+  background: linear-gradient(145deg,#1b2d43,#19283b 70%);
+  border-color: #35506b;
+  box-shadow: 0 8px 28px rgba(4,13,25,.15);
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-heading h2 { color: #eef5ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-heading h2 em { color: #95c8fb; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-heading p,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-note { color: #96acc5; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-my-position {
+  background: #223850;
+  border-color: #385571;
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-my-position span,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-my-position small { color: #a6bed9; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-my-position strong { color: #f0f6ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-my-position .home-ranking-position-icon {
+  background: #2a4764;
+  color: #f4c366;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player {
+  background: #20354b;
+  border-color: #3c5975;
+  border-top-color: #89afce;
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 {
+  background: linear-gradient(180deg,#35352f,#2c323b);
+  border-color: #716043;
+  border-top-color: #e3b65d;
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 { border-top-color: #cd9c86; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player:hover {
+  border-color: #6a90b1;
+  box-shadow: 0 7px 15px rgba(5,14,27,.18);
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1:hover { border-color: #d3af69; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player-name strong { color: #edf4ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player-name small {
+  background: #294761;
+  color: #c3ddf5;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name small {
+  background: #4d422c;
+  color: #ffe19d;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score strong { color: #a4d2ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score small { color: #a5bbd0; }
+
+/* Cards inferiores preservam as linhas de cor, só atenuando superfícies. */
+html[data-theme='dark'] .home-page .home-bottom-grid .home-next-card,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-card {
+  background: #1b2e43;
+  border-color: #35516b;
+  box-shadow: 0 5px 18px rgba(5,14,27,.12);
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-next-card { border-top-color: #5aa9ec; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-card { border-top-color: #dca54d; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-icon {
+  background: #284763;
+  color: #a9d7ff;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-icon {
+  background: #423a2d;
+  color: #f1c781;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-kicker,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-next-meta,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-copy p,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-questions,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-date { color: #acbfd6; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-copy h3 { color: #eff6ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-percentage { color: #99cbff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-result-progress { background: #304760; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-next-pending {
+  background: #284563;
+  border-color: #426785;
+  color: #b8dcff;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-button {
+  background: #2b4b6b;
+  border-color: #416688;
+  color: #e1f0ff;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-extra-button:hover {
+  background: #316ca5;
+  border-color: #69acdf;
+  color: #fff;
+}
+
+/* Modal de níveis, com seleção atual discreta e divisões mais leves. */
+html[data-theme='dark'] .modal-overlay { background: rgba(6,15,28,.64); }
+html[data-theme='dark'] .modal-card.levels-modal {
+  background: #1a2a3e;
+  border: 1px solid #39516b;
+  color: #e8f0fb;
+  box-shadow: 0 24px 64px rgba(0,0,0,.36);
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-modal-header h2,
+html[data-theme='dark'] .modal-card.levels-modal .levels-list-heading { color: #edf5ff; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-modal-header p { color: #a8bfd6; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-close {
+  color: #d2e6fc;
+  background: #263c55;
+  border: 1px solid #3e5873;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-close:hover { background: #355576; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-current-feature {
+  background: #223b56;
+  border: 1px solid #3c5977;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-feature-copy strong { color: #f0f6ff; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-feature-eyebrow,
+html[data-theme='dark'] .modal-card.levels-modal .levels-feature-copy small { color: #a9c5e0; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-list { scrollbar-color: #45617c #19283b; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-row {
+  border-bottom-color: #34465b;
+  background: transparent;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-row.current {
+  background: #294763;
+  border-bottom-color: transparent;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-row-badge {
+  background: #2a3f56;
+  color: #c8d9ec;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-row.current .levels-row-badge {
+  background: #3978b4;
+  color: #fff;
+}
+html[data-theme='dark'] .modal-card.levels-modal .levels-row-info strong { color: #e4edf9; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-row-info span { color: #9eb2ca; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-row-xp { color: #aed7ff; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-row.current .levels-row-info strong,
+html[data-theme='dark'] .modal-card.levels-modal .levels-row.current .levels-row-xp { color: #f5faff; }
+html[data-theme='dark'] .modal-card.levels-modal .levels-row.current .levels-row-info span { color: #bed5eb; }
+
+
+/* Ranking: quando o participante não tem foto, as iniciais devem ser
+   claramente visíveis, sem uma letra quase branca sobre fundo branco. */
+html[data-theme='dark'] .home-page .home-ranking-avatar {
+  background: linear-gradient(145deg, #315f8b, #224565);
+  color: #f5faff;
+  border-color: color-mix(in srgb, var(--rank-accent) 48%, #294969);
+}
+html[data-theme='dark'] .home-page .home-ranking-avatar > span {
+  color: #f5faff;
+  font-weight: 850;
+  text-shadow: 0 1px 2px rgba(6, 25, 49, .15);
+}
+html[data-theme='dark'] .home-page .home-ranking-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Ranking de XP — mesma estrutura do modo claro, com cores próprias para o escuro. */
+html[data-theme='dark'] .home-page .home-bottom-grid > .home-ranking {
+  background: #1b2e43;
+  border-color: #35516c;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player:hover {
+  background: #213951;
+  border-color: #3e5c79;
+  border-top: 3px solid var(--rank-accent);
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1:hover {
+  background: #34342e;
+  border-color: #6c5c42;
+  border-top-color: #e5ab38;
+  box-shadow: none;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3:hover {
+  background: #303640;
+  border-color: #685b5b;
+  border-top-color: #dc9e7c;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-placement { color: #b6c9df; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-placement { color: #f2cc7e; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-placement { color: #e4b09c; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-medal {
+  background: #304f70;
+  border-color: #54789a;
+  color: #d7ecff;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-medal {
+  background: #5a4c2e;
+  border-color: #866d3c;
+  color: #ffe2a1;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-medal {
+  background: #55443e;
+  border-color: #876859;
+  color: #f6c5b0;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-winner-mark {
+  background: #50442c;
+  color: #ffd16f;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-avatar,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-avatar {
+  background: #315b80;
+  border-color: #5685ab;
+  color: #f5faff;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-avatar {
+  background: #5b513a;
+  border-color: #a88a51;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-avatar {
+  background: #534c4b;
+  border-color: #a88272;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player-name strong,
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name strong {
+  color: #f1f6fd;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-player-name small {
+  background: #30516d;
+  color: #cfe5fa;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-player-name small {
+  background: #54472f;
+  color: #ffdc95;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-player-name small {
+  background: #4c4648;
+  color: #eac2b3;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score {
+  border-top-color: #395571;
+}
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score { border-top-color: #5e523d; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-3 .home-ranking-score { border-top-color: #5a5055; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score-caption { color: #a5bed8; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score-number strong { color: #a7d4ff; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number strong { color: #f5d083; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-score-number small { color: #b2c7dc; }
+html[data-theme='dark'] .home-page .home-bottom-grid .home-ranking-place-1 .home-ranking-score-number small { color: #edc983; }

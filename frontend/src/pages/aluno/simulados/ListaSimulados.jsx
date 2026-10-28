@@ -10,6 +10,26 @@ import {
   calcularIndicadores
 } from './dadosSimulados.js';
 
+// Busca e situação permanecem ao entrar numa prova e voltar depois.
+function chaveFiltrosSimulados() {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('etecamp_usuario') || 'null');
+    const id = usuario?.id ?? usuario?.usuarioId;
+    return id ? `tenna_simulados_filtros_${id}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function lerFiltrosSimulados() {
+  try {
+    const chave = chaveFiltrosSimulados();
+    return chave ? JSON.parse(sessionStorage.getItem(chave) || 'null') : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ListaSimulados({
   filtro,
   setFiltro,
@@ -26,8 +46,17 @@ export function ListaSimulados({
     ? estiloMateria(materiaSelecionada)
     : null;
 
-  const [busca, setBusca] = useState('');
-  const [situacao, setSituacao] = useState('todos');
+  const [busca, setBusca] = useState(() => lerFiltrosSimulados()?.busca || '');
+  const [situacao, setSituacao] = useState(() => lerFiltrosSimulados()?.situacao || 'todos');
+
+  useEffect(() => {
+    try {
+      const chave = chaveFiltrosSimulados();
+      if (chave) sessionStorage.setItem(chave, JSON.stringify({ busca, situacao }));
+    } catch {
+      // O filtro continua funcionando mesmo sem sessionStorage.
+    }
+  }, [busca, situacao]);
   const [filtroAberto, setFiltroAberto] = useState(false);
   const filtroRef = useRef(null);
   const opcoesSituacao = [
@@ -198,6 +227,26 @@ export function ListaSimulados({
         }`}
       >
         <div className="simulados-hero-copy">
+          {materiaSelecionada && (
+            <nav className="simulados-breadcrumb" aria-label="Navegação dos simulados">
+              <button
+                type="button"
+                className="simulados-breadcrumb-voltar"
+                onClick={() => {
+                  setFiltro('Todas');
+                  setBusca('');
+                  setSituacao('todos');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                Simulados
+              </button>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+              <span aria-current="page">{materiaSelecionada}</span>
+            </nav>
+          )}
           <h1>{materiaSelecionada || 'Simulados'}</h1>
           <p>
             {materiaSelecionada

@@ -2425,3 +2425,812 @@ html[data-theme='dark'] .flashcards-page .flashcards-decks-total { background:#1
 .flashcards-result-primary {background:#1556b2;color:white;border:1px solid #1556b2;box-shadow:0 5px 12px rgba(21,86,178,.14);}
 .flashcards-result-secondary {background:var(--card);color:var(--ink);border:1px solid var(--line);}
 @media(max-width:600px){.flashcards-result{padding:25px 18px;border-radius:18px}.flashcards-result-ring{width:148px;height:148px}.flashcards-result h1{font-size:23px}.flashcards-result-actions{grid-template-columns:1fr}.flashcards-result-stat{padding:13px}}
+
+/* =====================================================
+   HORA DOS FLASHCARDS — DESAFIO INTEGRADO À PÁGINA
+   Sem cabeçalho próprio: progresso centralizado e botão de retorno lateral
+   ===================================================== */
+
+.flashcards-game-page {
+  --session-ink: #104694;
+  --session-border: #d8e6f6;
+  --session-soft: #f3f8ff;
+}
+
+.flashcards-game-page .flashcards-session-layout {
+  width: min(100%, 820px);
+  margin: 0 auto;
+  padding: 32px 0 40px;
+}
+
+/* Centraliza o desafio com respiro sem criar uma navegação separada. */
+.flashcards-playing .flashcards-session-layout {
+  width: min(100%, 700px);
+  min-height: calc(100dvh - 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 50px 0 44px;
+}
+/* O desempenho deve ficar no meio da área útil também na vertical. */
+.flashcards-finished .flashcards-session-layout {
+  width: min(100%, 900px);
+  min-height: calc(100dvh - 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0 44px;
+}
+
+/* Botão de retorno como o da tela de login: circular, junto à margem do conteúdo. */
+.flashcards-playing { position: relative; }
+.flashcards-playing .flashcards-session-back-arrow {
+  position: absolute;
+  top: 55px;
+  left: clamp(24px, 3vw, 52px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1.5px solid rgba(13, 71, 161, .15);
+  border-radius: 50%;
+  background: var(--card, #fff);
+  color: var(--session-ink);
+  box-shadow: 0 6px 16px -8px rgba(13, 71, 161, .25);
+  cursor: pointer;
+  transition: transform .18s ease, background .15s ease, box-shadow .18s ease;
+}
+.flashcards-playing .flashcards-session-back-arrow svg { flex: none; }
+.flashcards-playing .flashcards-session-back-arrow:hover:not(:disabled) {
+  transform: translateX(-2px);
+  background: #104b9e;
+  color: #fff;
+  box-shadow: 0 8px 20px -8px rgba(13, 71, 161, .3);
+}
+.flashcards-playing .flashcards-session-back-arrow:disabled { opacity: .5; cursor: wait; }
+.flashcards-game-page .flashcards-session-back-arrow:focus-visible,
+.flashcards-game-page .flashcard-game-card:focus-visible,
+.flashcards-game-page button:focus-visible { outline: 3px solid #72bbff; outline-offset: 3px; }
+
+.flashcards-game-page .flashcards-session-progress {
+  width: min(100%, 640px);
+  margin: 0 auto;
+  padding: 20px 24px 22px;
+  border: 1px solid var(--line, var(--session-border));
+  border-radius: 18px;
+  background: var(--card, #fff);
+  box-shadow: 0 7px 23px rgba(16, 69, 136, .035);
+}
+.flashcards-session-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.flashcards-session-progress-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .075em;
+}
+.flashcards-session-progress-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.flashcards-session-progress-heading > strong { color: var(--ink); font-size: 15px; font-weight: 800; }
+.flashcards-session-progress-meta { display: inline-flex; align-items: center; gap: 12px; color: var(--muted); font-size: 11px; }
+.flashcards-session-progress-percent { color: var(--session-ink); font-size: 14px; font-weight: 850; }
+.flashcards-game-page .flashcards-session-progress .flashcards-progress {
+  width: 100%; height: 8px; margin: 0;
+  overflow: hidden; border-radius: 999px; background: #e6f0fb;
+}
+.flashcards-game-page .flashcards-session-progress .flashcards-progress-bar {
+  height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, #1c70cf, #2497eb);
+  transition: width .25s ease;
+}
+
+.flashcards-game-page .flashcards-game-content { padding: 34px 0 0; }
+.flashcards-game-page .flashcards-game-context {
+  width: min(100%, 640px);
+  margin: 0 0 18px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.flashcards-game-page .flashcards-game-subject {
+  border-color: #cfe1f8;
+  background: #eaf4ff;
+  color: #1152a2;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 7px 13px;
+}
+.flashcards-game-step { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+.flashcards-game-page .flashcard-game-card {
+  width: min(100%, 640px);
+  height: 325px;
+  border-radius: 22px;
+  outline: none;
+  will-change: auto;
+}
+.flashcards-game-page .flashcard-game-inner { transition: transform .48s ease; }
+.flashcards-game-page .flashcard-game-face {
+  position: absolute;
+  inset: 0;
+  padding: 58px 34px 55px;
+  border-radius: 22px;
+  box-shadow: 0 14px 32px rgba(14, 73, 150, .09);
+}
+.flashcards-game-page .flashcard-game-front { background: var(--card, #fff); border: 1px solid var(--session-border); color: var(--ink); }
+.flashcards-game-page .flashcard-game-back {
+  border: 1px solid #2867bb;
+  background: linear-gradient(137deg, #1658b0, #0e397d);
+  color: #fff;
+}
+.flashcards-game-page .flashcard-game-face p {
+  max-width: 510px;
+  margin: 0;
+  font-size: clamp(19px, 2.1vw, 24px);
+  font-weight: 750;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.flashcard-game-face-tag {
+  position: absolute;
+  top: 24px;
+  left: 26px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #eaf3ff;
+  color: #1454ab;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .09em;
+}
+.flashcard-game-back .flashcard-game-face-tag { background: rgba(255,255,255,.16); color: #edf6ff; }
+.flashcard-game-flip-hint {
+  position: absolute;
+  bottom: 22px;
+  left: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.flashcard-game-flip-hint span { font-size: 20px; line-height: 1; }
+.flashcard-game-back .flashcard-game-flip-hint { color: #d5e9ff; }
+
+.flashcards-game-page .flashcards-game-guidance {
+  width: min(100%, 640px);
+  min-height: 22px;
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.flashcards-game-page .flashcards-game-actions { width: min(100%, 640px); margin: 20px 0 0; gap: 16px; }
+.flashcards-game-page .flashcards-answer-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: none;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.flashcards-game-page .flashcards-answer-button.correct { background: #eaf7f0; border: 1px solid #c4e5d2; color: #197a4b; }
+.flashcards-game-page .flashcards-answer-button.wrong { background: #fff0f0; border: 1px solid #f2d0d0; color: #b34444; }
+.flashcards-game-page .flashcards-answer-button:hover:not(:disabled) { transform: none; box-shadow: none; }
+.flashcards-game-page .flashcards-answer-button.correct:hover:not(:disabled) { background: #d9f1e3; }
+.flashcards-game-page .flashcards-answer-button.wrong:hover:not(:disabled) { background: #fbe3e3; }
+.flashcards-game-page .flashcards-answer-button:disabled { opacity: .47; cursor: not-allowed; }
+.flashcards-answer-symbol { width: 23px; height: 23px; border-radius: 7px; display: inline-grid; place-items: center; background: rgba(255,255,255,.6); font-size: 19px; line-height: 1; }
+.flashcards-game-page .flashcards-swipe-help { margin: 13px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+.flashcards-game-page .flashcards-game-error { margin: 12px 0 0; color: #c34949; font-size: 12px; }
+
+/* Resumo da rodada */
+.flashcards-finished .flashcards-result {
+  width: min(100%, 900px);
+  max-width: none;
+  margin: 0 auto;
+  padding: 38px 42px 40px;
+  border: 1px solid var(--line, var(--session-border));
+  border-radius: 20px;
+  background: var(--card, #fff);
+  box-shadow: 0 10px 28px rgba(18, 75, 140, .055);
+  text-align: left;
+}
+.flashcards-result-summary { display: grid; grid-template-columns: minmax(0, 1fr) 190px; align-items: center; gap: 34px; }
+.flashcards-finished .flashcards-result-intro { text-align: left; }
+.flashcards-result-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+  color: #168052;
+  font-size: 13px;
+  font-weight: 800;
+}
+.flashcards-result-status span { display: inline-grid; place-items: center; height: 29px; width: 29px; border-radius: 50%; background: #e2f5eb; font-size: 17px; }
+.flashcards-finished .flashcards-result-intro h2 { margin: 0 0 12px; color: var(--ink); font-size: clamp(28px, 2.6vw, 34px); line-height: 1.2; letter-spacing: -.035em; }
+.flashcards-finished .flashcards-result-intro p { margin: 0; max-width: 495px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+.flashcards-finished .flashcards-result-score { margin: 0; display: flex; align-items: center; justify-content: center; }
+.flashcards-finished .flashcards-result-ring { width: 186px; height: 186px; padding: 11px; background: conic-gradient(#238be9 var(--score), #e2effc 0); }
+.flashcards-finished .flashcards-result-ring-inner { background: var(--card, #fff); }
+.flashcards-finished .flashcards-result-ring-inner strong { color: var(--ink); font-size: 47px; }
+.flashcards-finished .flashcards-result-ring-inner span { color: var(--muted); font-size: 14px; }
+.flashcards-finished .flashcards-result-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 28px 0 0; }
+.flashcards-finished .flashcards-result-stat { display: flex; align-items: center; justify-content: space-between; min-height: 78px; padding: 17px 21px; border: 1px solid var(--line); border-radius: 12px; background: var(--session-soft); }
+.flashcards-finished .flashcards-result-stat span { display: inline-flex; align-items: center; gap: 11px; margin: 0; font-size: 16px; font-weight: 750; color: var(--ink); }
+.flashcards-finished .flashcards-result-stat strong { font-size: 32px; line-height: 1; }
+.flashcards-result-stat .flashcards-stat-dot { display: inline-grid !important; place-items: center; width: 31px; height: 31px; margin: 0; border-radius: 9px; font-size: 19px !important; line-height: 1; }
+.flashcards-result-stat.is-correct .flashcards-stat-dot { color: #168052; background: #e1f4e9; }
+.flashcards-result-stat.is-wrong .flashcards-stat-dot { color: #be4c4c; background: #ffebeb; }
+.flashcards-finished .flashcards-review-suggestion {
+  width: 100%;
+  max-width: none;
+  margin: 24px 0 0;
+  padding: 24px 25px;
+  border: 1px solid var(--line, var(--session-border));
+  border-radius: 13px;
+  background: var(--session-soft);
+}
+.flashcards-review-eyebrow { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 850; letter-spacing: .1em; color: #4484c8; }
+.flashcards-finished .flashcards-review-suggestion h3 { margin: 0 0 8px; color: var(--ink); font-size: 19px; font-weight: 800; }
+.flashcards-finished .flashcards-review-suggestion p { margin: 0 0 14px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.flashcards-finished .flashcards-review-suggestion p:last-child { margin-bottom: 0; }
+.flashcards-finished .flashcards-review-topics { gap: 9px; }
+.flashcards-finished .flashcards-review-topics span { padding: 9px 12px; border: 1px solid #cde0f6; background: var(--card); border-radius: 8px; font-size: 13px; font-weight: 700; line-height: 1.35; }
+.flashcards-finished .flashcards-review-success { background: #f0faf5; border-color: #cdebd9; }
+.flashcards-finished .flashcards-result-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 26px; }
+.flashcards-finished .flashcards-result-actions button { min-height: 55px; border-radius: 11px; font-size: 15px; font-weight: 800; box-shadow: none; transition: background .16s ease; }
+.flashcards-finished .flashcards-result-actions button:hover { transform: none; }
+.flashcards-finished .flashcards-result-primary { display: flex; justify-content: center; align-items: center; gap: 10px; background: #1765c4; border-color: #1765c4; color: #fff; }
+.flashcards-finished .flashcards-result-primary:hover { background: #104f9c; }
+.flashcards-finished .flashcards-result-primary span { font-size: 19px; line-height: 1; }
+.flashcards-finished .flashcards-result-secondary { background: var(--card, #fff); color: var(--session-ink); border-color: var(--line); }
+.flashcards-finished .flashcards-result-secondary:hover { background: var(--session-soft); }
+
+/* Variáveis locais do jogo para o tema escuro */
+html[data-theme='dark'] .flashcards-game-page {
+  --session-ink: #c2deff;
+  --session-border: #29496a;
+  --session-soft: #182f49;
+}
+html[data-theme='dark'] .flashcards-game-page .flashcards-session-progress,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-front,
+html[data-theme='dark'] .flashcards-finished .flashcards-result,
+html[data-theme='dark'] .flashcards-finished .flashcards-result-ring-inner { background: var(--card); }
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-front { border-color: var(--line); }
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-back { background: linear-gradient(135deg, #1657a1, #0b2a57); }
+html[data-theme='dark'] .flashcards-game-page .flashcards-game-subject,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-face-tag { background: #203f61; color: #c8e3ff; border-color: #365e83; }
+html[data-theme='dark'] .flashcards-game-page .flashcards-session-progress .flashcards-progress { background: #2a435e; }
+html[data-theme='dark'] .flashcards-game-page .flashcards-answer-button.correct { background: #183c33; border-color: #2c6450; color: #a2e5c0; }
+html[data-theme='dark'] .flashcards-game-page .flashcards-answer-button.wrong { background: #442b34; border-color: #74434b; color: #ffc1c1; }
+html[data-theme='dark'] .flashcards-game-page .flashcards-answer-symbol { background: rgba(255,255,255,.06); }
+html[data-theme='dark'] .flashcards-game-page .flashcards-result-stat { background: #1a3047; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-ring { background: conic-gradient(#329bf5 var(--score), #294763 0); }
+html[data-theme='dark'] .flashcards-finished .flashcards-review-topics span { border-color: var(--line); }
+html[data-theme='dark'] .flashcards-finished .flashcards-review-success { background: #19382f; border-color: #2d634f; }
+
+/* Nas larguras menores, a seta fica acima do progresso sem sobrepor o card. */
+@media (max-width: 1120px) {
+  .flashcards-playing .flashcards-session-back-arrow {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin: 14px 0 0;
+  }
+  .flashcards-playing .flashcards-session-layout { padding-top: 14px; }
+}
+@media (max-width: 700px) {
+  .flashcards-playing .flashcards-session-layout,
+  .flashcards-finished .flashcards-session-layout { min-height: 0; padding: 22px 0 35px; }
+  .flashcards-game-page .flashcard-game-card { height: 290px; }
+  .flashcards-game-page .flashcard-game-face { padding: 55px 24px; }
+  .flashcards-finished .flashcards-result { padding: 26px; }
+}
+@media (max-width: 480px) {
+  .flashcards-game-page .flashcards-session-layout { padding-top: 14px; }
+  .flashcards-playing .flashcards-session-back-arrow { width: 40px; height: 40px; }
+  .flashcards-game-page .flashcards-session-progress { padding: 14px 16px 16px; }
+  .flashcards-session-progress-top { margin-bottom: 9px; }
+  .flashcards-session-progress-label { font-size: 9px; }
+  .flashcards-session-progress-heading > strong { font-size: 13px; }
+  .flashcards-session-progress-meta { gap: 7px; font-size: 10px; }
+  .flashcards-game-page .flashcards-game-content { padding-top: 24px; }
+  .flashcards-game-page .flashcard-game-card { height: 280px; }
+  .flashcards-game-page .flashcard-game-face { border-radius: 17px; padding: 55px 19px 52px; }
+  .flashcards-game-page .flashcard-game-face p { font-size: 19px; }
+  .flashcard-game-face-tag { top: 18px; left: 19px; }
+  .flashcards-game-page .flashcards-game-guidance { margin-top: 23px; }
+  .flashcards-game-page .flashcards-game-actions { flex-direction: row; gap: 11px; margin-top: 16px; }
+  .flashcards-game-page .flashcards-answer-button { padding: 11px 7px; min-width: 0; gap: 6px; }
+  .flashcards-finished .flashcards-result { padding: 23px 18px; }
+  .flashcards-result-summary { grid-template-columns: 1fr; gap: 18px; }
+  .flashcards-finished .flashcards-result-score { justify-content: center; }
+  .flashcards-finished .flashcards-result-ring { width: 148px; height: 148px; }
+  .flashcards-finished .flashcards-result-ring-inner strong { font-size: 37px; }
+  .flashcards-finished .flashcards-result-stat { min-height: 67px; padding: 12px; }
+  .flashcards-finished .flashcards-result-intro h2 { font-size: 27px; }
+  .flashcards-finished .flashcards-result-intro p { font-size: 14px; }
+  .flashcards-finished .flashcards-result-stat span { font-size: 14px; gap: 7px; }
+  .flashcards-finished .flashcards-result-stat strong { font-size: 27px; }
+  .flashcards-finished .flashcards-review-suggestion { padding: 19px 17px; }
+  .flashcards-finished .flashcards-review-suggestion h3 { font-size: 18px; }
+  .flashcards-finished .flashcards-review-topics span { font-size: 12px; padding: 8px 10px; }
+  .flashcards-finished .flashcards-result-actions { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcards-game-page .flashcard-game-inner,
+  .flashcards-game-page .flashcards-progress-bar,
+  .flashcards-game-page .flashcards-answer-button { transition: none; }
+}
+
+
+/* Hora dos Flashcards: a própria face da pergunta assume a cor da matéria.
+   Paleta igual à dos baralhos da página principal; resposta preservada em azul. */
+.flashcards-game-page .flashcards-game-content {
+  /* Sem a etiqueta de matéria, mantém uma distância confortável do progresso. */
+  padding-top: 64px;
+}
+.flashcards-game-page .flashcard-game-card {
+  --game-subject-color: #208be3;
+}
+.flashcards-game-page .flashcard-game-materia-portugues { --game-subject-color: #208be3; }
+.flashcards-game-page .flashcard-game-materia-matematica { --game-subject-color: #e3585b; }
+.flashcards-game-page .flashcard-game-materia-historia { --game-subject-color: #aa7959; }
+.flashcards-game-page .flashcard-game-materia-geografia { --game-subject-color: #36a363; }
+.flashcards-game-page .flashcard-game-materia-ciencias { --game-subject-color: #9061cd; }
+
+.flashcards-game-page .flashcard-game-card .flashcard-game-front,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-card .flashcard-game-front {
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--game-subject-color) 84%, #112d50),
+    color-mix(in srgb, var(--game-subject-color) 67%, #112d50)
+  );
+  border: 1px solid color-mix(in srgb, var(--game-subject-color) 65%, #112d50);
+}
+.flashcards-game-page .flashcard-game-front .flashcard-game-face-tag,
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-front .flashcard-game-face-tag {
+  color: #fff;
+  background: rgba(255,255,255,.19);
+  border: 1px solid rgba(255,255,255,.23);
+}
+.flashcards-game-page .flashcard-game-front .flashcard-game-flip-hint {
+  color: rgba(255,255,255,.94);
+}
+@media (max-width: 480px) {
+  .flashcards-game-page .flashcards-game-content { padding-top: 32px; }
+}
+
+/* Navegação da matéria: apenas "Baralhos" é um link de retorno. */
+.flashcards-page .flashcards-materia-trilha {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 11px;
+  color: rgba(255,255,255,.85);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.flashcards-page .flashcards-materia-trilha-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 2px;
+  margin: -4px -2px;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  transition: opacity .16s ease;
+}
+.flashcards-page .flashcards-materia-trilha-link:hover { opacity: .8; }
+.flashcards-page .flashcards-materia-trilha-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+.flashcards-page .flashcards-materia-trilha-separador { flex: none; opacity: .7; }
+.flashcards-page .flashcards-materia-trilha .flashcards-materia-hero-label {
+  margin: 0;
+  color: rgba(255,255,255,.88);
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+@media (max-width: 620px) {
+  .flashcards-page .flashcards-materia-trilha { gap: 7px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcards-page .flashcards-materia-trilha-link { transition: none; }
+}
+
+/* Hora dos Flashcards: escolha da rodada sem adicionar uma nova navegação. */
+.flashcards-page .flashcards-game-options {
+  margin-top: 23px;
+  padding-top: 18px;
+  border-top: 1px solid #d9e7f6;
+}
+.flashcards-page .flashcards-game-options-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px 16px;
+  margin-bottom: 12px;
+}
+.flashcards-page .flashcards-game-options-header > span {
+  color: #104b93;
+  font-size: 13px;
+  font-weight: 800;
+}
+.flashcards-page .flashcards-game-options-header > small {
+  color: #7693b7;
+  font-size: 12px;
+  font-weight: 550;
+}
+.flashcards-page .flashcards-game-options-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+}
+.flashcards-page .flashcards-game-mode {
+  --mode-color: #2d7dd2;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid #d5e3f3;
+  border-radius: 11px;
+  background: #fff;
+  color: #28558d;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.flashcards-page .flashcards-game-mode-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--mode-color);
+}
+.flashcards-page .flashcards-game-mode-portugues { --mode-color: #208be3; }
+.flashcards-page .flashcards-game-mode-matematica { --mode-color: #e3585b; }
+.flashcards-page .flashcards-game-mode-historia { --mode-color: #aa7959; }
+.flashcards-page .flashcards-game-mode-geografia { --mode-color: #36a363; }
+.flashcards-page .flashcards-game-mode-ciencias { --mode-color: #9061cd; }
+.flashcards-page .flashcards-game-mode:hover:not(:disabled) {
+  border-color: #8fbce9;
+  background: #f3f8ff;
+}
+.flashcards-page .flashcards-game-mode.is-selected {
+  border-color: #2a8ce3;
+  background: #eaf4ff;
+  color: #104c9a;
+  box-shadow: inset 0 0 0 1px rgba(42, 140, 227, .15);
+}
+.flashcards-page .flashcards-game-mode.is-general.is-selected {
+  border-color: #175db6;
+  background: #175db6;
+  color: #fff;
+  box-shadow: none;
+}
+.flashcards-page .flashcards-game-mode.is-general.is-selected .flashcards-game-mode-dot {
+  background: #fff;
+}
+.flashcards-page .flashcards-game-mode:disabled {
+  opacity: .43;
+  cursor: not-allowed;
+}
+.flashcards-page .flashcards-game-mode:focus-visible {
+  outline: 3px solid #72bbff;
+  outline-offset: 3px;
+}
+.flashcards-page .flashcards-game-options .flashcards-game-warning {
+  margin-top: 13px !important;
+  padding: 9px 12px;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-options {
+  border-top-color: #345170;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-options-header > span {
+  color: #d7eaff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-options-header > small {
+  color: #9bb7d9;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-mode {
+  border-color: #385773;
+  background: #19334f;
+  color: #d5e8ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-mode:hover:not(:disabled) {
+  border-color: #568fc6;
+  background: #204266;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-mode.is-selected {
+  border-color: #5aaeff;
+  background: #1c4976;
+  color: #f4f9ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-mode.is-general.is-selected {
+  border-color: #378ee5;
+  background: #2264b4;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-options .flashcards-game-warning {
+  background: #203a55;
+  color: #b5c9e2;
+}
+@media (max-width: 650px) {
+  .flashcards-page .flashcards-game-options { margin-top: 19px; padding-top: 15px; }
+  .flashcards-page .flashcards-game-options-list { gap: 8px; }
+  .flashcards-page .flashcards-game-mode { flex: 1 1 calc(50% - 8px); padding: 10px 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcards-page .flashcards-game-mode { transition: none; }
+}
+.flashcards-page .flashcards-game-options .flashcards-game-options-note {
+  max-width: none;
+  margin-top: 11px;
+  color: #718db2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-options .flashcards-game-options-note {
+  color: #a6bedb;
+}
+
+
+/* Hora do FlashCard: a escolha aparece só depois de Iniciar desafio. */
+.flashcards-page .flashcards-game-banner { margin-bottom: 22px; }
+.flashcards-page .flashcards-challenge-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(9, 30, 61, .58);
+  backdrop-filter: blur(4px);
+}
+.flashcards-page .flashcards-challenge-dialog {
+  width: min(100%, 580px);
+  max-height: min(92dvh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #dce7f4;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(4, 27, 65, .23);
+  color: #103f84;
+}
+.flashcards-page .flashcards-challenge-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 25px 27px 21px;
+  border-bottom: 1px solid #e4edf7;
+}
+.flashcards-page .flashcards-challenge-eyebrow {
+  color: #2685e4;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .12em;
+}
+.flashcards-page .flashcards-challenge-head h2 {
+  margin: 6px 0;
+  color: #104794;
+  font-size: clamp(22px, 4.5vw, 27px);
+  font-weight: 800;
+  letter-spacing: -.035em;
+}
+.flashcards-page .flashcards-challenge-head p {
+  margin: 0;
+  color: #738cac;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.flashcards-page .flashcards-challenge-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d4e4f6;
+  border-radius: 10px;
+  color: #1655a5;
+  background: #f4f9ff;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+}
+.flashcards-page .flashcards-challenge-close svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.flashcards-page .flashcards-challenge-body { padding: 23px 27px; overflow: auto; }
+.flashcards-page .flashcards-challenge-options-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 14px;
+}
+.flashcards-page .flashcards-challenge-options-heading strong { font-size: 14px; color: #104794; }
+.flashcards-page .flashcards-challenge-options-heading span { font-size: 12px; color: #819abb; }
+.flashcards-page .flashcards-challenge-body .flashcards-game-options-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+.flashcards-page .flashcards-challenge-body .flashcards-game-mode {
+  min-width: 0;
+  min-height: 56px;
+  padding: 12px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+}
+.flashcards-page .flashcards-challenge-note {
+  margin: 15px 0 0;
+  padding: 10px 13px;
+  border: 1px solid #d5e5f6;
+  border-radius: 10px;
+  background: #f4f9ff;
+  color: #5a789e;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.flashcards-page .flashcards-challenge-error { margin: 12px 0 0; color: #c54040; font-size: 13px; }
+.flashcards-page .flashcards-challenge-footer {
+  display: flex;
+  justify-content: center;
+  padding: 17px 27px;
+  border-top: 1px solid #e4edf7;
+}
+.flashcards-page .flashcards-challenge-footer button {
+  min-height: 44px;
+  padding: 11px 18px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.flashcards-page .flashcards-challenge-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 208px);
+  text-align: center;
+  border: 1px solid #1764c8;
+  color: #fff;
+  background: #1864c5;
+  box-shadow: 0 5px 13px rgba(24,100,197,.14);
+}
+.flashcards-page .flashcards-challenge-confirm:hover:not(:disabled) { background: #1255ad; }
+.flashcards-page .flashcards-challenge-dialog button:disabled { cursor: not-allowed; opacity: .52; }
+.flashcards-page .flashcards-challenge-dialog button:focus-visible { outline: 3px solid #7cbaff; outline-offset: 2px; }
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-dialog {
+  border-color: #32516e;
+  background: #162d46;
+  color: #e5f2ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-head,
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-footer { border-color: #34516e; }
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-head h2,
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-options-heading strong { color: #e9f5ff; }
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-head p,
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-options-heading span { color: #a5bedb; }
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-close {
+  background: #1a3552;
+  border-color: #42617e;
+  color: #e2f1ff;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-challenge-note { color: #bed1e7; background: #1a3755; border-color: #345674; }
+@media (max-width: 600px) {
+  .flashcards-page .flashcards-challenge-overlay { padding: 12px; }
+  .flashcards-page .flashcards-challenge-dialog { max-height: calc(100dvh - 24px); border-radius: 17px; }
+  .flashcards-page .flashcards-challenge-head { padding: 20px 19px 17px; }
+  .flashcards-page .flashcards-challenge-body { padding: 18px 19px; }
+  .flashcards-page .flashcards-challenge-footer { padding: 15px 19px; }
+  .flashcards-page .flashcards-challenge-body .flashcards-game-options-list { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .flashcards-page .flashcards-challenge-footer button { padding: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcards-page .flashcards-challenge-overlay { backdrop-filter: none; }
+}
+
+
+/* TENNA · refinamento final do modo escuro (Flashcards).
+   Apenas o tema escuro: conserva o modo claro e as cores dos baralhos. */
+html[data-theme='dark'] .flashcards-page .flashcards-hero,
+html[data-theme='dark'] .flashcards-page .flashcards-materia-hero {
+  background: #1d589f;
+  border: 1px solid #3276c2;
+  box-shadow: 0 12px 26px -22px rgba(3, 17, 40, .7);
+}
+html[data-theme='dark'] .flashcards-page .flashcards-hero::before,
+html[data-theme='dark'] .flashcards-page .flashcards-hero::after,
+html[data-theme='dark'] .flashcards-page .flashcards-materia-hero::before {
+  opacity: 0;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-hero-eyebrow,
+html[data-theme='dark'] .flashcards-page .flashcards-materia-hero-label { color: #d1e7ff; }
+html[data-theme='dark'] .flashcards-page .flashcards-hero p { color: #e5f1ff; }
+html[data-theme='dark'] .flashcards-page .flashcards-game-banner {
+  background: #182d45;
+  border-color: #35516e;
+  box-shadow: none;
+}
+html[data-theme='dark'] .flashcards-page .flashcards-game-banner h2,
+html[data-theme='dark'] .flashcards-page .flashcards-deck-title,
+html[data-theme='dark'] .flashcards-page .flashcards-content-title,
+html[data-theme='dark'] .flashcards-page .materia-section-title { color: #f0f6ff; }
+html[data-theme='dark'] .flashcards-page .flashcards-game-banner p,
+html[data-theme='dark'] .flashcards-page .flashcards-content-description,
+html[data-theme='dark'] .flashcards-page .materia-section-description { color: #b6cce3; }
+html[data-theme='dark'] .flashcards-page button.flashcards-deck { border-color: #37526e; border-left-color: var(--deck-accent, #2385ed); box-shadow: none; }
+html[data-theme='dark'] .flashcards-page button.flashcards-deck:hover { border-color: #537a9e; border-left-color: var(--deck-accent, #2385ed); box-shadow: none; }
+html[data-theme='dark'] .flashcards-page .flashcard-face.front {
+  background: #1a2e46;
+  color: #f1f7ff;
+  border-color: #385470;
+}
+html[data-theme='dark'] .flashcards-page .flashcard-face.back { background: #164677; border-color: #456a8d; }
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-card .flashcard-game-front > p { color: #fff; }
+html[data-theme='dark'] .flashcards-game-page .flashcard-game-card .flashcard-game-front .flashcard-game-flip-hint { color: #f1f7ff; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-stat { border-color: #385572; }
+html[data-theme='dark'] .flashcards-finished .flashcards-review-suggestion { border-color: #395571; }
+html[data-theme='dark'] .flashcards-finished .flashcards-review-eyebrow { color: #8bc5ff; }
+html[data-theme='dark'] .flashcards-finished .flashcards-review-topics span { background: #203952; color: #e6f1ff; border-color: #42617f; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-stat.is-correct .flashcards-stat-dot { background: #204b3d; color: #b6efd0; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-stat.is-wrong .flashcards-stat-dot { background: #51333b; color: #ffc3c3; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-secondary { background: #223b55; color: #e7f3ff; border-color: #486885; }
+html[data-theme='dark'] .flashcards-finished .flashcards-result-secondary:hover { background: #2c4b6a; }

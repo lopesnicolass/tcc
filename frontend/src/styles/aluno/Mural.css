@@ -1030,13 +1030,31 @@
   display:inline-flex; align-items:center; justify-content:center; gap:7px;
   min-height:40px; padding:9px 17px; border-radius:11px;
   font:700 13px/1.2 system-ui,sans-serif;
-  transition:background .18s ease, box-shadow .18s ease, transform .18s ease;
+  transition:none;
 }
+/* Acao destrutiva: vermelho suave e icone legivel em qualquer cor de papel. */
 .mural-page .mural-edit-bottom .mural-edit-delete {
-  background:rgba(255,255,255,.64); border:1px solid rgba(173,49,49,.26);
-  color:#a62e2e;
+  background:#fff0f1;
+  border:1px solid #e6acb2;
+  color:#a52836;
+  box-shadow:0 1px 2px rgba(93,28,41,.06);
+  transition:none;
 }
-.mural-page .mural-edit-bottom .mural-edit-delete:hover {background:rgba(255,244,244,.95);}
+.mural-page .mural-edit-bottom .mural-edit-delete:hover {
+  background:#ffe1e5;
+  border-color:#d98893;
+  color:#921c2c;
+}
+.mural-page .mural-edit-bottom .mural-edit-delete svg {
+  width:15px;
+  height:15px;
+  flex-shrink:0;
+  stroke:currentColor;
+}
+.mural-page .mural-edit-bottom .mural-edit-delete:focus-visible {
+  outline:3px solid #992d3b;
+  outline-offset:3px;
+}
 .mural-page .mural-edit-bottom .mural-edit-save {
   background:#1155ae; border:1px solid #1155ae; color:#fff;
   box-shadow:0 3px 8px rgba(11,65,139,.15);
@@ -1484,4 +1502,94 @@
   .mural-page .postit,
   .mural-page .materia-tab,
   .mural-page .mural-add-inline { animation: none; transition: none; }
+}
+
+/* =========================================================
+   MURAL — CABEÇALHO UNIFORME E CONTRASTE NO MODO ESCURO
+   Mantém os post-its coloridos e o layout existente.
+   ========================================================= */
+
+/* Mesmo acabamento azul sólido do cabeçalho da página inicial. */
+.student-area .mural-page .mural-hero {
+  background: #2269be;
+  background-image: none;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-hero {
+  background: #246ab9;
+  background-image: none;
+  border-color: rgba(133,193,255,.32);
+}
+
+/* Os papéis não devem herdar a cor clara do texto do modo escuro. */
+html[data-theme='dark'] .student-area .mural-page .postit-text,
+html[data-theme='dark'] .student-area .mural-page .mural-picker-option-name,
+html[data-theme='dark'] .student-area .mural-page .mural-create-text,
+html[data-theme='dark'] .student-area .mural-page .mural-edit-text {
+  color: #243649 !important;
+  -webkit-text-fill-color: #243649;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-create-text::placeholder {
+  color: rgba(36,54,73,.63) !important;
+  -webkit-text-fill-color: rgba(36,54,73,.63);
+  opacity: 1;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-create-count {
+  color: #304b5e;
+}
+
+/* A janela de escolha acompanha o tema: título e descrição legíveis. */
+html[data-theme='dark'] .student-area .mural-page .mural-picker {
+  background: #1c2c40;
+  border-color: #38516d;
+  box-shadow: 0 24px 60px rgba(2,10,24,.38);
+}
+html[data-theme='dark'] .student-area .mural-page .mural-picker h2 { color: #f0f6ff; }
+html[data-theme='dark'] .student-area .mural-page .mural-picker p { color: #afc6e0; }
+html[data-theme='dark'] .student-area .mural-page .mural-picker-close {
+  background: #293f59;
+  border-color: #405f80;
+  color: #e3f2ff;
+}
+
+/* Busca escura com contraste próprio em vez de campo branco destacado. */
+html[data-theme='dark'] .student-area .mural-page .mural-search {
+  background: #1c2e43;
+  border-color: #3c5775;
+  box-shadow: 0 3px 10px rgba(2,12,25,.14);
+}
+html[data-theme='dark'] .student-area .mural-page .mural-search input {
+  background: transparent;
+  color: #edf5ff;
+  -webkit-text-fill-color: #edf5ff;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-search input::placeholder {
+  color: #a1b9d4;
+  -webkit-text-fill-color: #a1b9d4;
+  opacity: 1;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-search-icon {
+  color: #9dcaff;
+}
+html[data-theme='dark'] .student-area .mural-page .mural-search:focus-within {
+  border-color: #68b1fb;
+  box-shadow: 0 0 0 3px rgba(104,177,251,.17);
+}
+
+/* Pesquisa: o foco pertence à caixa externa, não ao input interno.
+   Evita a borda retangular duplicada nos dois temas, especialmente no escuro. */
+.student-area .mural-page .mural-search input[type="search"],
+.student-area .mural-page .mural-search input[type="search"]:focus,
+.student-area .mural-page .mural-search input[type="search"]:focus-visible {
+  min-width: 0;
+  border: 0;
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.student-area .mural-page .mural-search input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }

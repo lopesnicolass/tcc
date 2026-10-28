@@ -15,7 +15,7 @@ const statements = [
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER NOT NULL,
     materia TEXT NOT NULL,
-    duracao_minutos INTEGER NOT NULL CHECK(duracao_minutos IN (1, 15, 25, 45)),
+    duracao_minutos INTEGER NOT NULL CHECK(duracao_minutos BETWEEN 1 AND 120),
     restante_segundos INTEGER NOT NULL,
     estado TEXT NOT NULL DEFAULT 'em_andamento'
       CHECK(estado IN ('em_andamento', 'pausada', 'concluida', 'cancelada')),
@@ -116,6 +116,53 @@ db.serialize(() => {
       if (erro) console.error('Erro na migração do Terrário:', erro.message);
     });
   }
+
+  // Versões antigas restringiam o tempo a 1, 15, 25 ou 45 minutos via CHECK.
+  // A tabela precisa ser recriada para permitir durações personalizadas, sem
+  // apagar sessões existentes nem alterar IDs ou recompensas já registradas.
+  db.get("SELECT sql FROM sqlite_master WHERE type='table' AND name='terrario_sessoes'", [], (erro, tabela) => {
+    if (erro) {
+      console.error('Erro ao conferir durações do Terrário:', erro.message);
+      return;
+    }
+    if (!tabela?.sql || !/duracao_minutos\s+IN\s*\(1\s*,\s*15\s*,\s*25\s*,\s*45\)/i.test(tabela.sql)) return;
+
+    const criarNova = statements[1].replace(
+      'CREATE TABLE IF NOT EXISTS terrario_sessoes',
+      'CREATE TABLE terrario_sessoes_migracao'
+    );
+    const gatilhoConclusao = statements.find((sql) => sql.includes('trg_terrario_conclusao'));
+    const passos = [
+      'BEGIN IMMEDIATE',
+      criarNova,
+      `INSERT INTO terrario_sessoes_migracao
+       (id,usuario_id,materia,duracao_minutos,restante_segundos,estado,
+        iniciada_em_ms,ativo_desde_ms,concluida_em_ms,sementes_recebidas,xp_recebido)
+       SELECT id,usuario_id,materia,duracao_minutos,restante_segundos,estado,
+        iniciada_em_ms,ativo_desde_ms,concluida_em_ms,sementes_recebidas,xp_recebido
+       FROM terrario_sessoes`,
+      'DROP TABLE terrario_sessoes',
+      'ALTER TABLE terrario_sessoes_migracao RENAME TO terrario_sessoes',
+      statements[2], // índice que impede duas sessões ativas por usuário
+      statements[3], // índice de busca do histórico
+      gatilhoConclusao, // o gatilho é recriado após a troca da tabela
+      'COMMIT'
+    ];
+    function executarPasso(indice) {
+      if (indice === passos.length) return;
+      db.run(passos[indice], (falha) => {
+        if (falha) {
+          console.error('Erro ao ampliar a duração do foco:', falha.message);
+          db.run('ROLLBACK', (erroRollback) => {
+            if (erroRollback) console.error('Erro ao reverter migração do foco:', erroRollback.message);
+          });
+          return;
+        }
+        executarPasso(indice + 1);
+      });
+    }
+    executarPasso(0);
+  });
 });
 
 module.exports = { statements };

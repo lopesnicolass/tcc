@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useGamification } from '../context/GamificationShared.js';
 import logoIcon from '../assets/tenna_logo.webp';
 import ThemeToggle from './ThemeToggle.jsx';
+import FocoNoSite from './FocoNoSite.jsx';
 
 
 const NAV_ITEMS = [
@@ -50,7 +51,13 @@ function toDateKey(value) {
   return new Intl.DateTimeFormat('sv-SE').format(parsed);
 }
 
-export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
+export default function Sidebar({
+  mobileOpen = false,
+  onClose = () => {},
+  onFocusRunningChange,
+  onToggleCleanFocus,
+  cleanFocus = false,
+}) {
   const { streak, lastActiveDate } = useGamification();
   const fecharRef = useRef(null);
   useEffect(() => { if (mobileOpen) fecharRef.current?.focus(); }, [mobileOpen]);
@@ -121,6 +128,9 @@ export default function Sidebar({ mobileOpen = false, onClose = () => {} }) {
           </NavLink>
         ))}
       </nav>
+
+      <FocoNoSite onFocusRunningChange={onFocusRunningChange}
+        onToggleCleanFocus={onToggleCleanFocus} cleanFocus={cleanFocus} />
 
       <div className="student-theme-toggle-wrap">
         <ThemeToggle className="student-theme-toggle" />

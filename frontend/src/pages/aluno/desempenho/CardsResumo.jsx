@@ -8,7 +8,7 @@ export function CardsResumo({ totalSimulados, totalQuestoes, totalAcertos, total
   return (
     <section className="desempenho-cards-grid" aria-label="Indicadores dos simulados">
       {itens.map((item) => (
-        <div className={`desempenho-kpi desempenho-kpi--${item.variante}`}>
+        <div className={`desempenho-kpi desempenho-kpi--${item.variante}`} key={item.titulo}>
           <span className="desempenho-kpi-rotulo">{item.titulo}</span>
           <strong className="desempenho-kpi-numero">{item.valor}</strong>
           <span className="desempenho-kpi-descricao">{item.descricao}</span>

@@ -651,7 +651,7 @@ html[data-theme='dark'] .terr-status.is-working > span { background: #5fdba1; bo
 @media(max-width:600px) {
   .terr-scene-shell { padding:9px 6px; }
   .terr-scene-story { top:2%; font-size:9px; padding:6px 8px; }
-  .terr-character { width:30%; }
+  /* A escala da Tenna permanece igual em todas as salas também no celular. */
 }
 
 /* Modo de avaliação da decoração — temporário, sem transações no backend. */
@@ -1073,8 +1073,8 @@ html[data-theme='dark'] .terr-world-room-buttons button:not(.active) { color:#ba
   transform-origin: 50% 72%;
 }
 
-/* Sala 3: a carteira aparece na frente do ninho; Tenna fica ao lado dela. */
-.terr-world-room-3 .terr-character { left:73%; top:78%; width:25%; }
+/* A Tenna tem a mesma escala nas três salas; na Sala 3 ela fica à direita da carteira. */
+.terr-world-room-3 .terr-character { left:73%; top:78%; }
 .terr-world-room-3 .terr-scene-item[data-item-id='s3_mesa'] { filter:drop-shadow(0 6px 4px rgba(74,42,16,.2)); }
 
 /* Sala 3: molduras de madeira discretas acompanhando a curva da toca.
@@ -1235,7 +1235,6 @@ html[data-theme='dark'] .terr-world-room-buttons button:not(.active) { color:#ba
   min-width: 160px;
 }
 
-.terr-page.is-focusing .terr-header,
 .terr-page.is-focusing .terr-test-banner,
 .terr-page.is-focusing .terr-overview-grid,
 .terr-page.is-focusing .terr-prototype-note {
@@ -1294,173 +1293,97 @@ html[data-theme='dark'] .terr-page .terr-scene-shell {
   border-color: #906141;
 }
 
-/* O editor passa a ser uma janela, com cenário e catálogo em painéis vizinhos. */
-.terr-decor-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  background: rgba(15, 31, 46, .68);
-  backdrop-filter: blur(6px);
-}
-.terr-page .terr-decor-dialog {
-  position: fixed;
-  inset: clamp(8px, 2.4vh, 28px) clamp(8px, 2vw, 32px);
-  z-index: 3001;
-  width: min(1480px, calc(100vw - 16px));
-  max-height: calc(100dvh - 16px);
-  margin: 0 auto;
+/* Personalização inline: o painel de itens substitui o cronômetro à direita.
+   Não existe overlay/modal; toda a interface segue a rolagem da página. */
+.terr-page.is-decorating .terr-header { display: none; }
+.terr-page.is-decorating { padding-top: 16px; }
+.terr-page.is-decorating .terr-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(320px, 29vw, 420px);
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 14px;
-  padding: 16px;
-  border: 1px solid rgba(255,255,255,.75);
-  border-radius: 23px;
-  background: #f0e1d1;
-  box-shadow: 0 26px 80px rgba(16, 31, 53, .32);
-  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 365px);
+  gap: 16px;
+  align-items: start;
 }
-.terr-decor-dialog-header {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+.terr-page.is-decorating .terr-scene-card {
   min-width: 0;
-  padding: 2px 4px 4px;
+  border-radius: 20px;
 }
-.terr-decor-dialog-header h2 {
-  margin: 4px 0 3px;
-  color: #56331f;
-  font-size: clamp(20px, 1.8vw, 27px);
-  font-weight: 850;
-  letter-spacing: -.03em;
+.terr-page.is-decorating .terr-scene-topbar {
+  padding: 20px 22px;
 }
-.terr-decor-dialog-header p { margin: 0; color: #87644a; font-size: 12px; }
-.terr-decor-close {
-  flex: 0 0 auto;
-  min-height: 43px;
-  padding: 10px 16px;
-  border: 0;
-  border-radius: 12px;
-  background: #185bb2;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 850;
-}
-.terr-decor-close:hover { background: #104889; }
-.terr-page .terr-decor-dialog .terr-layout {
-  grid-column: 1;
-  grid-row: 2;
-  display: block;
-  min-width: 0;
-  min-height: 0;
-}
-.terr-decor-dialog .terr-sidebar,
-.terr-decor-dialog .terr-scene-bottom,
-.terr-decor-dialog .terr-scene-actions {
-  display: none;
-}
-.terr-page .terr-decor-dialog .terr-scene-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  border-color: #d8b99b;
-  border-radius: 18px;
-}
-.terr-decor-dialog .terr-scene-topbar {
-  padding: 13px 19px;
-  flex-shrink: 0;
-}
-.terr-decor-dialog .terr-scene-topbar h2 { font-size: 19px; }
-.terr-decor-dialog .terr-scene-heading p { font-size: 11px; }
-.terr-decor-dialog .terr-size-toolbar { flex-shrink: 0; }
-.terr-page .terr-decor-dialog .terr-scene-shell {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  padding: 12px;
-  overflow: hidden;
-}
-.terr-decor-dialog .terr-world-toolbar { flex-shrink: 0; }
-.terr-decor-dialog .terr-world-hint { color: #704d32; }
-.terr-page .terr-decor-dialog .terr-world-viewport {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: auto;
-  max-height: none;
-  overflow: auto;
-  border-radius: 13px;
-}
-.terr-decor-dialog .terr-world-footnote { display: none; }
-.terr-page .terr-decor-dialog .terr-inventory {
-  grid-column: 2;
-  grid-row: 2;
-  display: block;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  margin: 0;
-  padding: 17px 14px;
-  border-color: #dfc8b2;
-  border-radius: 18px;
+.terr-page.is-decorating .terr-scene-topbar h2 { font-size: 24px; }
+.terr-page.is-decorating .terr-scene-shell { padding: 12px; }
+.terr-page.is-decorating .terr-world-viewport {
+  height: clamp(470px, 53vw, 665px);
   overflow: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #c5a58b transparent;
+  border-radius: 14px;
 }
-.terr-decor-dialog .terr-inventory-header { gap: 10px; flex-wrap: wrap; margin-bottom: 13px; }
-.terr-decor-dialog .terr-inventory h2 { font-size: 20px; }
-.terr-decor-dialog .terr-inventory-header p { font-size: 11px; }
-.terr-decor-dialog .terr-inventory-balance { padding: 7px 10px; }
-.terr-decor-dialog .terr-items-grid {
+.terr-page.is-decorating .terr-world-hint { font-size: 11px; color: #714e35; }
+.terr-page.is-decorating .terr-world-toolbar { margin-bottom: 10px; padding-bottom: 10px; }
+.terr-page.is-decorating .terr-size-toolbar { padding: 10px 13px; gap: 10px; }
+.terr-page.is-decorating .terr-size-item small { display: none; }
+.terr-page.is-decorating .terr-scene-story { display: none; }
+.terr-page.is-decorating .terr-inventory {
+  position: sticky;
+  top: 14px;
+  min-width: 0;
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c7ad92 transparent;
+  margin: 0;
+  padding: 17px;
+  border: 1px solid var(--terr-border);
+  border-radius: 20px;
+  background: var(--terr-surface);
+}
+.terr-page.is-decorating .terr-inventory-header {
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 0 0 12px;
+}
+.terr-page.is-decorating .terr-inventory h2 { font-size: 20px; }
+.terr-page.is-decorating .terr-inventory-balance {
+  padding: 7px 10px;
+  white-space: nowrap;
+  font-size: 11px;
+}
+.terr-page.is-decorating .terr-items-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
-.terr-decor-dialog .terr-item-preview { height: 113px; min-height: 113px; padding: 9px; }
-.terr-decor-dialog .terr-item-desc { min-height: 57px; padding: 9px 10px 6px; }
-.terr-decor-dialog .terr-item-desc strong { font-size: 11px; }
-.terr-decor-dialog .terr-item-desc small { font-size: 10px; }
-.terr-decor-dialog .terr-item-bottom { padding: 8px 9px; flex-wrap: wrap; gap: 6px; }
-.terr-decor-dialog .terr-item-bottom button { min-height: 30px; flex: 1 1 auto; }
-.terr-decor-dialog .terr-inventory-foot { flex-direction: column; align-items: stretch; }
-.terr-decor-dialog .terr-inventory-foot button { border-radius: 9px; background: #e9f3ff; }
-
-/* Tablets e celulares: os painéis viram duas faixas da mesma janela. */
-@media (max-width: 900px) {
-  .terr-page .terr-decor-dialog {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1.3fr) minmax(190px, .8fr);
-    gap: 10px;
-    padding: 10px;
+.terr-page.is-decorating .terr-item-preview { height: 126px; min-height: 126px; padding: 9px; }
+.terr-page.is-decorating .terr-item-desc { min-height: 48px; padding: 10px 10px 7px; }
+.terr-page.is-decorating .terr-item-desc strong { font-size: 11.5px; }
+.terr-page.is-decorating .terr-item-bottom { padding: 8px 10px; flex-wrap: wrap; gap: 8px; }
+.terr-page.is-decorating .terr-item-bottom button { flex: 1 1 auto; }
+.terr-page.is-decorating .terr-owned-label,
+.terr-page.is-decorating .terr-cost-label { font-size: 10px; }
+@media(max-width:1100px) {
+  .terr-page.is-decorating .terr-layout { grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); gap: 12px; }
+  .terr-page.is-decorating .terr-inventory { padding: 12px; }
+  .terr-page.is-decorating .terr-world-viewport { height: 560px; }
+}
+@media(max-width:820px) {
+  .terr-page.is-decorating .terr-layout { grid-template-columns: minmax(0, 1fr); }
+  .terr-page.is-decorating .terr-inventory {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
-  .terr-page .terr-decor-dialog .terr-layout { grid-column: 1; grid-row: 2; }
-  .terr-page .terr-decor-dialog .terr-inventory { grid-column: 1; grid-row: 3; }
-  .terr-decor-dialog .terr-items-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .terr-decor-dialog .terr-scene-topbar { padding: 10px 14px; }
-  .terr-decor-dialog .terr-scene-heading p { display: none; }
+  .terr-page.is-decorating .terr-items-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .terr-page.is-decorating .terr-world-viewport { height: min(67vw, 550px); min-height: 360px; }
 }
-@media (max-width: 560px) {
-  .terr-page .terr-decor-dialog { inset: 5px; width: calc(100vw - 10px); max-height: calc(100dvh - 10px); border-radius: 14px; }
-  .terr-decor-dialog-header { gap: 7px; }
-  .terr-decor-dialog-header h2 { font-size: 17px; }
-  .terr-decor-dialog-header p { display: none; }
-  .terr-decor-close { min-height: 38px; padding: 7px 9px; font-size: 10px; }
-  .terr-decor-dialog .terr-items-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .terr-page .terr-decor-dialog .terr-scene-shell { padding: 8px; }
-  .terr-decor-dialog .terr-world-toolbar { gap: 6px; padding-bottom: 7px; }
-  .terr-decor-dialog .terr-world-hint { display: none; }
+@media(max-width:560px) {
+  .terr-page.is-decorating .terr-scene-topbar { padding: 14px; align-items: flex-start; }
+  .terr-page.is-decorating .terr-scene-topbar h2 { font-size: 20px; }
+  .terr-page.is-decorating .terr-world-viewport { height: 410px; min-height: 0; }
+  .terr-page.is-decorating .terr-items-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .terr-page.is-decorating .terr-inventory { padding: 13px; }
+  .terr-page.is-decorating .terr-item-preview { height: 110px; min-height: 110px; }
 }
-html[data-theme='dark'] .terr-page .terr-decor-dialog {
-  background: #30281f;
-  border-color: #594733;
-}
-html[data-theme='dark'] .terr-decor-dialog-header h2 { color: #fff3e2; }
-html[data-theme='dark'] .terr-decor-dialog-header p { color: #c8b29c; }
-html[data-theme='dark'] .terr-decor-dialog .terr-world-hint { color: #fff1e2; }
 
 .terr-decor-quick-actions {
   display: flex;
@@ -1486,9 +1409,1611 @@ html[data-theme='dark'] .terr-decor-quick-actions button {
   color: #e1f2ff;
 }
 
-/* O controle de retorno ao foco fica sempre visível na janela de decoração. */
-.terr-decor-header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 9px; flex-wrap: wrap; }
-.terr-decor-to-focus { min-height: 43px; padding: 10px 14px; border: 1px solid #b5c5d4; border-radius: 12px; background: #fffaf4; color: #18549e; font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
-.terr-decor-to-focus:hover { background: #eaf5ff; }
-@media(max-width:560px) { .terr-decor-header-actions { gap: 5px; } .terr-decor-to-focus { min-height: 38px; padding: 7px 9px; font-size: 10px; } }
-html[data-theme='dark'] .terr-decor-to-focus { background: #304960; color: #e4f2ff; border-color: #4b6885; }
+
+/* 27/10: uma sala inteira no modo normal e mapa completo na decoração.
+   Não modificar o tamanho original das salas: o arraste depende da geometria. */
+.terr-page:not(.is-decorating) .terr-world-board.is-individual {
+  width: min(100%, clamp(470px, 70vh, 690px));
+}
+.terr-page:not(.is-decorating) .terr-world-board.is-individual .terr-world-room-heading {
+  display: none;
+}
+.terr-page:not(.is-decorating) .terr-world-viewport.is-individual {
+  padding: 14px 10px;
+}
+.terr-page.is-decorating .terr-world-viewport.is-fitted {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+  padding: 12px;
+  cursor: default;
+  touch-action: auto;
+  scrollbar-width: none;
+}
+.terr-page.is-decorating .terr-world-viewport.is-fitted::-webkit-scrollbar {
+  display: none;
+}
+.terr-page.is-decorating .terr-world-fit {
+  position: relative;
+  flex: 0 0 auto;
+  margin: auto;
+}
+.terr-world-unscaled { display: contents; }
+/* A altura do mapa cresce com a escala em vez de criar barras internas.
+   Somente a lista de móveis mantém a rolagem independente. */
+.terr-page.is-decorating .terr-world-viewport.is-fitted .terr-world-board {
+  overflow: visible;
+}
+@media (max-width: 820px) {
+  .terr-page:not(.is-decorating) .terr-world-board.is-individual {
+    width: min(100%, 660px);
+  }
+  .terr-page.is-decorating .terr-world-viewport.is-fitted {
+    min-height: 0;
+    max-height: none;
+  }
+}
+@media (max-width: 560px) {
+  .terr-page:not(.is-decorating) .terr-world-board.is-individual {
+    width: 100%;
+  }
+  .terr-page.is-decorating .terr-world-viewport.is-fitted { padding: 8px; }
+}
+/* Cabeçalho compacto: o ninho fica visível sem exigir rolagem extensa. */
+@media (min-width: 721px) {
+  .terr-page:not(.is-decorating) .terr-header {
+    min-height: 122px;
+    padding: 20px 27px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+  }
+  .terr-page:not(.is-decorating) .terr-header h1 {
+    margin: 5px 0 6px;
+    font-size: clamp(24px, 2vw, 32px);
+  }
+  .terr-page:not(.is-decorating) .terr-wallet,
+  .terr-page:not(.is-decorating) .terr-level { min-height: 64px; }
+  .terr-page:not(.is-decorating) .terr-scene-topbar { padding: 17px 21px; }
+  .terr-page:not(.is-decorating) .terr-scene-shell { padding: 10px 14px; }
+  .terr-page:not(.is-decorating) .terr-timer-card { padding: 20px 20px 19px; }
+  .terr-page:not(.is-decorating) .terr-timer-clock {
+    width: min(190px, 82%);
+    margin: 12px auto 19px;
+  }
+}
+/* Navegação integrada ao cenário: fundo terroso uniforme e seletor compacto. */
+.terr-page .terr-scene-shell,
+html[data-theme='dark'] .terr-page .terr-scene-shell {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: #b47d54;
+}
+.terr-page .terr-world-viewport,
+html[data-theme='dark'] .terr-page .terr-world-viewport {
+  position: relative;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #b47d54;
+  scrollbar-color: #885638 #b47d54;
+}
+.terr-page:not(.is-decorating) .terr-world-viewport.is-individual { padding: 18px 12px 12px; }
+.terr-page.is-decorating .terr-world-viewport.is-fitted { padding: 14px; }
+.terr-page .terr-world-toolbar,
+.terr-page.is-decorating .terr-world-toolbar {
+  position: absolute;
+  z-index: 120;
+  top: 14px;
+  right: 14px;
+  left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: max-content;
+  max-width: calc(100% - 28px);
+  margin: 0;
+  padding: 5px;
+  border: 1px solid rgba(255, 250, 243, .55);
+  border-radius: 15px;
+  background: rgba(255, 247, 235, .96);
+  box-shadow: 0 5px 16px rgba(72, 41, 22, .20);
+  backdrop-filter: blur(6px);
+}
+.terr-page .terr-world-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  padding: 0;
+  margin: -1px;
+  white-space: nowrap;
+  border: 0;
+}
+.terr-page .terr-world-room-buttons { display: flex; gap: 4px; flex-wrap: nowrap; }
+.terr-page .terr-world-room-buttons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 37px;
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #624b3b;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: none;
+  transition: background .16s, color .16s, box-shadow .16s;
+}
+.terr-page .terr-world-room-buttons button:hover:not(.active) {
+  background: #f0ddc9;
+  color: #482e1b;
+}
+.terr-page .terr-world-room-buttons button.active {
+  background: #155ab4;
+  color: #fff;
+  border-color: #155ab4;
+  box-shadow: 0 3px 8px rgba(17, 73, 145, .22);
+}
+.terr-page .terr-world-room-buttons button:focus-visible { outline: 3px solid #2679e3; outline-offset: 2px; }
+.terr-room-tab-index { font-weight: 900; font-variant-numeric: tabular-nums; opacity: .84; }
+.terr-room-tab-label { font-weight: 800; }
+.terr-room-tab-lock { font-size: 10px; }
+@media (max-width: 700px) {
+  .terr-page .terr-world-toolbar,
+  .terr-page.is-decorating .terr-world-toolbar {
+    top: 9px;
+    right: 9px;
+    max-width: calc(100% - 18px);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .terr-page .terr-world-room-buttons button { min-height: 34px; padding: 7px 9px; }
+}
+@media (max-width: 410px) {
+  .terr-page .terr-world-room-buttons button { gap: 0; padding: 7px 10px; }
+  .terr-room-tab-label { display: none; }
+}
+
+/* Uma unica cor de terra, inclusive no recuo interno e no mapa. */
+.terr-page .terr-scene-shell,
+.terr-page .terr-world-viewport,
+.terr-page .terr-world-board,
+.terr-page .terr-world-fit,
+html[data-theme='dark'] .terr-page .terr-scene-shell,
+html[data-theme='dark'] .terr-page .terr-world-viewport,
+html[data-theme='dark'] .terr-page .terr-world-board,
+html[data-theme='dark'] .terr-page .terr-world-fit {
+  background: #b47d54;
+  background-image: none;
+  box-shadow: none;
+}
+.terr-page:not(.is-decorating) .terr-world-viewport.is-individual { padding: 0; }
+.terr-page.is-decorating .terr-world-viewport.is-fitted { padding: 0; }
+
+/* Ajuste isolado: painel de foco acompanha a altura do terrário. */
+@media (min-width: 1101px) {
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-layout { align-items: stretch; }
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar { align-self: stretch; display: flex; flex-direction: column; min-height: 0; }
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-card { flex: 1 1 auto; display: flex; flex-direction: column; }
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-buttons { margin-top: auto; }
+}
+
+
+/* Cronômetro personalizável: um minuto por passo e aro preenchendo com o tempo. */
+.terr-page .terr-timer-clock {
+  position: relative;
+  isolation: isolate;
+  padding: 19px;
+  background: transparent !important;
+  box-shadow: none;
+}
+.terr-page .terr-timer-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+  pointer-events: none;
+}
+.terr-page .terr-timer-ring-track,
+.terr-page .terr-timer-ring-progress {
+  fill: none;
+  stroke-width: 12;
+}
+.terr-page .terr-timer-ring-track { stroke: #dbe9f8; }
+.terr-page .terr-timer-ring-progress {
+  stroke: #267cda;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .35s linear, stroke .2s ease;
+  filter: drop-shadow(0 0 3px rgba(34, 127, 235, .25));
+}
+.terr-page .terr-timer-clock.is-paused .terr-timer-ring-progress { stroke: #e1a43e; }
+.terr-page .terr-timer-clock.is-completed .terr-timer-ring-progress { stroke: #2aa979; }
+.terr-page .terr-timer-inner {
+  position: relative;
+  z-index: 1;
+  box-shadow: inset 0 2px 12px rgba(43, 115, 193, .045);
+}
+.terr-page .terr-duration-picker {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  align-items: stretch;
+  gap: 10px;
+  margin: 9px 0 0;
+}
+.terr-page .terr-duration-step {
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+  border: 1px solid #c5ddf6;
+  border-radius: 13px;
+  background: #edf5ff;
+  color: #1658ad;
+  font-size: 24px;
+  font-weight: 700;
+  transition: background .2s ease, transform .2s ease;
+}
+.terr-page .terr-duration-step:hover:not(:disabled) { background: #deecff; transform: translateY(-1px); }
+.terr-page .terr-duration-step:active:not(:disabled) { transform: translateY(0); }
+.terr-page .terr-duration-step:disabled { opacity: .45; cursor: not-allowed; }
+.terr-page .terr-duration-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 50px;
+  border: 1px solid #d9e8f7;
+  border-radius: 13px;
+  background: var(--terr-surface-soft);
+}
+.terr-page .terr-duration-value input {
+  width: 75px;
+  min-width: 0;
+  padding: 5px 0;
+  border: 0;
+  outline-offset: 2px;
+  background: transparent;
+  color: var(--terr-strong);
+  font: inherit;
+  font-size: 23px;
+  font-weight: 850;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.terr-page .terr-duration-value input::-webkit-inner-spin-button,
+.terr-page .terr-duration-value input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.terr-page .terr-duration-value input:disabled { opacity: 1; }
+.terr-page .terr-duration-value span { color: var(--terr-text-soft); font-size: 12px; font-weight: 800; }
+.terr-page .terr-test-note { margin: 10px 0 18px; }
+.terr-page .terr-timer-buttons { align-items: stretch; }
+.terr-page .terr-timer-buttons .terr-primary {
+  gap: 9px;
+  min-height: 51px;
+  border-radius: 13px;
+  font-size: 14px;
+  letter-spacing: -.01em;
+}
+.terr-page .terr-timer-buttons .terr-primary > span { font-size: 15px; }
+.terr-page .terr-timer-buttons .terr-secondary {
+  min-width: 94px;
+  border-radius: 13px;
+  font-weight: 800;
+}
+.terr-page .terr-timer-buttons .terr-primary:focus-visible,
+.terr-page .terr-duration-step:focus-visible,
+.terr-page .terr-duration-value input:focus-visible { outline: 3px solid #56acfc; outline-offset: 2px; }
+@media (max-width: 420px) {
+  .terr-page .terr-duration-picker { grid-template-columns: 46px minmax(0, 1fr) 46px; gap: 8px; }
+  .terr-page .terr-duration-value input { font-size: 21px; width: 66px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terr-page .terr-timer-ring-progress,
+  .terr-page .terr-duration-step { transition: none; }
+}
+html[data-theme='dark'] .terr-page .terr-timer-ring-track { stroke: #304865; }
+html[data-theme='dark'] .terr-page .terr-duration-step { background: #264867; color: #d7ebff; border-color: #4c6f92; }
+html[data-theme='dark'] .terr-page .terr-duration-value { border-color: #486581; }
+
+/* Estados claros de foco: acao principal e encerramento com hierarquia distinta. */
+.terr-page .terr-timer-card.is-running .terr-timer-buttons .terr-primary {
+  background: #185ea8;
+  border-color: #185ea8;
+}
+.terr-page .terr-timer-card.is-paused .terr-timer-buttons .terr-primary {
+  background: #176ac4;
+  border-color: #176ac4;
+}
+.terr-page .terr-timer-card .terr-timer-buttons .terr-secondary {
+  border-color: #f1c6bd;
+  background: #fff8f6;
+  color: #a34d3e;
+}
+.terr-page .terr-timer-card .terr-timer-buttons .terr-secondary:hover {
+  background: #ffede8;
+  border-color: #e9a598;
+}
+html[data-theme='dark'] .terr-page .terr-timer-card .terr-timer-buttons .terr-secondary {
+  border-color: #8a5a52;
+  background: #46302f;
+  color: #ffdad5;
+}
+
+/* Modo foco: controles agrupados e estáveis em todos os estados da sessão. */
+.terr-page .terr-timer-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.terr-page .terr-timer-card > p {
+  margin-bottom: 4px;
+}
+.terr-page .terr-timer-clock {
+  flex: 0 0 auto;
+  margin: 13px auto 17px;
+}
+.terr-page .terr-focus-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.terr-page .terr-focus-controls .terr-duration-label {
+  margin: 0;
+}
+.terr-page .terr-duration-presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.terr-page .terr-duration-presets button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 5px;
+  border: 1px solid #cfe1f5;
+  border-radius: 11px;
+  background: var(--terr-surface-soft);
+  color: var(--terr-accent);
+  font-size: 12px;
+  font-weight: 800;
+  transition: border-color .16s ease, background-color .16s ease;
+}
+.terr-page .terr-duration-presets button:hover:not(:disabled) {
+  background: #e5f2ff;
+  border-color: #91bdeb;
+}
+.terr-page .terr-duration-presets button.active {
+  border-color: #185db9;
+  background: #185db9;
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(16, 71, 150, .16);
+}
+.terr-page .terr-duration-presets button:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+.terr-page .terr-duration-presets button.active:disabled {
+  opacity: .9;
+}
+.terr-page .terr-duration-presets button:focus-visible {
+  outline: 3px solid #56acfc;
+  outline-offset: 2px;
+}
+.terr-page .terr-focus-controls .terr-duration-picker {
+  margin: 0;
+  grid-template-columns: 46px minmax(0, 1fr) 46px;
+  gap: 8px;
+}
+.terr-page .terr-focus-controls .terr-duration-step,
+.terr-page .terr-focus-controls .terr-duration-value {
+  min-height: 44px;
+  border-radius: 11px;
+}
+.terr-page .terr-focus-controls .terr-duration-value input {
+  font-size: 21px;
+  width: 70px;
+}
+.terr-page .terr-focus-controls .terr-timer-buttons,
+.terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-buttons {
+  margin-top: 4px;
+  gap: 8px;
+}
+.terr-page .terr-focus-controls .terr-timer-buttons .terr-primary {
+  min-height: 47px;
+}
+/* Encerrar é secundário, sem competir visualmente com Pausar/Retomar. */
+.terr-page .terr-focus-controls .terr-timer-buttons .terr-secondary {
+  min-height: 47px;
+  min-width: 92px;
+  padding: 9px 10px;
+  border-color: var(--terr-border);
+  background: transparent;
+  color: var(--terr-text-soft);
+  box-shadow: none;
+}
+.terr-page .terr-focus-controls .terr-timer-buttons .terr-secondary:hover {
+  border-color: #d8ad9e;
+  background: #fff5f0;
+  color: #9e4d3f;
+}
+.terr-page .terr-focus-status-slot {
+  min-height: 40px;
+  margin-top: 1px;
+}
+.terr-page .terr-focus-one-status {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: var(--terr-surface-soft);
+  color: var(--terr-text-soft);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.terr-page .terr-focus-controls .terr-confirm-cancel {
+  margin: 0;
+  padding: 11px;
+  border-radius: 11px;
+}
+.terr-page .terr-focus-controls .terr-confirm-cancel p {
+  margin: 0 0 9px;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+.terr-page .terr-focus-controls .terr-confirm-cancel > div {
+  display: flex;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+.terr-page .terr-focus-controls .terr-confirm-cancel button {
+  min-height: 35px;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 7px 8px;
+  font-size: 10.5px;
+}
+.terr-page .terr-focus-controls .terr-focus-summary {
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 11px;
+}
+.terr-page .terr-focus-controls .terr-focus-summary strong { font-size: 12.5px; }
+.terr-page .terr-focus-controls .terr-focus-summary > div { margin-top: 7px; }
+@media (max-width: 410px) {
+  .terr-page .terr-duration-presets { gap: 5px; }
+  .terr-page .terr-duration-presets button { min-height: 38px; }
+  .terr-page .terr-focus-controls .terr-timer-buttons .terr-secondary { min-width: 75px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terr-page .terr-duration-presets button { transition: none; }
+}
+html[data-theme='dark'] .terr-page .terr-duration-presets button:not(.active) {
+  background: var(--terr-surface-soft);
+  color: #d4e9ff;
+  border-color: #456383;
+}
+html[data-theme='dark'] .terr-page .terr-focus-one-status {
+  background: var(--terr-surface-soft);
+}
+html[data-theme='dark'] .terr-page .terr-focus-controls .terr-timer-buttons .terr-secondary {
+  color: #b8cee8;
+  border-color: #496480;
+  background: transparent;
+}
+
+
+/* Durante o foco o cabeçalho azul com sementes e nível permanece visível. */
+.terr-page.is-focusing .terr-header { display: flex; }
+
+/* Presets e ajuste livre só antes de iniciar: durante a sessão o tempo é
+   somente leitura, e a interface não induz a alterar uma sessão em curso. */
+.terr-page .terr-duration-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.terr-page .terr-duration-session {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--terr-border);
+  border-radius: 11px;
+  background: var(--terr-surface-soft);
+  color: var(--terr-text-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+/* Confirmar substitui os botões habituais, sem criar um segundo painel. */
+.terr-page .terr-focus-controls .terr-confirm-actions {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.terr-page .terr-focus-controls .terr-confirm-actions button {
+  flex: 1 1 50%;
+  min-width: 0;
+  min-height: 47px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: normal;
+}
+.terr-page .terr-focus-controls .terr-confirm-actions .terr-confirm-danger {
+  border-color: #c65041;
+  background: #b34435;
+  color: #fff;
+  box-shadow: none;
+}
+.terr-page .terr-focus-controls .terr-confirm-actions .terr-confirm-danger:hover:not(:disabled) {
+  background: #96392f;
+}
+.terr-page .terr-focus-one-status.is-warning {
+  background: #fff5f1;
+  color: #945040;
+  border: 1px solid #f1c7ba;
+}
+@media (max-width: 720px) {
+  .terr-page.is-focusing .terr-header { display: flex; }
+}
+html[data-theme='dark'] .terr-page .terr-duration-session {
+  background: var(--terr-surface-soft);
+  border-color: var(--terr-border);
+}
+html[data-theme='dark'] .terr-page .terr-focus-one-status.is-warning {
+  background: #402d2b;
+  border-color: #755348;
+  color: #ffdacd;
+}
+
+/* O foco mantém o mesmo alinhamento vertical do cenário, inclusive quando o
+   número de controles é reduzido durante uma sessão ativa. */
+@media (min-width: 1101px) {
+  .terr-page.is-focusing .terr-layout { align-items: stretch; }
+  .terr-page.is-focusing .terr-sidebar { align-self: stretch; display: flex; flex-direction: column; }
+  .terr-page.is-focusing .terr-timer-card { flex: 1 1 auto; }
+}
+.terr-page .terr-timer-card.is-running .terr-timer-clock,
+.terr-page .terr-timer-card.is-paused .terr-timer-clock {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+
+/* Refinamento final: mesma geometria no início, na pausa e durante o foco.
+   O cabeçalho do painel, o relógio e a área de ações ocupam trilhas fixas;
+   o espaço restante fica distribuído entre elas, nunca empilhado embaixo. */
+@media (min-width: 1021px) {
+  .terr-page:not(.is-decorating) .terr-layout,
+  .terr-page.is-focusing .terr-layout {
+    grid-template-columns: minmax(0, 1.93fr) minmax(330px, .87fr);
+    align-items: stretch;
+  }
+  .terr-page:not(.is-decorating) .terr-sidebar,
+  .terr-page.is-focusing .terr-sidebar {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    position: static;
+    min-height: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-card {
+    display: grid;
+    grid-template-rows: auto minmax(185px, 1fr) 198px;
+    align-items: stretch;
+    align-content: stretch;
+    row-gap: 15px;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 23px 20px 23px;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-clock,
+  .terr-page .terr-timer-card.is-running .terr-timer-clock,
+  .terr-page .terr-timer-card.is-paused .terr-timer-clock {
+    grid-row: 2;
+    align-self: center;
+    justify-self: center;
+    width: 190px;
+    height: 190px;
+    margin: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-focus-controls {
+    grid-row: 3;
+    min-height: 0;
+    justify-content: flex-end;
+    align-self: stretch;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-heading { grid-row: 1; }
+}
+.terr-page .terr-timer-heading { min-width: 0; }
+.terr-page .terr-timer-heading h2 { margin: 5px 0 0; }
+.terr-page .terr-timer-heading > p {
+  margin: 7px 0 0;
+  color: var(--terr-text-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.terr-page .terr-focus-status-slot {
+  min-height: 0;
+  margin: 0;
+}
+.terr-page .terr-focus-controls { gap: 9px; }
+.terr-page .terr-timer-card.is-running .terr-timer-clock,
+.terr-page .terr-timer-card.is-paused .terr-timer-clock { margin-top: 0; margin-bottom: 0; }
+@media (min-width: 1021px) and (max-width: 1190px) {
+  .terr-page:not(.is-decorating) .terr-layout,
+  .terr-page.is-focusing .terr-layout {
+    grid-template-columns: minmax(0, 1.75fr) minmax(300px, .9fr);
+  }
+  .terr-page:not(.is-decorating) .terr-timer-card {
+    grid-template-rows: auto minmax(170px, 1fr) 198px;
+  }
+}
+@media (max-width: 1020px) {
+  .terr-page:not(.is-decorating) .terr-layout,
+  .terr-page.is-focusing .terr-layout { grid-template-columns: minmax(0, 1fr); }
+  .terr-page .terr-timer-card { display: flex; }
+  .terr-page .terr-timer-clock,
+  .terr-page .terr-timer-card.is-running .terr-timer-clock,
+  .terr-page .terr-timer-card.is-paused .terr-timer-clock {
+    margin: 15px auto 18px;
+  }
+}
+
+/* Mantém EXATAMENTE a mesma geometria do card antes, durante e após o foco.
+   A regra antiga do modo inicial forçava flex, enquanto o foco rodando
+   entrava num grid de largura mínima; isso encolhia os botões e movia o anel. */
+.terr-page.is-focusing {
+  padding-top: 4px; /* Evita que o cabeçalho e os cards saltem ao iniciar. */
+}
+@media (min-width: 1021px) {
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-card,
+  .terr-page.is-focusing .terr-sidebar .terr-timer-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(185px, 1fr) 198px;
+    align-items: stretch;
+    justify-items: stretch;
+    justify-content: stretch;
+    align-content: stretch;
+    gap: 15px;
+    min-width: 0;
+    min-height: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-heading,
+  .terr-page:not(.is-decorating) .terr-timer-clock,
+  .terr-page:not(.is-decorating) .terr-focus-controls {
+    grid-column: 1;
+    width: 100%;
+    min-width: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-heading { grid-row: 1; }
+  .terr-page:not(.is-decorating) .terr-timer-clock,
+  .terr-page.is-focusing .terr-timer-clock {
+    grid-row: 2;
+    place-self: center;
+    width: 190px;
+    height: 190px;
+    margin: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-focus-controls {
+    grid-row: 3;
+    justify-content: flex-end;
+  }
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-buttons {
+    margin-top: 4px; /* Não usa margin-top:auto apenas no estado inicial. */
+  }
+}
+@media (min-width: 1021px) and (max-width: 1190px) {
+  .terr-page:not(.is-decorating):not(.is-focusing) .terr-sidebar .terr-timer-card,
+  .terr-page.is-focusing .terr-sidebar .terr-timer-card {
+    grid-template-rows: auto minmax(170px, 1fr) 198px;
+  }
+}
+@media (max-width: 1020px) {
+  /* Sem a segunda coluna de estatísticas, o card deve ocupar toda a largura
+     disponível no tablet/celular, inclusive durante a sessão ativa. */
+  .terr-page:not(.is-decorating) .terr-sidebar,
+  .terr-page.is-focusing .terr-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .terr-page:not(.is-decorating) .terr-sidebar .terr-timer-card {
+    width: 100%;
+    min-width: 0;
+  }
+  .terr-page:not(.is-decorating) .terr-timer-clock,
+  .terr-page.is-focusing .terr-timer-clock {
+    width: 190px;
+    height: 190px;
+    max-width: min(190px, 90%);
+  }
+}
+
+
+/* Editor compacto: cabe o mapa-pirâmide inteiro na janela de desktop.
+   Somente o catálogo mantém rolagem vertical; a sala não é cortada. */
+@media (min-width: 821px) {
+  .terr-page.is-decorating .terr-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(282px, 316px);
+    gap: 14px;
+    align-items: start;
+  }
+  .terr-page.is-decorating .terr-scene-topbar {
+    padding: 14px 19px;
+  }
+  .terr-page.is-decorating .terr-scene-topbar h2 { font-size: 21px; }
+  .terr-page.is-decorating .terr-size-toolbar {
+    padding: 7px 12px;
+    gap: 7px;
+  }
+  .terr-page.is-decorating .terr-inventory {
+    padding: 13px;
+    max-height: calc(100dvh - 24px);
+  }
+  .terr-page.is-decorating .terr-inventory-header {
+    padding-bottom: 8px;
+    margin-bottom: 9px;
+  }
+  .terr-page.is-decorating .terr-inventory h2 { font-size: 18px; }
+  .terr-page.is-decorating .terr-items-grid { gap: 8px; }
+  .terr-page.is-decorating .terr-item-preview {
+    height: 104px;
+    min-height: 104px;
+  }
+  .terr-page.is-decorating .terr-item-desc {
+    min-height: 40px;
+    padding: 8px 9px 6px;
+  }
+  .terr-page.is-decorating .terr-item-bottom { padding: 7px 8px; }
+  .terr-page.is-decorating .terr-decor-quick-actions { margin-bottom: 10px; }
+}
+.terr-page.is-decorating .terr-world-viewport.is-fitted {
+  overflow: hidden;
+  max-height: none;
+}
+
+/* O modo decorar respeita a mesma largura dos cards do modo normal.
+   O catálogo substitui o cronômetro sem mudar a proporção do grid. */
+@media (min-width: 1021px) {
+  .terr-page.is-decorating .terr-layout {
+    grid-template-columns: minmax(0, 1.93fr) minmax(330px, .87fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+  .terr-page.is-decorating .terr-scene-card {
+    align-self: stretch;
+    min-height: 600px;
+  }
+  .terr-page.is-decorating .terr-inventory {
+    align-self: stretch;
+    height: 100%;
+    max-height: 620px;
+    overflow-y: auto;
+  }
+}
+/* Em tablet/celular os dois modos usam uma única coluna. */
+@media (min-width: 821px) and (max-width: 1020px) {
+  .terr-page.is-decorating .terr-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .terr-page.is-decorating .terr-inventory {
+    position: static;
+    max-height: none;
+    height: auto;
+  }
+}
+
+/* Correção final: manter o cabeçalho azul também na personalização.
+   A pirâmide volta a usar espaço suficiente para que os móveis sejam visíveis
+   e os cards conservam a mesma proporção de colunas do modo de visualização. */
+.terr-page.is-decorating .terr-header {
+  display: flex;
+  min-height: 122px;
+  margin-bottom: 16px;
+  padding: 20px 27px;
+  border-radius: 20px;
+}
+.terr-page.is-decorating .terr-header h1 {
+  margin: 5px 0 6px;
+  font-size: clamp(24px, 2vw, 32px);
+}
+.terr-page.is-decorating .terr-wallet,
+.terr-page.is-decorating .terr-level { min-height: 64px; }
+@media (min-width: 1021px) {
+  .terr-page.is-decorating .terr-layout {
+    grid-template-columns: minmax(0, 1.93fr) minmax(330px, .87fr);
+    align-items: stretch;
+  }
+  .terr-page.is-decorating .terr-scene-card { min-height: 0; }
+  .terr-page.is-decorating .terr-inventory {
+    align-self: stretch;
+    max-height: 730px;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+@media (max-width: 720px) {
+  .terr-page.is-decorating .terr-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 22px 20px;
+  }
+  .terr-page.is-decorating .terr-header-stats { flex-direction: row; }
+}
+
+/* Editor equilibrado: mesma divisão horizontal do modo foco e altura do
+   catálogo acompanhando o mapa. Evita um card desproporcionalmente alto. */
+@media (min-width: 1021px) {
+  .terr-page.is-decorating .terr-layout {
+    grid-template-columns: minmax(0, 1.93fr) minmax(330px, .87fr);
+    align-items: stretch;
+  }
+  .terr-page.is-decorating .terr-scene-card,
+  .terr-page.is-decorating .terr-inventory { min-height: 0; }
+  .terr-page.is-decorating .terr-inventory {
+    align-self: stretch;
+    height: 100%;
+    max-height: min(820px, calc(100dvh - 32px));
+    overflow-y: auto;
+  }
+}
+
+
+/* Editor 27/10 — as etiquetas brancas com nomes não aparecem no mapa.
+   A seleção de salas permanece disponível nos botões do cenário. */
+.terr-page.is-decorating .terr-world-room-heading { display: none; }
+
+/* O catálogo não segue a rolagem da janela. Ele começa junto do terrário,
+   tem exatamente a altura medida do card vizinho e rola apenas os itens.
+   A cena usa altura intrínseca para não herdar a altura da lista. */
+@media (min-width: 1021px) {
+  .terr-page.is-decorating .terr-layout {
+    align-items: start;
+  }
+  .terr-page.is-decorating .terr-scene-card {
+    align-self: start;
+    height: auto;
+  }
+  .terr-page.is-decorating .terr-inventory {
+    position: static;
+    top: auto;
+    align-self: start;
+    height: var(--terr-catalog-height, 660px);
+    min-height: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    overscroll-behavior-y: contain;
+  }
+}
+@media (max-width: 1020px) {
+  .terr-page.is-decorating .terr-inventory {
+    position: static;
+    top: auto;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+
+/* 27/10 — Catálogo organizado: cabeçalho e ações ficam à vista, apenas
+   a lista de móveis rola. Uma barra sutil substitui a faixa larga antiga. */
+@media (min-width: 1021px) {
+  .terr-page.is-decorating .terr-inventory {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    overscroll-behavior: auto;
+    scrollbar-gutter: auto;
+  }
+  .terr-page.is-decorating .terr-inventory-header,
+  .terr-page.is-decorating .terr-decor-quick-actions {
+    flex: 0 0 auto;
+  }
+  .terr-page.is-decorating .terr-items-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 2px 4px 2px 1px;
+    overscroll-behavior-y: auto;
+    scrollbar-gutter: stable;
+  }
+}
+.terr-page.is-decorating .terr-items-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #bacce0 transparent;
+}
+.terr-page.is-decorating .terr-items-scroll::-webkit-scrollbar { width: 7px; }
+.terr-page.is-decorating .terr-items-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 7px;
+}
+.terr-page.is-decorating .terr-items-scroll::-webkit-scrollbar-thumb {
+  background: #b9cee5;
+  border: 1px solid var(--terr-surface);
+  border-radius: 30px;
+}
+.terr-page.is-decorating .terr-items-scroll::-webkit-scrollbar-thumb:hover { background: #88add3; }
+.terr-page.is-decorating .terr-items-scroll:focus-visible {
+  outline: 2px solid #559de9;
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+html[data-theme='dark'] .terr-page.is-decorating .terr-items-scroll {
+  scrollbar-color: #5b7998 transparent;
+}
+html[data-theme='dark'] .terr-page.is-decorating .terr-items-scroll::-webkit-scrollbar-thumb {
+  background: #5b7998;
+}
+/* O formigueiro não é um container rolável no modo decoração.
+   Deixa a roda do mouse continuar rolando a página inteira, inclusive
+   quando o cursor está sobre a imagem da toca ou seus móveis. */
+.terr-page.is-decorating .terr-world-viewport.is-fitted {
+  overflow: clip;
+  overscroll-behavior: auto;
+  touch-action: pan-y;
+}
+.terr-page.is-decorating .terr-scene-shell,
+.terr-page.is-decorating .terr-scene-card {
+  overscroll-behavior: auto;
+}
+@media (max-width: 1020px) {
+  .terr-page.is-decorating .terr-items-scroll {
+    flex: initial;
+    overflow: visible;
+    padding: 0;
+  }
+}
+
+/* Guia do terrário: pequenos cartões com a paleta da toca + azul TENNA. */
+.terr-guide-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #d7e7f9;
+  border-radius: 11px;
+  background: #f5f9ff;
+  color: #1858a4;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.terr-guide-trigger:hover:not(:disabled) { background: #eaf3ff; border-color: #a9cefa; }
+.terr-guide-trigger:disabled { opacity: .55; cursor: not-allowed; }
+.terr-guide-trigger > span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #dcecff;
+  color: #1455a5;
+  font-size: 13px;
+  font-weight: 900;
+}
+.terr-guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow-y: auto;
+  background: rgba(13, 37, 67, .57);
+  backdrop-filter: blur(3px);
+}
+.terr-guide-dialog {
+  --guide-accent: #2772b9;
+  --guide-accent-soft: #e7f3ff;
+  --guide-outline: #c9e0f7;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(100%, 495px);
+  margin: auto;
+  padding: clamp(20px, 4vw, 27px);
+  border: 1px solid #e5d4bf;
+  border-radius: 24px;
+  background: #fffefa;
+  box-shadow: 0 23px 70px rgba(24, 37, 54, .27), 0 5px 0 rgba(97, 61, 35, .10);
+  color: #133b6c;
+}
+.terr-guide-dialog::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 90px;
+  background: linear-gradient(180deg, #f5e8d8, rgba(248, 240, 227, 0));
+  pointer-events: none;
+}
+.terr-guide-dialog::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, #6cae64, #c79158 55%, #287cd2);
+  pointer-events: none;
+}
+.terr-guide-dialog.is-sementes {
+  --guide-accent: #51843b;
+  --guide-accent-soft: #eef7e9;
+  --guide-outline: #d3e9c8;
+}
+.terr-guide-dialog.is-decoracao {
+  --guide-accent: #9c6739;
+  --guide-accent-soft: #fbf0e1;
+  --guide-outline: #ecd3b4;
+}
+.terr-guide-dialog.is-salas {
+  --guide-accent: #9b7342;
+  --guide-accent-soft: #fbf3df;
+  --guide-outline: #eadbb8;
+}
+.terr-guide-topbar,
+.terr-guide-actions,
+.terr-guide-step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.terr-guide-eyebrow {
+  color: #6a553f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.terr-guide-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e6ddcf;
+  border-radius: 11px;
+  background: #fffaf3;
+  color: #766555;
+  font-size: 23px;
+  line-height: 1;
+}
+.terr-guide-close:hover { background: #f5e9dc; }
+.terr-guide-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 15px 0 20px;
+}
+.terr-guide-progress > span {
+  height: 6px;
+  border-radius: 20px;
+  background: #eae5dc;
+}
+.terr-guide-progress > span.active {
+  background: #2978cc;
+  box-shadow: 0 1px 4px rgba(29, 91, 166, .12);
+}
+.terr-guide-content {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  align-items: center;
+  gap: 19px;
+  min-height: 172px;
+  padding: 20px 19px;
+  border: 1px solid #eadcc9;
+  border-radius: 20px;
+  background: linear-gradient(125deg, #faf0e4 0%, #fffaf2 65%, #fffdf9);
+}
+.terr-guide-illustration {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 100px;
+  height: 106px;
+  border: 1px solid var(--guide-outline);
+  border-radius: 23px;
+  background: var(--guide-accent-soft);
+  color: var(--guide-accent);
+  box-shadow: inset 0 2px 1px rgba(255,255,255,.8), 0 3px 0 rgba(124, 89, 52, .12);
+}
+.terr-guide-illustration svg {
+  display: block;
+  max-width: 75%;
+  height: auto;
+  filter: drop-shadow(0 2px 1px rgba(71, 47, 29, .07));
+}
+.terr-guide-step {
+  display: block;
+  margin-bottom: 7px;
+  color: #815a38;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+.terr-guide-dialog h2 {
+  margin: 0 0 8px;
+  color: #123967;
+  font-size: clamp(21px, 4vw, 25px);
+  font-weight: 850;
+  letter-spacing: -.035em;
+  line-height: 1.18;
+}
+.terr-guide-description {
+  margin: 0;
+  color: #587189;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.terr-guide-actions {
+  margin-top: 19px;
+  padding-top: 17px;
+  border-top: 1px solid #f0e4d7;
+}
+.terr-guide-actions button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.terr-guide-skip { border: 0; background: transparent; color: #78859b; }
+.terr-guide-skip:hover { background: #f8f0e6; }
+.terr-guide-back { border: 1px solid #d4e5f8; background: #fff; color: #1857a5; }
+.terr-guide-back:hover { background: #f3f8ff; }
+.terr-guide-next {
+  min-width: 100px;
+  border: 1px solid #1b62bf;
+  background: #1c65c5;
+  color: white;
+  box-shadow: 0 3px 6px rgba(29, 98, 185, .14);
+}
+.terr-guide-next:hover { background: #1254ab; }
+.terr-guide-dialog button:focus-visible { outline: 3px solid #69a8ff; outline-offset: 3px; }
+@media (max-width: 570px) {
+  .terr-page .terr-scene-actions { gap: 6px; }
+  .terr-guide-trigger { padding: 8px; font-size: 11px; }
+  .terr-guide-trigger > span { width: 18px; height: 18px; }
+  .terr-guide-dialog { padding: 18px; border-radius: 19px; }
+  .terr-guide-content { grid-template-columns: 80px 1fr; gap: 13px; padding: 14px 12px; min-height: 160px; }
+  .terr-guide-illustration { width: 80px; height: 90px; border-radius: 18px; }
+  .terr-guide-illustration svg { max-width: 68%; }
+  .terr-guide-description { font-size: 12px; }
+  .terr-guide-actions button { padding: 9px 10px; }
+}
+@media (max-width: 370px) {
+  .terr-guide-content { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .terr-guide-illustration { width: 70px; height: 70px; }
+}
+html[data-theme='dark'] .terr-guide-trigger {
+  background: #243e59;
+  border-color: #355775;
+  color: #dceaff;
+}
+html[data-theme='dark'] .terr-guide-trigger > span { background: #345c89; color: #e7f5ff; }
+html[data-theme='dark'] .terr-guide-dialog {
+  background: #202b35;
+  border-color: #6f563e;
+  color: #e7f4ff;
+}
+html[data-theme='dark'] .terr-guide-dialog::before {
+  background: linear-gradient(180deg, #43382f, rgba(67,56,47,0));
+}
+html[data-theme='dark'] .terr-guide-eyebrow { color: #e6d0b0; }
+html[data-theme='dark'] .terr-guide-content {
+  border-color: #6b503a;
+  background: linear-gradient(130deg, #3b302a, #282f34);
+}
+html[data-theme='dark'] .terr-guide-dialog h2 { color: #f3f9ff; }
+html[data-theme='dark'] .terr-guide-description { color: #cad8e8; }
+html[data-theme='dark'] .terr-guide-step { color: #e4b37e; }
+html[data-theme='dark'] .terr-guide-close,
+html[data-theme='dark'] .terr-guide-back { background: #294463; border-color: #466789; color: #e2f2ff; }
+html[data-theme='dark'] .terr-guide-skip { color: #c1d5e9; }
+html[data-theme='dark'] .terr-guide-illustration { filter: brightness(.93); }
+html[data-theme='dark'] .terr-guide-actions { border-color: #594d43; }
+@media (prefers-reduced-motion: reduce) {
+  .terr-guide-backdrop { backdrop-filter: none; }
+}
+
+
+/* Identidade do terrário · edição delicada dos cards, sem alterar a cena.
+   Tons de madeira/folhagem nas superfícies; azul TENNA nas ações. */
+.terr-page {
+  --terr-border: #e7d8c7;
+  --terr-line: #f0e6da;
+  --terr-surface: #fffdfa;
+  --terr-surface-soft: #f9f5ed;
+  --terr-surface-muted: #f6f0e7;
+  --terr-shadow: 0 10px 24px -19px rgba(81, 57, 34, .23), 0 3px 10px rgba(86, 56, 30, .045);
+}
+.terr-page .terr-header {
+  background:
+    radial-gradient(ellipse at 84% -16%, rgba(139, 201, 149, .14), transparent 45%),
+    linear-gradient(112deg, #103775, #1558aa 55%, #2287dc);
+}
+.terr-page .terr-scene-card,
+.terr-page .terr-timer-card,
+.terr-page .terr-inventory {
+  border-color: #e4d7c7;
+  box-shadow: var(--terr-shadow);
+}
+.terr-page .terr-scene-topbar {
+  background: linear-gradient(100deg, #fffcf7 0%, #fff9f0 100%);
+  border-bottom-color: #eaddc9;
+}
+.terr-page .terr-scene-topbar h2 { color: #173e6c; }
+.terr-page .terr-scene-actions .terr-guide-trigger {
+  background: #fbf4e9;
+  border-color: #e7cfb1;
+  color: #315a80;
+}
+.terr-page .terr-scene-actions .terr-guide-trigger > span {
+  background: #e6f2e2;
+  color: #407e4c;
+}
+.terr-page .terr-scene-actions .terr-guide-trigger:hover:not(:disabled) {
+  background: #f5e8d5;
+  border-color: #d6b88f;
+}
+.terr-page .terr-scene-actions .terr-decorate-button {
+  border-color: #b3d3ad;
+  background: #f1f8ec;
+  color: #245e4b;
+  font-weight: 850;
+}
+.terr-page .terr-scene-actions .terr-decorate-button:hover:not(:disabled) {
+  background: #e6f2df;
+  border-color: #8ebd8a;
+}
+.terr-page .terr-scene-actions .terr-decorate-button.active {
+  background: #1862bd;
+  color: white;
+  border-color: #1862bd;
+}
+
+/* O cronômetro mantém a mesma geometria já testada nos 3 estados. */
+.terr-page .terr-timer-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 48% 43%, rgba(251, 242, 227, .50), transparent 54%),
+    linear-gradient(165deg, #fffdf9 0%, #fffaf3 100%);
+}
+.terr-page .terr-timer-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7caf69 0%, #ba936a 52%, #257bcf 100%);
+  pointer-events: none;
+}
+.terr-page .terr-timer-heading .terr-kicker { color: #548357; }
+.terr-page .terr-timer-heading h2 { color: #173c6b; }
+.terr-page .terr-timer-heading > p { color: #758394; }
+.terr-page .terr-timer-ring-track { stroke: #e7e3db; }
+.terr-page .terr-timer-ring-progress { stroke: #237bd1; }
+.terr-page .terr-timer-inner {
+  background: #fffefa;
+  border-color: #f1e8dc;
+  box-shadow: inset 0 2px 10px rgba(135, 98, 59, .035);
+  padding: 12px 9px;
+  overflow: hidden;
+  min-width: 0;
+}
+.terr-page .terr-timer-inner strong {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  font-size: clamp(32px, 2.6vw, 41px);
+  letter-spacing: -.06em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  line-height: 1.12;
+}
+.terr-page .terr-timer-inner span {
+  display: block;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 0 2px;
+  color: #67809b;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .035em;
+  line-height: 1.3;
+  text-align: center;
+  white-space: nowrap;
+}
+.terr-page .terr-duration-label { color: #294d6c; }
+.terr-page .terr-duration-presets button {
+  border-color: #e2d8c8;
+  background: #fffaf2;
+  color: #3f5e77;
+}
+.terr-page .terr-duration-presets button:hover:not(:disabled) {
+  border-color: #acc99f;
+  background: #f3f7eb;
+}
+.terr-page .terr-duration-presets button.active,
+.terr-page .terr-duration-presets button.active:disabled {
+  border-color: #1762bb;
+  background: #1762bb;
+  color: #fff;
+}
+.terr-page .terr-focus-controls .terr-duration-step {
+  background: #f2f8ed;
+  border-color: #d0e2c5;
+  color: #246451;
+}
+.terr-page .terr-focus-controls .terr-duration-step:hover:not(:disabled) {
+  background: #e9f3e1;
+  border-color: #a9c99f;
+}
+.terr-page .terr-focus-controls .terr-duration-value {
+  background: #fffdf8;
+  border-color: #dfd5c8;
+}
+.terr-page .terr-focus-controls .terr-duration-value input { color: #153d6b; }
+.terr-page .terr-focus-controls .terr-timer-buttons .terr-primary {
+  background: linear-gradient(105deg, #1557ad, #1d78d4);
+  border-color: #145db7;
+  box-shadow: 0 8px 16px -11px rgba(12, 64, 137, .42);
+}
+.terr-page .terr-focus-controls .terr-timer-buttons .terr-primary:hover:not(:disabled) {
+  background: #12529d;
+}
+.terr-page .terr-duration-session,
+.terr-page .terr-focus-one-status {
+  border-color: #e5dbc9;
+  background: #fbf4e9;
+  color: #5f6f7c;
+}
+.terr-page .terr-inventory { background: #fffdf9; }
+
+/* Modo escuro: mantém o calor das superfícies, sem perder o contraste. */
+html[data-theme='dark'] .terr-page {
+  --terr-border: #4b4d4b;
+  --terr-line: #3c4650;
+  --terr-surface: #202c39;
+  --terr-surface-soft: #273747;
+  --terr-surface-muted: #304252;
+}
+html[data-theme='dark'] .terr-page .terr-scene-card,
+html[data-theme='dark'] .terr-page .terr-inventory {
+  background: #202c39;
+  border-color: #4a4b4c;
+}
+html[data-theme='dark'] .terr-page .terr-scene-topbar {
+  background: linear-gradient(100deg, #26313a, #2b302f);
+  border-color: #594d42;
+}
+html[data-theme='dark'] .terr-page .terr-scene-topbar h2,
+html[data-theme='dark'] .terr-page .terr-timer-heading h2 { color: #f0f6ff; }
+html[data-theme='dark'] .terr-page .terr-timer-card {
+  border-color: #594d42;
+  background: radial-gradient(ellipse at 48% 43%, #303637 0%, #242e38 75%);
+}
+html[data-theme='dark'] .terr-page .terr-timer-heading .terr-kicker { color: #9bc69a; }
+html[data-theme='dark'] .terr-page .terr-timer-heading > p { color: #b8cadb; }
+html[data-theme='dark'] .terr-page .terr-timer-inner {
+  border-color: #435361;
+  background: #202d3d;
+}
+html[data-theme='dark'] .terr-page .terr-timer-inner strong { color: #f2f8ff; }
+html[data-theme='dark'] .terr-page .terr-timer-inner span { color: #bcd5e9; }
+html[data-theme='dark'] .terr-page .terr-timer-ring-track { stroke: #475363; }
+html[data-theme='dark'] .terr-page .terr-duration-presets button:not(.active) {
+  background: #293943;
+  border-color: #5a5a52;
+  color: #dceafa;
+}
+html[data-theme='dark'] .terr-page .terr-duration-presets button.active { background: #206ab9; color: #fff; border-color: #206ab9; }
+html[data-theme='dark'] .terr-page .terr-focus-controls .terr-duration-step {
+  background: #2d443d;
+  border-color: #4d6757;
+  color: #c4ecc3;
+}
+html[data-theme='dark'] .terr-page .terr-focus-controls .terr-duration-value {
+  background: #273541;
+  border-color: #53606a;
+}
+html[data-theme='dark'] .terr-page .terr-focus-controls .terr-duration-value input { color: #f1f8ff; }
+html[data-theme='dark'] .terr-page .terr-duration-session,
+html[data-theme='dark'] .terr-page .terr-focus-one-status {
+  background: #343c3e;
+  border-color: #5d584d;
+  color: #d6e4f1;
+}
+html[data-theme='dark'] .terr-page .terr-scene-actions .terr-guide-trigger {
+  background: #32413e;
+  color: #daebdf;
+  border-color: #5c6d55;
+}
+html[data-theme='dark'] .terr-page .terr-scene-actions .terr-decorate-button:not(.active) {
+  background: #294338;
+  color: #cbf2d8;
+  border-color: #548062;
+}
+html[data-theme='dark'] .terr-page .terr-inventory { background: #202c39; }
+@media (max-width: 420px) {
+  .terr-page .terr-timer-inner strong { font-size: clamp(30px, 8vw, 40px); }
+  .terr-page .terr-timer-inner span { font-size: 8px; letter-spacing: 0; }
+}
+html[data-theme='dark'] .terr-page .terr-duration-label { color: #d6e4f3; }
+
+/* Guia do terrário: recompensas de sementes sem sobrecarregar a tela principal. */
+.terr-guide-rewards {
+  margin-top: 13px;
+}
+.terr-guide-reward-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+.terr-guide-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 77px;
+  padding: 10px 4px 8px;
+  border: 1px solid #d8e9cf;
+  border-radius: 13px;
+  background: #f4faef;
+  color: #426831;
+  text-align: center;
+}
+.terr-guide-reward-time {
+  color: #54704a;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.terr-guide-reward strong {
+  color: #2f692d;
+  font-size: 21px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.terr-guide-reward strong span { font-size: 15px; vertical-align: 1px; }
+.terr-guide-reward small {
+  color: #6d805d;
+  font-size: 9px;
+  line-height: 1;
+}
+.terr-guide-reward-note {
+  margin: 9px 2px 0;
+  color: #6f766d;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+html[data-theme='dark'] .terr-guide-reward {
+  background: #2d3e32;
+  border-color: #51694b;
+}
+html[data-theme='dark'] .terr-guide-reward-time,
+html[data-theme='dark'] .terr-guide-reward small,
+html[data-theme='dark'] .terr-guide-reward-note { color: #c4d7ba; }
+html[data-theme='dark'] .terr-guide-reward strong { color: #c6efa5; }
+@media (max-width: 400px) {
+  .terr-guide-reward-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .terr-guide-reward { min-height: 62px; padding: 7px; }
+}
+
+/* Ícone ilustrado da moeda do terrário, sem depender do emoji do sistema. */
+.terr-wallet > .terr-seed-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, .34);
+  border-radius: 15px;
+  background: linear-gradient(155deg, rgba(240, 255, 215, .29), rgba(133, 221, 158, .18));
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .26), 0 3px 9px rgba(6, 51, 92, .11);
+}
+.terr-wallet .terr-seed-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 1px rgba(65, 48, 21, .18));
+}
+@media (max-width: 540px) {
+  .terr-wallet > .terr-seed-icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+}
+
+/* Botão de finalizar decoração com contraste e estados consistentes. */
+.terr-page .terr-scene-actions .terr-decorate-button.active,
+.terr-page .terr-scene-actions .terr-decorate-button.active:hover,
+html[data-theme='dark'] .terr-page .terr-scene-actions .terr-decorate-button.active {
+  background: #26724e;
+  border-color: #26724e;
+  color: #ffffff;
+  font-weight: 850;
+  opacity: 1;
+  box-shadow: 0 3px 9px rgba(35, 92, 63, .13);
+}
+.terr-page .terr-scene-actions .terr-decorate-button.active:focus-visible {
+  outline: 3px solid #91c9a5;
+  outline-offset: 2px;
+}
+
+
+/* TENNA · refinamento final do modo escuro (Terrário).
+   A cena, o chão de terra, os itens e as posições não são alterados. */
+html[data-theme='dark'] .terr-page .terr-header {
+  background: #1d589f;
+  border-color: #3276c2;
+  box-shadow: 0 12px 26px -22px rgba(3, 17, 40, .7);
+}
+html[data-theme='dark'] .terr-page {
+  --terr-ink: #eff6ff;
+  --terr-strong: #f0f6ff;
+  --terr-text-soft: #b7cce0;
+  --terr-accent: #a4d4ff;
+}
+html[data-theme='dark'] .terr-page .terr-scene-topbar {
+  background: #26343f;
+  border-bottom-color: #465564;
+}
+html[data-theme='dark'] .terr-page .terr-scene-card,
+html[data-theme='dark'] .terr-page .terr-timer-card,
+html[data-theme='dark'] .terr-page .terr-inventory {
+  border-color: #465564;
+  box-shadow: none;
+}
+html[data-theme='dark'] .terr-page .terr-timer-card { background: #26333e; }
+html[data-theme='dark'] .terr-page .terr-scene-topbar h2,
+html[data-theme='dark'] .terr-page .terr-timer-heading h2 { color: #f0f6ff; }
+html[data-theme='dark'] .terr-page .terr-world-toolbar,
+html[data-theme='dark'] .terr-page.is-decorating .terr-world-toolbar {
+  background: rgba(34, 46, 57, .96);
+  border-color: #627182;
+  box-shadow: 0 5px 14px rgba(17, 23, 29, .3);
+}
+html[data-theme='dark'] .terr-page .terr-world-room-buttons button:not(.active) {
+  color: #d7e7f7;
+  background: #334657;
+  border-color: #52697c;
+}
+html[data-theme='dark'] .terr-page .terr-world-room-buttons button:hover:not(.active) {
+  background: #40596f;
+  color: #f4faff;
+}
+html[data-theme='dark'] .terr-page .terr-scene-actions .terr-guide-trigger { background: #31473e; color: #e0f0e4; border-color: #53725e; }
+html[data-theme='dark'] .terr-page .terr-scene-actions .terr-decorate-button:not(.active) { background: #27463a; color: #cef0d9; border-color: #4a795e; }
+html[data-theme='dark'] .terr-page .terr-duration-session,
+html[data-theme='dark'] .terr-page .terr-focus-one-status { background: #303d44; border-color: #50616a; color: #dce8f4; }
+html[data-theme='dark'] .terr-page .terr-duration-presets button:not(.active) { background: #2c404e; border-color: #4a6171; color: #e6eff9; }
+html[data-theme='dark'] .terr-page .terr-timer-inner { background: #202f40; border-color: #485d71; }

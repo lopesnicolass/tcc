@@ -878,7 +878,12 @@ export default function Mural() {
                 autoFocus
               />
               <div className="mural-edit-bottom">
-                <button type="button" className="mural-edit-delete" onClick={handleDelete}><span aria-hidden="true">✕</span> Excluir</button>
+                <button type="button" className="mural-edit-delete" onClick={handleDelete}>
+                  <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18M8 6V4h8v2M5 6l1 14h12l1-14M10 10v6M14 10v6" />
+                  </svg>
+                  Excluir
+                </button>
                 <button type="submit" className="mural-edit-save"><span aria-hidden="true">✓</span> Salvar</button>
               </div>
             </div>

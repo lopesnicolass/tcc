@@ -1,4 +1,5 @@
 import '../../styles/aluno/Home.css';
+import '../../styles/dark-home-polish.css';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGamification } from '../../context/GamificationShared.js';

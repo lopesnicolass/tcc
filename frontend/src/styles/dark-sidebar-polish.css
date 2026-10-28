@@ -1,0 +1,70 @@
+/* Sidebar com as cores azuis tradicionais da Tenna no modo escuro.
+   O modo escuro do conteúdo não altera mais a identidade do menu. */
+html[data-theme='dark'] .student-area .student-sidebar {
+  background: #092a53;
+  border-right: 1px solid rgba(131, 183, 239, .16);
+  box-shadow: 7px 0 20px rgba(4, 15, 34, .12);
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .student-sidebar-brand {
+  background: #092a53;
+  border-bottom: 0;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-nav::before {
+  color: #a0c4ed;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link {
+  color: #d0e3fb;
+}
+
+/* Ícones sem os quadradinhos de fundo que pareciam botões sobrepostos. */
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover svg,
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active svg {
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  box-sizing: border-box;
+  color: currentColor;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: none;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link:hover {
+  color: #fff;
+  background: rgba(55, 133, 217, .20);
+  border-color: transparent;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active {
+  color: #fff;
+  background: #1e72c9;
+  border-color: rgba(156, 208, 255, .20);
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .sidebar-link.active::before {
+  background: #b1ddff;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle {
+  background: rgba(255, 255, 255, .075);
+  border-color: rgba(192, 223, 255, .18);
+  color: #e7f1ff;
+  box-shadow: none;
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle:hover {
+  background: rgba(255, 255, 255, .12);
+  border-color: rgba(192, 223, 255, .22);
+}
+
+html[data-theme='dark'] .student-area .student-sidebar .student-theme-toggle-wrap .theme-toggle-icon {
+  background: rgba(215, 234, 255, .15);
+  color: #ffd77a;
+}

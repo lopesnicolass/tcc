@@ -593,3 +593,290 @@
 .desempenho-ampliacao-fechar svg { display: block; flex: none; }
 .desempenho-ampliacao-dialog > .desempenho-card-ampliavel { padding-right: max(26px, 52px); }
 @media (max-width: 700px) { .desempenho-ampliacao-fechar { top: 8px; right: 8px; } }
+
+
+/* ==========================================================
+   TENNA — modo escuro de Desempenho (apenas tema e contraste).
+   Preserva gráficos, ampliadores, filtros e modo claro existentes.
+   ========================================================== */
+html[data-theme='dark'] .desempenho-page {
+  --des-texto: #e7f1ff;
+  --des-muted: #acc2dc;
+  --des-borda: #354e6a;
+  --des-escuro: #eaf3ff;
+  --des-azul: #92c9ff;
+  color: #eaf2fc;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-hero-principal {
+  background: #1c5cab;
+  background-image: none;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-hero-principal h1,
+html[data-theme='dark'] .desempenho-page .desempenho-hero-principal .desempenho-hero-valor,
+html[data-theme='dark'] .desempenho-page .desempenho-hero-principal .desempenho-hero-meta strong { color: #fff; }
+html[data-theme='dark'] .desempenho-page .desempenho-hero-destaques,
+html[data-theme='dark'] .desempenho-page .desempenho-kpi,
+html[data-theme='dark'] .desempenho-page .desempenho-painel,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-card,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-vazio,
+html[data-theme='dark'] .desempenho-page .desempenho-evolucao-painel {
+  background: #192b40;
+  border-color: #37516e;
+  color: #e9f2ff;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-hero-destaque + .desempenho-hero-destaque,
+html[data-theme='dark'] .desempenho-page .desempenho-grafico-rodape,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-row,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-rodape { border-color: #354e69; }
+html[data-theme='dark'] .desempenho-page .desempenho-kpi-numero,
+html[data-theme='dark'] .desempenho-page .desempenho-hero-destaque strong,
+html[data-theme='dark'] .desempenho-page .desempenho-painel-cabecalho h2,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-topo h2,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-cabecalho h3,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-vazio h2,
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-texto strong,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-identificacao strong,
+html[data-theme='dark'] .desempenho-page .desempenho-comparacao-titulos strong,
+html[data-theme='dark'] .desempenho-page .desempenho-legendas strong,
+html[data-theme='dark'] .desempenho-page .desempenho-explicacao strong { color: #eaf4ff; }
+html[data-theme='dark'] .desempenho-page .desempenho-kpi--verde .desempenho-kpi-numero { color: #69e2aa; }
+html[data-theme='dark'] .desempenho-page .desempenho-kpi--vermelho .desempenho-kpi-numero { color: #ff8e94; }
+html[data-theme='dark'] .desempenho-page .desempenho-hero-destaque strong.desempenho-tendencia-titulo { color: #eaf3ff; }
+html[data-theme='dark'] .desempenho-page .desempenho-tendencia-titulo span { color: #68d9a3; }
+html[data-theme='dark'] .desempenho-page .desempenho-kpi-rotulo,
+html[data-theme='dark'] .desempenho-page .desempenho-kpi-descricao,
+html[data-theme='dark'] .desempenho-page .desempenho-hero-destaque small,
+html[data-theme='dark'] .desempenho-page .desempenho-painel-cabecalho p,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-topo p,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-cabecalho p,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-amostra,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-nota,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-identificacao span,
+html[data-theme='dark'] .desempenho-page .desempenho-grafico-rodape,
+html[data-theme='dark'] .desempenho-page .desempenho-grafico-rodape strong,
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-texto small { color: #acc3dd; }
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-item,
+html[data-theme='dark'] .desempenho-page .desempenho-explicacao,
+html[data-theme='dark'] .desempenho-page .desempenho-legendas > div {
+  background: #213b55;
+  border-color: #3b5975;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-item:hover { background: #294862; }
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-texto span,
+html[data-theme='dark'] .desempenho-page .desempenho-revisao-link,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-nome strong,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-porcentagem { color: #94c9ff; }
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-barra,
+html[data-theme='dark'] .desempenho-page .desempenho-barra,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-barra,
+html[data-theme='dark'] .desempenho-page .desempenho-consistencia-escala span:not(.preenchido) { background: #2d4762; }
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-barra span { background: #3298ed; }
+html[data-theme='dark'] .desempenho-page .desempenho-opcoes { background: #233c57; }
+html[data-theme='dark'] .desempenho-page .desempenho-opcoes button { color: #bcd1e8; }
+html[data-theme='dark'] .desempenho-page .desempenho-opcoes button.ativo {
+  background: #34618d;
+  color: #fff;
+  box-shadow: none;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-contador { background: #284563; color: #bcdeff; }
+html[data-theme='dark'] .desempenho-page .desempenho-svg-eixo { fill: #b0c6e2; }
+html[data-theme='dark'] .desempenho-page .desempenho-svg-valor { fill: #91c8ff; }
+html[data-theme='dark'] .desempenho-page .desempenho-painel-numero,
+html[data-theme='dark'] .desempenho-page .desempenho-historico-porcentagem { color: #94caff; }
+html[data-theme='dark'] .desempenho-page .desempenho-botao-secundario,
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-btn,
+html[data-theme='dark'] .desempenho-page .desempenho-ampliacao-fechar {
+  background: #263f5a;
+  border-color: #4c6c8d;
+  color: #e8f3ff;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-botao-secundario:hover,
+html[data-theme='dark'] .desempenho-page .desempenho-ampliacao-fechar:hover { background: #315574; }
+html[data-theme='dark'] .desempenho-page .desempenho-diagnostico-acao a { background: #206ec7; color: #fff; }
+
+
+/* TENNA — recuperação do layout de filtros e histórico.
+   Os componentes renovados usam classes que ainda não tinham regras no CSS.
+   Deliberadamente isolado em .desempenho-page (claro + escuro). */
+.desempenho-page .desempenho-grafico-filtros,
+.desempenho-page .desempenho-historico-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+.desempenho-page .desempenho-grafico-filtros {
+  justify-content: flex-end;
+}
+.desempenho-page .desempenho-historico-filtros {
+  margin: 4px 0 16px;
+}
+.desempenho-page .desempenho-campo-filtro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #436489;
+}
+.desempenho-page .desempenho-campo-filtro select {
+  appearance: auto;
+  box-sizing: border-box;
+  display: block;
+  width: clamp(160px, 15vw, 205px);
+  max-width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #c8dbf0;
+  border-radius: 9px;
+  background: #f8fbff;
+  color: #18467d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.4;
+  box-shadow: none;
+}
+.desempenho-page .desempenho-campo-filtro select:focus-visible {
+  outline: 2px solid #398dec;
+  outline-offset: 2px;
+}
+.desempenho-page .desempenho-historico-lista {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+.desempenho-page .desempenho-historico-entrada {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border-bottom: 1px solid #e1eaf5;
+}
+.desempenho-page .desempenho-historico-entrada:last-child { border-bottom: 0; }
+.desempenho-page .desempenho-historico-row--botao {
+  display: grid;
+  grid-template-columns: minmax(160px, .8fr) minmax(100px, 1.25fr) 60px 18px;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-width: 0;
+  min-height: 69px;
+  margin: 0;
+  padding: 13px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: #163c6a;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  transform: none;
+}
+.desempenho-page .desempenho-historico-row--botao:hover {
+  background: #f2f7fd;
+  box-shadow: none;
+  transform: none;
+}
+.desempenho-page .desempenho-historico-row--botao[aria-expanded='true'] {
+  background: #f0f6fe;
+}
+.desempenho-page .desempenho-historico-row--botao:focus-visible {
+  outline: 2px solid #4d9cf0;
+  outline-offset: -2px;
+}
+.desempenho-page .desempenho-historico-row--botao .desempenho-historico-barra {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e6eef7;
+}
+.desempenho-page .desempenho-historico-row--botao .desempenho-historico-barra > span {
+  display: block;
+  height: 100%;
+  background: #2588ec;
+  border-radius: inherit;
+}
+.desempenho-page .desempenho-historico-row--botao .desempenho-historico-porcentagem {
+  white-space: nowrap;
+  text-align: right;
+}
+.desempenho-page .desempenho-historico-seta {
+  justify-self: end;
+  text-align: center;
+  color: #5d81a5;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1;
+}
+.desempenho-page .desempenho-historico-detalhe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  padding: 12px 16px 15px;
+  margin: 0 8px 8px;
+  background: #f4f9ff;
+  border: 1px solid #dce9f7;
+  border-radius: 9px;
+  color: #345c84;
+  font-size: 12px;
+}
+.desempenho-page .desempenho-historico-detalhe span {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.desempenho-page .desempenho-historico-detalhe strong { color: #184c86; }
+
+/* O tema escuro conserva a mesma estrutura, com contraste adequado. */
+html[data-theme='dark'] .desempenho-page .desempenho-campo-filtro { color: #c3d8ee; }
+html[data-theme='dark'] .desempenho-page .desempenho-campo-filtro select {
+  background: #203a54;
+  border-color: #456482;
+  color: #ecf6ff;
+  color-scheme: dark;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-historico-entrada { border-color: #35516e; }
+html[data-theme='dark'] .desempenho-page .desempenho-historico-row--botao {
+  background: transparent;
+  border-color: transparent;
+  color: #ecf5ff;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-historico-row--botao:hover { background: #223e58; }
+html[data-theme='dark'] .desempenho-page .desempenho-historico-row--botao[aria-expanded='true'] { background: #294760; }
+html[data-theme='dark'] .desempenho-page .desempenho-historico-row--botao .desempenho-historico-barra { background: #2d4863; }
+html[data-theme='dark'] .desempenho-page .desempenho-historico-seta { color: #a1c9ee; }
+html[data-theme='dark'] .desempenho-page .desempenho-historico-detalhe {
+  background: #223b55;
+  border-color: #3b5b79;
+  color: #bed4eb;
+}
+html[data-theme='dark'] .desempenho-page .desempenho-historico-detalhe strong { color: #eaf4ff; }
+
+@media (max-width: 720px) {
+  .desempenho-page .desempenho-grafico-filtros { justify-content: flex-start; }
+  .desempenho-page .desempenho-historico-row--botao {
+    grid-template-columns: minmax(0,1fr) 60px 18px;
+    gap: 9px;
+  }
+  .desempenho-page .desempenho-historico-row--botao .desempenho-historico-barra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+@media (max-width: 480px) {
+  .desempenho-page .desempenho-campo-filtro { flex: 1 1 135px; }
+  .desempenho-page .desempenho-campo-filtro select { width: 100%; }
+  .desempenho-page .desempenho-historico-row--botao { padding-left: 3px; padding-right: 3px; }
+}
+

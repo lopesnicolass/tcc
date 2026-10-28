@@ -802,141 +802,60 @@ export default function Conteudos() {
                         className="content-topic-list"
                       >
 
-                        {topics.map(
-                          (topic) => {
+                        {topics.map((topic, index) => {
+                          const done = Boolean(estudados[String(topic.id)]);
+                          const salvando = salvandoTopico === Number(topic.id);
 
-                            const done =
-                              Boolean(
-                                estudados[
-                                  String(
-                                    topic.id
-                                  )
-                                ]
-                              );
-
-                            const salvando =
-                              salvandoTopico ===
-                              Number(
-                                topic.id
-                              );
-
-                            return (
-                              <div
-                                className={
-                                  `content-topic ${
-                                    done
-                                      ? 'studied'
-                                      : ''
-                                  }`
-                                }
-                                key={
-                                  topic.id
-                                }
-                                style={{
-                                  '--topic-color': style.color,
-                                  '--topic-bg': style.bg,
-                                  borderColor: done
-                                    ? style.color
-                                    : undefined
-                                }}
+                          return (
+                            <div
+                              className={`content-topic ${done ? 'studied' : ''}`}
+                              key={topic.id}
+                              style={{
+                                '--topic-color': style.color,
+                                '--topic-bg': style.bg
+                              }}
+                            >
+                              <button
+                                type="button"
+                                className="content-topic-open"
+                                onClick={() => navigate(`/conteudos/${topic.id}`)}
+                                aria-label={`Abrir conteúdo: ${topic.nome}`}
                               >
-
-                                <button
-                                  type="button"
-                                  className="content-topic-check"
-                                  onClick={(evento) => {
-                                    evento.stopPropagation();
-                                    toggleEstudado(
-                                      topic
-                                    );
-                                  }}
-                                  disabled={
-                                    salvando
-                                  }
-                                  aria-label={
-                                    done
-                                      ? 'Marcar tópico como não estudado'
-                                      : 'Marcar tópico como estudado'
-                                  }
-                                  style={{
-                                    background: done
-                                      ? style.color
-                                      : style.bg,
-                                    borderColor: done
-                                      ? style.color
-                                      : style.color,
-                                    color: done
-                                      ? '#fff'
-                                      : style.color
-                                  }}
-                                >
-                                  {done
-                                    ? '✓'
-                                    : ''}
-                                </button>
-
-                                <button
-                                  type="button"
-                                  className="content-topic-open"
-                                  onClick={() =>
-                                    navigate(
-                                      `/conteudos/${topic.id}`
-                                    )
-                                  }
-                                >
-                                  <span className="content-topic-meta">
-
-                                    <span
-                                      className="content-topic-materia"
-                                      style={{
-                                        color: style.color,
-                                        background: style.bg
-                                      }}
-                                    >
-                                      {materia}
-                                    </span>
+                                <span className="content-topic-index">
+                                  CONTEÚDO {String(index + 1).padStart(2, '0')}
+                                </span>
+                                <span className="content-topic-name">
+                                  {topic.nome}
+                                </span>
+                                <span className="content-topic-footer">
+                                  <span className="content-topic-status">
+                                    <span className="content-topic-status-dot" aria-hidden="true" />
+                                    {salvando ? 'Salvando...' : done ? 'Estudado' : 'Não iniciado'}
                                   </span>
-
-                                  <span className="content-topic-name">
-                                    {topic.nome}
+                                  <span className="content-topic-action">
+                                    Ver conteúdo
                                   </span>
-
-                                  <span className="content-topic-footer">
-                                    <span
-                                      className="content-topic-status"
-                                      style={{
-                                        color: style.color,
-                                        borderColor: `${style.color}2E`,
-                                        background: done
-                                          ? style.bg
-                                          : '#F7FBFF'
-                                      }}
-                                    >
-                                      {salvando
-                                        ? 'Salvando...'
-                                        : done
-                                          ? 'Estudado'
-                                          : 'Não iniciado'}
-                                    </span>
-
-                                    <span
-                                      className="content-topic-action"
-                                      style={{
-                                        color: style.color
-                                      }}
-                                    >
-                                      Ver conteúdo
-                                      <span className="content-topic-arrow">
-                                        ›
-                                      </span>
-                                    </span>
-                                  </span>
-                                </button>
-
-                              </div>
-                            );
-                          }
-                        )}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                className="content-topic-check"
+                                onClick={(evento) => {
+                                  evento.stopPropagation();
+                                  toggleEstudado(topic);
+                                }}
+                                disabled={salvando}
+                                aria-label={done
+                                  ? `Marcar ${topic.nome} como não estudado`
+                                  : `Marcar ${topic.nome} como estudado`}
+                                aria-pressed={done}
+                                title={done ? 'Marcar como não estudado' : 'Marcar como estudado'}
+                              >
+                                {done && <span aria-hidden="true">✓</span>}
+                              </button>
+                            </div>
+                          );
+                        })}
 
                       </div>
 

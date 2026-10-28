@@ -1115,7 +1115,7 @@ html[data-theme='dark'] .tenna-auto-plan .studyplan-open-button {background:#247
 .tenna-auto-plan .studyplan-section-heading p{max-width:480px;}
 .tenna-auto-plan .studyplan-month-tabs{border-bottom:0;padding:0;margin-bottom:22px;gap:10px;}
 .tenna-auto-plan .studyplan-month-tab{border:1px solid #e1eaf5;background:#f7faff;padding:12px 15px;min-width:140px;transition:background .18s,border-color .18s,transform .18s;}
-.tenna-auto-plan .studyplan-month-tab:hover{transform:translateY(-2px);border-color:#8bbcf3;}
+.tenna-auto-plan .studyplan-month-tab:hover{transform:none;border-color:#8bbcf3;}
 .tenna-auto-plan .studyplan-month-tab.active{background:#e9f3ff;border-color:#1976d2;box-shadow:inset 0 0 0 1px #1976d2;}
 .tenna-auto-plan .studyplan-month-panel{padding-top:0;}
 .tenna-auto-plan .studyplan-month-heading{margin-bottom:20px;}
@@ -1177,3 +1177,469 @@ html[data-theme='dark'] .tenna-auto-plan .studyplan-open-button {background:#247
 .studyplan-week-choice.status-pending strong{background:#eef2f7;color:#64748b}
 .studyplan-week-choice.status-done{border-color:#d0eadd}
 .studyplan-week-choice.active{background:#f0f7ff}
+
+/* ==============================================================
+   TENNA | Cronograma — acabamento coerente nos dois temas.
+   Os cards de resumo e da trilha tinham regras claras com
+   background: white !important, prevalecendo sobre o modo escuro.
+   ============================================================== */
+
+/* Mesmo azul uniforme dos cabeçalhos das outras páginas. */
+.tenna-auto-plan .tenna-auto-simple-banner {
+  background: #1d62b4;
+}
+.tenna-auto-plan .studyplan-result .studyplan-hero {
+  background: #1d62b4 !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-banner {
+  background: #1b559f;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-hero {
+  background: #1b559f !important;
+}
+
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result {
+  --sp-ink: #eaf2fd;
+  --sp-muted: #afc3da;
+  --sp-line: #30465f;
+  --sp-surface: #19283b;
+  --sp-soft: #20364f;
+  color: var(--sp-ink);
+}
+
+/* Resumo do plano: elimina as caixas brancas e os números apagados. */
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-stat {
+  background: #1c3048 !important;
+  border: 1px solid #334b65 !important;
+  border-bottom: 3px solid #4ba5f6 !important;
+  color: var(--sp-ink);
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-stat:nth-child(2) {
+  border-bottom-color: #5bc388 !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-stat:nth-child(3) {
+  border-bottom-color: #b47add !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat strong {
+  color: #f0f6ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat > div > span,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat strong small {
+  color: #b7cbe0;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stat-icon {
+  background: #274667;
+  color: #a9d6ff;
+}
+
+/* Trilha: a superfície, títulos e abas passam a respeitar o tema. */
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-journey {
+  background: #19283b;
+  border-color: #30465f;
+  color: var(--sp-ink);
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-section-heading h2,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-heading h3,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-weeks-intro strong {
+  color: #edf5ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-section-heading p,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-heading p,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-weeks-intro > span {
+  color: #b5c9df;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-stage-count,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-metrics > span {
+  background: #253f5b;
+  border-color: #3b5875;
+  color: #b6dcff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab {
+  background: #20364e;
+  border-color: #36506a;
+  color: #eaf3ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab:hover {
+  background: #284665;
+  border-color: #648fb9;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab.active {
+  background: #234d7a;
+  border-color: #59a7f5;
+  color: #fff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab small {
+  color: #bdd1e7;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab-number {
+  background: #305274;
+  border-color: #47739d;
+  color: #d5eaff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-tab.active .studyplan-month-tab-number {
+  background: #2077d3;
+  color: #fff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-month-panel {
+  border-color: #30465f;
+}
+
+/* Seletor de semanas: status legíveis e distinção discreta da semana ativa. */
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice {
+  background: #20364e;
+  border-color: #36506a;
+  color: #e6f0fe;
+  box-shadow: none;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice > span:first-child {
+  color: #a3cafa;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice.active {
+  background: #24496e;
+  border-color: #5daafa;
+  box-shadow: none;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice:hover {
+  border-color: #70b6f4;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice strong {
+  background: #2b425c;
+  color: #c6d9ed;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice.status-done strong {
+  background: #224c40;
+  color: #8ee1b0;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice.status-ongoing strong {
+  background: #23486e;
+  color: #9bd2ff;
+}
+
+/* Detalhes das semanas e sessões — sem voltar a superfícies claras. */
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week {
+  background: #192f47;
+  border-color: #36506a !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week.open {
+  border-color: #5a91c5 !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-toggle,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week.open .studyplan-week-toggle {
+  background: #203a56 !important;
+  color: #eaf3ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-toggle:hover {
+  background: #294968 !important;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-body {
+  background: #192f47;
+  border-top-color: #36506a;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-title strong,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson h4 {
+  color: #eff6ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-title small,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson-meta {
+  color: #aec3d9;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-progress {
+  background: #38506a;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-lesson {
+  background: #1e354e;
+  border-color: #3a526d;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-lesson:hover {
+  background: #24405b;
+  border-color: #6488ac;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-result .studyplan-lesson.completed {
+  background: #1b403d;
+  border-color: #39776b;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-lesson-subject {
+  color: color-mix(in srgb, var(--study-color) 65%, white);
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-complete-button:not(.active),
+html[data-theme='dark'] .tenna-auto-plan .studyplan-add-calendar:not(.is-added) {
+  background: #294665;
+  border-color: #4a6b8e;
+  color: #d5ebff;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-complete-button.active,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-add-calendar.is-added {
+  background: #265345;
+  border-color: #47866c;
+  color: #c5f8dd;
+}
+
+/* Sem piscar de cor ao interagir com os botões do cronograma. */
+.tenna-auto-plan .tenna-auto-choice,
+.tenna-auto-plan .studyplan-week-choice,
+.tenna-auto-plan .studyplan-month-tab {
+  transition: none;
+}
+
+/* Abas de mês: a faixa tem rolagem horizontal e recortava a aba ao subir no hover.
+   Não deslocar nem redimensionar os botões ao interagir. */
+.tenna-auto-plan .studyplan-month-tabs .studyplan-month-tab,
+.tenna-auto-plan .studyplan-month-tabs .studyplan-month-tab:hover,
+.tenna-auto-plan .studyplan-month-tabs .studyplan-month-tab:focus-visible,
+.tenna-auto-plan .studyplan-month-tabs .studyplan-month-tab:active {
+  transform: none;
+  border-width: 1px;
+}
+
+/* Cronograma | botões da configuração no modo escuro.
+   Cores próprias para não herdar tons apagados do tema global. */
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-footer .tenna-auto-secondary-button {
+  background: #253f5b;
+  border-color: #466482;
+  color: #e2efff;
+  box-shadow: none;
+  transition: none;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-footer .tenna-auto-secondary-button:hover {
+  background: #2c4b6b;
+  border-color: #6389b2;
+  color: #fff;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-footer .mural-btn.primary.tenna-auto-simple-submit {
+  background: #1767c6;
+  border: 1px solid #277dde;
+  color: #fff;
+  opacity: 1;
+  box-shadow: none;
+  transition: none;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-footer .mural-btn.primary.tenna-auto-simple-submit:hover:not(:disabled) {
+  background: #155ab0;
+  border-color: #368bf0;
+  box-shadow: none;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-footer .mural-btn.primary.tenna-auto-simple-submit:disabled {
+  background: #2d5179;
+  border-color: #3e6186;
+  color: #b9d3ed;
+  opacity: 1;
+  cursor: wait;
+}
+
+/* Organização dos dias escolhidos pelo estudante. Mantém a identidade visual da Tenna. */
+.tenna-auto-plan .tenna-auto-weekday-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 17px 19px;
+  background: #f6faff;
+  border: 1px solid #dce9f9;
+  border-radius: 14px;
+}
+.tenna-auto-plan .tenna-auto-weekday-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 14px;
+  color: #164b89;
+}
+.tenna-auto-plan .tenna-auto-weekday-heading strong { font-size: 13px; }
+.tenna-auto-plan .tenna-auto-weekday-heading span { font-size: 11px; color: #6a82a4; }
+.tenna-auto-plan .tenna-auto-weekday-list {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.tenna-auto-plan .tenna-auto-weekday {
+  min-height: 39px;
+  padding: 7px 5px;
+  border: 1px solid #d7e5f7;
+  border-radius: 9px;
+  background: #fff;
+  color: #28578d;
+  font-size: 11px; font-weight: 700; line-height: 1.2;
+  cursor: pointer;
+  transition: none;
+}
+.tenna-auto-plan .tenna-auto-weekday.is-selected {
+  border-color: #186acb;
+  background: #1a69c8;
+  color: #fff;
+}
+.tenna-auto-plan .tenna-auto-weekday:disabled:not(.is-selected) { opacity: .55; cursor: not-allowed; }
+.tenna-auto-plan .tenna-auto-weekday:focus-visible { outline: 2px solid #69b5ff; outline-offset: 2px; }
+.tenna-auto-plan .tenna-auto-weekday-help {
+  margin: 0;
+  color: #657d9c;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.tenna-auto-plan .tenna-auto-simple-date-notice {
+  margin: 3px 0 0;
+  padding: 11px 13px;
+  border: 1px solid #e9c780;
+  border-radius: 9px;
+  color: #805618;
+  background: #fff6e7;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.tenna-auto-plan .tenna-auto-replan-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 13px 16px;
+  border: 1px solid #e8c98a;
+  border-radius: 12px;
+  background: #fff7e8;
+  color: #865923;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.tenna-auto-plan .tenna-auto-replan-notice button {
+  border: 1px solid #d9aa56;
+  border-radius: 9px;
+  background: #fff;
+  color: #85571b;
+  padding: 9px 12px;
+  font-size: 11px; font-weight: 750;
+  cursor: pointer;
+}
+.tenna-auto-plan .studyplan-week-choice small { font-size: 11px; font-weight: 600; color: #657fa0; }
+.tenna-auto-plan .studyplan-day-label small { color: #637d9f; font-size: 11px; font-weight: 650; }
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday-selection {
+  background: #182f49;
+  border-color: #365573;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday-heading { color: #eff6ff; }
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday-heading span,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday-help { color: #b1c8e2; }
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday {
+  background: #263f5c;
+  color: #c9e3ff;
+  border-color: #496583;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-weekday.is-selected {
+  background: #2074dc;
+  color: white;
+  border-color: #5fa9ff;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-simple-date-notice,
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-replan-notice {
+  background: #42341e;
+  border-color: #785a26;
+  color: #ffe0a3;
+}
+html[data-theme='dark'] .tenna-auto-plan .tenna-auto-replan-notice button {
+  background: #273e57;
+  border-color: #7d6741;
+  color: #ffe3a9;
+}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-week-choice small,
+html[data-theme='dark'] .tenna-auto-plan .studyplan-day-label small { color: #acc8e7; }
+@media (max-width: 770px) {
+  .tenna-auto-plan .tenna-auto-weekday-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 440px) {
+  .tenna-auto-plan .tenna-auto-weekday-selection { padding: 14px 11px; }
+  .tenna-auto-plan .tenna-auto-weekday-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+
+/* O formulário original descreve apenas período e frequência, conforme o TCC.
+   A escolha dos dias específicos fica disponível somente como ajuste opcional do plano pronto. */
+.tenna-auto-plan .tenna-auto-simple-form > .tenna-auto-simple-footer {
+  width: 100%;
+  justify-content: flex-end;
+}
+.tenna-auto-plan .tenna-auto-simple-form > .tenna-auto-simple-footer .tenna-auto-simple-submit {
+  flex: 0 1 auto;
+  min-width: 245px;
+}
+.tenna-auto-plan .studyplan-hero-info .studyplan-custom-days-link {
+  margin-left: 3px;
+  min-height: 0;
+  padding: 2px 0;
+  border: 0;
+  border-bottom: 1px solid rgba(234, 246, 255, .75);
+  background: transparent;
+  color: #ecf7ff;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tenna-auto-plan .studyplan-hero-info .studyplan-custom-days-link:hover {
+  border-color: #fff;
+  color: #fff;
+}
+.tenna-auto-plan .studyplan-hero-info .studyplan-custom-days-link:focus-visible {
+  outline: 2px solid #92ccff;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.tenna-auto-plan .studyplan-days-modal {
+  width: min(100%, 580px);
+}
+.tenna-auto-plan .studyplan-days-modal .tenna-auto-weekday-selection {margin-top: 22px;}
+.tenna-auto-plan .studyplan-days-modal .tenna-auto-weekday-list {grid-template-columns: repeat(4, minmax(0, 1fr));}
+.tenna-auto-plan .studyplan-days-modal .studyplan-schedule-actions {margin-top: 20px;}
+html[data-theme='dark'] .tenna-auto-plan .studyplan-days-modal .tenna-auto-weekday-selection {
+  background: #182f49;
+  border-color: #365573;
+}
+@media (max-width: 620px) {
+  .tenna-auto-plan .tenna-auto-simple-form > .tenna-auto-simple-footer .tenna-auto-simple-submit {width:100%;min-width:0;}
+  .tenna-auto-plan .studyplan-days-modal .tenna-auto-weekday-list {grid-template-columns: repeat(2, minmax(0, 1fr));}
+  .tenna-auto-plan .studyplan-days-modal .tenna-auto-weekday-selection {padding: 14px;}
+}
+
+
+/* Agendamento integral: opção complementar, sem alterar a configuração da banca. */
+.tenna-auto-plan .studyplan-hero-links .studyplan-bulk-calendar-button {
+  background: #155fbd;
+  border: 1px solid rgba(255,255,255,.45);
+  color: #fff;
+  font-weight: 800;
+}
+.tenna-auto-plan .studyplan-hero-links .studyplan-bulk-calendar-button:hover,
+.tenna-auto-plan .studyplan-hero-links .studyplan-bulk-calendar-button:focus-visible {
+  background: #155fbd;
+  color: #fff;
+  transform: none;
+}
+.tenna-auto-plan .studyplan-bulk-modal { max-width: 670px; max-height: min(92vh, 800px); overflow-y: auto; }
+.tenna-auto-plan .studyplan-bulk-time { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 15px; margin-top: 17px; }
+.tenna-auto-plan .studyplan-bulk-time > label { font-size: 13px; font-weight: 800; color: #174a87; flex-basis: 100%; }
+.tenna-auto-plan .studyplan-bulk-time > input {
+  padding: 11px 14px; border-radius: 11px; border: 1px solid #c6d9f0;
+  font: inherit; font-weight: 800; color: #164b8c; background: #f9fbff; min-width: 135px;
+}
+.tenna-auto-plan .studyplan-bulk-time-options { display: flex; flex-wrap: wrap; gap: 7px; }
+.tenna-auto-plan .studyplan-bulk-time-options button {
+  padding: 9px 12px; border-radius: 10px; border: 1px solid #c6d9f0;
+  color: #215990; background: #f5f9ff; font: inherit; font-size: 12px; font-weight: 800;
+}
+.tenna-auto-plan .studyplan-bulk-time-options button.active { background: #1b66bd; border-color: #1b66bd; color: #fff; }
+.tenna-auto-plan .studyplan-bulk-summary {
+  display: flex; flex-direction: column; gap: 4px; padding: 13px 15px;
+  border: 1px solid #c7def5; border-radius: 12px; background: #f1f7ff; margin-top: 17px;
+  color: #184675;
+}
+.tenna-auto-plan .studyplan-bulk-summary strong { font-size: 14px; }
+.tenna-auto-plan .studyplan-bulk-summary span, .tenna-auto-plan .studyplan-bulk-summary small { font-size: 12px; line-height: 1.5; }
+html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-time > label { color: #e7f1ff; }
+html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-time > input { border-color: #476c90; background: #142b46; color: #f2f8ff; color-scheme: dark; }
+html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-time-options button { border-color: #476c90; background: #193958; color: #dceaff; }
+html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-time-options button.active { background: #2476d2; color: #fff; }
+html[data-theme='dark'] .tenna-auto-plan .studyplan-bulk-summary { background: #19334f; border-color: #3c678e; color: #e1f0ff; }
+@media (max-width: 700px) {
+  .tenna-auto-plan .studyplan-bulk-modal { max-height: 90vh; }
+  .tenna-auto-plan .studyplan-bulk-time-options { width: 100%; }
+}
+
+.tenna-auto-plan .studyplan-hero-links .studyplan-bulk-calendar-button { grid-column: 1 / -1; width: 100%; }

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
 
-function novoBanco() {
+function novoBanco({ schemaAntigo = false } = {}) {
   const banco = new DatabaseSync(':memory:');
   banco.exec(`PRAGMA foreign_keys=ON;
     CREATE TABLE usuarios (id INTEGER PRIMARY KEY, xp INTEGER NOT NULL DEFAULT 0,
@@ -18,6 +18,26 @@ function novoBanco() {
   const gatilhoXP = origemXP.match(/db\.run\(`(CREATE TRIGGER IF NOT EXISTS trg_xp_verificado_saldo[\s\S]*?)`\);/);
   assert.ok(gatilhoXP);
   banco.exec(gatilhoXP[1]);
+  if (schemaAntigo) {
+    banco.exec(`CREATE TABLE terrario_sessoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuario_id INTEGER NOT NULL,
+      materia TEXT NOT NULL,
+      duracao_minutos INTEGER NOT NULL CHECK(duracao_minutos IN (1, 15, 25, 45)),
+      restante_segundos INTEGER NOT NULL,
+      estado TEXT NOT NULL DEFAULT 'em_andamento'
+        CHECK(estado IN ('em_andamento', 'pausada', 'concluida', 'cancelada')),
+      iniciada_em_ms INTEGER NOT NULL,
+      ativo_desde_ms INTEGER,
+      concluida_em_ms INTEGER,
+      sementes_recebidas INTEGER NOT NULL DEFAULT 0,
+      xp_recebido INTEGER NOT NULL DEFAULT 0,
+      FOREIGN KEY(usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    );
+    INSERT INTO terrario_sessoes
+      (id,usuario_id,materia,duracao_minutos,restante_segundos,estado,iniciada_em_ms,ativo_desde_ms,concluida_em_ms,sementes_recebidas,xp_recebido)
+      VALUES(55,1,'Estudo livre',25,0,'concluida',1000,NULL,1600000,8,15);`);
+  }
   // Captura as migrações reais, sem criar um arquivo SQLite real.
   const caminhoDB = require.resolve('../config/db');
   const simulador = {
@@ -66,7 +86,7 @@ test('Terrário: iniciar, pausar, continuar, concluir e impedir prêmio repetido
   assert.equal(done.status, 200);
   assert.equal((await model.acao(1, started.lastID, 'concluir', t + 1100000)).status, 200);
   state = await model.buscarEstado(1, t + 1100000);
-  assert.equal(state.sementes, 5);
+  assert.equal(state.sementes, 2);
   assert.equal(state.sessoesValidas, 1);
   assert.equal(state.xpTotal, 10);
   assert.equal(banco.prepare("SELECT COUNT(*) n FROM xp_eventos_verificados WHERE action='foco_concluido'").get().n, 1);
@@ -87,7 +107,7 @@ test('Terrário: cancelamento não paga recompensas; demo não desbloqueia sala'
   state = await model.buscarEstado(1, t + 10070000); // passagem do tempo conclui ao carregar
   assert.equal(state.sessao.id, demo.lastID);
   assert.equal(state.sessao.estado, 'concluida');
-  assert.equal(state.sementes, 2);
+  assert.equal(state.sementes, 0);
   assert.equal(state.sessoesValidas, 0);
   assert.equal(state.xpTotal, 0);
   banco.close();
@@ -309,5 +329,81 @@ test('Terrário: estudo livre funciona sem escolher matéria no cronômetro', as
   assert.equal((await model.acao(1, sessao.lastID, 'continuar', inicio + 4000)).status, 200);
   estado = await model.buscarEstado(1, inicio + 5000);
   assert.equal(estado.sessao.estado, 'em_andamento');
+  banco.close();
+});
+
+
+test('Terrário: aceita durações de 1 a 120 min e paga 2 sementes a cada 15 completos', async () => {
+  const { banco, model } = novoBanco();
+  const tempoInicial = Date.now();
+  for (const n of [0, -2, 121, 17.5, '17', null]) {
+    await assert.rejects(model.iniciar(1, 'Estudo livre', n, tempoInicial), /duração deve ser/);
+  }
+  const duracoes = [2, 14, 17, 30, 46, 120];
+  const sementes = [0, 0, 2, 4, 6, 16];
+  const xp = [0, 0, 10, 15, 20, 20];
+  for (let i = 0; i < duracoes.length; i++) {
+    const inicio = tempoInicial + i * 8_000_000;
+    const sessao = await model.iniciar(1, 'Estudo livre', duracoes[i], inicio);
+    assert.equal((await model.acao(1, sessao.lastID, 'concluir', inicio + duracoes[i] * 60000 + 20)).status, 200);
+    const credito = banco.prepare('SELECT duracao_minutos,sementes_recebidas,xp_recebido FROM terrario_sessoes WHERE id=?').get(sessao.lastID);
+    assert.equal(credito.duracao_minutos, duracoes[i]);
+    assert.equal(credito.sementes_recebidas, sementes[i]);
+    assert.equal(credito.xp_recebido, xp[i]);
+  }
+  const estado = await model.buscarEstado(1, tempoInicial + 50_000_000);
+  assert.equal(estado.sessoesValidas, 4);
+  assert.equal(estado.sementes, 28);
+  assert.equal(estado.xpTotal, 65);
+  banco.close();
+});
+
+test('Terrário: migração preserva sessões antigas, seus IDs e os gatilhos', async () => {
+  const { banco, model } = novoBanco({ schemaAntigo: true });
+  const sessaoAntiga = banco.prepare('SELECT * FROM terrario_sessoes WHERE id=55').get();
+  assert.equal(sessaoAntiga.duracao_minutos, 25);
+  assert.equal(sessaoAntiga.sementes_recebidas, 8);
+  assert.equal(sessaoAntiga.xp_recebido, 15);
+  assert.match(banco.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='terrario_sessoes'").get().sql, /BETWEEN 1 AND 120/);
+  const t = Date.now();
+  const nova = await model.iniciar(1, 'Estudo livre', 36, t);
+  assert.ok(nova.lastID > 55);
+  await assert.rejects(model.iniciar(1, 'Estudo livre', 40, t), /UNIQUE constraint failed/);
+  assert.equal((await model.acao(1, nova.lastID, 'concluir', t + 36 * 60000 + 10)).status, 200);
+  assert.equal((await model.buscarEstado(1, t + 3000000)).sementes, 4); // Crédito antigo já registrado na sessão não é recalculado
+  banco.close();
+});
+
+
+test('Terrário: recompensa usa apenas blocos completos de 15 minutos', async () => {
+  const { banco, model } = novoBanco();
+  const tempoInicial = Date.now();
+  const duracoes = [1, 15, 25, 29, 30, 44, 45, 60, 120];
+  const esperadas = [0, 2, 2, 2, 4, 4, 6, 8, 16];
+  for (let i = 0; i < duracoes.length; i++) {
+    const inicio = tempoInicial + i * 8_000_000;
+    const sessao = await model.iniciar(1, 'Estudo livre', duracoes[i], inicio);
+    assert.equal((await model.acao(1, sessao.lastID, 'concluir', inicio + duracoes[i] * 60000 + 20)).status, 200);
+    const valor = banco.prepare('SELECT sementes_recebidas FROM terrario_sessoes WHERE id=?').get(sessao.lastID);
+    assert.equal(valor.sementes_recebidas, esperadas[i], `Duração de ${duracoes[i]} min`);
+  }
+  assert.equal((await model.buscarEstado(1, tempoInicial + 80_000_000)).sementes, 44);
+  banco.close();
+});
+
+
+test('Terrário: após 8 sessões válidas no dia, nenhuma semente nova é concedida', async () => {
+  const { banco, model } = novoBanco();
+  const hoje = Date.now();
+  // Insere sessões históricas concluídas hoje, sem creditar o saldo de teste.
+  for (let i = 0; i < 8; i++) {
+    banco.prepare(`INSERT INTO terrario_sessoes
+      (usuario_id,materia,duracao_minutos,restante_segundos,estado,iniciada_em_ms,ativo_desde_ms,concluida_em_ms)
+      VALUES (1,'Estudo livre',15,0,'concluida',?,NULL,?)`)
+      .run(hoje - (i + 1) * 1000, hoje - (i + 1) * 1000);
+  }
+  const sessao = await model.iniciar(1, 'Estudo livre', 45, hoje);
+  assert.equal((await model.acao(1, sessao.lastID, 'concluir', hoje + 45 * 60_000 + 1)).status, 200);
+  assert.equal(banco.prepare('SELECT sementes_recebidas FROM terrario_sessoes WHERE id=?').get(sessao.lastID).sementes_recebidas, 0);
   banco.close();
 });

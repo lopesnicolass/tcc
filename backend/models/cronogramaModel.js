@@ -536,3 +536,39 @@ module.exports = {
     excluirAtividade,
     excluirAtividadesPorOrigem
 };
+// Salva sessões de um plano de forma atômica e idempotente por origem.
+// Não altera agendamentos já cadastrados pelo estudante.
+function adicionarSessoesPlano(usuarioId, atividades, callback) {
+    db.serialize(() => {
+        db.run('BEGIN IMMEDIATE TRANSACTION', (erro) => {
+            if (erro) return callback(erro);
+            let indice = 0;
+            let adicionadas = 0;
+            let ignoradas = 0;
+            const rollback = (falha) => db.run('ROLLBACK', () => callback(falha));
+            function proximo() {
+                if (indice >= atividades.length) {
+                    return db.run('COMMIT', (falha) => falha ? rollback(falha) : callback(null, { adicionadas, ignoradas }));
+                }
+                const item = atividades[indice++];
+                db.run(`
+                    INSERT INTO cronograma_atividades
+                    (usuario_id, data, horario, nome, materia, concluida, origem, topico_id)
+                    SELECT ?, ?, ?, ?, ?, 0, ?, ?
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM cronograma_atividades
+                        WHERE usuario_id = ? AND origem = ?
+                    )
+                `, [usuarioId, item.data, item.horario, item.nome, item.materia,
+                    item.origem, item.topicoId, usuarioId, item.origem], function (falha) {
+                    if (falha) return rollback(falha);
+                    if (this.changes) adicionadas++;
+                    else ignoradas++;
+                    proximo();
+                });
+            }
+            proximo();
+        });
+    });
+}
+module.exports.adicionarSessoesPlano = adicionarSessoesPlano;

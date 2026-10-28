@@ -1,1039 +1,378 @@
-/* PERFIL — visual alinhado ao sistema do estudante */
-
+/* TENNA | Perfil: uma única folha de estilos, com tokens do design system. */
 .perfil-page {
+  --perfil-blue: #1869d1;
+  --perfil-blue-deep: #0d47a1;
+  --perfil-subtle: var(--color-surface-soft);
+  --perfil-stroke: var(--color-border);
   width: 100%;
-  max-width: none;
-  margin: 0 auto;
+  min-width: 0;
   padding: 0 0 40px;
-}
-
-.perfil-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(300px, 360px);
-  gap: 22px;
-  align-items: start;
-}
-
-.perfil-form-card,
-.perfil-avatar-card,
-.perfil-achievements-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.perfil-form-card {
-  padding: 28px;
-}
-
-.perfil-form-heading {
-  padding-bottom: 20px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--line);
-}
-
-.perfil-profile-badge,
-.perfil-card-dot { display: none; }
-
-.perfil-section-kicker {
-  display: block;
-  margin-bottom: 7px;
-  color: var(--accent-dark);
-  font-size: 10px;
-  letter-spacing: .12em;
-  font-weight: 800;
-}
-
-.perfil-form-heading h2,
-.perfil-card-heading h3,
-.perfil-side-heading h3 {
-  margin: 0;
   color: var(--color-text);
-  font-family: var(--font-display);
-  letter-spacing: -.02em;
 }
+.perfil-page *, .perfil-page *::before, .perfil-page *::after { box-sizing: border-box; }
+.perfil-page button { font-family: var(--font-body); cursor: pointer; }
+.perfil-page button:disabled { opacity: .65; cursor: wait; }
+.perfil-page button:focus-visible, .perfil-page input:focus-visible { outline: 3px solid rgba(33, 150, 243, .32); outline-offset: 2px; }
 
-.perfil-form-heading h2 {
-  font-size: 24px;
-  line-height: 1.2;
-}
-
-.perfil-form-heading p {
-  margin: 7px 0 0;
-  max-width: 660px;
-  color: var(--muted);
-  font-size: 13.5px;
-  line-height: 1.55;
-}
-
-.perfil-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.perfil-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 17px;
-}
-
-.perfil-field label {
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.perfil-input-wrap {
-  position: relative;
-}
-
-.perfil-input-wrap input {
-  box-sizing: border-box;
-  width: 100%;
-  height: 50px;
-  padding: 0 52px 0 15px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  outline: none;
-  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
-}
-
-.perfil-input-wrap input:hover:not(:disabled) {
-  border-color: var(--color-border-strong);
-  background: var(--card);
-}
-
-.perfil-input-wrap input:focus {
-  border-color: var(--accent);
-  background: var(--card);
-  box-shadow: 0 0 0 3px rgba(33,150,243,.12);
-}
-
-.perfil-input-wrap input:disabled {
-  color: var(--color-text-soft);
-  background: var(--color-surface-muted);
-}
-
-.perfil-input-wrap input::placeholder {
-  color: var(--muted);
-}
-
-.perfil-edit-btn {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transform: translateY(-50%);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--accent-dark);
-  cursor: pointer;
-  font-size: 16px;
-  transition: background .16s ease, color .16s ease;
-}
-
-.perfil-edit-btn:hover {
-  background: var(--color-primary-100);
-  color: var(--color-primary-900);
-}
-
-.perfil-edit-btn:focus-visible,
-.btn-logout:focus-visible,
-.perfil-profile-card .mural-btn:focus-visible,
-.perfil-form-footer button:focus-visible {
-  outline: 3px solid rgba(33,150,243,.22);
-  outline-offset: 2px;
-}
-
-.perfil-form-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 6px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-}
-
-.perfil-form-footer > span {
-  color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.45;
-}
-
-.perfil-form-footer .mural-btn.primary {
-  min-width: 180px;
-  min-height: 44px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  box-shadow: 0 8px 18px -10px rgba(13,71,161,.35);
-}
-
-.perfil-alert {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.perfil-alert-success {
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  border-color: rgba(38,115,77,.18);
-}
-
-.perfil-alert-error {
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
-  border-color: rgba(193,70,47,.18);
-}
-
-.perfil-alert-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,.75);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.perfil-side-column {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-}
-
-.perfil-avatar-card {
-  min-height: 0;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  text-align: center;
-}
-
-.perfil-side-heading {
-  width: 100%;
-  padding-bottom: 14px;
-  margin-bottom: 2px;
-  text-align: left;
-  border-bottom: 1px solid var(--line);
-}
-
-.perfil-side-heading h3 {
-  font-size: 18px;
-}
-
-.avatar-circle {
-  width: 116px;
-  height: 116px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: var(--color-primary-100);
-  color: var(--color-primary-800);
-  border: 4px solid var(--card);
-  box-shadow: 0 0 0 1px var(--line);
-  font-family: var(--font-display);
-  font-size: 38px;
-  font-weight: 700;
-}
-
-.avatar-circle img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.perfil-avatar-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.perfil-avatar-meta strong {
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1.15;
-}
-
-.perfil-avatar-meta span {
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.perfil-avatar-card > .mural-btn {
-  min-width: 150px;
-  min-height: 42px;
-  border-radius: var(--radius-md);
-  font-size: 12.5px;
-  font-weight: 700;
-}
-
-.perfil-avatar-card > div[style*="display: flex"] {
-  position: relative;
-  width: 100%;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-logout {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 42px;
-  margin-top: 3px;
-  padding: 9px 14px;
-  border: 1px solid rgba(193,70,47,.22);
-  border-radius: var(--radius-md);
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .16s ease, border-color .16s ease;
-}
-
-.btn-logout:hover {
-  background: #ffe7e4;
-  border-color: rgba(193,70,47,.32);
-}
-
-html[data-theme='dark'] .perfil-input-wrap input {
-  background: var(--dark-surface-2);
-  border-color: var(--dark-border);
-}
-
-html[data-theme='dark'] .perfil-input-wrap input:hover:not(:disabled),
-html[data-theme='dark'] .perfil-input-wrap input:focus {
-  background: var(--dark-surface-3);
-}
-
-html[data-theme='dark'] .perfil-input-wrap input:disabled {
-  background: var(--dark-surface);
-}
-
-@media (max-width: 1000px) {
-  .perfil-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 18px;
-  }
-}
-
-@media (max-width: 860px) {
-  .perfil-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .perfil-side-column {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-  }
-}
-
-@media (max-width: 640px) {
-  .perfil-page {
-    padding-bottom: 28px;
-  }
-
-  .perfil-form-card {
-    padding: 22px 18px;
-  }
-
-  .perfil-side-column {
-    grid-template-columns: 1fr;
-  }
-
-  .perfil-form-footer {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .perfil-form-footer .mural-btn.primary {
-    width: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .perfil-input-wrap input,
-  .perfil-edit-btn,
-  .achievement-item,
-  .btn-logout {
-    transition: none;
-  }
-}
-
-
-/* PERFIL — EVOLUÇÃO E CONQUISTAS REAIS */
+/* Apresentação da página, mesma identidade das outras áreas. */
 .perfil-hero {
   position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 390px);
-  gap: 28px;
-  align-items: center;
-  padding: 30px 34px;
-  margin-bottom: 24px;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(120deg, #123d83, #1a72ce);
-  color: #fff;
-  box-shadow: 0 16px 38px -27px rgba(8, 45, 112, .65);
-}
-.perfil-hero::after {
-  content: '';
-  position: absolute;
-  width: 230px;
-  height: 230px;
-  top: -155px;
-  left: 42%;
-  border: 42px solid rgba(255,255,255,.07);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.perfil-hero-intro, .perfil-hero-dados { position: relative; z-index: 1; }
-.perfil-hero-kicker {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 10px;
-  color: rgba(255,255,255,.76);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .12em;
-}
-.perfil-hero h1 {
-  margin: 0 0 10px;
-  color: #fff;
-  font-family: var(--font-display);
-  font-size: clamp(25px, 3vw, 35px);
-  letter-spacing: -.025em;
-  line-height: 1.12;
-}
-.perfil-hero p {
-  max-width: 550px;
-  margin: 0;
-  color: rgba(255,255,255,.86);
-  font-size: 13px;
-  line-height: 1.55;
-}
-.perfil-hero-dados {
-  padding: 18px;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 19px;
-  background: rgba(255,255,255,.11);
-}
-.perfil-level-details { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; }
-.perfil-level-badge {
-  display: grid;
-  place-items: center;
-  flex: 0 0 50px;
-  width: 50px;
-  height: 50px;
-  border-radius: 15px;
-  background: #ffda70;
-  color: #16407b;
-  font: 800 23px/1 var(--font-display);
-}
-.perfil-level-details > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.perfil-level-label { font-size: 10px; letter-spacing: .09em; font-weight: 700; color: rgba(255,255,255,.76); }
-.perfil-level-details strong { color: #fff; font-size: 15px; }
-.perfil-level-track { height: 9px; border-radius: 100px; overflow: hidden; background: rgba(255,255,255,.22); }
-.perfil-level-track > span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg,#ffcb45,#ffe59e);
-  border-radius: inherit;
-  transition: width .3s ease;
-}
-.perfil-level-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 7px; color: rgba(255,255,255,.89); font-size: 11px; }
-.perfil-hero-streak { display: flex; align-items: center; gap: 6px; margin-top: 16px; color: rgba(255,255,255,.93); font-size: 12px; }
-.perfil-hero-streak strong { color: #fff; font-size: 15px; }
-
-.perfil-achievements-section {
-  margin-top: 24px;
-  padding: 26px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-xl);
-  background: var(--card);
-  box-shadow: var(--shadow-sm);
-}
-.perfil-achievements-heading {
+  isolation: isolate;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  padding-bottom: 19px;
-  border-bottom: 1px solid var(--line);
-}
-.perfil-achievements-heading h2 {
-  margin: 0 0 5px;
-  color: var(--ink);
-  font: 750 25px/1.2 var(--font-display);
-}
-.perfil-achievements-heading p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
-.perfil-achievements-counter {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 115px;
-  min-height: 66px;
-  padding: 10px;
-  border-radius: 15px;
-  background: var(--color-primary-100);
-}
-.perfil-achievements-counter strong { color: var(--accent-dark); font: 800 23px/1.1 var(--font-display); }
-.perfil-achievements-counter span { margin-top: 3px; color: var(--accent-dark); font-size: 11px; }
-.perfil-achievements-controls { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 20px 0; }
-.perfil-achievements-filters { display: flex; flex-wrap: wrap; gap: 7px; }
-.perfil-achievements-filter, .perfil-achievements-refresh {
-  min-height: 37px;
-  padding: 9px 13px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--color-surface-soft);
-  color: var(--ink);
-  font: 700 12px var(--font-body);
-  cursor: pointer;
-  transition: background .15s, border-color .15s, color .15s;
-}
-.perfil-achievements-filter.active { background: var(--color-primary-800); color: #fff; border-color: var(--color-primary-800); }
-.perfil-achievements-refresh { display: flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; }
-.perfil-achievements-refresh:disabled { opacity: .6; cursor: wait; }
-.perfil-achievements-filter:focus-visible, .perfil-achievements-refresh:focus-visible, .perfil-badge-link:focus-visible { outline: 3px solid rgba(33,150,243,.32); outline-offset: 2px; }
-.perfil-achievements-notice {
-  padding: 11px 13px;
-  background: var(--color-surface-soft);
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  font-size: 12px;
-}
-.perfil-achievements-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.perfil-badge-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: 18px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--color-surface-soft);
-}
-.perfil-badge-unlocked { border-color: rgba(45,159,117,.42); background: color-mix(in srgb, var(--color-success-soft) 45%, var(--card)); }
-.perfil-badge-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 15px; }
-.perfil-badge-icon {
-  display: grid;
-  place-items: center;
-  width: 47px;
-  height: 47px;
-  flex-shrink: 0;
-  border-radius: 14px;
-  background: var(--color-primary-100);
-  color: var(--accent-dark);
-}
-.perfil-badge-locked .perfil-badge-icon { color: var(--muted); background: var(--color-surface-muted); }
-.perfil-badge-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 8px;
-  border-radius: 99px;
-  background: var(--color-surface-muted);
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.perfil-badge-status.is-unlocked { background: var(--color-success-soft); color: var(--color-success); }
-.perfil-badge-category { color: var(--accent-dark); letter-spacing: .11em; text-transform: uppercase; font-size: 10px; font-weight: 800; }
-.perfil-badge-card h3 { margin: 6px 0; color: var(--ink); font: 800 17px/1.2 var(--font-display); }
-.perfil-badge-card > p { min-height: 36px; margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.perfil-badge-bottom { margin-top: auto; }
-.perfil-badge-count { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; color: var(--muted); }
-.perfil-badge-count strong { color: var(--ink); font-size: 12px; }
-.perfil-badge-progress { height: 7px; background: var(--color-surface-muted); border-radius: 99px; overflow: hidden; }
-.perfil-badge-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-.perfil-badge-unlocked .perfil-badge-progress > span { background: #2d9f75; }
-.perfil-badge-link {
-  display: inline-flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 7px;
-  align-self: flex-start;
-  margin-top: 15px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent-dark);
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.perfil-achievements-explainer { margin: 20px 0 0; padding-top: 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.55; }
-html[data-theme='dark'] .perfil-badge-card { background: var(--dark-surface-2); border-color: var(--dark-border); }
-html[data-theme='dark'] .perfil-badge-unlocked { border-color: rgba(70,189,143,.45); background: color-mix(in srgb, #123a39 38%, var(--dark-surface-2)); }
-html[data-theme='dark'] .perfil-achievements-filter,
-html[data-theme='dark'] .perfil-achievements-refresh { background: var(--dark-surface-2); border-color: var(--dark-border); }
-html[data-theme='dark'] .perfil-achievements-filter.active { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
-@media (max-width: 1150px) { .perfil-achievements-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 860px) { .perfil-hero { grid-template-columns: 1fr; } .perfil-achievements-controls { flex-direction: column; } }
-@media (max-width: 640px) {
-  .perfil-hero { gap: 19px; padding: 22px 18px; border-radius: var(--radius-lg); }
-  .perfil-achievements-section { padding: 20px 16px; }
-  .perfil-achievements-heading { align-items: flex-start; flex-direction: column; }
-  .perfil-achievements-counter { align-items: flex-start; min-height: 0; }
-  .perfil-achievements-grid { grid-template-columns: 1fr; }
-  .perfil-achievements-refresh { width: 100%; }
-}
-@media (prefers-reduced-motion: reduce) { .perfil-level-track > span, .perfil-achievements-filter { transition: none; } }
-
-/* Participação voluntária no ranking (nome, foto e XP). */
-.perfil-ranking-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 22px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--card);
-  box-shadow: var(--shadow-sm);
-}
-.perfil-ranking-top { display: flex; align-items: flex-start; gap: 10px; color: var(--accent-dark); }
-.perfil-ranking-top > svg { flex-shrink: 0; }
-.perfil-ranking-top h3 { margin: 0 0 4px; color: var(--ink); font-size: 16px; }
-.perfil-ranking-top p,
-.perfil-ranking-description {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-.perfil-ranking-toggle {
-  min-height: 42px;
-  padding: 10px 13px;
-  border: 1px solid var(--color-primary-800);
-  border-radius: 12px;
-  background: var(--color-primary-800);
+  gap: 22px;
+  min-height: 150px;
+  margin: 0 0 20px;
+  padding: 27px 34px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(115deg, #123e87 0%, #1766c5 62%, #2595ed 100%);
   color: #fff;
-  font: 750 12px var(--font-body);
-  cursor: pointer;
+  box-shadow: 0 15px 32px -26px rgba(14, 67, 144, .65);
 }
-.perfil-ranking-toggle.is-active {
-  background: var(--color-surface-soft);
-  color: var(--color-primary-800);
+.perfil-hero-intro { max-width: 680px; min-width: 0; }
+.perfil-hero-kicker { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 9px; color: #cce8ff; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+.perfil-page .perfil-hero h1 { margin: 0 0 8px; color: #fff; font: 800 clamp(28px,3vw,38px)/1.12 var(--font-display); letter-spacing: -.035em; }
+.perfil-page .perfil-hero p { margin: 0; color: #e3f1ff; font-size: 14px; line-height: 1.55; }
+
+/* Cartões e layout. */
+.perfil-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(310px, .43fr); align-items: stretch; gap: 20px; }
+/* Cards entram já no tamanho final, sem zoom ou transição de dimensões. */
+.perfil-hero, .perfil-form-card, .perfil-conquistas-resumo, .perfil-ranking-card {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
 }
-.perfil-ranking-toggle:disabled { opacity: .65; cursor: wait; }
-.perfil-ranking-toggle:focus-visible { outline: 3px solid var(--color-primary-500); outline-offset: 3px; }
-.perfil-ranking-error { margin: 0; color: var(--color-danger); font-size: 12px; }
-html[data-theme='dark'] .perfil-ranking-toggle.is-active { color: #c5e5ff; background: var(--dark-surface-2); }
-
-/* Refinamento da página Perfil — linguagem visual do restante do Tenna */
-.perfil-hero::after { display:none; }
-.perfil-hero { background:linear-gradient(110deg,#194b97 0%,#216fc9 100%); box-shadow:0 12px 24px -20px rgba(9,45,100,.6); }
-.perfil-grid { grid-template-columns:minmax(0,1fr) minmax(290px,330px); gap:18px; }
-.perfil-form-card { padding:24px 26px; }
-.perfil-form-heading { margin-bottom:20px; padding-bottom:16px; }
-.perfil-fields { gap:0; }
-.perfil-field { margin-bottom:13px; gap:6px; }
-.perfil-input-wrap input { height:46px; background:var(--card); }
-.perfil-avatar-card { padding:22px; }
-.perfil-ranking-card { padding:20px; gap:9px; }
-.perfil-achievements-section { padding:24px; margin-top:20px; }
-.perfil-achievements-heading { padding-bottom:14px; }
-.perfil-achievements-controls { margin:16px 0 18px; align-items:center; }
-.perfil-achievements-grid { gap:12px; }
-.perfil-badge-card { position:relative; min-height:170px; padding:17px 18px 15px; background:var(--card); border-radius:15px; transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease; }
-.perfil-badge-card:hover { transform:translateY(-2px); box-shadow:0 8px 22px -16px rgba(15,54,110,.4); }
-.perfil-badge-unlocked { background:var(--card); border-color:rgba(37,151,104,.28); border-bottom:3px solid #35a474; }
-.perfil-badge-locked { border-bottom:3px solid #b8cce8; }
-.perfil-badge-top { margin-bottom:10px; }
-.perfil-badge-icon { width:40px; height:40px; }
-.perfil-badge-card h3 { font-size:16px; margin:5px 0; }
-.perfil-badge-card > p { min-height:0; margin-bottom:15px; }
-.perfil-badge-count { margin-bottom:6px; }
-.perfil-badge-progress { height:5px; }
-.perfil-badge-link { margin-top:10px; }
-.perfil-achievements-explainer { margin-top:16px; padding-top:12px; }
-@media(max-width:1100px) { .perfil-grid { grid-template-columns:minmax(0,1fr) 300px; } .perfil-achievements-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@media(max-width:760px) { .perfil-grid { grid-template-columns:1fr; } .perfil-achievements-grid { grid-template-columns:1fr; } .perfil-hero { grid-template-columns:1fr; } .perfil-achievements-controls { flex-wrap:wrap; } }
-
-/* Refinamento visual Tenna — componentes consistentes com Início/Conteúdos */
-.perfil-page { padding-bottom: 28px; }
-.perfil-hero { min-height: 172px; padding: 26px 30px; border-radius: 21px; background: linear-gradient(110deg,#174991 0%,#1d61b7 68%,#258fec 100%); box-shadow: 0 12px 26px rgba(22,80,149,.12); }
-.perfil-hero::after { display:none; }
-.perfil-hero h1 { font-size: clamp(26px,2.3vw,34px); }
-.perfil-hero-dados { border-radius: 15px; background: rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.19); }
-.perfil-grid { grid-template-columns: minmax(0, 1.6fr) minmax(285px, 330px); gap: 18px; margin-top: 18px; }
-.perfil-form-card,.perfil-avatar-card,.perfil-ranking-card,.perfil-achievements-section { border:1px solid #d6e5f7; border-radius:18px; box-shadow:none; background:var(--card); }
-.perfil-form-card { padding:24px 26px; }
-.perfil-form-heading { margin-bottom:20px; padding-bottom:16px; }
-.perfil-fields { gap:0; }
-.perfil-field { margin-bottom:14px; gap:6px; }
-.perfil-input-wrap input,.perfil-input-wrap input:disabled { height:44px; background:var(--card); border:1px solid #cfdef0; border-radius:11px; color:var(--color-text); }
-.perfil-input-wrap input:focus { border-color:#258fec; box-shadow:0 0 0 3px rgba(37,143,236,.1); }
-.perfil-edit-btn { color:#1764c1; border-radius:9px; }
-.perfil-form-footer { padding-top:16px; margin-top:4px; }
-.perfil-form-footer .mural-btn.primary { background:#1768cc; border:1px solid #1768cc; color:#fff; box-shadow:none; border-radius:10px; }
-.perfil-form-footer .mural-btn.primary:hover { background:#1256ae; }
-.perfil-avatar-card { padding:20px; }
-.perfil-avatar-card > .mural-btn { border:1px solid #cbdff5; background:#eef6ff; color:#1256ae; border-radius:10px; box-shadow:none; }
-.perfil-avatar-card > .mural-btn:hover { background:#e0efff; }
-.perfil-ranking-card { padding:19px; gap:10px; }
-.perfil-ranking-toggle,.perfil-ranking-toggle.is-active { border:1px solid #c8dcf5; background:#eef6ff; color:#1456ac; border-radius:10px; box-shadow:none; }
-.perfil-ranking-toggle:hover { background:#deedff; }
-.btn-logout { border-radius:10px; }
-.perfil-achievements-section { margin-top:20px; padding:24px 26px; }
-.perfil-achievements-controls { margin:17px 0; }
-.perfil-achievements-grid { gap:12px; }
-.perfil-badge-card,.perfil-badge-unlocked,.perfil-badge-locked { min-height:175px; padding:16px; border:1px solid #d7e6f6; border-radius:14px; background:var(--card); box-shadow:none; }
-.perfil-badge-unlocked { border-bottom:3px solid #39a66b; }
-.perfil-badge-locked { border-bottom:3px solid #a9c5e8; }
-.perfil-badge-top { margin-bottom:10px; }
-.perfil-badge-icon { border-radius:11px; }
-.perfil-badge-card > p { min-height:0; margin-bottom:12px; }
-.perfil-badge-card h3 { font-size:16px; }
-.perfil-badge-progress { height:6px; }
-.perfil-badge-link { text-decoration:none; }
-.perfil-achievements-explainer { font-size:11px; }
-@media(max-width:860px){.perfil-grid{grid-template-columns:1fr}.perfil-hero{padding:23px}.perfil-achievements-section{padding:20px}}
-@media(max-width:640px){.perfil-form-card{padding:19px}.perfil-achievements-grid{grid-template-columns:1fr}.perfil-form-footer{flex-wrap:wrap}}
-
-/* Perfil — reorganização da área superior, consistente com os demais painéis Tenna */
-.perfil-grid { grid-template-columns:minmax(0,1fr) minmax(270px,310px); gap:16px; align-items:stretch; }
-.perfil-form-card { padding:24px 26px; display:flex; flex-direction:column; }
-.perfil-form-heading { padding-bottom:13px; margin-bottom:17px; }
-.perfil-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:16px; row-gap:14px; }
-.perfil-field { margin-bottom:0; min-width:0; }
-.perfil-field:last-child { grid-column:1/-1; }
-.perfil-input-wrap input,.perfil-input-wrap input:disabled { height:46px; border-radius:10px; background:#f8fbff; }
-.perfil-form-footer { margin-top:auto; padding-top:18px; border-top:0; }
-.perfil-form-footer > span { max-width:260px; }
-.perfil-form-footer .mural-btn.primary { min-height:42px; }
-.perfil-avatar-card { padding:20px; gap:10px; }
-.perfil-side-heading { padding-bottom:10px; margin-bottom:0; }
-.perfil-side-heading h3 { font-size:16px; }
-.avatar-circle { width:94px; height:94px; }
-.perfil-avatar-meta strong { font-size:16px; }
-.perfil-avatar-card > .mural-btn { min-height:38px; }
-.perfil-ranking-card { padding:17px 19px; gap:9px; }
-.perfil-ranking-top h3 { font-size:15px; }
-.perfil-ranking-description { font-size:11.5px; }
-.perfil-ranking-toggle { min-height:38px; }
-@media(max-width:1050px) { .perfil-grid { grid-template-columns:minmax(0,1fr) 275px; } .perfil-fields { grid-template-columns:1fr; } }
-@media(max-width:860px) { .perfil-grid { grid-template-columns:1fr; } .perfil-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@media(max-width:600px) { .perfil-fields { grid-template-columns:1fr; } .perfil-form-footer { align-items:stretch; flex-direction:column; } .perfil-form-footer .mural-btn.primary { width:100%; } }
-
-/* Cabecalho compacto: o foco desta pagina e a gestao da conta. */
-.perfil-hero { min-height: 0; padding: 20px 27px; margin-bottom: 18px; grid-template-columns: minmax(0,1fr) minmax(220px,300px); gap:20px; border-radius:18px; box-shadow:none; }
-.perfil-hero-kicker { margin-bottom:5px; font-size:9px; }
-.perfil-hero h1 { font-size:clamp(23px,2vw,29px); margin-bottom:5px; }
-.perfil-hero p { font-size:12px; line-height:1.4; }
-.perfil-hero-dados { padding:0; border:0; border-radius:0; background:transparent; }
-.perfil-level-details { gap:9px; margin-bottom:8px; }
-.perfil-level-badge { width:36px; height:36px; flex-basis:36px; border-radius:10px; font-size:18px; }
-.perfil-level-label { font-size:9px; }
-.perfil-level-details strong { font-size:13px; }
-.perfil-level-track { height:5px; }
-.perfil-level-foot { font-size:10px; margin-top:5px; }
-.perfil-hero-streak { margin-top:7px; font-size:10px; }
-.perfil-hero-streak strong { font-size:11px; }
-.perfil-hero-streak svg { width:13px; height:13px; }
-@media(max-width:760px) { .perfil-hero { grid-template-columns:1fr; padding:20px; gap:14px; } .perfil-hero-dados { max-width:340px; } }
-
-/* Cabeçalho do perfil sem bloco de nível */
-.perfil-hero { display:flex; align-items:center; min-height:0; padding:24px 28px; }
-.perfil-hero-intro { width:100%; }
-@media(max-width:760px) { .perfil-hero { padding:20px; } }
-
-/* Perfil integrado: dados, foto, ranking e conquistas resumidas */
-.perfil-grid { grid-template-columns: minmax(0, 1fr) minmax(275px, 320px); gap: 18px; }
-.perfil-form-card { padding: 24px; }
-.perfil-form-heading { margin-bottom: 20px; padding-bottom: 16px; }
-.perfil-form-content { display: grid; grid-template-columns: 155px minmax(0, 1fr); gap: 24px; align-items: start; }
-.perfil-account-avatar { grid-column: 1; grid-row: 1; }
-.perfil-account-fields { grid-column: 2; grid-row: 1; min-width: 0; }
-.perfil-account-avatar .perfil-avatar-card { border: 0; box-shadow: none; background: transparent; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.perfil-account-avatar .perfil-side-heading { display: none; }
-.perfil-account-avatar .avatar-circle { margin: 0 auto; }
-.perfil-account-avatar .perfil-avatar-meta { text-align: center; overflow-wrap: anywhere; }
-.perfil-account-avatar .mural-btn { width: 100%; max-width: 150px; }
-.perfil-form-footer { margin-top: 10px; }
-.perfil-form-footer .btn-logout { width: auto; padding: 10px 16px; margin-left: auto; }
-.perfil-form-footer .mural-btn.primary { order: 2; }
-.perfil-form-footer > span { margin-right: auto; }
-.perfil-side-column { gap: 16px; }
-.perfil-ranking-position { display: flex; align-items: baseline; gap: 12px; padding: 14px 0 8px; }
-.perfil-ranking-position strong { font-size: 35px; line-height: 1; color: var(--accent-dark); font-family: var(--font-display); }
-.perfil-ranking-position span { font-size: 12px; color: var(--muted); }
-.perfil-conquistas-resumo { padding: 20px; border-radius: var(--radius-lg); }
-.perfil-resumo-heading { display: flex; justify-content: space-between; align-items: center; color: var(--accent-dark); }
-.perfil-resumo-heading h3 { margin: 0; font-size: 18px; }
-.perfil-resumo-count { display: flex; align-items: baseline; gap: 10px; margin: 18px 0 12px; }
-.perfil-resumo-count strong { font-size: 30px; color: var(--color-text); }
-.perfil-resumo-count strong span { font-size: 17px; color: var(--muted); }
-.perfil-resumo-count small { color: var(--muted); }
-.perfil-resumo-track { height: 7px; border-radius: 10px; background: var(--color-surface-muted); overflow: hidden; }
-.perfil-resumo-track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-.perfil-resumo-open { width: 100%; margin-top: 18px; padding: 11px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--color-surface-soft); color: var(--accent-dark); font-weight: 700; cursor: pointer; }
-.perfil-resumo-open:hover { background: var(--color-primary-100); }
-.perfil-modal-backdrop { position: fixed; inset: 0; z-index: 10000; display: flex; justify-content: center; align-items: center; padding: 24px; background: rgba(6, 24, 53, .58); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
-.perfil-modal-panel { position: relative; width: min(1080px, 100%); max-height: min(90vh, 900px); overflow-y: auto; border-radius: 20px; background: var(--card); box-shadow: 0 25px 85px rgba(0, 25, 70, .3); }
-.perfil-modal-panel .perfil-achievements-section { margin: 0; border: 0; box-shadow: none; }
-.perfil-modal-close { position: sticky; top: 16px; float: right; z-index: 2; margin: 16px 16px -54px 0; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--color-text); cursor: pointer; }
-@media (max-width: 1050px) { .perfil-grid { grid-template-columns: 1fr; } .perfil-side-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media (max-width: 650px) { .perfil-form-content { grid-template-columns: 1fr; } .perfil-account-avatar,.perfil-account-fields { grid-column: 1; grid-row: auto; } .perfil-side-column { display: flex; } .perfil-modal-backdrop { padding: 10px; } .perfil-form-footer { flex-wrap: wrap; } }
-
-/* Refinamento visual: perfil compacto e alinhado ao design do Tenna */
-.perfil-grid { align-items:start; gap:16px; }
-.perfil-form-card { min-height:0; height:auto; padding:22px 24px 20px; }
-.perfil-form-heading { margin-bottom:18px; padding-bottom:14px; }
-.perfil-form-content { grid-template-columns:140px minmax(0,1fr); gap:22px; align-items:center; }
-.perfil-account-avatar .perfil-avatar-card { gap:8px; }
-.perfil-account-avatar .avatar-circle { width:100px; height:100px; flex:0 0 100px; border:3px solid #fff; box-shadow:0 0 0 1px #d3e3f5; }
-.perfil-account-avatar .perfil-avatar-meta { display:flex; flex-direction:column; gap:2px; }
-.perfil-account-avatar .perfil-avatar-meta strong { font-size:15px; }
-.perfil-account-avatar .perfil-avatar-meta span { font-size:11px; }
-.perfil-account-avatar .mural-btn { min-height:36px; border-radius:9px; }
-.perfil-account-fields .perfil-fields { row-gap:13px; }
-.perfil-form-footer { margin-top:18px; padding-top:15px; border-top:1px solid #e2ecf8; gap:10px; }
-.perfil-form-footer .btn-logout,.perfil-form-footer .mural-btn.primary { min-height:38px; border-radius:9px; }
-.perfil-side-column { gap:14px; }
-.perfil-ranking-card { padding:17px 18px; gap:7px; }
-.perfil-ranking-position { padding:5px 0; gap:9px; align-items:center; }
-.perfil-ranking-position strong { font-size:29px; }
-.perfil-ranking-description { margin:0; line-height:1.4; }
-.perfil-ranking-toggle { min-height:36px; }
-.perfil-conquistas-resumo { padding:17px 18px; }
-.perfil-resumo-heading h3 { font-size:16px; }
-.perfil-resumo-count { margin:11px 0 10px; gap:7px; }
-.perfil-resumo-count strong { font-size:26px; }
-.perfil-resumo-track { height:6px; }
-.perfil-resumo-open { margin-top:12px; padding:9px; font-size:12px; transition:background .2s ease,border-color .2s ease; }
-.perfil-modal-panel { width:min(980px,100%); border:1px solid #d6e5f7; }
-@media(max-width:1050px) { .perfil-grid { grid-template-columns:1fr; } }
-@media(max-width:650px) { .perfil-form-content { grid-template-columns:1fr; } .perfil-account-avatar,.perfil-account-fields { grid-column:1; grid-row:auto; } .perfil-form-footer { margin-top:16px; } }
-
-/* Perfil: foto, nome, e-mail e senha em sequência vertical. */
-.perfil-form-content {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 20px;
-}
-.perfil-account-avatar,
-.perfil-account-fields {
-  width: 100%;
+.perfil-form-card, .perfil-conquistas-resumo, .perfil-ranking-card {
   min-width: 0;
-}
-.perfil-account-avatar .perfil-avatar-card {
-  align-items: center;
-}
-.perfil-account-fields .perfil-fields {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: 14px;
-}
-.perfil-account-fields .perfil-field {
-  grid-column: 1 / -1;
-  min-width: 0;
-}
-@media (max-width: 650px) {
-  .perfil-form-content { gap: 18px; }
-}
-
-/* Perfil: foto à esquerda e ação ao lado; campos abaixo. */
-.perfil-form-heading { margin-bottom: 18px; }
-.perfil-account-avatar .perfil-avatar-card {
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 18px;
-}
-.perfil-account-avatar .avatar-circle { margin: 0; flex-shrink: 0; }
-.perfil-account-avatar .mural-btn { width: auto; min-width: 145px; max-width: none; }
-.perfil-account-avatar .perfil-avatar-card > div[style*="display: flex"] { width: auto !important; }
-@media (max-width: 480px) {
-  .perfil-account-avatar .perfil-avatar-card { gap: 14px; }
-  .perfil-account-avatar .avatar-circle { width: 80px; height: 80px; flex-basis: 80px; }
-}
-
-
-/* Conquistas: janela refinada e consistente com os cards do Tenna. */
-.perfil-modal-backdrop { padding: 22px; align-items: center; background: rgba(7, 29, 62, .64); backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px); }
-.perfil-modal-panel { position: relative; width: min(1060px, 100%); max-height: min(88vh, 860px); overflow-y: auto; overflow-x: hidden; border: 1px solid #dbe8f7; border-radius: 22px; background: var(--card); box-shadow: 0 28px 80px rgba(4, 30, 66, .35); scrollbar-width: thin; }
-.perfil-modal-close { position: sticky; top: 15px; float: right; z-index: 10; margin: 15px 17px -55px 0; width: 40px; height: 40px; border: 1px solid #d5e4f7; border-radius: 12px; background: var(--card); color: var(--accent-dark); box-shadow: 0 3px 10px rgba(12, 64, 135, .09); line-height: 0; }
-.perfil-modal-close svg { display: block; }
-.perfil-modal-close:hover { background: var(--color-primary-100); }
-.perfil-modal-panel .perfil-achievements-section { padding: 29px 28px 23px; }
-.perfil-modal-panel .perfil-achievements-heading { padding-right: 55px; gap: 18px; padding-bottom: 18px; }
-.perfil-modal-panel .perfil-achievements-heading h2 { font-size: 26px; }
-.perfil-modal-panel .perfil-achievements-counter { border-radius: 13px; min-width: 104px; min-height: 64px; }
-.perfil-modal-panel .perfil-achievements-controls { align-items: center; margin: 18px 0; }
-.perfil-modal-panel .perfil-achievements-grid { gap: 13px; }
-.perfil-modal-panel .perfil-badge-card { position: relative; padding: 17px 17px 15px; min-height: 206px; background: var(--card); border: 1px solid #dae7f6; border-radius: 15px; transition: border-color .16s, box-shadow .16s; }
-.perfil-modal-panel .perfil-badge-card:hover { border-color: #a8c9ef; box-shadow: 0 5px 18px rgba(23, 95, 177, .08); }
-.perfil-modal-panel .perfil-badge-unlocked { border-color: #c1e7d3; background: color-mix(in srgb, var(--card) 96%, #2f9c6e); }
-.perfil-modal-panel .perfil-badge-unlocked .perfil-badge-icon { background: #e6f6ed; color: #17834c; }
-.perfil-modal-panel .perfil-badge-locked .perfil-badge-icon { background: #edf4fc; color: #8ca9cc; }
-.perfil-modal-panel .perfil-badge-top { margin-bottom: 11px; }
-.perfil-modal-panel .perfil-badge-icon { width: 43px; height: 43px; border-radius: 12px; }
-.perfil-modal-panel .perfil-badge-card h3 { font-size: 16px; margin: 6px 0; line-height: 1.3; }
-.perfil-modal-panel .perfil-badge-card > p { font-size: 12px; min-height: 0; margin-bottom: 20px; }
-.perfil-modal-panel .perfil-badge-bottom { margin-top: auto; }
-.perfil-modal-panel .perfil-badge-link { margin-top: 11px; }
-.perfil-modal-panel .perfil-achievements-explainer { margin-top: 16px; }
-@media(max-width: 780px) { .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .perfil-modal-panel .perfil-achievements-controls { flex-direction: column; align-items: stretch; } }
-@media(max-width: 560px) { .perfil-modal-backdrop { padding: 9px; } .perfil-modal-panel { max-height: 94vh; border-radius: 16px; } .perfil-modal-panel .perfil-achievements-section { padding: 18px 14px; } .perfil-modal-panel .perfil-achievements-heading { padding-right: 40px; align-items: flex-start; flex-direction: column; } .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: 1fr; } .perfil-modal-close { top: 9px; margin: 9px 9px -51px 0; } }
-html[data-theme='dark'] .perfil-modal-panel .perfil-badge-card { background: var(--dark-surface-2); border-color: var(--dark-border); }
-
-
-/* Janela de conquistas: cabeçalho e filtros fixos, rolagem apenas dos cards. */
-.perfil-modal-backdrop {
-  padding: clamp(12px, 2.5vh, 26px);
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.perfil-modal-panel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: min(1040px, 100%);
-  height: min(760px, calc(100dvh - 40px));
-  max-height: calc(100dvh - 24px);
-  min-height: 0;
-  overflow: hidden;
-  box-sizing: border-box;
+  border: 1px solid var(--perfil-stroke);
   border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--shadow-xs);
 }
-.perfil-modal-panel .perfil-achievements-section {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  padding: 24px 28px 0;
-  overflow: hidden;
-}
-.perfil-modal-panel .perfil-achievements-heading {
-  flex: 0 0 auto;
-  padding: 0 54px 17px 0;
-  align-items: center;
-}
-.perfil-modal-panel .perfil-achievements-heading h2 { font-size: 25px; }
-.perfil-modal-panel .perfil-achievements-controls {
-  flex: 0 0 auto;
-  margin: 14px 0 16px;
-  gap: 12px;
-}
-.perfil-modal-panel .perfil-achievements-notice { flex: 0 0 auto; }
-.perfil-modal-panel .perfil-modal-scroll-region {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 2px 8px 20px 0;
-  scrollbar-width: thin;
-  scrollbar-color: #a9bfdb transparent;
-  overscroll-behavior: contain;
-}
-.perfil-modal-panel .perfil-achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.perfil-modal-panel .perfil-badge-card {
-  min-height: 175px;
-  padding: 17px;
-  border-radius: 14px;
-}
-.perfil-modal-panel .perfil-badge-top { margin-bottom: 8px; }
-.perfil-modal-panel .perfil-badge-card > p { margin: 0 0 12px; }
-.perfil-modal-panel .perfil-badge-link { margin-top: 10px; }
-.perfil-modal-panel .perfil-achievements-explainer { margin: 14px 0 0; }
-.perfil-modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  float: none;
-  margin: 0;
-  z-index: 30;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  color: var(--accent-dark);
-}
-.perfil-modal-x {
-  position: relative;
+.perfil-form-card { display: flex; flex-direction: column; justify-content: space-between; padding: 22px 25px 20px; }
+.perfil-form-heading { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+.perfil-heading-icon { display: grid; place-items: center; width: 47px; height: 47px; flex: 0 0 47px; border-radius: 14px; background: var(--color-primary-100); color: var(--accent-dark); }
+.perfil-page .perfil-form-heading h2 { margin: 0 0 4px; font: 800 21px/1.2 var(--font-display); color: var(--ink); letter-spacing: -.025em; }
+.perfil-form-heading p, .perfil-subheading p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.perfil-eyebrow { color: var(--accent-dark); font-size: 10px; font-weight: 800; letter-spacing: .105em; }
+
+/* Identidade e foto num bloco horizontal, sem o espaço vazio anterior. */
+.perfil-account-avatar { display: flex; align-items: center; gap: 16px; min-width: 0; margin-bottom: 12px; padding: 0 0 14px; border: 0; border-bottom: 1px solid var(--color-border); background: transparent; }
+.avatar-circle { display: grid; place-items: center; overflow: hidden; flex: 0 0 76px; width: 76px; height: 76px; border: 3px solid var(--card); border-radius: 50%; background: #d8ebff; box-shadow: 0 0 0 2px var(--color-border); color: #1458a9; font: 800 28px var(--font-display); }
+.avatar-circle img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.perfil-avatar-info { display: flex; flex: 1 1 auto; flex-direction: column; gap: 5px; min-width: 0; }
+.perfil-avatar-info strong { overflow: hidden; color: var(--color-text); font: 800 19px/1.25 var(--font-display); text-overflow: ellipsis; overflow-wrap: anywhere; }
+.perfil-avatar-info > span:last-child { color: var(--muted); font-size: 11.5px; line-height: 1.45; }
+.perfil-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.perfil-photo-actions { display: flex; flex: 0 0 auto; flex-direction: column; gap: 7px; }
+
+/* Campos editáveis. */
+.perfil-subheading { margin: 0 0 10px; }
+.perfil-page .perfil-subheading h3 { margin: 0 0 4px; color: var(--ink); font: 800 16px/1.3 var(--font-display); }
+.perfil-fields, .perfil-password-fields { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.perfil-field { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+.perfil-page .perfil-field label { font-size: 12px; font-weight: 750; color: var(--color-text); }
+.perfil-input-wrap { position: relative; min-width: 0; }
+.perfil-input-wrap input {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 100%;
+  height: 44px;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  outline: none;
+  color: var(--color-text);
+  background: var(--card);
+  font: 500 13px var(--font-body);
+  transition: border-color .2s, box-shadow .2s;
 }
-.perfil-modal-x::before, .perfil-modal-x::after {
-  content: '';
-  position: absolute;
-  left: 8px;
-  top: 0;
-  width: 2px;
-  height: 18px;
-  border-radius: 2px;
-  background: currentColor;
-  transform: rotate(45deg);
+.perfil-fields .perfil-input-wrap input { padding-right: 52px; }
+.perfil-input-wrap input:disabled { opacity: 1; -webkit-text-fill-color: var(--color-text); background: var(--color-surface-soft); }
+.perfil-input-wrap input::placeholder { color: var(--muted); opacity: 1; }
+.perfil-input-wrap input:focus { border-color: var(--color-primary-500); box-shadow: 0 0 0 3px rgba(33,150,243,.12); }
+.perfil-input-wrap.is-editing input { border-color: var(--color-primary-500); background: var(--card); }
+.perfil-edit-btn { position: absolute; top: 50%; right: 7px; transform: translateY(-50%); display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px; background: var(--color-primary-100); color: var(--accent-dark); }
+.perfil-edit-btn:hover { filter: brightness(.97); }
+.perfil-input-wrap.is-editing .perfil-edit-btn { background: var(--perfil-blue); color: #fff; }
+
+/* Senha colapsável: sem campo falso de bolinhas. */
+.perfil-security { margin-top: 13px; padding: 13px 16px; border: 1px solid var(--color-border); border-radius: 15px; background: var(--color-surface-soft); }
+.perfil-security-bar { display: flex; align-items: center; gap: 12px; }
+.perfil-security-icon { display: grid; place-items: center; flex: 0 0 39px; width: 39px; height: 39px; border-radius: 12px; background: var(--card); color: var(--accent-dark); }
+.perfil-security-copy { flex: 1 1 auto; min-width: 0; }
+.perfil-page .perfil-security-copy h3 { margin: 0 0 4px; color: var(--ink); font-size: 13px; font-weight: 800; }
+.perfil-security-copy p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.perfil-password-fields { padding-top: 17px; margin-top: 16px; border-top: 1px solid var(--color-border); }
+
+/* Botões sem dependência das classes globais do mural. */
+.perfil-btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 41px; padding: 10px 14px; border: 1px solid transparent; border-radius: 11px; font-size: 12px; font-weight: 800; line-height: 1.25; text-align: center; transition: background .16s, border-color .16s, transform .16s; }
+.perfil-btn-primary { background: var(--perfil-blue); border-color: var(--perfil-blue); color: #fff; }
+.perfil-btn-primary:hover:not(:disabled) { background: #0e58b8; border-color: #0e58b8; }
+.perfil-btn-outline { background: var(--card); border-color: var(--color-border-strong); color: var(--accent-dark); }
+.perfil-btn-outline:hover:not(:disabled) { background: var(--color-primary-100); }
+.perfil-btn-quiet { background: transparent; color: var(--muted); border-color: var(--color-border); }
+.perfil-btn-quiet:hover { background: var(--color-surface-muted); }
+.perfil-security-toggle { flex: 0 0 auto; min-height: 37px; white-space: nowrap; }
+.perfil-form-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 13px; margin-top: 14px; padding-top: 15px; border-top: 1px solid var(--color-border); }
+.perfil-save { min-width: 185px; }
+.perfil-logout { background: transparent; color: var(--color-danger); border-color: transparent; }
+.perfil-logout:hover { background: var(--color-danger-soft); }
+.perfil-alert { display: flex; align-items: center; gap: 9px; padding: 12px 15px; margin-bottom: 18px; border-radius: 12px; border: 1px solid var(--color-border); font-size: 13px; font-weight: 650; }
+.perfil-alert-success { background: var(--color-success-soft); color: var(--color-success); }
+.perfil-alert-error { background: var(--color-danger-soft); color: var(--color-danger); }
+
+/* Resumo de progresso e ranking. */
+.perfil-side-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.perfil-conquistas-resumo, .perfil-ranking-card { padding: 21px; }
+.perfil-side-head { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+.perfil-side-icon { display: grid; place-items: center; width: 41px; height: 41px; border-radius: 13px; }
+.perfil-side-icon-blue { color: #196ac5; background: #e8f3ff; }
+.perfil-side-icon-gold { color: #ad7417; background: #fff4dc; }
+.perfil-page .perfil-side-column h2 { margin: 0 0 6px; font: 800 19px/1.25 var(--font-display); color: var(--ink); letter-spacing: -.025em; }
+.perfil-side-description { margin: 0 0 13px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.perfil-progress-main { display: flex; align-items: center; gap: 16px; margin: 14px 0 15px; }
+.perfil-progress-ring { display: grid; place-items: center; flex: 0 0 104px; width: 104px; height: 104px; padding: 10px; border-radius: 50%; background: conic-gradient(#2387e2 var(--perfil-progress), var(--color-surface-muted) 0); }
+.perfil-progress-ring-inner { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1px; width: 100%; height: 100%; border-radius: 50%; background: var(--card); }
+.perfil-progress-ring strong { color: var(--ink); font: 800 26px/1.15 var(--font-display); }
+.perfil-progress-ring small { color: var(--muted); font-size: 10px; }
+.perfil-progress-info { display: flex; flex: 1 1 auto; flex-direction: column; gap: 5px; min-width: 0; }
+.perfil-progress-info > strong { color: var(--ink); font: 800 26px/1.1 var(--font-display); }
+.perfil-progress-info > strong span { color: var(--muted); font-size: 15px; }
+.perfil-progress-info > span { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.perfil-progress-info > small { color: var(--accent-dark); font-size: 11px; font-weight: 750; }
+.perfil-progress-divider { height: 1px; width: 100%; margin: 6px 0; background: var(--color-border); }
+.perfil-next-goal { display: flex; align-items: center; gap: 10px; min-height: 59px; margin-bottom: 13px; padding: 11px 12px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-soft); }
+.perfil-next-goal-loading { visibility: hidden; }
+.perfil-next-goal-icon { display: grid; place-items: center; width: 33px; height: 33px; flex: 0 0 33px; border-radius: 10px; color: var(--accent-dark); background: var(--card); }
+.perfil-next-goal > div { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
+.perfil-next-goal > div span { color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+.perfil-next-goal > div strong { color: var(--color-text); font-size: 11px; line-height: 1.3; }
+.perfil-next-goal > small { margin-left: auto; color: var(--accent-dark); white-space: nowrap; font-size: 10px; font-weight: 800; }
+.perfil-full-button { width: 100%; justify-content: space-between; padding: 12px 15px; }
+.perfil-ranking-title-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 7px; }
+.perfil-ranking-title-row h2 { margin-bottom: 4px !important; }
+.perfil-ranking-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 99px; background: var(--color-surface-muted); color: var(--muted); font-size: 10px; font-weight: 800; }
+.perfil-ranking-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #95a8bb; }
+.perfil-ranking-status.is-participating { color: var(--color-success); background: var(--color-success-soft); }
+.perfil-ranking-status.is-participating::before { background: #38a36a; }
+.perfil-ranking-position { display: flex; align-items: center; gap: 15px; margin: 14px 0; padding: 14px 17px; border: 1px solid var(--color-border); border-left: 3px solid #dda954; border-radius: 13px; background: var(--color-surface-soft); }
+.perfil-ranking-position > strong { min-width: 67px; color: var(--ink); font: 800 41px/1 var(--font-display); letter-spacing: -.045em; }
+.perfil-ranking-position > div { display: flex; flex-direction: column; gap: 4px; }
+.perfil-ranking-position span { color: var(--color-text); font-size: 12px; font-weight: 700; }
+.perfil-ranking-position small { color: var(--muted); font-size: 11px; line-height: 1.4; }
+.perfil-ranking-privacy { display: flex; align-items: flex-start; gap: 9px; margin: 0 0 15px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.perfil-ranking-privacy svg { flex: 0 0 16px; margin-top: 1px; color: var(--accent-dark); }
+.perfil-ranking-toggle { width: 100%; background: var(--color-primary-100); border-color: var(--color-border); color: var(--accent-dark); }
+.perfil-ranking-toggle:hover:not(:disabled) { background: var(--color-surface-muted); }
+.perfil-ranking-toggle.is-active { background: var(--card); }
+.perfil-ranking-error { margin: 10px 0 0; color: var(--color-danger); font-size: 11px; }
+
+/* Equilíbrio vertical no desktop: a soma dos dois cartões acompanha o card principal.
+   Espaçamento mais enxuto sem cortar conteúdo ou fixar alturas em pixels. */
+@media (min-width: 1071px) {
+  .perfil-side-column {
+    display: grid;
+    grid-template-rows: minmax(min-content, 1.1fr) minmax(min-content, .9fr);
+    align-items: stretch;
+  }
+  .perfil-conquistas-resumo, .perfil-ranking-card { min-height: 0; padding: 16px 19px; }
+  .perfil-side-head { margin-bottom: 6px; }
+  .perfil-side-icon { width: 34px; height: 34px; }
+  .perfil-side-description { margin-bottom: 8px; }
+  .perfil-progress-main { gap: 12px; margin: 7px 0 9px; }
+  .perfil-progress-ring { flex-basis: 92px; width: 92px; height: 92px; padding: 8px; }
+  .perfil-next-goal { margin-bottom: 9px; padding: 8px 10px; }
+  .perfil-ranking-position { margin: 8px 0; padding: 9px 12px; }
+  .perfil-ranking-privacy { margin-bottom: 8px; }
+  .perfil-conquistas-resumo { display: flex; flex-direction: column; }
+  .perfil-conquistas-resumo .perfil-full-button { margin-top: auto; }
+  .perfil-ranking-card { display: flex; flex-direction: column; }
+  .perfil-ranking-card .perfil-ranking-toggle { margin-top: auto; }
 }
+
+/* Modal de conquistas: resumo fixo e rolagem apenas nos cartões. */
+.perfil-modal-backdrop { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(4, 21, 48, .63); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.perfil-modal-panel { display: flex; flex-direction: column; min-height: 0; width: min(990px,100%); height: min(790px,calc(100dvh - 40px)); max-height: calc(100dvh - 40px); overflow: hidden; border: 1px solid var(--color-border); border-radius: 21px; background: var(--card); box-shadow: 0 25px 90px rgba(3,22,55,.32); }
+.perfil-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex: 0 0 auto; padding: 23px 28px 19px; border-bottom: 1px solid var(--color-border); }
+.perfil-modal-title .perfil-eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.perfil-page .perfil-modal-title h2 { margin: 0 0 6px; color: var(--ink); font: 800 25px/1.18 var(--font-display); letter-spacing: -.03em; }
+.perfil-modal-title p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.perfil-modal-header-right { display: flex; gap: 16px; align-items: center; flex: 0 0 auto; }
+.perfil-achievements-counter { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 107px; min-height: 65px; padding: 9px 12px; border-radius: 13px; background: var(--color-primary-100); }
+.perfil-achievements-counter strong { color: var(--accent-dark); font: 800 24px/1.05 var(--font-display); }
+.perfil-achievements-counter strong span { color: var(--muted); font-size: 15px; }
+.perfil-achievements-counter small { color: var(--accent-dark); font-size: 10px; }
+.perfil-modal-close { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; padding: 0; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface-soft); color: var(--accent-dark); }
+.perfil-modal-close:hover { background: var(--color-primary-100); }
+.perfil-modal-x { display: block; position: relative; width: 17px; height: 17px; }
+.perfil-modal-x::before, .perfil-modal-x::after { content: ''; display: block; position: absolute; top: 8px; left: 0; width: 17px; height: 2px; border-radius: 2px; background: currentColor; transform: rotate(45deg); }
 .perfil-modal-x::after { transform: rotate(-45deg); }
-.perfil-modal-close:focus-visible { outline: 3px solid #66b7ff; outline-offset: 2px; }
-@media (max-width: 740px) {
-  .perfil-modal-panel { height: calc(100dvh - 20px); max-height: calc(100dvh - 20px); border-radius: 16px; }
-  .perfil-modal-panel .perfil-achievements-section { padding: 18px 16px 0; }
-  .perfil-modal-panel .perfil-achievements-heading { padding-right: 42px; gap: 10px; }
-  .perfil-modal-panel .perfil-achievements-counter { min-width: 90px; }
-  .perfil-modal-panel .perfil-achievements-controls { flex-direction: column; align-items: stretch; }
-  .perfil-modal-panel .perfil-achievements-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 3px; }
-  .perfil-modal-panel .perfil-achievements-filter { flex-shrink: 0; }
-  .perfil-modal-panel .perfil-achievements-refresh { align-self: flex-start; width: auto; }
-  .perfil-modal-close { top: 15px; right: 14px; }
+.perfil-achievements-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex: 0 0 auto; padding: 14px 28px; border-bottom: 1px solid var(--color-border); }
+.perfil-achievements-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.perfil-achievements-filter, .perfil-achievements-refresh { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 8px 13px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--accent-dark); font: 750 11px var(--font-body); white-space: nowrap; }
+.perfil-achievements-filter:hover, .perfil-achievements-refresh:hover:not(:disabled) { background: var(--color-primary-100); }
+.perfil-achievements-refresh { border-color: var(--color-border); background: var(--color-surface-soft); }
+.perfil-achievements-filter.active { border-color: var(--perfil-blue); background: var(--perfil-blue); color: #fff; }
+.perfil-achievements-notice { margin: 0 28px 14px; padding: 12px; background: var(--color-warning-soft); color: var(--color-warning); border-radius: 10px; font-size: 12px; }
+.perfil-modal-scroll-region { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 16px 28px 18px; scrollbar-width: thin; scrollbar-color: var(--color-border-strong) transparent; overscroll-behavior: contain; }
+.perfil-achievements-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.perfil-badge-card { --badge-accent: #237bd1; --badge-soft: #eaf3ff; display: flex; flex-direction: column; min-width: 0; min-height: 209px; padding: 18px 19px 17px; border: 1px solid var(--color-border); border-radius: 15px; background: var(--card); transition: border-color .16s, box-shadow .16s; }
+.perfil-badge-card:hover { border-color: var(--color-border-strong); box-shadow: var(--shadow-sm); }
+.perfil-badge-unlocked { border-color: color-mix(in srgb,var(--color-success) 26%,var(--color-border)); background: color-mix(in srgb,var(--color-success-soft) 12%,var(--card)); box-shadow: inset 3px 0 0 #26976a; }
+.perfil-badge-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 13px; }
+.perfil-badge-icon { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 13px; background: var(--badge-soft); color: var(--badge-accent); }
+.perfil-badge-unlocked .perfil-badge-icon { background: var(--badge-soft); color: var(--badge-accent); }
+.perfil-badge-card[data-categoria="Simulados"] { --badge-accent: #7952c9; --badge-soft: #f1ecff; }
+.perfil-badge-card[data-categoria="Flashcards"] { --badge-accent: #b97126; --badge-soft: #fff2de; }
+.perfil-badge-card[data-categoria="Consistência"] { --badge-accent: #188e85; --badge-soft: #e1f6f2; }
+
+.perfil-badge-status { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 6px 9px; border-radius: 99px; color: var(--muted); background: var(--color-surface-muted); font-size: 10px; font-weight: 800; white-space: nowrap; }
+.perfil-badge-status.is-unlocked { color: var(--color-success); background: var(--color-success-soft); }
+.perfil-badge-category { margin-bottom: 6px; color: var(--badge-accent); font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.perfil-page .perfil-badge-card h3 { margin: 0 0 6px; font: 800 17px/1.28 var(--font-display); color: var(--ink); }
+.perfil-badge-card > p { min-height: 30px; margin: 0 0 17px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.perfil-badge-bottom { margin-top: auto; }
+.perfil-badge-count { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: var(--muted); font-size: 11px; }
+.perfil-badge-count strong { color: var(--color-text); font-size: 11px; }
+.perfil-badge-progress { width: 100%; height: 6px; overflow: hidden; border-radius: 99px; background: var(--color-surface-muted); }
+.perfil-badge-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--badge-accent); }
+.perfil-badge-unlocked .perfil-badge-progress > span { background: #2b9c6c; }
+.perfil-badge-link { display: inline-flex; align-items: center; gap: 7px; align-self: flex-start; margin-top: 11px; padding: 0; border: 0; background: transparent; color: var(--accent-dark); font: 800 11px var(--font-body); }
+.perfil-badge-link:hover { text-decoration: underline; }
+.perfil-modal-footer { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; padding: 12px 28px; border-top: 1px solid var(--color-border); background: var(--color-surface-soft); color: var(--muted); font-size: 11px; }
+.perfil-modal-footer p { display: flex; align-items: center; gap: 8px; margin: 0; line-height: 1.4; }
+.perfil-modal-footer svg { color: var(--accent-dark); flex-shrink: 0; }
+.perfil-modal-footer > span { white-space: nowrap; font-weight: 750; color: var(--accent-dark); }
+
+/* Dark mode: manter superfícies e contraste da TENNA. */
+html[data-theme='dark'] .perfil-page { --perfil-blue: #267bdb; --perfil-blue-deep: #8fc4ff; }
+html[data-theme='dark'] .perfil-form-card,
+html[data-theme='dark'] .perfil-conquistas-resumo,
+html[data-theme='dark'] .perfil-ranking-card,
+html[data-theme='dark'] .perfil-modal-panel { background: var(--dark-surface); border-color: var(--dark-border); }
+html[data-theme='dark'] .perfil-security,
+html[data-theme='dark'] .perfil-next-goal,
+html[data-theme='dark'] .perfil-ranking-position { background: var(--dark-surface-2); border-color: var(--dark-border); }
+html[data-theme='dark'] .perfil-page .perfil-hero h1,
+html[data-theme='dark'] .perfil-page .perfil-hero p { color: #fff; }
+html[data-theme='dark'] .perfil-page .perfil-hero-kicker { color: #dbeeff; }
+html[data-theme='dark'] .perfil-input-wrap input:disabled { background: var(--dark-surface-2); }
+html[data-theme='dark'] .perfil-input-wrap input:not(:disabled) { background: var(--dark-surface-3); }
+html[data-theme='dark'] .perfil-page .perfil-btn-primary,
+html[data-theme='dark'] .perfil-page .perfil-achievements-filter.active { color: #fff; }
+html[data-theme='dark'] .perfil-page .perfil-logout { color: var(--color-danger); }
+html[data-theme='dark'] .perfil-page .perfil-btn-outline,
+html[data-theme='dark'] .perfil-page .perfil-btn-quiet,
+html[data-theme='dark'] .perfil-page .perfil-modal-close,
+html[data-theme='dark'] .perfil-page .perfil-achievements-refresh { background: var(--dark-surface-2); border-color: var(--dark-border); color: #b9dbff; }
+html[data-theme='dark'] .perfil-page .perfil-achievements-filter:not(.active) { background: transparent; border-color: transparent; color: #b9dbff; }
+html[data-theme='dark'] .perfil-progress-ring-inner { background: var(--dark-surface); }
+html[data-theme='dark'] .perfil-side-icon-blue { background: #173858; color: #9acaff; }
+html[data-theme='dark'] .perfil-side-icon-gold { background: #3a3020; color: #ffd27a; }
+html[data-theme='dark'] .perfil-badge-card { background: var(--dark-surface-2); border-color: var(--dark-border); }
+html[data-theme='dark'] .perfil-badge-unlocked { background: color-mix(in srgb,var(--dark-surface-2) 94%,var(--color-success)); border-color: rgba(123,215,167,.27); }
+html[data-theme='dark'] .perfil-page .perfil-badge-status.is-unlocked,
+html[data-theme='dark'] .perfil-page .perfil-ranking-status.is-participating { color: var(--color-success); }
+html[data-theme='dark'] .perfil-badge-card { --badge-soft: #173958; --badge-accent: #91c9ff; }
+html[data-theme='dark'] .perfil-badge-card[data-categoria="Simulados"] { --badge-soft: #302648; --badge-accent: #c8b0ff; }
+html[data-theme='dark'] .perfil-badge-card[data-categoria="Flashcards"] { --badge-soft: #403020; --badge-accent: #ffcb8d; }
+html[data-theme='dark'] .perfil-badge-card[data-categoria="Consistência"] { --badge-soft: #1b4141; --badge-accent: #87ded2; }
+html[data-theme='dark'] .perfil-modal-footer { background: var(--dark-surface-2); border-color: var(--dark-border); }
+html[data-theme='dark'] .perfil-page .perfil-next-goal-icon,
+html[data-theme='dark'] .perfil-page .perfil-security-icon { background: var(--dark-surface-3); }
+
+/* Breakpoints do dashboard e smartphones. */
+@media (max-width: 1200px) {
+  .perfil-grid { grid-template-columns: minmax(0,1fr) 310px; gap: 16px; }
+  .perfil-form-card { padding: 24px; }
+  .perfil-account-avatar { gap: 12px; padding: 0 0 14px; }
+  .perfil-progress-main { gap: 12px; }
+  .perfil-progress-ring { flex-basis: 110px; width: 110px; height: 110px; }
 }
-@media (max-width: 600px) {
-  .perfil-modal-panel .perfil-achievements-heading { flex-direction: column; align-items: flex-start; }
-  .perfil-modal-panel .perfil-achievements-grid { grid-template-columns: 1fr; }
-  .perfil-modal-panel .perfil-badge-card { min-height: 165px; }
+@media (max-width: 1070px) {
+  .perfil-grid { grid-template-columns: 1fr; align-items: start; }
+  .perfil-side-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; }
 }
+@media (max-width: 720px) {
+  .perfil-hero { min-height: 0; padding: 23px; gap: 18px; }
+  .perfil-form-card { padding: 20px; justify-content: flex-start; }
+  .perfil-form-heading { margin-bottom: 18px; }
+  .perfil-account-avatar { margin-bottom: 20px; }
+  .perfil-security { margin-top: 20px; }
+  .perfil-form-footer { margin-top: 22px; }
+  .perfil-side-column { grid-template-columns: 1fr; }
+  .perfil-account-avatar { flex-wrap: wrap; }
+  .perfil-photo-actions { margin-left: auto; }
+  .perfil-modal-header { padding: 22px 20px 17px; }
+  .perfil-achievements-controls { flex-direction: column; align-items: stretch; padding: 15px 20px; }
+  .perfil-achievements-refresh { align-self: flex-start; }
+  .perfil-modal-scroll-region { padding: 15px 20px 18px; }
+  .perfil-modal-footer { padding: 12px 20px; }
+}
+@media (max-width: 560px) {
+  .perfil-page { padding-bottom: 24px; }
+  .perfil-hero { align-items: flex-start; flex-direction: column; padding: 23px 20px; margin-bottom: 15px; }
+  .perfil-fields, .perfil-password-fields { grid-template-columns: 1fr; }
+  .perfil-account-avatar { gap: 12px; padding: 0 0 17px; }
+  .avatar-circle { width: 66px; height: 66px; flex-basis: 66px; font-size: 25px; }
+  .perfil-avatar-info { flex-basis: calc(100% - 90px); }
+  .perfil-avatar-info strong { font-size: 16px; }
+  .perfil-photo-actions { width: 100%; flex-direction: row; }
+  .perfil-photo-actions .perfil-btn { flex: 1 1 auto; }
+  .perfil-security-bar { flex-wrap: wrap; }
+  .perfil-security-toggle { margin-left: 51px; }
+  .perfil-save { width: 100%; }
+  .perfil-logout { width: 100%; }
+  .perfil-progress-main { justify-content: flex-start; }
+  .perfil-modal-backdrop { padding: 8px; }
+  .perfil-modal-panel { height: calc(100dvh - 16px); max-height: calc(100dvh - 16px); border-radius: 16px; }
+  .perfil-modal-title .perfil-eyebrow { margin-bottom: 6px; }
+  .perfil-page .perfil-modal-title h2 { font-size: 21px; }
+  .perfil-modal-header-right { gap: 8px; align-items: flex-start; }
+  .perfil-modal-footer > span { white-space: normal; }
+  .perfil-achievements-counter { min-width: 74px; min-height: 55px; padding: 8px; }
+  .perfil-achievements-counter strong { font-size: 17px; }
+  .perfil-achievements-counter strong span { font-size: 11px; }
+  .perfil-modal-close { width: 34px; height: 34px; flex-basis: 34px; }
+  .perfil-achievements-filters { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+  .perfil-achievements-filter { flex-shrink: 0; }
+  .perfil-achievements-grid { grid-template-columns: 1fr; }
+  .perfil-badge-card { min-height: 186px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .perfil-page button, .perfil-badge-card, .perfil-input-wrap input { transition: none; }
+}
+
+
+/* TENNA · refinamento final do modo escuro (Perfil).
+   Somente ajustes cromáticos; formulários, foto e ranking mantêm a lógica atual. */
+html[data-theme='dark'] .perfil-page .perfil-hero {
+  background: #1d589f;
+  border-color: #3276c2;
+  box-shadow: 0 12px 26px -22px rgba(3, 17, 40, .7);
+}
+html[data-theme='dark'] .perfil-page .perfil-form-card,
+html[data-theme='dark'] .perfil-page .perfil-conquistas-resumo,
+html[data-theme='dark'] .perfil-page .perfil-ranking-card,
+html[data-theme='dark'] .perfil-page .perfil-modal-panel { border-color: #344f6a; }
+html[data-theme='dark'] .perfil-page .perfil-heading-icon,
+html[data-theme='dark'] .perfil-page .perfil-edit-btn { background: #244666; color: #b7dcff; }
+html[data-theme='dark'] .perfil-page .perfil-input-wrap input { color: #f2f7ff; border-color: #3c5b79; }
+html[data-theme='dark'] .perfil-page .perfil-input-wrap input::placeholder { color: #aabfd4; }
+html[data-theme='dark'] .perfil-page .perfil-security,
+html[data-theme='dark'] .perfil-page .perfil-next-goal,
+html[data-theme='dark'] .perfil-page .perfil-ranking-position { border-color: #3c5772; }
+html[data-theme='dark'] .perfil-page .perfil-progress-ring { background: conic-gradient(#329af0 var(--perfil-progress), #2e4760 0); }
+html[data-theme='dark'] .perfil-page .perfil-progress-ring-inner { background: var(--dark-surface); }
+html[data-theme='dark'] .perfil-page .perfil-ranking-status.is-participating { background: #204838; color: #b2eacc; }
+html[data-theme='dark'] .perfil-page .perfil-ranking-toggle { background: #213d59; border-color: #3d5d7b; color: #c4e4ff; }
+html[data-theme='dark'] .perfil-page .perfil-ranking-toggle:hover:not(:disabled) { background: #2b4c6d; }
+html[data-theme='dark'] .perfil-page .perfil-modal-close,
+html[data-theme='dark'] .perfil-page .perfil-achievements-refresh { background: #223f5b; color: #d9edff; }
+html[data-theme='dark'] .perfil-page .perfil-achievements-counter { background: #233f5e; }
+html[data-theme='dark'] .perfil-page .perfil-achievements-counter strong,
+html[data-theme='dark'] .perfil-page .perfil-achievements-counter small { color: #c1e2ff; }

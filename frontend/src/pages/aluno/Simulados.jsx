@@ -10,19 +10,56 @@ import { request } from '../../services/api.js';
 import { lerPrazoSalvo, lerSegundosSalvos, pausarPrazo, retomarPrazo, calcularSegundosRestantes } from '../../utils/simuladoCronometro.js';
 import { prepararTentativaPersistida } from '../../utils/simuladoTentativa.js';
 
+// A navegação dos simulados é independente do estado de outras contas.
+// sessionStorage mantém a tela no mesmo navegador/aba ao navegar pela sidebar.
+function chaveVisitaSimulados() {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('etecamp_usuario') || 'null');
+    const id = usuario?.id ?? usuario?.usuarioId;
+    return id ? `tenna_simulados_visita_${id}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function lerVisitaSimulados() {
+  try {
+    const chave = chaveVisitaSimulados();
+    return chave ? JSON.parse(sessionStorage.getItem(chave) || 'null') : null;
+  } catch {
+    return null;
+  }
+}
+
+function salvarVisitaSimulados(visita) {
+  try {
+    const chave = chaveVisitaSimulados();
+    if (chave) sessionStorage.setItem(chave, JSON.stringify(visita));
+  } catch {
+    // Navegação continua funcionando mesmo com armazenamento indisponível.
+  }
+}
+
 export default function Simulados() {
   const { recarregarGamificacao } = useGamification();
+  const visitaInicial = useRef(undefined);
+  if (visitaInicial.current === undefined) {
+    visitaInicial.current = lerVisitaSimulados();
+  }
+  const restauracaoTentada = useRef(false);
+  const restauracaoPendente = useRef(Boolean(visitaInicial.current?.simuladoId));
+  const rolagemPendente = useRef(visitaInicial.current?.scrollY ?? null);
+  const visualAtual = useRef(null);
 
   const [simulados, setSimulados] = useState([]);
-  const [filtro, setFiltro] = useState('Todas');
+  const [filtro, setFiltro] = useState(() =>
+    typeof visitaInicial.current?.filtro === 'string'
+      ? visitaInicial.current.filtro
+      : 'Todas'
+  );
 
-  // Permite retornar às categorias ao clicar em Simulados na sidebar,
-  // mesmo quando a rota atual já é /simulados.
-  useEffect(() => {
-    const voltarAoInicio = () => setFiltro('Todas');
-    window.addEventListener('tenna:simulados-inicio', voltarAoInicio);
-    return () => window.removeEventListener('tenna:simulados-inicio', voltarAoInicio);
-  }, []);
+  // Clicar em Simulados na sidebar não reinicia a matéria escolhida.
+  // O retorno à lista principal é feito pelo botão "Simulados" no cabeçalho.
 
   const [simuladoSelecionado, setSimuladoSelecionado] =
     useState(null);
@@ -74,6 +111,39 @@ export default function Simulados() {
 
   const [tempoGasto, setTempoGasto] =
     useState(null);
+
+  // Guarda a visualização ao navegar por outras páginas sem mexer na prova.
+  // A tentativa, respostas e cronômetro continuam controlados pelas rotinas
+  // já existentes do simulador.
+  useEffect(() => {
+    visualAtual.current = {
+      filtro, simuladoSelecionado, resultadoFinal, tempoGasto, mostrarErros
+    };
+  }, [filtro, simuladoSelecionado, resultadoFinal, tempoGasto, mostrarErros]);
+
+  useEffect(() => {
+    function guardarVisualizacao() {
+      const visual = visualAtual.current;
+      if (!visual) return;
+      if (restauracaoPendente.current && !visual.simuladoSelecionado) return;
+      salvarVisitaSimulados({
+        filtro: visual.filtro,
+        simuladoId: visual.simuladoSelecionado?.id ?? null,
+        tela: visual.simuladoSelecionado
+          ? (visual.resultadoFinal ? 'resultado' : 'prova')
+          : 'lista',
+        resultadoFinal: visual.resultadoFinal,
+        tempoGasto: visual.tempoGasto,
+        mostrarErros: visual.mostrarErros,
+        scrollY: window.scrollY
+      });
+    }
+    window.addEventListener('pagehide', guardarVisualizacao);
+    return () => {
+      guardarVisualizacao();
+      window.removeEventListener('pagehide', guardarVisualizacao);
+    };
+  }, []);
 
   const finalizandoPorTempo =
     useRef(false);
@@ -734,7 +804,8 @@ export default function Simulados() {
   // ==========================================
 
   async function abrirSimulado(
-    simulado
+    simulado,
+    { restaurando = false } = {}
   ) {
     try {
       finalizandoPorTempo.current =
@@ -883,11 +954,12 @@ export default function Simulados() {
         );
       }
 
-      window.scrollTo({
-        top: 0,
-        behavior:
-          'smooth'
-      });
+      if (!restaurando) {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
     } catch (error) {
       console.error(
         error
@@ -993,6 +1065,57 @@ export default function Simulados() {
     simulados,
     simuladoSelecionado
   ]);
+
+  // Restaura um simulado que estava aberto ao sair pela sidebar.
+  // A abertura reutiliza o ID da tentativa e retoma o tempo pausado,
+  // sem reiniciar respostas nem criar outra tentativa.
+  const retomarSimuladoNoEfeito = useEffectEvent((simulado) =>
+    abrirSimulado(simulado, { restaurando: true })
+  );
+  useEffect(() => {
+    if (carregando || restauracaoTentada.current) return;
+    restauracaoTentada.current = true;
+    const visita = visitaInicial.current;
+    const id = Number(visita?.simuladoId);
+    const aberturaExterna = new URLSearchParams(window.location.search).has('simuladoId');
+    if (!Number.isInteger(id) || id <= 0 || aberturaExterna) {
+      restauracaoPendente.current = false;
+      return;
+    }
+    const simulado = simulados.find((item) => Number(item.id) === id);
+    if (!simulado) {
+      restauracaoPendente.current = false;
+      return;
+    }
+
+    if (visita.tela === 'resultado' && visita.resultadoFinal) {
+      queueMicrotask(() => {
+        setSimuladoSelecionado({ ...simulado, status: 'concluido' });
+        setResultadoFinal(visita.resultadoFinal);
+        setTempoGasto(visita.tempoGasto ?? null);
+        setMostrarErros(Boolean(visita.mostrarErros));
+        restauracaoPendente.current = false;
+      });
+    } else if (visita.tela === 'prova' && simulado.status === 'em-progresso') {
+      void retomarSimuladoNoEfeito(simulado).finally(() => {
+        restauracaoPendente.current = false;
+      });
+    } else {
+      restauracaoPendente.current = false;
+    }
+  }, [carregando, simulados]);
+
+  // Recupera a posição de leitura somente após o conteúdo ter sido montado.
+  useEffect(() => {
+    if (carregando || (visitaInicial.current?.simuladoId && !simuladoSelecionado && restauracaoPendente.current)) return;
+    const posicao = rolagemPendente.current;
+    if (typeof posicao !== 'number' || posicao <= 0) return;
+    rolagemPendente.current = null;
+    const quadro = requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.scrollTo({ top: posicao, behavior: 'instant' }));
+    });
+    return () => cancelAnimationFrame(quadro);
+  }, [carregando, simuladoSelecionado, resultadoFinal]);
 
   // ==========================================
   // SELECIONAR / TROCAR RESPOSTA

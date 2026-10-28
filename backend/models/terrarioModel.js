@@ -1,12 +1,16 @@
 const db = require('../config/db');
 const { MATERIAS_FIXAS } = require('../utils/materiasFixas');
 
-const DURACOES = [1, 15, 25, 45]; // 1 min: demonstração, sem XP/desbloqueio
+const DURACOES = [1, 15, 25, 45]; // Predefinições antigas (sessões existentes preservadas)
+const DURACAO_MINIMA = 1;
+const DURACAO_MAXIMA = 120;
+// Sementes: 2 a cada 15 minutos completos. A demonstração não gera sementes.
+// A progressão de XP permanece com as faixas anteriores.
 const RECOMPENSAS = Object.freeze({
-  1: { sementes: 2, xp: 0 },
-  15: { sementes: 5, xp: 10 },
-  25: { sementes: 8, xp: 15 },
-  45: { sementes: 12, xp: 20 }
+  1: { sementes: 0, xp: 0 },
+  15: { sementes: 2, xp: 10 },
+  25: { sementes: 2, xp: 15 },
+  45: { sementes: 6, xp: 20 }
 });
 const MATERIAS = [...MATERIAS_FIXAS.map(({ nome }) => nome), 'Estudo livre'];
 const LIMITES = Object.freeze({
@@ -173,31 +177,22 @@ async function creditarConclusao(usuarioId, id, agora = Date.now()) {
     SET estado='concluida', restante_segundos=0, ativo_desde_ms=NULL,
       concluida_em_ms=?,
       sementes_recebidas=CASE
-        WHEN duracao_minutos=1 AND
-          (SELECT COUNT(*) FROM terrario_sessoes s
-           WHERE s.usuario_id=terrario_sessoes.usuario_id
-             AND s.estado='concluida' AND s.duracao_minutos=1
-             AND date(s.concluida_em_ms/1000,'unixepoch')=date('now')) >= 3
-          THEN 0
-        WHEN duracao_minutos>=15 AND
-          (SELECT COUNT(*) FROM terrario_sessoes s
+        WHEN duracao_minutos < 15 THEN 0
+        WHEN (SELECT COUNT(*) FROM terrario_sessoes s
            WHERE s.usuario_id=terrario_sessoes.usuario_id
              AND s.estado='concluida' AND s.duracao_minutos>=15
              AND date(s.concluida_em_ms/1000,'unixepoch')=date('now')) >= 8
           THEN 0
-        WHEN duracao_minutos=1 THEN 2
-        WHEN duracao_minutos=15 THEN 5
-        WHEN duracao_minutos=25 THEN 8
-        ELSE 12 END,
+        ELSE CAST(duracao_minutos / 15 AS INTEGER) * 2 END,
       xp_recebido=CASE
         WHEN (SELECT COUNT(*) FROM xp_eventos_verificados
               WHERE usuario_id=terrario_sessoes.usuario_id
                 AND action='foco_concluido' AND data=date('now')) >= 8
           THEN 0
-        WHEN duracao_minutos=15 THEN 10
-        WHEN duracao_minutos=25 THEN 15
-        WHEN duracao_minutos=45 THEN 20
-        ELSE 0 END
+        WHEN duracao_minutos < 15 THEN 0
+        WHEN duracao_minutos < 25 THEN 10
+        WHEN duracao_minutos < 45 THEN 15
+        ELSE 20 END
     WHERE id=? AND usuario_id=? AND estado='em_andamento'
       AND ativo_desde_ms IS NOT NULL
       AND ? >= ativo_desde_ms + restante_segundos * 1000`,
@@ -248,8 +243,9 @@ async function buscarEstado(usuarioId, agora = Date.now()) {
 }
 
 async function iniciar(usuarioId, materia, duracao, agora = Date.now()) {
-  if (!MATERIAS.includes(materia) || !DURACOES.includes(duracao)) {
-    const erro = new Error('Selecione uma matéria e uma duração válida.');
+  if (!MATERIAS.includes(materia) || !Number.isSafeInteger(duracao) ||
+    duracao < DURACAO_MINIMA || duracao > DURACAO_MAXIMA) {
+    const erro = new Error('A duração deve ser um número inteiro de 1 a 120 minutos.');
     erro.status = 400;
     throw erro;
   }

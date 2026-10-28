@@ -3726,15 +3726,61 @@ html[data-theme='dark'] .calendar-page .calendar-check { background: #1b3653 !im
 .tenna-date-grid button.today:not(.selected) { box-shadow:inset 0 0 0 1px #6cb1f4; }
 .tenna-date-grid button.selected { background:#166cd2; color:#fff; }
 .tenna-date-today { margin-top:10px; width:100%; border:0; border-radius:8px; background:#edf6ff; color:#1766bd; padding:9px; font-size:12px; font-weight:700; cursor:pointer; }
-.tenna-time-control { height:48px; display:flex; align-items:center; gap:5px; border:1px solid #cddff3; border-radius:11px; padding:0 14px; background:#fff; transition:border-color .15s, box-shadow .15s; }
-.tenna-time-control > svg { color:#4087d1; margin-right:10px; }
-.tenna-time-control input { width:32px; min-width:0; padding:0; border:0; background:transparent; outline:0; color:#184b88; font-size:19px; font-weight:700; text-align:center; font-variant-numeric:tabular-nums; }
-.tenna-time-separator { color:#184b88; font-size:19px; font-weight:700; }
-.tenna-time-hint { margin-left:auto; font-size:11px; font-weight:700; color:#96aac2; }
-.tenna-time-suggestions { display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
-.tenna-time-suggestions > span { font-size:11px; color:#829bb8; margin-right:2px; }
-.tenna-time-suggestions button { padding:6px 10px; border:1px solid #d9e7f7; border-radius:8px; background:#f7fbff; color:#4e7bab; font-size:11px; font-weight:700; cursor:pointer; }
-.tenna-time-suggestions button.active, .tenna-time-suggestions button:hover { border-color:#87bdf4; background:#eaf4ff; color:#145eae; }
+/* Horário direto no campo: sem popovers que escondem os outros campos. */
+.tenna-time-control {
+  display:flex; align-items:center; gap:13px; min-height:76px;
+  border:1px solid #cddff3; border-radius:12px; padding:10px 15px;
+  background:#fff;
+}
+.tenna-time-icon {
+  flex:0 0 38px; height:38px; display:grid; place-items:center;
+  border-radius:11px; background:#eaf4ff; color:#287bd2;
+}
+.tenna-time-part { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.tenna-time-part-label { color:#8199b6; font-size:10px; font-weight:750; line-height:1; }
+.tenna-time-part-entry { display:flex; align-items:center; gap:5px; border-radius:9px; border:1px solid transparent; padding:1px 3px 1px 5px; }
+.tenna-time-part-entry:focus-within { background:#f1f7ff; border-color:#b2d5fa; }
+.tenna-time-part-input {
+  width:2.4ch; min-width:36px; height:36px; box-sizing:content-box;
+  padding:0; border:0; outline:0; background:transparent; color:#174a88;
+  text-align:center; font-family:inherit; line-height:1.1;
+  font-size:23px; font-weight:800; font-variant-numeric:tabular-nums;
+}
+.tenna-time-part-input:disabled { opacity:.55; cursor:not-allowed; }
+.tenna-time-step-buttons { display:grid; grid-template-rows:repeat(2,22px); gap:0; }
+.tenna-time-step {
+  display:grid; place-items:center; width:28px; height:22px; padding:0;
+  border:0; border-radius:6px; background:transparent; color:#6890bc; cursor:pointer;
+}
+.tenna-time-step:hover:not(:disabled), .tenna-time-step:focus-visible {
+  background:#e7f2fe; color:#135fba;
+}
+.tenna-time-step:focus-visible { outline:2px solid #499bf1; outline-offset:0; }
+.tenna-time-step:disabled { opacity:.4; cursor:not-allowed; }
+.tenna-time-separator { color:#7c9bbf; font-size:23px; font-weight:800; line-height:1; margin-top:17px; }
+.tenna-time-hint {
+  margin-left:auto; padding:5px 9px; border-radius:7px;
+  background:#f1f6fd; color:#7794b6; font-size:11px; font-weight:750; white-space:nowrap;
+}
+.tenna-time-suggestions { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:2px; }
+.tenna-time-suggestions > span { font-size:12px; font-weight:600; color:#7892b2; margin-right:4px; }
+.tenna-time-suggestions button {
+  min-height:30px; padding:5px 12px; border:1px solid #d9e7f7;
+  border-radius:9px; background:#f5f9ff; color:#4475ad;
+  font-family:inherit; font-size:12px; font-weight:750; cursor:pointer;
+}
+.tenna-time-suggestions button.active { border-color:#68aef0; background:#e5f2ff; color:#125fb3; }
+.tenna-time-suggestions button:hover:not(:disabled) { border-color:#80baf0; background:#edf6ff; }
+.tenna-time-suggestions button:disabled { opacity:.5; cursor:not-allowed; }
+.tenna-time-control:focus-within { border-color:#2588ed; box-shadow:0 0 0 3px rgba(37,136,237,.12); }
+@media (max-width:520px) {
+  .tenna-time-control { gap:6px; padding:9px 10px; }
+  .tenna-time-icon { flex-basis:32px; height:32px; }
+  .tenna-time-part-entry { padding-left:1px; gap:0; }
+  .tenna-time-part-input { min-width:31px; font-size:20px; }
+  .tenna-time-step { width:25px; }
+  .tenna-time-hint { padding:5px; font-size:10px; }
+}
 .tenna-activity-footer { display:flex; justify-content:flex-end; align-items:center; gap:10px; padding:17px 28px 24px; border-top:1px solid #eaf0f8; }
 .tenna-activity-footer button { min-height:40px; padding:0 16px; border-radius:10px; font-size:13px; font-weight:750; cursor:pointer; }
 .tenna-activity-cancel { border:1px solid #d4e2f2; color:#426d9f; background:#fff; }
@@ -3768,4 +3814,224 @@ html[data-theme='dark'] .calendar-page .calendar-check { background: #1b3653 !im
     width: calc(100vw - 24px) !important;
     max-width: calc(100vw - 24px) !important;
   }
+}
+
+
+/* ================================================================
+   Calendário / aula: uniformização de cores (claro e escuro)
+   ================================================================ */
+/* Igual aos outros cabeçalhos do site: cor sólida, sem clareamento nas bordas. */
+.calendar-page .tenna-auto-intro,
+html[data-theme='dark'] .calendar-page .tenna-auto-intro {
+  background: #1853a1 !important;
+  box-shadow: none;
+}
+html[data-theme='dark'] .calendar-page .tenna-auto-intro { background: #174b90 !important; }
+.calendar-page .tenna-auto-intro h2 span { color: #fff; }
+
+/* Todos os dias do mês têm a mesma superfície, inclusive sábados e dias com eventos.
+   As datas de outros meses e o dia selecionado mantêm seus estados próprios. */
+html[data-theme='dark'] .calendar-page .calendar-day:not(.outside):not(.selected),
+html[data-theme='dark'] .calendar-page .calendar-day:nth-child(7n):not(.outside):not(.selected),
+html[data-theme='dark'] .calendar-page .calendar-day.has-events:not(.outside):not(.selected) {
+  background: #153453 !important;
+  border-color: #285780 !important;
+  color: #e7f2ff !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-day.outside,
+html[data-theme='dark'] .calendar-page .calendar-day.outside:nth-child(7n) {
+  background: #172538 !important;
+  border-color: #293c52 !important;
+  opacity: .60;
+}
+html[data-theme='dark'] .calendar-page .calendar-day:hover:not(.outside):not(.selected) {
+  background: #153453 !important;
+  border-color: #527aa2 !important;
+  box-shadow: none !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-day.selected,
+html[data-theme='dark'] .calendar-page .calendar-day.selected.today {
+  background: #234c75 !important;
+  border-color: #5aafff !important;
+  box-shadow: inset 0 0 0 1px #5aafff !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-day-number { color: #e6f0fb !important; }
+html[data-theme='dark'] .calendar-page .calendar-day.today .calendar-day-number {
+  background: #2876d0 !important;
+  color: white !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-day.selected:not(.today) .calendar-day-number {
+  background: #2b628f !important;
+  color: #f0f8ff !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-today-label {
+  background: #254d70 !important;
+  color: #b9dcff !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-subject-dot {
+  box-shadow: 0 0 0 2px #1b2c41 !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-weekdays span { color: #b3c7df; }
+html[data-theme='dark'] .calendar-page .calendar-selected-head .calendar-selected-copy .calendar-selected-date,
+html[data-theme='dark'] .calendar-page .calendar-task-info span { color: #a8c1dd !important; }
+html[data-theme='dark'] .calendar-page .calendar-add-small {
+  background: #203f5f !important;
+  color: #a8d5ff !important;
+  border-color: #365e86 !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-add-small:hover { background: #2b5176 !important; }
+html[data-theme='dark'] .calendar-page .calendar-check {
+  background: #1b324b !important;
+  border-color: #6e8aab !important;
+}
+html[data-theme='dark'] .calendar-page .calendar-task.done .calendar-check {
+  background: #1b9e72 !important;
+  border-color: #1b9e72 !important;
+}
+
+/* Janela de criar/editar atividades: os campos e o texto devem seguir o tema. */
+html[data-theme='dark'] .tenna-activity-modal {
+  background: #19283b !important;
+  border-color: #334c67 !important;
+  color: #e6f0fc !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, .43);
+}
+html[data-theme='dark'] .tenna-activity-header,
+html[data-theme='dark'] .tenna-activity-footer { border-color: #34475e; }
+html[data-theme='dark'] .tenna-activity-header h2 { color: #f0f7ff !important; }
+html[data-theme='dark'] .tenna-activity-header p,
+html[data-theme='dark'] .tenna-activity-eyebrow { color: #afc8e3; }
+html[data-theme='dark'] .tenna-activity-field > span:first-child,
+html[data-theme='dark'] .tenna-activity-field > label { color: #c7daf0 !important; }
+html[data-theme='dark'] .tenna-activity-field > input,
+html[data-theme='dark'] .tenna-activity-control,
+html[data-theme='dark'] .tenna-time-control {
+  background: #101f31 !important;
+  color: #edf6ff !important;
+  border-color: #405c7a !important;
+  box-shadow: none;
+}
+html[data-theme='dark'] .tenna-activity-field > input::placeholder { color: #91abc6; }
+html[data-theme='dark'] .tenna-activity-control svg { color: #9ec7ec; }
+html[data-theme='dark'] .tenna-time-icon { background:#254664; color:#a6d5ff; }
+html[data-theme='dark'] .tenna-time-part-label { color:#91b1d0; }
+html[data-theme='dark'] .tenna-time-part-input { color:#f0f7ff; }
+html[data-theme='dark'] .tenna-time-part-entry:focus-within { background:#284665; border-color:#416f9d; }
+html[data-theme='dark'] .tenna-time-step { color:#a0bfdd; }
+html[data-theme='dark'] .tenna-time-step:hover:not(:disabled),
+html[data-theme='dark'] .tenna-time-step:focus-visible { background:#2d5072; color:#fff; }
+html[data-theme='dark'] .tenna-time-separator { color:#98b9d8; }
+html[data-theme='dark'] .tenna-time-hint { background:#263e59; color:#abcbe8; }
+html[data-theme='dark'] .tenna-time-suggestions > span { color:#9bb4d0; }
+html[data-theme='dark'] .tenna-time-suggestions button {
+  background:#243c58; border-color:#3c5b7b; color:#bedbf9;
+}
+html[data-theme='dark'] .tenna-time-suggestions button.active {
+  background:#204e7d; border-color:#64a8ea; color:#fff;
+}
+html[data-theme='dark'] .tenna-time-suggestions button:hover:not(:disabled) { background:#2b5176; }
+html[data-theme='dark'] .tenna-activity-field > input:focus,
+html[data-theme='dark'] .tenna-activity-control:focus-visible,
+html[data-theme='dark'] .tenna-time-control:focus-within {
+  border-color: #6eb9ff !important;
+  box-shadow: 0 0 0 2px rgba(110, 185, 255, .22) !important;
+}
+html[data-theme='dark'] .tenna-picker-popover {
+  background: #1e3148 !important;
+  border-color: #405b7a !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .36);
+}
+html[data-theme='dark'] .tenna-subject-options > button,
+html[data-theme='dark'] .tenna-date-nav strong,
+html[data-theme='dark'] .tenna-date-grid button { color: #e1efff !important; }
+html[data-theme='dark'] .tenna-subject-options > button:hover,
+html[data-theme='dark'] .tenna-subject-options > button.active,
+html[data-theme='dark'] .tenna-date-grid button:hover { background: #2a4c70 !important; color: #fff !important; }
+html[data-theme='dark'] .tenna-date-nav button,
+html[data-theme='dark'] .tenna-date-today {
+  background: #284767 !important;
+  color: #bddfff !important;
+}
+html[data-theme='dark'] .tenna-date-grid button.outside,
+html[data-theme='dark'] .tenna-date-weekday { color: #8ea9c6 !important; }
+html[data-theme='dark'] .tenna-date-grid button.selected { background: #226bc0 !important; color: #fff !important; }
+html[data-theme='dark'] .tenna-activity-close {
+  background: #253d57 !important;
+  color: #d2e7ff !important;
+  border-color: #3f5876 !important;
+}
+html[data-theme='dark'] .tenna-activity-close:hover { background: #314d6d !important; }
+html[data-theme='dark'] .tenna-activity-cancel {
+  background: #263d58 !important;
+  color: #d8eaff !important;
+  border-color: #425c7b !important;
+}
+html[data-theme='dark'] .tenna-activity-cancel:hover { background: #315171 !important; }
+html[data-theme='dark'] .tenna-activity-submit { background: #226ac5 !important; border-color: #226ac5 !important; color: #fff !important; }
+html[data-theme='dark'] .tenna-activity-submit:hover:not(:disabled) { background: #2e7cdf !important; }
+html[data-theme='dark'] .tenna-activity-delete { color: #ff929a !important; }
+
+.tenna-activity-modal button,
+.tenna-activity-modal input,
+.calendar-page .calendar-day { transition-property: none !important; }
+
+
+/* Agendamentos: datas passadas continuam visíveis, mas não podem ser escolhidas. */
+.calendar-page .calendar-add-small:disabled {
+  opacity: .48;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+.tenna-date-grid button:disabled,
+.tenna-date-grid button:disabled:hover {
+  color: #a2afbf !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  opacity: .6;
+}
+.tenna-date-today:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+.tenna-schedule-error {
+  margin: 0;
+  color: #b83943;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+html[data-theme='dark'] .tenna-date-grid button:disabled,
+html[data-theme='dark'] .tenna-date-grid button:disabled:hover {
+  color: #788ca4 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme='dark'] .tenna-schedule-error { color: #ffb0b8; }
+
+.calendar-page .calendar-past-day-hint {
+  margin: 10px 0 14px;
+  color: #607d9d;
+  font-size: 12px;
+  line-height: 1.45;
+}
+html[data-theme='dark'] .calendar-page .calendar-past-day-hint { color: #acc2dc; }
+
+
+/* Ajuste pontual: campos de horas e minutos sem quadrados de fundo no modo escuro.
+   Mantém as setinhas, a digitação e as sugestões de horários existentes. */
+html[data-theme='dark'] .tenna-activity-modal .tenna-time-part-entry,
+html[data-theme='dark'] .tenna-activity-modal .tenna-time-part-entry:focus-within {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme='dark'] .tenna-activity-modal .tenna-time-part-input,
+html[data-theme='dark'] .tenna-activity-modal .tenna-time-part-input:focus {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #f0f7ff !important;
 }

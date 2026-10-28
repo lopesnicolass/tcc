@@ -3,6 +3,7 @@ const {
     buscarAtividadePorId,
     criarAtividade,
     salvarAtividadesEmLote,
+    adicionarSessoesPlano,
     atualizarAtividade,
     excluirAtividade,
     excluirAtividadesPorOrigem
@@ -153,6 +154,27 @@ function horarioValido(
         minuto <= 59
     );
 }
+
+
+// Usa o relógio de São Paulo, região atendida pela Tenna.
+// Atividades antigas permanecem disponíveis para consulta e conclusão.
+function horarioDeAgendamentoPassou(data, horario) {
+    const partes = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+    }).formatToParts(new Date());
+
+    const campos = Object.fromEntries(
+        partes.map(({ type, value }) => [type, value])
+    );
+    const hoje = `${campos.year}-${campos.month}-${campos.day}`;
+    const horaAtual = `${campos.hour}:${campos.minute}`;
+    return data < hoje || (data === hoje && horario <= horaAtual);
+}
+
+const MENSAGEM_AGENDAMENTO_PASSADO =
+    'Não é possível agendar atividades em datas ou horários que já passaram.';
 
 
 // =====================================================
@@ -440,6 +462,10 @@ function criar(req, res) {
     }
 
 
+    if (horarioDeAgendamentoPassou(dados.data, dados.horario)) {
+        return res.status(400).json({ mensagem: MENSAGEM_AGENDAMENTO_PASSADO });
+    }
+
     const atividade =
         prepararAtividade(
             dados
@@ -676,6 +702,41 @@ function criarEmLote(
 }
 
 
+
+// Confirma um plano inteiro sem duplicar sessões de mesma origem.
+// A confirmação é explícita no frontend; a transação protege contra salvamento parcial.
+function agendarPlano(req, res) {
+    const usuarioId = Number(req.params.usuarioId);
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) return res.status(400).json({ mensagem: 'Usuário inválido.' });
+    if (!usuarioPodeAcessar(req, usuarioId)) return res.status(403).json({ mensagem: 'Acesso negado.' });
+    const atividades = req.body?.atividades;
+    if (!Array.isArray(atividades) || atividades.length < 1 || atividades.length > 500) {
+        return res.status(400).json({ mensagem: 'Selecione de 1 a 500 atividades do cronograma.' });
+    }
+    const origens = new Set();
+    const preparadas = [];
+    for (const atividade of atividades) {
+        const erro = validarAtividade(atividade, true);
+        if (erro) return res.status(400).json({ mensagem: erro });
+        // Exceção exclusiva do plano: preservar a data de estudo original,
+        // inclusive quando ela é anterior a hoje. O POST manual continua
+        // proibindo agendamentos no passado.
+        const origem = atividade.origem;
+        if (typeof origem !== 'string' || !/^plano-automatico:[\w:-]{1,160}$/.test(origem) || origens.has(origem)) {
+            return res.status(400).json({ mensagem: 'Identificador de sessão inválido ou repetido.' });
+        }
+        origens.add(origem);
+        preparadas.push(prepararAtividade(atividade));
+    }
+    adicionarSessoesPlano(usuarioId, preparadas, (erro, resultado) => {
+        if (erro) {
+            console.error('Erro ao adicionar cronograma ao Calendário:', erro);
+            return res.status(500).json({ mensagem: 'Não foi possível agendar o cronograma.' });
+        }
+        return res.status(201).json({ mensagem: 'Cronograma adicionado ao Calendário.', ...resultado });
+    });
+}
+
 // =====================================================
 // ATUALIZAR
 // =====================================================
@@ -785,6 +846,17 @@ function atualizar(
                 });
             }
 
+
+            // Editar uma atividade antiga é permitido se não mudar seu agendamento.
+            const dataFinal = dados.data ?? atividade.data;
+            const horarioFinal = dados.horario ?? atividade.horario;
+            const mudouAgendamento =
+                (dados.data !== undefined && dados.data !== atividade.data) ||
+                (dados.horario !== undefined && dados.horario !== atividade.horario);
+
+            if (mudouAgendamento && horarioDeAgendamentoPassou(dataFinal, horarioFinal)) {
+                return res.status(400).json({ mensagem: MENSAGEM_AGENDAMENTO_PASSADO });
+            }
 
             atualizarAtividade(
                 id,
@@ -1109,6 +1181,7 @@ module.exports = {
     listar,
     criar,
     criarEmLote,
+    agendarPlano,
     atualizar,
     excluir,
     excluirPorOrigem

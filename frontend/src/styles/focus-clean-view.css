@@ -1,0 +1,77 @@
+/* TENNA — Tela limpa opcional. Não interfere no timer ou no conteúdo.
+   Um controle na sidebar inicia; um único ícone no canto traz o menu de volta.
+   A sidebar permanece montada para continuar monitorando a pausa automática. */
+@media (min-width:761px) {
+  .dashboard.student-area.is-focus-clean > .student-sidebar {
+    box-sizing: border-box;
+    width: 0 !important;
+    min-width: 0 !important;
+    flex: 0 0 0px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-width: 0 !important;
+    box-shadow: none !important;
+    opacity: 0;
+    overflow: hidden !important;
+    visibility: hidden;
+    pointer-events: none;
+    transition: width .28s ease, flex-basis .28s ease, opacity .2s ease, visibility .28s step-end;
+  }
+
+  .dashboard.student-area.is-focus-clean > .dashboard-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    padding: clamp(28px, 3vw, 48px) clamp(64px, 6vw, 100px) 58px;
+    transition: padding .28s ease;
+  }
+  .dashboard.student-area.is-focus-clean > .dashboard-content > * {
+    width: 100%;
+    max-width: 1260px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Botão de retorno leve e permanente — sem barra flutuante nem cronômetro duplicado. */
+.dashboard.student-area .tenna-focus-clean-exit {
+  position: fixed;
+  top: 20px;
+  left: 18px;
+  z-index: 80;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(89, 128, 173, .23);
+  border-radius: 12px;
+  background: rgba(255,255,255,.85);
+  color: #1c538c;
+  box-shadow: 0 3px 14px rgba(16, 59, 110, .055);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.dashboard.student-area .tenna-focus-clean-exit:hover {
+  background: #fff;
+  box-shadow: 0 5px 19px rgba(16, 59, 110, .12);
+  transform: translateY(-1px);
+}
+.dashboard.student-area .tenna-focus-clean-exit:focus-visible {
+  outline: 3px solid #60a9ed;
+  outline-offset: 3px;
+}
+html[data-theme='dark'] .dashboard.student-area .tenna-focus-clean-exit {
+  background: rgba(24,45,69,.89);
+  color: #d5edff;
+  border-color: rgba(188, 211, 235, .23);
+}
+@media (max-width: 760px) {
+  .dashboard.student-area .tenna-focus-clean-exit { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard.student-area.is-focus-clean > .student-sidebar,
+  .dashboard.student-area.is-focus-clean > .dashboard-content,
+  .dashboard.student-area .tenna-focus-clean-exit { transition: none; }
+}
