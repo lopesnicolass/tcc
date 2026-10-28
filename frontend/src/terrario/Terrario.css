@@ -3031,3 +3031,142 @@ html[data-theme='dark'] .student-area .terr-page .terr-focus-controls .terr-dura
   box-shadow: none;
   color: #f1f8ff;
 }
+
+/* Desbloqueio da próxima sala: cartão de progressão compacto e destacado. */
+.terr-scene-bottom {
+  position: relative;
+  gap: clamp(18px, 3vw, 40px);
+  padding: 20px 26px 22px;
+  background: linear-gradient(110deg, #fffaf3 0%, #ffffff 43%, #f3f9ff 100%);
+  border-top: 1px solid #e7dac8;
+}
+.terr-scene-bottom::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 5px 5px 0;
+  background: linear-gradient(#f6c46b, #d28b41);
+}
+.terr-room-journey { gap: 15px; flex: 1 1 0; }
+.terr-chapter-mark {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  color: #1769c7 !important;
+  border: 1px solid #c3def7;
+  background: linear-gradient(150deg, #e6f4ff, #d9ebff);
+  box-shadow: 0 5px 12px rgba(35, 100, 174, .08), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.terr-chapter-mark::after {
+  content: '✦';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  color: #e2a13c;
+  font-size: 12px;
+  line-height: 1;
+}
+.terr-chapter-mark svg { display: block; }
+.terr-unlock-heading { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.terr-journey-copy .terr-unlock-heading > span:first-child {
+  color: #6d83a0;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+.terr-journey-copy .terr-unlock-room-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #e6f2ff;
+  color: #1460bd;
+  font-size: 9px;
+  letter-spacing: .06em;
+  font-weight: 900;
+}
+.terr-journey-copy strong { margin: 5px 0 4px; font-size: clamp(15px, 1.2vw, 18px); letter-spacing: -.025em; }
+.terr-journey-copy small { color: #6f8198; font-size: 12px; }
+.terr-room-progress { flex: 0 0 38%; width: 38%; min-width: 205px; }
+.terr-room-progress .terr-room-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 11px;
+  font-size: 12px;
+  color: #6f8198;
+}
+.terr-room-progress .terr-room-progress-heading > strong { color: #0d4b9f; font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1; }
+.terr-room-progress .terr-room-progress-heading > strong span { color: #6f8198; font-size: 11px; font-weight: 650; }
+.terr-room-progress .terr-progress-track { height: 10px; background: #dceaf8; box-shadow: inset 0 1px 2px rgba(23,76,131,.08); }
+.terr-room-progress .terr-progress-track > span { background: linear-gradient(90deg, #1764c6, #2b9fee); }
+.terr-room-progress .terr-progress-hint { display: block; margin-top: 9px; color: #7b91aa; font-size: 10.5px; line-height: 1.35; }
+
+html[data-theme='dark'] .terr-scene-bottom {
+  background: linear-gradient(110deg, #293746 0%, #1b2f47 56%, #1b344f 100%);
+  border-top-color: #536078;
+}
+html[data-theme='dark'] .terr-chapter-mark {
+  background: linear-gradient(150deg, #234d76, #1f4267);
+  color: #b5dbff !important;
+  border-color: #456b90;
+  box-shadow: none;
+}
+html[data-theme='dark'] .terr-journey-copy .terr-unlock-heading > span:first-child,
+html[data-theme='dark'] .terr-journey-copy small,
+html[data-theme='dark'] .terr-room-progress .terr-room-progress-heading,
+html[data-theme='dark'] .terr-room-progress .terr-room-progress-heading > strong span,
+html[data-theme='dark'] .terr-room-progress .terr-progress-hint { color: #a7bfd9; }
+html[data-theme='dark'] .terr-journey-copy .terr-unlock-room-tag { background: #294c6d; color: #b4dcff; }
+html[data-theme='dark'] .terr-room-progress .terr-room-progress-heading > strong { color: #9cccff; }
+html[data-theme='dark'] .terr-room-progress .terr-progress-track { background: #304b69; box-shadow: inset 0 1px 2px rgba(0,0,0,.15); }
+
+@media (max-width: 720px) {
+  .terr-scene-bottom { gap: 18px; padding: 18px 20px; }
+  .terr-chapter-mark { width: 48px; height: 48px; border-radius: 15px; }
+  .terr-room-progress { flex: 1 1 100%; width: 100%; min-width: 0; }
+}
+
+
+/* Integração da próxima conquista à base de terra do terrário. */
+.terr-page .terr-scene-bottom {
+  background: linear-gradient(180deg, #a8754e 0%, #95613d 100%);
+  border-top: 2px solid #c18c5d;
+  color: #fff3df;
+  box-shadow: inset 0 7px 13px rgba(69, 35, 16, .10);
+}
+.terr-page .terr-scene-bottom::before { display: none; }
+.terr-page .terr-chapter-mark {
+  background: rgba(255, 237, 207, .13);
+  border-color: rgba(255, 234, 201, .32);
+  color: #fff0d6 !important;
+  box-shadow: none;
+}
+.terr-page .terr-chapter-mark::after { color: #ffcf78; }
+.terr-page .terr-journey-copy strong { color: #fffaf1; }
+.terr-page .terr-journey-copy .terr-unlock-heading > span:first-child,
+.terr-page .terr-journey-copy small,
+.terr-page .terr-room-progress .terr-room-progress-heading,
+.terr-page .terr-room-progress .terr-room-progress-heading > strong span,
+.terr-page .terr-room-progress .terr-progress-hint { color: #f3ddc3; }
+.terr-page .terr-journey-copy .terr-unlock-room-tag {
+  background: rgba(255, 241, 219, .18);
+  color: #fff2d9;
+}
+.terr-page .terr-room-progress .terr-room-progress-heading > strong { color: #fffaf1; }
+.terr-page .terr-room-progress .terr-progress-track {
+  background: rgba(70, 37, 17, .33);
+  box-shadow: inset 0 1px 3px rgba(49, 24, 9, .2);
+}
+.terr-page .terr-room-progress .terr-progress-track > span {
+  background: linear-gradient(90deg, #7fc9ff, #278ce5);
+}
+html[data-theme='dark'] .terr-page .terr-scene-bottom {
+  background: linear-gradient(180deg, #785036, #62402d);
+  border-top-color: #a47751;
+}

@@ -38,6 +38,23 @@ const STORAGE_KEY =
   'tenna_plano_automatico';
 const pad = (n) =>
   String(n).padStart(2, '0');
+// Exibe o mês real de cada etapa, incluindo planos que atravessam o ano.
+function nomeMesEtapa(mes) {
+  const data = typeof mes?.inicio === 'string' ? mes.inicio : '';
+  const partes = /^(\d{4})-(0[1-9]|1[0-2])-\d{2}$/.exec(data);
+  if (partes) {
+    const mesFormatado = new Intl.DateTimeFormat('pt-BR', { month: 'long' })
+      .format(new Date(Number(partes[1]), Number(partes[2]) - 1, 1));
+    return mesFormatado.charAt(0).toUpperCase() + mesFormatado.slice(1);
+  }
+  // Compatibilidade com planos antigos que guardavam apenas o nome do mês.
+  const nomeSalvo = typeof mes?.nome === 'string' ? mes.nome.trim() : '';
+  if (nomeSalvo) {
+    const primeiroNome = nomeSalvo.split(/\s+de\s+\d{4}/i)[0].trim();
+    return primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
+  }
+  return `Mês ${mes?.numero || 1}`;
+}
 function getUser() {
   try {
     return JSON.parse(
@@ -320,6 +337,8 @@ export default function PlanoAutomatico() {
         atividadesExistentes: atividadesAgenda, topicosEstudados: studiedTopics,
       }) : null,
   [agendandoPlano, plan, diasAgendaPlano, horaAgendaPlano, atividadesAgenda, studiedTopics]);
+  const nenhumaSessaoPendente = Boolean(previaAgendamentoCompleto &&
+    !previaAgendamentoCompleto.erro && previaAgendamentoCompleto.atividades.length === 0);
 
   async function confirmarAgendamentoCompleto() {
     if (!usuarioId || salvandoPlanoAgenda || !validarDiasSemana(diasAgendaPlano, configSalva.days)) return;
@@ -968,12 +987,6 @@ export default function PlanoAutomatico() {
           </section>
 
           {avisoPlano && <div className="studyplan-calendar-feedback" role="status"><Icon name="check" size={17}/>{avisoPlano}</div>}
-          {(pendentesAtrasados || planoSemDatas) && !avisoPlano && (
-            <div className="tenna-auto-replan-notice" role="status">
-              <span>O cronograma começa no dia 1º do mês e mantém as datas originais, mesmo as que já passaram.</span>
-              <button type="button" onClick={abrirAgendamentoCompleto}>Agendar pendentes</button>
-            </div>
-          )}
           {syncingPlan && <p className="tenna-auto-sync-status" role="status">Preparando sua trilha de estudos...</p>}
           {syncError && <p className="tenna-auto-error" role="alert">{syncError}</p>}
           {prazoSelecionado.conhecido && prazoSelecionado.ultrapassa && (
@@ -1042,9 +1055,8 @@ export default function PlanoAutomatico() {
                 <h2 id="studyplan-journey-heading">Sua trilha de estudos</h2>
                 <p>Escolha seu mês e avance uma semana de cada vez.</p>
               </div>
-              <span className="studyplan-stage-count"><Icon name="layers" size={15} /> Mês {current.numero} de {plan.length}</span>
+              <span className="studyplan-stage-count"><Icon name="layers" size={15} /> {nomeMesEtapa(current)} · {current.numero} de {plan.length}</span>
             </div>
-            <p className="studyplan-counts-hint">Um conteúdo pode aparecer em mais de uma sessão. O progresso conta os conteúdos únicos estudados, enquanto as sessões representam os momentos de estudo planejados.</p>
             {mensagemAgenda && <div className="studyplan-calendar-feedback" role="status"><Icon name="check" size={17}/>{mensagemAgenda}</div>}
             {erroAgenda && <div className="studyplan-calendar-error" role="alert">{erroAgenda} <button type="button" onClick={() => { setCarregandoAgenda(true); carregarAtividadesAgenda().then(() => setErroAgenda('')).catch((erro) => setErroAgenda(erro.message)).finally(() => setCarregandoAgenda(false)); }}>Tentar novamente</button></div>}
             <div className="studyplan-month-tabs" role="tablist" aria-label="Escolher mês do cronograma">
@@ -1065,7 +1077,7 @@ export default function PlanoAutomatico() {
                     }}
                   >
                     <span className="studyplan-month-tab-number">{mesConcluido ? <Icon name="check" size={16} /> : pad(mes.numero)}</span>
-                    <span><strong>Mês {mes.numero}</strong><small>{mesConcluido ? 'Concluído' : mes.numero === current.numero ? 'Em destaque' : phases[Math.min(mes.numero - 1, phases.length - 1)]}</small></span>
+                    <span><strong>{nomeMesEtapa(mes)}</strong><small>{mesConcluido ? 'Concluído' : mes.numero === current.numero ? 'Em destaque' : phases[Math.min(mes.numero - 1, phases.length - 1)]}</small></span>
                   </button>
                 );
               })}
@@ -1233,43 +1245,79 @@ export default function PlanoAutomatico() {
             onKeyDown={(evento) => { if (evento.key === 'Escape' && !salvandoPlanoAgenda) setAgendandoPlano(false); }}>
             <button className="studyplan-schedule-close" type="button" aria-label="Fechar" disabled={salvandoPlanoAgenda} onClick={() => setAgendandoPlano(false)}><span aria-hidden="true">×</span></button>
             <span className="studyplan-eyebrow"><Icon name="calendar" size={15}/> ORGANIZE SUA ROTINA</span>
-            <h2 id="studyplan-bulk-title">Adicionar cronograma ao Calendário</h2>
-            <p className="studyplan-schedule-description">Escolha os {configSalva.days} dias em que você pode estudar e o horário de início. Só serão agendadas sessões pendentes; atividades já agendadas serão mantidas.</p>
-            <div className="tenna-auto-weekday-selection" role="group" aria-label="Dias para agendar no Calendário">
-              <div className="tenna-auto-weekday-heading"><strong>Em quais dias você vai estudar?</strong><span>{diasAgendaPlano.length} de {configSalva.days} selecionados</span></div>
-              <div className="tenna-auto-weekday-list">
-                {[1, 2, 3, 4, 5, 6, 0].map((dia) => (
-                  <button key={dia} type="button" className={`tenna-auto-weekday ${diasAgendaPlano.includes(dia) ? 'is-selected' : ''}`}
-                    aria-pressed={diasAgendaPlano.includes(dia)}
-                    disabled={salvandoPlanoAgenda || (!diasAgendaPlano.includes(dia) && diasAgendaPlano.length >= configSalva.days)}
-                    onClick={() => alternarDiaDaAgenda(dia)}>{NOMES_DIAS[dia]}</button>
-                ))}
+            <h2 id="studyplan-bulk-title">Adicionar cronograma ao calendário</h2>
+            <p className="studyplan-schedule-description">Selecione os dias e o horário para agendar suas sessões.</p>
+
+            <div className="studyplan-bulk-section studyplan-bulk-days-section">
+              <div className="studyplan-bulk-section-heading">
+                <span className="studyplan-bulk-step" aria-hidden="true">1</span>
+                <div className="studyplan-bulk-section-title"><h3>Dias de estudo</h3></div>
+                <span className="studyplan-bulk-counter">{diasAgendaPlano.length}/{configSalva.days} selecionados</span>
               </div>
-              <p className="tenna-auto-weekday-help">Se houver mais de um conteúdo no mesmo dia, cada um receberá um horário próprio, com intervalo de uma hora.</p>
-            </div>
-            <div className="studyplan-bulk-time">
-              <label htmlFor="studyplan-bulk-time">Horário de início</label>
-              <input id="studyplan-bulk-time" type="time" value={horaAgendaPlano} onChange={(evento) => {setHoraAgendaPlano(evento.target.value);setErroPlanoAgenda('');}} disabled={salvandoPlanoAgenda}/>
-              <div className="studyplan-bulk-time-options" aria-label="Sugestões de horário">
-                {['08:00','14:00','19:00'].map((hora) => <button key={hora} type="button" className={horaAgendaPlano === hora ? 'active' : ''} disabled={salvandoPlanoAgenda} onClick={() => setHoraAgendaPlano(hora)}>{hora}</button>)}
+              <div className="tenna-auto-weekday-selection" role="group" aria-label="Dias para agendar no calendário">
+                <div className="tenna-auto-weekday-list">
+                  {[1, 2, 3, 4, 5, 6, 0].map((dia) => (
+                    <button key={dia} type="button" className={`tenna-auto-weekday ${diasAgendaPlano.includes(dia) ? 'is-selected' : ''}`}
+                      aria-pressed={diasAgendaPlano.includes(dia)}
+                      disabled={salvandoPlanoAgenda || (!diasAgendaPlano.includes(dia) && diasAgendaPlano.length >= configSalva.days)}
+                      onClick={() => alternarDiaDaAgenda(dia)}>{NOMES_DIAS[dia]}</button>
+                  ))}
+                </div>
               </div>
             </div>
+
+            <div className="studyplan-bulk-section studyplan-bulk-time-section">
+              <div className="studyplan-bulk-section-heading">
+                <span className="studyplan-bulk-step" aria-hidden="true">2</span>
+                <div className="studyplan-bulk-section-title"><h3>Horário de início</h3></div>
+              </div>
+              <div className="studyplan-bulk-time">
+                <label className="studyplan-bulk-time-field" htmlFor="studyplan-bulk-time">
+                  <Icon name="clock" size={16}/>
+                  <input id="studyplan-bulk-time" type="time" value={horaAgendaPlano}
+                    aria-label="Horário de início" onChange={(evento) => { setHoraAgendaPlano(evento.target.value); setErroPlanoAgenda(''); }}
+                    disabled={salvandoPlanoAgenda}/>
+                </label>
+                <div className="studyplan-bulk-time-options" aria-label="Sugestões de horário">
+                  {['08:00', '14:00', '19:00'].map((hora) => (
+                    <button key={hora} type="button" className={horaAgendaPlano === hora ? 'active' : ''}
+                      aria-pressed={horaAgendaPlano === hora} disabled={salvandoPlanoAgenda}
+                      onClick={() => { setHoraAgendaPlano(hora); setErroPlanoAgenda(''); }}>{hora}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {previaAgendamentoCompleto && !previaAgendamentoCompleto.erro && (
-              <div className="studyplan-bulk-summary" role="status">
-                <strong>{previaAgendamentoCompleto.atividades.length} {previaAgendamentoCompleto.atividades.length === 1 ? 'atividade para agendar' : 'atividades para agendar'}</strong>
-                <span>{previaAgendamentoCompleto.jaAgendadas} já agendadas · {previaAgendamentoCompleto.concluidas} conteúdos estudados serão ignorados</span>
-                <small>Primeira sessão: {new Date(`${previaAgendamentoCompleto.inicio}T12:00:00`).toLocaleDateString('pt-BR')}. {previaAgendamentoCompleto.anteriores > 0 ? `${previaAgendamentoCompleto.anteriores} sessões de datas anteriores a hoje serão registradas nas datas originais.` : 'Todas as sessões mantêm as datas do cronograma.'}</small>
+              <div className={`studyplan-bulk-summary ${nenhumaSessaoPendente ? 'is-complete' : ''}`} role="status">
+                <div className="studyplan-bulk-summary-heading">
+                  <span className="studyplan-bulk-summary-icon" aria-hidden="true"><Icon name={nenhumaSessaoPendente ? 'check' : 'calendar'} size={19}/></span>
+                  <div>
+                    <strong>{nenhumaSessaoPendente ? 'Cronograma já organizado' : 'Resumo do agendamento'}</strong>
+                    <small>{nenhumaSessaoPendente ? 'Todas as sessões já estão no calendário.' : 'Sessões que serão adicionadas ao calendário.'}</small>
+                  </div>
+                </div>
+                <p className="studyplan-bulk-compact-count"><strong>{previaAgendamentoCompleto.atividades.length}</strong> novas sessões <span>·</span> {previaAgendamentoCompleto.jaAgendadas} já agendadas</p>
+                {previaAgendamentoCompleto.anteriores > 0 && !nenhumaSessaoPendente && (
+                  <p className="studyplan-bulk-summary-note">{previaAgendamentoCompleto.anteriores} sessões anteriores serão mantidas nas datas originais.</p>
+                )}
               </div>
             )}
             {(erroPlanoAgenda || (diasAgendaPlano.length === configSalva.days && previaAgendamentoCompleto?.erro)) && (
               <p className="studyplan-calendar-error" role="alert">{erroPlanoAgenda || previaAgendamentoCompleto.erro}</p>
             )}
             <div className="studyplan-schedule-actions">
-              <button type="button" className="studyplan-schedule-cancel" disabled={salvandoPlanoAgenda} onClick={() => setAgendandoPlano(false)}>Cancelar</button>
-              <button type="button" className="studyplan-schedule-submit" onClick={confirmarAgendamentoCompleto}
-                disabled={salvandoPlanoAgenda || !validarDiasSemana(diasAgendaPlano, configSalva.days) || Boolean(previaAgendamentoCompleto?.erro) || !previaAgendamentoCompleto?.atividades.length || !usuarioId}>
-                <Icon name="calendar" size={16}/>{salvandoPlanoAgenda ? 'Adicionando...' : 'Confirmar agendamento'}
-              </button>
+              {nenhumaSessaoPendente ? (
+                <button type="button" className="studyplan-schedule-submit" onClick={() => setAgendandoPlano(false)}>Fechar</button>
+              ) : (
+                <>
+                  <button type="button" className="studyplan-schedule-cancel" disabled={salvandoPlanoAgenda} onClick={() => setAgendandoPlano(false)}>Cancelar</button>
+                  <button type="button" className="studyplan-schedule-submit" onClick={confirmarAgendamentoCompleto}
+                    disabled={salvandoPlanoAgenda || !validarDiasSemana(diasAgendaPlano, configSalva.days) || Boolean(previaAgendamentoCompleto?.erro) || !previaAgendamentoCompleto?.atividades.length || !usuarioId}>
+                    <Icon name="calendar" size={16}/>{salvandoPlanoAgenda ? 'Adicionando...' : 'Adicionar ao calendário'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

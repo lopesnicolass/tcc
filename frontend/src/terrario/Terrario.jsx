@@ -35,24 +35,24 @@ import { ITEMS_SALA3, ITEMS_SALA3_LEGADOS } from './sala3Itens.js';
 import { distribuirMoveis, ehMovelDeEstudoAntigo } from './catalogoSalas.js';
 import { TEST_STORAGE_PREFIX, baseTeste, lerTeste, alternarItemTeste, moverItemTeste, redimensionarItemTeste, prepararPreviaCompletaSala3, montarAmbienteSala3 } from './modoTeste.js';
 
-// IDs e preços existentes preservados: as compras antigas continuam valendo.
+// Os IDs e as compras anteriores são preservados; os preços foram adaptados a 2 sementes por 15 min.
 // As coordenadas são percentuais da imagem original, não da janela do usuário.
 const ITEMS = [
   { id: 'vasinho', name: 'Planta em vaso', price: 0, img: vasinhoImg, width: 13, x: 30, y: 78, zone: 'chao', subtitle: 'Seu primeiro presente' },
-  { id: 'mesa', name: 'Mesa de estudos', price: 10, img: mesaImg, width: 27, x: 50, y: 56, zone: 'chao', subtitle: 'Organize seus materiais' },
-  { id: 'banquinho', name: 'Banquinho de estudos', price: 6, img: bancoImg, width: 12, x: 47, y: 70, zone: 'chao', subtitle: 'Um assento de madeira' },
-  { id: 'luminaria', name: 'Mesa com luminária cogumelo', price: 12, img: luminariaImg, width: 13, x: 15, y: 69, zone: 'chao', subtitle: 'Luz para o seu cantinho' },
-  { id: 'cama', name: 'Cama de folhas', price: 16, img: camaImg, width: 31, x: 31, y: 68, zone: 'chao', subtitle: 'Um cantinho de descanso' },
-  { id: 'prateleira', name: 'Prateleira de livros e plantas', price: 18, img: prateleiraImg, width: 25, x: 26, y: 36, zone: 'parede', subtitle: 'Decore a parede da toca' },
-  { id: 'quadro', name: 'Quadro de recados', price: 9, img: quadroImg, width: 17, x: 50, y: 36, zone: 'parede', subtitle: 'Suas ideias em destaque' },
-  { id: 'estante', name: 'Estante de livros', price: 20, img: estanteImg, width: 18, x: 70, y: 55, zone: 'chao', subtitle: 'Guarde seus livros' },
-  { id: 'lampiao', name: 'Lampião', price: 12, img: lampiaoImg, width: 10, x: 83, y: 42, zone: 'pendurado', subtitle: 'Luz quentinha na parede' },
-  { id: 'bau', name: 'Baú de madeira', price: 14, img: bauImg, width: 18, x: 22, y: 79, zone: 'chao', subtitle: 'Um baú para lembranças' },
-  { id: 'tapete', name: 'Tapete de folha', price: 8, img: tapeteImg, width: 30, x: 40, y: 77, zone: 'tapete', subtitle: 'Aconchego para o chão' },
-  { id: 'mesa_redonda', name: 'Mesa redonda com planta', price: 18, img: mesaRedondaImg, width: 20, x: 76, y: 73, zone: 'chao', subtitle: 'Natureza e decoração' },
-  { id: 'almofada', name: 'Almofada de folhas', price: 7, img: almofadaImg, width: 15, x: 63, y: 80, zone: 'tapete', subtitle: 'Um descanso macio' },
-  { id: 'banquinho_tronco', name: 'Banquinho de tronco', price: 7, img: bancoTroncoImg, width: 12, x: 82, y: 80, zone: 'chao', subtitle: 'Assento feito de tronco' },
-  { id: 'guarda_roupa', name: 'Guarda-roupa de folhas', price: 20, img: guardaRoupaImg, width: 27, x: 59, y: 51, zone: 'chao', subtitle: 'Madeira aconchegante com detalhes de folhas' },
+  { id: 'mesa', name: 'Mesa de estudos', price: 6, img: mesaImg, width: 27, x: 50, y: 56, zone: 'chao', subtitle: 'Organize seus materiais' },
+  { id: 'banquinho', name: 'Banquinho de estudos', price: 2, img: bancoImg, width: 12, x: 47, y: 70, zone: 'chao', subtitle: 'Um assento de madeira' },
+  { id: 'luminaria', name: 'Mesa com luminária cogumelo', price: 4, img: luminariaImg, width: 13, x: 15, y: 69, zone: 'chao', subtitle: 'Luz para o seu cantinho' },
+  { id: 'cama', name: 'Cama de folhas', price: 8, img: camaImg, width: 31, x: 31, y: 68, zone: 'chao', subtitle: 'Um cantinho de descanso' },
+  { id: 'prateleira', name: 'Prateleira de livros e plantas', price: 6, img: prateleiraImg, width: 25, x: 26, y: 36, zone: 'parede', subtitle: 'Decore a parede da toca' },
+  { id: 'quadro', name: 'Quadro de recados', price: 4, img: quadroImg, width: 17, x: 50, y: 36, zone: 'parede', subtitle: 'Suas ideias em destaque' },
+  { id: 'estante', name: 'Estante de livros', price: 8, img: estanteImg, width: 18, x: 70, y: 55, zone: 'chao', subtitle: 'Guarde seus livros' },
+  { id: 'lampiao', name: 'Lampião', price: 4, img: lampiaoImg, width: 10, x: 83, y: 42, zone: 'pendurado', subtitle: 'Luz quentinha na parede' },
+  { id: 'bau', name: 'Baú de madeira', price: 6, img: bauImg, width: 18, x: 22, y: 79, zone: 'chao', subtitle: 'Um baú para lembranças' },
+  { id: 'tapete', name: 'Tapete de folha', price: 2, img: tapeteImg, width: 30, x: 40, y: 77, zone: 'tapete', subtitle: 'Aconchego para o chão' },
+  { id: 'mesa_redonda', name: 'Mesa redonda com planta', price: 8, img: mesaRedondaImg, width: 20, x: 76, y: 73, zone: 'chao', subtitle: 'Natureza e decoração' },
+  { id: 'almofada', name: 'Almofada de folhas', price: 2, img: almofadaImg, width: 15, x: 63, y: 80, zone: 'tapete', subtitle: 'Um descanso macio' },
+  { id: 'banquinho_tronco', name: 'Banquinho de tronco', price: 2, img: bancoTroncoImg, width: 12, x: 82, y: 80, zone: 'chao', subtitle: 'Assento feito de tronco' },
+  { id: 'guarda_roupa', name: 'Guarda-roupa de folhas', price: 8, img: guardaRoupaImg, width: 27, x: 59, y: 51, zone: 'chao', subtitle: 'Madeira aconchegante com detalhes de folhas' },
 ];
 
 const DURACOES_RAPIDAS = [15, 25, 45];
@@ -60,10 +60,10 @@ const DURACAO_MINIMA = 1;
 const DURACAO_MAXIMA = 120;
 const ANEL_CIRCUNFERENCIA = 2 * Math.PI * 90;
 const TODOS_ITENS = [...ITEMS, ...ITEMS_SALA2, ...ITEMS_SALA3, ...ITEMS_SALA3_LEGADOS];
-// ALTERAÇÃO TEMPORÁRIA: salas visíveis e acessíveis só no modo de teste.
-// Para restaurar os bloqueios originais, altere para false ou remova esta condição.
-// Não altera o banco de dados, as sessões, o XP, as sementes nem os desbloqueios reais.
-const SALAS_LIBERADAS_PARA_PREVIA = true;
+// Modo de apresentação desativado: o servidor controla salas, compras e inventário.
+// As decorações da prévia ficam isoladas no localStorage e não são importadas
+// para a conta do estudante ao voltar ao funcionamento real.
+const SALAS_LIBERADAS_PARA_PREVIA = false;
 // O catálogo seleciona móveis por ambiente sem alterar os IDs ou as compras existentes.
 
 function userKey() {
@@ -126,9 +126,9 @@ export default function Terrario() {
     try { window.localStorage.setItem(chaveGuia, '1'); } catch { /* Armazenamento opcional. */ }
   }, [chaveGuia]);
 
-  // Nesta versão de avaliação o modo livre já começa ativo.
-  // Ao desligá-lo, a loja e o inventário oficiais continuam como antes.
-  const [modoTeste, setModoTeste] = useState(true);
+  // O Terrário funciona no modo real por padrão: só usar itens comprados
+  // e salas conquistadas com sessões válidas, conforme o servidor.
+  const modoTeste = false;
   const chaveTeste = useMemo(() => `${TEST_STORAGE_PREFIX}${userKey()}`, []);
   const [testeSalvo, setTesteSalvo] = useState(() => {
     try {
@@ -933,10 +933,38 @@ export default function Terrario() {
             </div>
 
           </div>
-          {!decorate && !previaLiberada && !jornada.terceiraConquistada && <div className="terr-scene-bottom">
-            <div className="terr-room-journey"><span className="terr-chapter-mark" aria-hidden="true">✦</span><div className="terr-journey-copy"><span>PRÓXIMA SALA</span><strong>{jornada.terceiraConquistada ? 'Todas as salas liberadas' : jornada.segundaConquistada ? 'Sala do Desafio Final' : 'Refúgio do Conhecimento'}</strong><small>{previaLiberada ? 'Disponível para experimentar no modo de teste.' : jornada.terceiraConquistada ? 'As três salas já foram conquistadas.' : jornada.segundaConquistada ? `Faltam ${jornada.faltamSala3} sessões válidas para liberar a Sala 3` : `Faltam ${sessionsUntilNextRoom} sessões válidas para liberar`}</small></div></div>
-            <div className="terr-room-progress"><div><span>{jornada.progresso} de {jornada.objetivo} sessões</span><strong>{jornada.percentual}%</strong></div><div className="terr-progress-track"><span style={{ width: `${jornada.percentual}%` }}/></div></div>
-          </div>}
+          {!decorate && !previaLiberada && !jornada.terceiraConquistada && (
+            <div className="terr-scene-bottom">
+              <div className="terr-room-journey">
+                <span className="terr-chapter-mark" aria-hidden="true">
+                  <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="5.5" y="2.8" width="13" height="18.4" rx="2.4" />
+                    <path d="M9 20.7V6.5h6.5" />
+                    <circle cx="13.5" cy="13.2" r=".9" fill="currentColor" stroke="none" />
+                  </svg>
+                </span>
+                <div className="terr-journey-copy">
+                  <div className="terr-unlock-heading">
+                    <span>PRÓXIMA CONQUISTA</span>
+                    <span className="terr-unlock-room-tag">SALA {jornada.segundaConquistada ? '03' : '02'}</span>
+                  </div>
+                  <strong>{jornada.segundaConquistada ? 'Sala do Desafio Final' : 'Refúgio do Conhecimento'}</strong>
+                  <small>{sessionsUntilNextRoom === 1 ? 'Só mais 1 sessão válida para desbloquear!' : `Faltam ${sessionsUntilNextRoom} sessões válidas para desbloquear`}</small>
+                </div>
+              </div>
+              <div className="terr-room-progress">
+                <div className="terr-room-progress-heading">
+                  <span>Seu progresso</span>
+                  <strong>{jornada.progresso}<span> / {jornada.objetivo} sessões</span></strong>
+                </div>
+                <div className="terr-progress-track" role="progressbar" aria-label="Progresso para desbloquear a próxima sala"
+                  aria-valuemin={0} aria-valuemax={jornada.objetivo} aria-valuenow={jornada.progresso}>
+                  <span style={{ width: `${jornada.percentual}%` }} />
+                </div>
+                <small className="terr-progress-hint">Sessões de foco de pelo menos 15 minutos</small>
+              </div>
+            </div>
+          )}
         </section>
 
         {!decorate && <aside className="terr-sidebar">

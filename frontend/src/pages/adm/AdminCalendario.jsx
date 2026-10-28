@@ -3,6 +3,7 @@ import { request } from '../../services/api.js';
 import '../../styles/adm/AdminCalendario.css';
 
 const TIPOS = [
+  'Vestibulinho',
   'Inscrições',
   'Prova',
   'Resultado',
@@ -14,6 +15,8 @@ const FORM_INICIAL = {
   tipo: 'Inscrições',
   data: '',
   descricao: '',
+  horario: '',
+  link: '',
 };
 
 const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -43,6 +46,7 @@ function mesLabel(date) {
 
 function getTipoClass(tipo) {
   const mapa = {
+    Vestibulinho: 'vestibulinho',
     Inscrições: 'inscricoes',
     Prova: 'prova',
     Resultado: 'resultado',
@@ -138,6 +142,8 @@ export default function AdminCalendario() {
       tipo: data.tipo || 'Outro',
       data: data.data || '',
       descricao: data.descricao || '',
+      horario: data.horario || '',
+      link: data.link || '',
     });
     setMensagem('');
     setErro('');
@@ -174,6 +180,8 @@ export default function AdminCalendario() {
             tipo: form.tipo,
             data: form.data,
             descricao: form.descricao.trim(),
+            horario: form.horario,
+            link: form.link.trim(),
           }),
         }
       );
@@ -342,6 +350,7 @@ export default function AdminCalendario() {
                     {TIPOS.map((tipo) => <button type="button" role="option" aria-selected={form.tipo === tipo} key={tipo} className={form.tipo === tipo ? 'active' : ''} onClick={() => { alterarForm('tipo', tipo); setCampoAberto(null); }}>{tipo}</button>)}
                   </div>}
                 </div>
+                <small className="admin-calendar-vestibulinho-help">Selecione "Vestibulinho" para identificar a data principal da prova e exibi-la na página inicial dos estudantes.</small>
               </label>
 
               <label>
@@ -364,6 +373,29 @@ export default function AdminCalendario() {
                     <div className="admin-calendar-date-footer"><button type="button" onClick={() => { alterarForm('data', ''); setCampoAberto(null); }}>Limpar</button><button type="button" onClick={() => { alterarForm('data', dateKey(new Date())); setCampoAberto(null); }}>Hoje</button></div>
                   </div>}
                 </div>
+              </label>
+            </div>
+
+            <div className="admin-calendar-form-row admin-calendar-official-details">
+              <label>
+                Horário (opcional)
+                <input
+                  type="time"
+                  value={form.horario}
+                  onChange={(event) => alterarForm('horario', event.target.value)}
+                  disabled={salvando}
+                />
+              </label>
+              <label>
+                Link oficial (opcional)
+                <input
+                  type="url"
+                  value={form.link}
+                  onChange={(event) => alterarForm('link', event.target.value)}
+                  placeholder="https://vestibulinho.etec.sp.gov.br/"
+                  maxLength={2000}
+                  disabled={salvando}
+                />
               </label>
             </div>
 

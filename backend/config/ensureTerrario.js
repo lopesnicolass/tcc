@@ -53,27 +53,42 @@ const statements = [
     item_id TEXT PRIMARY KEY,
     preco INTEGER NOT NULL CHECK(preco>=0)
   )`,
-  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
-     ('vasinho',0),('mesa',10),('banquinho',6),('luminaria',12),('cama',16)`,
-  // Amplia o catálogo sem alterar compras, saldos nem preços dos cinco itens anteriores.
-  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
-    ('prateleira',18),('quadro',9),('estante',20),('lampiao',12),
-    ('bau',14),('tapete',8),('mesa_redonda',18),('almofada',7),('banquinho_tronco',7)`,
-  // Preços oficiais dos itens exclusivos da Sala 2. Nenhuma compra antiga muda.
-  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
-    ('s2_mesa',24),('s2_cadeira',10),('s2_estante',22),
-    ('s2_mural',14),('s2_calendario',8),('s2_globo',16),
-    ('s2_puff',12),('s2_planta',9),('s2_luzes',15),('s2_caixa',7)`,
-  // Complementos exclusivos: cadastrados na abertura do backend, sem mexer nos anteriores.
-  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
-    ('s2_tapete_redondo',11),('s2_vaso',8),('s2_livros',6),('s2_avisos',12)` ,
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES
+     ('vasinho',0),('mesa',6),('banquinho',2),('luminaria',4),('cama',8) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
+  // Completa o catálogo sem alterar compras ou saldos existentes.
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES
+    ('prateleira',6),('quadro',4),('estante',8),('lampiao',4),
+    ('bau',6),('tapete',2),('mesa_redonda',8),('almofada',2),('banquinho_tronco',2) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
+  // Preços acessíveis da Sala 2; compras anteriores continuam sendo de seus donos.
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES
+    ('s2_mesa',8),('s2_cadeira',4),('s2_estante',8),
+    ('s2_mural',4),('s2_calendario',2),('s2_globo',6),
+    ('s2_puff',4),('s2_planta',2),('s2_luzes',6),('s2_caixa',2) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
+  // Complementos da Sala 2 com valores proporcionais às recompensas de foco.
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES
+    ('s2_tapete_redondo',4),('s2_vaso',2),('s2_livros',2),('s2_avisos',4) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
   // Sala 3: disponíveis para compra ao alcançar a etapa de prova.
-  // INSERT OR IGNORE não altera preço, inventário ou saldo de compras anteriores.
-  `INSERT OR IGNORE INTO terrario_catalogo(item_id,preco) VALUES
-    ('s3_mesa',28),('s3_lousa',18),('s3_relogio',11),('s3_mochila',13),
-    ('s3_kit',9),('s3_calendario',9),('s3_painel',15),('s3_tapete',12),
-    ('s3_cadeira',12),('s3_estante',24),('s3_livros',7),('s3_puff',13),
-    ('s3_vaso',9),('s3_luzes',16),('s3_caixa',8)`,
+  // O upsert reajusta preços sem alterar inventário ou saldo das compras anteriores.
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES
+    ('s3_mesa',10),('s3_lousa',6),('s3_relogio',2),('s3_mochila',4),
+    ('s3_kit',2),('s3_calendario',2),('s3_painel',6),('s3_tapete',4),
+    ('s3_cadeira',4),('s3_estante',8),('s3_livros',2),('s3_puff',4),
+    ('s3_vaso',2),('s3_luzes',6),('s3_caixa',2) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
+  // O guarda-roupa tem o mesmo preço na loja do frontend e no banco de dados
+  // para permitir compras reais. Preços existentes são atualizados no reinício.
+  `INSERT INTO terrario_catalogo(item_id,preco) VALUES ('guarda_roupa',8) ON CONFLICT(item_id) DO UPDATE SET preco=excluded.preco`,
+  // Desbloqueio da Sala 3 após 10 sessões válidas (>= 15 minutos).
+  // Este gatilho acompanha a contagem persistida pelo gatilho de conclusão,
+  // sem depender do navegador nem modificar sessões, sementes ou XP.
+  `CREATE TRIGGER IF NOT EXISTS trg_terrario_liberar_sala3
+    AFTER UPDATE OF total_sessoes_concluidas ON terrario_usuario
+    WHEN NEW.total_sessoes_concluidas >= 10 AND NEW.sala_desbloqueada < 3
+    BEGIN
+      UPDATE terrario_usuario SET sala_desbloqueada=3 WHERE usuario_id=NEW.usuario_id;
+    END`,
+  // Corrige contas antigas que já tinham 10 sessões válidas durante o teste.
+  `UPDATE terrario_usuario SET sala_desbloqueada=3
+    WHERE total_sessoes_concluidas >= 10 AND sala_desbloqueada < 3`,
   // A inserção do item e o desconto acontecem atomicamente na mesma instrução.
   // INSERT OR IGNORE de um item já adquirido não executa este gatilho.
   `CREATE TRIGGER IF NOT EXISTS trg_terrario_comprar_item

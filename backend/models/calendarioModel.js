@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 function listarDatasImportantes(callback) {
     const sql = `
-        SELECT id, titulo, tipo, data, descricao, criado_em, atualizado_em
+        SELECT id, titulo, tipo, data, descricao, horario, link, criado_em, atualizado_em
         FROM datas_importantes
         ORDER BY data ASC, id ASC
     `;
@@ -23,11 +23,11 @@ function buscarDataImportantePorId(id, callback) {
 function criarDataImportante(dados, callback) {
     const sql = `
         INSERT INTO datas_importantes
-        (titulo, tipo, data, descricao)
-        VALUES (?, ?, ?, ?)
+        (titulo, tipo, data, descricao, horario, link)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    db.run(sql, [dados.titulo, dados.tipo || "Outro", dados.data, dados.descricao || ""], function (erro) {
+    db.run(sql, [dados.titulo, dados.tipo || "Outro", dados.data, dados.descricao || "", dados.horario || "", dados.link || ""], function (erro) {
         if (erro) return callback(erro);
         callback(null, this);
     });
@@ -52,6 +52,14 @@ function atualizarDataImportante(id, dados, callback) {
     if (dados.descricao !== undefined) {
         campos.push("descricao = ?");
         valores.push(dados.descricao);
+    }
+    if (dados.horario !== undefined) {
+        campos.push("horario = ?");
+        valores.push(dados.horario);
+    }
+    if (dados.link !== undefined) {
+        campos.push("link = ?");
+        valores.push(dados.link);
     }
 
     if (!campos.length) {
@@ -89,9 +97,19 @@ function buscarProximoVestibulinho(hoje, callback) {
         SELECT data
         FROM datas_importantes
         WHERE data >= ?
-          AND (LOWER(titulo) LIKE '%vestibulinho%'
-               OR LOWER(tipo) LIKE '%vestibulinho%')
-        ORDER BY data ASC, id ASC
+          AND (
+            LOWER(tipo) = 'vestibulinho'
+            OR (
+              LOWER(titulo) LIKE '%vestibulinho%'
+              AND LOWER(titulo) NOT LIKE '%inscri%'
+              AND LOWER(titulo) NOT LIKE '%resultado%'
+              AND LOWER(titulo) NOT LIKE '%gabarito%'
+              AND LOWER(titulo) NOT LIKE '%recurso%'
+              AND LOWER(titulo) NOT LIKE '%prazo%'
+              AND LOWER(tipo) NOT IN ('inscrições', 'resultado')
+            )
+          )
+        ORDER BY data ASC, CASE WHEN LOWER(tipo) = 'vestibulinho' THEN 0 ELSE 1 END, id ASC
         LIMIT 1
     `;
 

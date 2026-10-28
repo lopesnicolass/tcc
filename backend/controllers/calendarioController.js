@@ -15,6 +15,21 @@ function validarData(data) {
     return /^\d{4}-\d{2}-\d{2}$/.test(String(data || ""));
 }
 
+// Horario e link sao opcionais; URLs arbitrarias ou scripts nao sao aceitos.
+function validarHorario(horario) {
+    return !horario || /^([01]\d|2[0-3]):[0-5]\d$/.test(horario);
+}
+function validarLink(link) {
+    if (!link) return true;
+    if (link.length > 2000) return false;
+    try {
+        const url = new URL(link);
+        return ['https:', 'http:'].includes(url.protocol) && Boolean(url.hostname);
+    } catch {
+        return false;
+    }
+}
+
 function listar(req, res) {
     listarDatasImportantes((erro, datas) => {
         if (erro) {
@@ -32,6 +47,8 @@ function criar(req, res) {
     const tipo = normalizarTexto(req.body.tipo) || "Outro";
     const data = normalizarTexto(req.body.data);
     const descricao = normalizarTexto(req.body.descricao);
+    const horario = normalizarTexto(req.body.horario);
+    const link = normalizarTexto(req.body.link);
 
     if (!titulo || !data) {
         return res.status(400).json({
@@ -43,7 +60,10 @@ function criar(req, res) {
         return res.status(400).json({ mensagem: "Informe uma data válida." });
     }
 
-    criarDataImportante({ titulo, tipo, data, descricao }, (erro, resultado) => {
+    if (!validarHorario(horario)) return res.status(400).json({ mensagem: "Informe um horário válido (HH:mm)." });
+    if (!validarLink(link)) return res.status(400).json({ mensagem: "Informe um link HTTP(S) válido." });
+
+    criarDataImportante({ titulo, tipo, data, descricao, horario, link }, (erro, resultado) => {
         if (erro) {
             console.error("Erro ao criar data importante:", erro);
             return res.status(500).json({ mensagem: "Erro ao salvar a data importante." });
@@ -94,6 +114,14 @@ function atualizar(req, res) {
 
     if (req.body.descricao !== undefined) {
         dados.descricao = normalizarTexto(req.body.descricao);
+    }
+    if (req.body.horario !== undefined) {
+        dados.horario = normalizarTexto(req.body.horario);
+        if (!validarHorario(dados.horario)) return res.status(400).json({ mensagem: "Informe um horário válido (HH:mm)." });
+    }
+    if (req.body.link !== undefined) {
+        dados.link = normalizarTexto(req.body.link);
+        if (!validarLink(dados.link)) return res.status(400).json({ mensagem: "Informe um link HTTP(S) válido." });
     }
 
     atualizarDataImportante(id, dados, (erro, resultado) => {

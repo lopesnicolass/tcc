@@ -1,7 +1,26 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import '../../styles/aluno/Cronograma.css';
+import '../../styles/aluno/CalendarVestibulinho.css';
 import Icon from '../../components/Icon.jsx';
 import { request } from '../../services/api.js';
+import { ehVestibulinho, formatarDataImportante, ordenarDatasImportantes, linkOficialSeguro, tipoMarcoVestibulinho, rotuloMarcoVestibulinho } from '../../utils/datasVestibulinho.js';
+
+// Ícones diferenciados para início das inscrições, encerramento e prova.
+// São locais ao calendário para não alterar a iconografia compartilhada do site.
+function IconeDataOficial({ tipo }) {
+  if (tipo === 'prova') {
+    return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 2.5 2.9 6 6.6 1-4.8 4.7 1.2 6.6-5.9-3.1-5.9 3.1 1.2-6.6L2.5 9.5l6.6-1z" />
+    </svg>;
+  }
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="16" rx="2.5" />
+    <path d="M7.5 3v4M16.5 3v4M3 10h18" />
+    {tipo === 'inscricoes-inicio' ? <path d="M12 12.5v6M9 15.5h6" />
+      : tipo === 'inscricoes-fim' ? <path d="M8.5 15.5h7" />
+        : <circle cx="12" cy="15.5" r="1.2" fill="currentColor" stroke="none" />}
+  </svg>;
+}
 
 const STORAGE_KEY =
   'tenna_calendario_atividades';
@@ -270,6 +289,7 @@ export default function Cronograma() {
 
   const [activities, setActivities] =
     useState([]);
+  const calendarSectionRef = useRef(null);
 
   const [datasImportantes, setDatasImportantes] =
     useState([]);
@@ -292,6 +312,40 @@ export default function Cronograma() {
 
   const [selectedDate, setSelectedDate] =
     useState(getTodayKey);
+  const [modalDataOficial, setModalDataOficial] = useState(null);
+  const fecharModalDataRef = useRef(null);
+
+  useEffect(() => {
+    if (!modalDataOficial) return;
+    const focoAnterior = document.activeElement;
+    fecharModalDataRef.current?.focus();
+    const aoPressionarTecla = (evento) => {
+      if (evento.key === 'Escape') {
+        evento.preventDefault();
+        setModalDataOficial(null);
+      }
+      if (evento.key === 'Tab') {
+        const dialogo = fecharModalDataRef.current?.closest('[role="dialog"]');
+        if (!dialogo) return;
+        const focaveis = Array.from(dialogo.querySelectorAll('button:not([disabled]), a[href]'));
+        if (!focaveis.length) return;
+        const primeiro = focaveis[0];
+        const ultimo = focaveis[focaveis.length - 1];
+        if (evento.shiftKey && document.activeElement === primeiro) {
+          evento.preventDefault();
+          ultimo.focus();
+        } else if (!evento.shiftKey && document.activeElement === ultimo) {
+          evento.preventDefault();
+          primeiro.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', aoPressionarTecla);
+    return () => {
+      document.removeEventListener('keydown', aoPressionarTecla);
+      focoAnterior?.focus?.();
+    };
+  }, [modalDataOficial]);
 
   const [now, setNow] = useState(() => new Date());
 
@@ -512,8 +566,13 @@ export default function Cronograma() {
         1 - first.getDay()
       );
 
+      // Exibe seis fileiras para manter a altura da grade visualmente
+      // alinhada ao painel de atividades à direita, inclusive em meses
+      // que caberiam em apenas quatro ou cinco semanas.
+      const numeroSemanas = 6;
+
       return Array.from(
-        { length: 42 },
+        { length: numeroSemanas * 7 },
         (_, i) => {
           const d =
             new Date(start);
@@ -541,12 +600,42 @@ export default function Cronograma() {
         )
       );
 
-  const selectedImportantDates =
-    datasImportantes.filter(
-      (item) => item.data === selectedDate
-    );
+  const orderedImportantDates = ordenarDatasImportantes(datasImportantes, dateKey(now));
+  const selectedOfficialEvents = orderedImportantDates.filter((item) => item.data === selectedDate);
+  const upcomingOfficialDates = orderedImportantDates.filter((item) => item.data >= dateKey(now));
   const selectedDateObject = new Date(`${selectedDate}T12:00:00`);
 
+
+  function irParaDataImportante(data) {
+    const dataEvento = new Date(`${data}T12:00:00`);
+    setSelectedDate(data);
+    setCurrentMonth(new Date(dataEvento.getFullYear(), dataEvento.getMonth(), 1));
+    calendarSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function linhaDataImportante(item) {
+    const tipoMarco = tipoMarcoVestibulinho(item);
+    const passou = item.data < dateKey(now);
+    const proxima = upcomingOfficialDates[0]?.id === item.id;
+    return (
+      <button
+        type="button"
+        key={item.id}
+        className={`calendar-important-event-row is-${tipoMarco} ${proxima ? 'is-next' : ''} ${passou ? 'is-past' : ''}`}
+        onClick={() => setModalDataOficial(item)}
+        aria-label={`Ver detalhes de ${item.titulo}, ${formatarDataImportante(item.data)}`}
+      >
+        <span className={`calendar-important-row-icon is-${tipoMarco}`} aria-hidden="true">
+          <IconeDataOficial tipo={tipoMarco} />
+        </span>
+        <span className="calendar-important-event-info">
+          <small>{formatarDataImportante(item.data, { day: '2-digit', month: 'short', year: 'numeric' })}{item.horario ? ` · ${item.horario}` : ''}</small>
+          <strong>{item.titulo}</strong>
+        </span>
+        <span className="calendar-important-event-chevron" aria-hidden="true">›</span>
+      </button>
+    );
+  }
 
   function changeMonth(delta) {
     const proximoMes = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
@@ -966,7 +1055,7 @@ export default function Cronograma() {
 
       <div className="calendar-layout">
 
-        <section className="calendar-card">
+        <section ref={calendarSectionRef} className="calendar-card">
 
           <div className="calendar-toolbar">
 
@@ -1068,6 +1157,10 @@ export default function Cronograma() {
                 const materiasDoDia = [...new Set(dayActivities.map((activity) => activity.materia || 'Outro'))];
                 const quantidadeEventos = dayActivities.length + dayImportantDates.length;
                 const temDatasImportantes = dayImportantDates.length > 0;
+                const temProva = dayImportantDates.some(ehVestibulinho);
+                const marcoPrincipal = temProva ? 'prova'
+                  : dayImportantDates.some((evento) => tipoMarcoVestibulinho(evento) === 'inscricoes-fim') ? 'inscricoes-fim'
+                    : dayImportantDates.some((evento) => tipoMarcoVestibulinho(evento) === 'inscricoes-inicio') ? 'inscricoes-inicio' : 'outro';
 
                 const inMonth =
                   day.getMonth() ===
@@ -1099,11 +1192,12 @@ export default function Cronograma() {
                         isToday
                           ? 'today'
                           : ''
-                      } ${hasEvents ? 'has-events' : ''} ${allDone ? 'all-done' : ''}`
+                      } ${hasEvents ? 'has-events' : ''} ${allDone ? 'all-done' : ''} ${temDatasImportantes ? 'has-important-date' : ''} ${temProva ? 'has-vestibulinho' : ''}`
                     }
                     type="button"
                     aria-pressed={selected}
-                    aria-label={`${day.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}: ${quantidadeEventos} ${quantidadeEventos === 1 ? 'evento' : 'eventos'}`}
+                    aria-label={`${day.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}: ${quantidadeEventos} ${quantidadeEventos === 1 ? 'evento' : 'eventos'}${temDatasImportantes ? '. Data importante do Vestibulinho' : ''}`}
+                    title={temDatasImportantes ? dayImportantDates.map((item) => item.titulo).join(' · ') : undefined}
                     onClick={() => {
                       setSelectedDate(key);
                       if (!inMonth) {
@@ -1115,6 +1209,7 @@ export default function Cronograma() {
                     <span className="calendar-day-topline">
                       <span className="calendar-day-number">{day.getDate()}</span>
                       {isToday && <span className="calendar-today-label">HOJE</span>}
+                      {temDatasImportantes && <span className={`calendar-special-date-icon is-${marcoPrincipal}`} title={rotuloMarcoVestibulinho(marcoPrincipal)} aria-hidden="true"><IconeDataOficial tipo={marcoPrincipal} /></span>}
 
                     </span>
 
@@ -1145,6 +1240,27 @@ export default function Cronograma() {
         </section>
 
         <div className="calendar-bottom-cards">
+        <section className="calendar-important-overview" aria-labelledby="important-dates-title">
+          <div className="calendar-important-overview-heading">
+            <div className="calendar-important-overview-title">
+              <span className="calendar-important-overview-icon" aria-hidden="true"><Icon name="calendar" size={19} /></span>
+              <div>
+                <span className="calendar-important-overview-kicker">VESTIBULINHO ETEC</span>
+                <h2 id="important-dates-title">Datas importantes</h2>
+              </div>
+            </div>
+            <span className="calendar-important-total">{orderedImportantDates.length} {orderedImportantDates.length === 1 ? 'data' : 'datas'}</span>
+          </div>
+          <p className="calendar-important-overview-subtitle">Toque em uma data para ver todos os detalhes.</p>
+          {orderedImportantDates.length > 0 ? (
+            <div className="calendar-important-events" aria-label="Datas do Vestibulinho">
+              {orderedImportantDates.map(linhaDataImportante)}
+            </div>
+          ) : (
+            <div className="calendar-important-empty">Nenhuma data oficial cadastrada.</div>
+          )}
+        </section>
+
         <aside className="calendar-sidebar-card">
 
           <div className="calendar-selected-head">
@@ -1176,39 +1292,46 @@ export default function Cronograma() {
             </p>
           )}
 
-          {selectedImportantDates.length > 0 && (
-            <div className="calendar-important-list">
-              <span className="calendar-important-list-label">
-                DATAS IMPORTANTES
-              </span>
-
-              {selectedImportantDates.map((item) => (
-                <article
-                  className="calendar-important-card"
-                  key={item.id}
+          {selectedOfficialEvents.length > 0 && (
+            <section className="calendar-selected-official" aria-label="Datas oficiais neste dia">
+              <h3>Datas importantes neste dia</h3>
+              {selectedOfficialEvents.map((evento) => (
+                <button
+                  type="button"
+                  key={evento.id}
+                  className="calendar-selected-official-row"
+                  onClick={() => setModalDataOficial(evento)}
+                  aria-label={`Ver detalhes: ${evento.titulo}`}
                 >
-                  <span className="calendar-important-pin">📌</span>
-                  <div>
-                    <strong>{item.titulo}</strong>
-                    {item.tipo && <span>{item.tipo}</span>}
-                    {item.descricao && <p>{item.descricao}</p>}
-                  </div>
-                </article>
+                  <span className={`calendar-important-row-icon is-${tipoMarcoVestibulinho(evento)}`} aria-hidden="true">
+                    <IconeDataOficial tipo={tipoMarcoVestibulinho(evento)} />
+                  </span>
+                  <span>{evento.titulo}</span>
+                  <span aria-hidden="true">›</span>
+                </button>
               ))}
-            </div>
+            </section>
           )}
 
-          <div className="calendar-task-list">
+          <div
+            key={selectedDate}
+            className="calendar-task-list"
+            role="region"
+            aria-label="Atividades do dia selecionado"
+            tabIndex={selectedActivities.length > 4 ? 0 : undefined}
+          >
 
             {selectedActivities.length ===
             0 ? (
 
-              <div className="calendar-empty-day">
+              <div className={`calendar-empty-day ${selectedOfficialEvents.length ? 'with-official-events' : ''}`}>
                 <span className="calendar-empty-day-icon" aria-hidden="true"><Icon name="calendar" size={23} /></span>
-                <strong>Nenhuma atividade neste dia</strong>
-                <p>{selectedDayAllowsCreation
-                  ? 'Use o botão + para planejar seus estudos.'
-                  : 'Esta data já passou. Você ainda pode consultar suas atividades.'}</p>
+                <strong>{selectedOfficialEvents.length ? 'Nenhuma atividade pessoal neste dia' : 'Nenhuma atividade neste dia'}</strong>
+                <p>{selectedOfficialEvents.length
+                  ? 'Os eventos oficiais estão destacados acima.'
+                  : selectedDayAllowsCreation
+                    ? 'Use o botão + para planejar seus estudos.'
+                    : 'Esta data já passou. Você ainda pode consultar suas atividades.'}</p>
               </div>
 
             ) : (
@@ -1292,12 +1415,71 @@ export default function Cronograma() {
             )}
 
           </div>
-
+          {selectedActivities.length > 0 && (
+            <p className="calendar-activity-count">{selectedActivities.filter((a) => a.done).length} concluídas de {selectedActivities.length} atividades</p>
+          )}
         </aside>
+
+
 
         </div>
 
       </div>
+
+      {modalDataOficial && (
+        <div
+          className="calendar-important-modal-backdrop"
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget) setModalDataOficial(null);
+          }}
+        >
+          <section
+            className="calendar-important-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="calendar-official-modal-title"
+            aria-describedby="calendar-official-modal-description"
+          >
+            <div className="calendar-important-modal-heading">
+              <span className={`calendar-important-modal-badge is-${tipoMarcoVestibulinho(modalDataOficial)}`} aria-hidden="true">
+                <IconeDataOficial tipo={tipoMarcoVestibulinho(modalDataOficial)} />
+              </span>
+              <div>
+                <small>VESTIBULINHO ETEC</small>
+                <h2 id="calendar-official-modal-title">{modalDataOficial.titulo}</h2>
+              </div>
+              <button type="button" className="calendar-important-modal-close" ref={fecharModalDataRef}
+                onClick={() => setModalDataOficial(null)} aria-label="Fechar detalhes da data importante">×</button>
+            </div>
+            <div className="calendar-important-modal-content" id="calendar-official-modal-description">
+              <span className="calendar-important-modal-type">{rotuloMarcoVestibulinho(tipoMarcoVestibulinho(modalDataOficial))}</span>
+              <div className="calendar-important-modal-detail">
+                <Icon name="calendar" size={18} />
+                <div><small>Data</small><strong>{formatarDataImportante(modalDataOficial.data, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong></div>
+              </div>
+              <div className="calendar-important-modal-detail">
+                <Icon name="clock" size={18} />
+                <div><small>Horário</small><strong>{modalDataOficial.horario || 'Não informado pela administração'}</strong></div>
+              </div>
+              <div className="calendar-important-modal-description">
+                <strong>Sobre esta data</strong>
+                <p>{modalDataOficial.descricao?.trim() || 'Confira as informações e os prazos oficiais do Vestibulinho ETEC.'}</p>
+              </div>
+            </div>
+            <div className="calendar-important-modal-actions">
+              {linkOficialSeguro(modalDataOficial.link) && (
+                <a className="calendar-important-modal-link" href={linkOficialSeguro(modalDataOficial.link)} target="_blank" rel="noopener noreferrer">
+                  Ver site oficial <Icon name="external" size={16} />
+                </a>
+              )}
+              <button type="button" className="calendar-important-modal-date"
+                onClick={() => { irParaDataImportante(modalDataOficial.data); setModalDataOficial(null); }}>
+                Ver no calendário
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {showCreate && (
 

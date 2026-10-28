@@ -1,0 +1,26 @@
+.home-page .home-stats-row .stat-card:first-child { justify-content: flex-start; }
+.home-page .stat-vestibulinho-date {
+  margin-top: 9px;
+  color: var(--color-text, #234567);
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 750;
+}
+.home-page .stat-vestibulinho-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0;
+  margin: 5px 0 0;
+  border: 0;
+  background: transparent;
+  color: #1774cb;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  text-align: left;
+}
+.home-page .stat-vestibulinho-link:hover { text-decoration: underline; }
+.home-page .stat-vestibulinho-link:focus-visible { outline: 2px solid #82baff; outline-offset: 2px; }
+html[data-theme='dark'] .home-page .stat-vestibulinho-date { color: #d0e6fa; }
+html[data-theme='dark'] .home-page .stat-vestibulinho-link { color: #83c1ff; }

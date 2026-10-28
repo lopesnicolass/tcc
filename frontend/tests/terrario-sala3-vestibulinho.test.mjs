@@ -20,7 +20,7 @@ test('a carteira aprovada permanece na sala 3 em PNG com transparência', () => 
   const b=fs.readFileSync(file);
   assert.equal(b.subarray(1,4).toString(), 'PNG');
   assert.equal(b[25],6, 'formato RGBA (com canal alfa)');
-  assert.match(catalogo,/id:'s3_mesa'.*Carteira do Vestibulinho.*price:28.*width:30, x:43, y:80/);
+  assert.match(catalogo,/id:'s3_mesa'.*Carteira do Vestibulinho.*price:10.*width:30, x:43, y:80/);
   assert.match(catalogo,/export const ITEMS_SALA3_LEGADOS/);
   assert.doesNotMatch(catalogo.split('export const ITEMS_SALA3_LEGADOS')[0], /id:'s3_cadeira'/);
 });

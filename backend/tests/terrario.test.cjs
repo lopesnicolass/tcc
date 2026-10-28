@@ -138,10 +138,10 @@ test('Terrário: loja debita sementes uma vez, mantém inventário e isola conta
   banco.prepare('UPDATE terrario_usuario SET sementes=25 WHERE usuario_id=1').run();
   await model.comprarItem(1, 'mesa');
   state = await model.buscarEstado(1);
-  assert.equal(state.sementes, 15);
+  assert.equal(state.sementes, 19);
   assert.equal(state.inventario.find(item => item.id === 'mesa')?.equipado, false);
   await assert.rejects(model.comprarItem(1, 'mesa'), /já possui/);
-  assert.equal((await model.buscarEstado(1)).sementes, 15);
+  assert.equal((await model.buscarEstado(1)).sementes, 19);
   await model.personalizarItem(1, 'mesa', { equipado: true, x: 65.5, y: 77 });
   state = await model.buscarEstado(1);
   assert.deepEqual(state.inventario.find(item => item.id === 'mesa'), {
@@ -156,10 +156,31 @@ test('Terrário: loja debita sementes uma vez, mantém inventário e isola conta
   banco.close();
 });
 
+test('Terrário: preços acessíveis atualizam catálogos antigos sem mexer nas compras', async () => {
+  const { banco, model } = novoBanco();
+  await model.buscarEstado(1);
+  banco.prepare('UPDATE terrario_usuario SET sementes=14 WHERE usuario_id=1').run();
+  banco.prepare("UPDATE terrario_catalogo SET preco=28 WHERE item_id='s3_mesa'").run();
+  banco.prepare("UPDATE terrario_catalogo SET preco=10 WHERE item_id='mesa'").run();
+  const saldoAntes = (await model.buscarEstado(1)).sementes;
+  delete require.cache[require.resolve('../config/ensureTerrario')];
+  require('../config/ensureTerrario');
+  assert.equal(banco.prepare("SELECT preco FROM terrario_catalogo WHERE item_id='s3_mesa'").get().preco,10);
+  assert.equal(banco.prepare("SELECT preco FROM terrario_catalogo WHERE item_id='mesa'").get().preco,6);
+  assert.equal((await model.buscarEstado(1)).sementes,saldoAntes);
+  await model.comprarItem(1,'mesa');
+  assert.equal((await model.buscarEstado(1)).sementes,8);
+  delete require.cache[require.resolve('../config/ensureTerrario')];
+  require('../config/ensureTerrario');
+  assert.equal((await model.buscarEstado(1)).sementes,8);
+  assert.equal((await model.buscarEstado(1)).inventario.filter(i=>i.id==='mesa').length,1);
+  banco.close();
+});
+
 test('Terrário: compras simultâneas não gastam além do saldo', async () => {
   const { banco, model } = novoBanco();
   await model.buscarEstado(1);
-  banco.prepare('UPDATE terrario_usuario SET sementes=12 WHERE usuario_id=1').run();
+  banco.prepare('UPDATE terrario_usuario SET sementes=8 WHERE usuario_id=1').run();
   const results = await Promise.allSettled([
     model.comprarItem(1, 'mesa'),
     model.comprarItem(1, 'luminaria')
@@ -182,7 +203,7 @@ test('Terrário: novos móveis preservam compra e possuem limites de parede e ch
   await assert.rejects(model.personalizarItem(1, 'prateleira', { equipado: true, x: 27, y: 75 }), /Posição inválida/);
   await assert.rejects(model.personalizarItem(1, 'tapete', { equipado: true, x: 42, y: 30 }), /Posição inválida/);
   const estado = await model.buscarEstado(1);
-  assert.equal(estado.sementes, 54);
+  assert.equal(estado.sementes, 72);
   assert.equal(estado.inventario.find(item => item.id === 'prateleira').y, 38);
   assert.equal(estado.inventario.find(item => item.id === 'tapete').y, 77);
   assert.equal(estado.inventario.find(item => item.id === 'vasinho').equipado, true);
@@ -197,7 +218,7 @@ test('Terrário: escala do móvel é persistida por aluno sem gastar sementes', 
   await model.personalizarItem(1, 'mesa', { equipado: true, escala: 1.4 });
   const state = await model.buscarEstado(1);
   assert.equal(state.inventario.find(item => item.id === 'mesa').escala, 1.4);
-  assert.equal(state.sementes, 20);
+  assert.equal(state.sementes, 24);
   await model.personalizarItem(1, 'mesa', { equipado: true, x: 50, y: 56 });
   assert.equal((await model.buscarEstado(1)).inventario.find(item => item.id === 'mesa').escala, 1.4);
   await assert.rejects(model.personalizarItem(1, 'mesa', { equipado: true, escala: 2.2 }), /tamanho/);
@@ -217,11 +238,11 @@ test('Terrário: sala 2 só permite comprar móveis depois do desbloqueio e não
   banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2 WHERE usuario_id=1').run();
   await model.comprarItem(1, 's2_mesa');
   let state = await model.buscarEstado(1);
-  assert.equal(state.sementes, 66);
+  assert.equal(state.sementes, 82);
   assert.equal(state.inventario.find(item => item.id === 's2_mesa').equipado, false);
   assert.equal(state.inventario.find(item => item.id === 'vasinho').equipado, true);
   await assert.rejects(model.comprarItem(1, 's2_mesa'), /já possui/);
-  assert.equal((await model.buscarEstado(1)).sementes, 66);
+  assert.equal((await model.buscarEstado(1)).sementes, 82);
   await model.personalizarItem(1, 's2_mesa', { equipado:true, x:45, y:68, escala:1.2 });
   state = await model.buscarEstado(1);
   assert.deepEqual(state.inventario.find(item => item.id === 's2_mesa'), { id:'s2_mesa', equipado:true, x:45, y:68, escala:1.2 });
@@ -239,7 +260,7 @@ test('Terrário: Sala 2 mantém posição e escala próprias, respeitando zonas 
   banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2, sementes=100 WHERE usuario_id=1').run();
   await model.comprarItem(1,'s2_mural');
   await model.comprarItem(1,'s2_cadeira');
-  assert.equal((await model.buscarEstado(1)).sementes,76);
+  assert.equal((await model.buscarEstado(1)).sementes,92);
   await assert.rejects(model.personalizarItem(1, 's2_mural', { equipado:true, x:55, y:75 }), /Posição inválida/);
   await model.personalizarItem(1, 's2_mural', { equipado:true, x:51, y:39, escala:1.4 });
   await model.personalizarItem(1, 's2_cadeira', { equipado:true, x:57, y:72 });
@@ -256,10 +277,10 @@ test('Terrário: quatro novos itens da Sala 2 exigem desbloqueio, têm preços e
   const { banco, model } = novoBanco();
   await model.buscarEstado(1);
   const itens = [
-    ['s2_tapete_redondo',11,53,83],
-    ['s2_vaso',8,18,68],
-    ['s2_livros',6,52,81],
-    ['s2_avisos',12,29,39],
+    ['s2_tapete_redondo',4,53,83],
+    ['s2_vaso',2,18,68],
+    ['s2_livros',2,52,81],
+    ['s2_avisos',4,29,39],
   ];
   for (const [id] of itens) await assert.rejects(model.comprarItem(1,id), /Desbloqueie a Sala 2/);
   banco.prepare('UPDATE terrario_usuario SET sala_desbloqueada=2, sementes=100 WHERE usuario_id=1').run();
@@ -309,7 +330,7 @@ test('Terrário: a Sala 3 vende seus oito itens exclusivos, com limites e compra
   await assert.rejects(model.personalizarItem(1,'s3_lousa',{equipado:true,x:30,y:80}),/Posição inválida/);
   await assert.rejects(model.personalizarItem(1,'s3_mochila',{equipado:true,x:26,y:34}),/Posição inválida/);
   const estado=await model.buscarEstado(1);
-  assert.equal(estado.sementes,85);
+  assert.equal(estado.sementes,164);
   assert.equal(estado.inventario.filter(item=>ids.includes(item.id)).length,8);
   assert.equal(estado.inventario.find(i=>i.id==='s3_lousa').escala,1.3);
   banco.close();
