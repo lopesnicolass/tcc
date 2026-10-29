@@ -3170,3 +3170,146 @@ html[data-theme='dark'] .terr-page .terr-scene-bottom {
   background: linear-gradient(180deg, #785036, #62402d);
   border-top-color: #a47751;
 }
+
+
+/* TENNA — Ajuste responsivo dos controles do modo decorar.
+   Evita empilhar/quebrar os botões no notebook e não muda o palco. */
+.terr-page.is-decorating .terr-scene-card {
+  container-type: inline-size;
+}
+.terr-page.is-decorating .terr-scene-topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 14px 16px;
+}
+.terr-page.is-decorating .terr-scene-heading { min-width: 0; }
+.terr-page.is-decorating .terr-scene-topbar h2 {
+  margin: 0;
+  font-size: clamp(17px, 1.35vw, 20px);
+  line-height: 1.25;
+  overflow-wrap: normal;
+}
+.terr-page.is-decorating .terr-scene-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 7px;
+}
+.terr-page.is-decorating .terr-scene-actions button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.terr-page.is-decorating .terr-scene-actions .terr-guide-trigger > span {
+  flex-shrink: 0;
+}
+
+/* O editor de tamanho distribui o espaço sem cortar o slider ou Restaurar. */
+.terr-page.is-decorating .terr-size-toolbar {
+  display: grid;
+  grid-template-columns: minmax(125px, .8fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 8px 12px;
+  padding: 9px 13px;
+}
+.terr-page.is-decorating .terr-size-item { flex: initial; min-width: 0; }
+.terr-page.is-decorating .terr-size-item strong { overflow-wrap: anywhere; }
+.terr-page.is-decorating .terr-size-editor {
+  flex: initial;
+  width: 100%;
+  min-width: 0;
+  gap: 6px;
+}
+.terr-page.is-decorating .terr-size-editor input[type='range'] {
+  flex: 1 1 60px;
+  width: 100%;
+  min-width: 45px;
+  max-width: none;
+}
+.terr-page.is-decorating .terr-size-step { flex: 0 0 30px; }
+.terr-page.is-decorating .terr-size-value { flex: 0 0 auto; min-width: 36px; }
+.terr-page.is-decorating .terr-size-reset {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  min-height: 32px;
+}
+.terr-page.is-decorating .terr-size-reset:disabled { opacity: .67; }
+.terr-page.is-decorating .terr-wall-snap { grid-column: 1 / -1; justify-self: start; }
+
+/* Na loja, custo e ação sempre cabem nos dois cartões por linha. */
+.terr-page.is-decorating .terr-item-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.terr-page.is-decorating .terr-item-bottom > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.terr-page.is-decorating .terr-item-bottom button {
+  flex: initial;
+  width: 100%;
+  min-width: 0;
+  min-height: 33px;
+  padding: 7px 5px;
+  font-size: 11px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+/* Em painéis de cena mais estreitos, manter os dois botões na mesma linha
+   em uma segunda linha do cabeçalho, sem sobreposição. */
+@container (max-width: 595px) {
+  .terr-page.is-decorating .terr-scene-topbar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+  }
+  .terr-page.is-decorating .terr-scene-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .terr-page.is-decorating .terr-size-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .terr-page.is-decorating .terr-size-editor { width: 100%; }
+  .terr-page.is-decorating .terr-wall-snap { grid-column: 1; }
+}
+@container (max-width: 355px) {
+  .terr-page.is-decorating .terr-scene-actions { flex-wrap: wrap; }
+  .terr-page.is-decorating .terr-scene-actions button { flex: 1 1 140px; }
+  .terr-page.is-decorating .terr-size-editor { flex-wrap: wrap; }
+  .terr-page.is-decorating .terr-size-editor input[type='range'] { flex: 1 1 calc(100% - 100px); }
+}
+
+/* Salas bloqueadas: somente o cadeado, sem cartão de texto sobre a cena. */
+.terr-world-preview.is-locked .terr-world-gate {
+  width:auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  gap:0;
+}
+.terr-world-preview.is-locked .terr-world-gate strong,
+.terr-world-preview.is-locked .terr-world-gate small {
+  display:none;
+}
+.terr-world-preview.is-locked .terr-world-gate-symbol {
+  width:54px;
+  height:54px;
+  font-size:28px;
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 5px 18px rgba(58,32,16,.22);
+}

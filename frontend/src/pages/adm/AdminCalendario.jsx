@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { request } from '../../services/api.js';
 import '../../styles/adm/AdminCalendario.css';
 
@@ -57,6 +57,8 @@ function getTipoClass(tipo) {
 }
 
 export default function AdminCalendario() {
+  const formCardRef = useRef(null);
+  const tituloRef = useRef(null);
   const [datas, setDatas] = useState([]);
   const [form, setForm] = useState(FORM_INICIAL);
   const [editando, setEditando] = useState(null);
@@ -147,6 +149,7 @@ export default function AdminCalendario() {
     });
     setMensagem('');
     setErro('');
+    formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function cancelarEdicao() {
@@ -251,6 +254,15 @@ export default function AdminCalendario() {
 
   const hoje = dateKey(new Date());
   const eventosSelecionados = datasOrdenadas.filter((item) => item.data === diaSelecionado);
+  const eventosNesteMes = datasOrdenadas.filter((item) => item.data?.slice(0, 7) === dateKey(mesAtual).slice(0, 7));
+
+  function prepararNovaData() {
+    cancelarEdicao();
+    setCampoAberto(null);
+    setForm({ ...FORM_INICIAL, data: diaSelecionado });
+    formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    tituloRef.current?.focus({ preventScroll: true });
+  }
 
   return (
     <div className="admin-calendar-page">
@@ -268,6 +280,7 @@ export default function AdminCalendario() {
       {erro && <div className="admin-calendar-feedback error">{erro}</div>}
 
       <div className="admin-calendar-layout">
+        <div className="admin-calendar-main">
         <section className="admin-calendar-month-card">
           <div className="admin-calendar-toolbar">
             <div className="admin-calendar-month-actions">
@@ -276,6 +289,7 @@ export default function AdminCalendario() {
               <button type="button" onClick={() => mudarMes(1)} aria-label="Próximo mês">›</button>
             </div>
             <div className="admin-calendar-month-actions">
+              <span className="admin-calendar-month-count">{eventosNesteMes.length} {eventosNesteMes.length === 1 ? 'data' : 'datas'} neste mês</span>
               <button type="button" className="admin-calendar-today" onClick={() => { const d = new Date(); setMesAtual(new Date(d.getFullYear(), d.getMonth(), 1)); setDiaSelecionado(dateKey(d)); }}>Hoje</button>
             </div>
           </div>
@@ -308,11 +322,10 @@ export default function AdminCalendario() {
           </div>
         </section>
 
-        <aside className="admin-calendar-sidebar">
           <section className="admin-calendar-selected-card">
             <div className="admin-calendar-selected-heading">
               <div><span>DATA SELECIONADA</span><h2>{formatarData(diaSelecionado)}</h2></div>
-              <button type="button" onClick={() => { cancelarEdicao(); setForm((atual) => ({ ...atual, data: diaSelecionado })); }} aria-label="Cadastrar evento nesta data">+</button>
+              <button type="button" onClick={prepararNovaData} aria-label="Cadastrar evento nesta data">+</button>
             </div>
             {eventosSelecionados.length ? eventosSelecionados.map((item) => (
               <button key={item.id} type="button" className="admin-calendar-selected-event" onClick={() => iniciarEdicao(item)}>
@@ -322,7 +335,8 @@ export default function AdminCalendario() {
               </button>
             )) : <p className="admin-calendar-empty">Nenhuma data importante neste dia.</p>}
           </section>
-          <aside className="admin-calendar-form-card">
+        </div>
+          <section className="admin-calendar-form-card" ref={formCardRef}>
           <div className="admin-calendar-form-heading">
             <h2>{editando ? 'Atualizar evento' : 'Adicionar data importante'}</h2>
             <p>Essas informações serão exibidas no calendário dos estudantes.</p>
@@ -332,6 +346,7 @@ export default function AdminCalendario() {
             <label>
               Título
               <input
+                ref={tituloRef}
                 value={form.titulo}
                 onChange={(event) => alterarForm('titulo', event.target.value)}
                 placeholder="Ex.: Início das inscrições"
@@ -421,10 +436,14 @@ export default function AdminCalendario() {
               </button>
             </div>
           </form>
+          </section>
+      </div>
 
+          <section className="admin-calendar-list-card">
           <div className="admin-calendar-list-heading">
             <div>
-              <h3>Datas configuradas</h3>
+              <h3>Datas cadastradas</h3>
+              <p>Gerencie os eventos oficiais exibidos aos estudantes.</p>
             </div>
             <small>{datas.length}</small>
           </div>
@@ -462,9 +481,7 @@ export default function AdminCalendario() {
               ))
             )}
           </div>
-          </aside>
-        </aside>
-      </div>
+          </section>
     </div>
   );
 }

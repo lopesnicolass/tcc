@@ -139,9 +139,28 @@ export default function Landing() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [menuOpen]);
 
-  function handleNavLink(section) {
+  // Navegação por âncoras: posiciona o título abaixo da barra fixa,
+  // inclusive em notebooks com menos altura útil por causa do navegador.
+  function handleNavLink(event, section) {
+    event.preventDefault();
     setActiveSection(section);
     setMenuOpen(false);
+
+    const heading = section === 'inicio'
+      ? null
+      : document.querySelector(`#${section} .landing-section-heading`);
+    const nav = document.querySelector('.landing-nav-shell');
+    const navBottom = nav?.getBoundingClientRect().bottom ?? 0;
+    const spacing = 22;
+    const top = heading
+      ? Math.max(0, window.scrollY + heading.getBoundingClientRect().top - navBottom - spacing)
+      : 0;
+
+    if (window.location.hash !== `#${section}`) {
+      window.history.pushState(null, '', `#${section}`);
+    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   const diasParaProva = diasAteVestibulinho(dataVestibulinho);
@@ -190,7 +209,7 @@ export default function Landing() {
             className="landing-brand"
             href="#inicio"
             aria-label="Tenna — voltar ao início"
-            onClick={() => handleNavLink('inicio')}
+            onClick={(event) => handleNavLink(event, 'inicio')}
           >
             <img src={tennaLogo} alt="Tenna" className="landing-brand-icon" />
           </a>
@@ -200,7 +219,7 @@ export default function Landing() {
               href="#inicio"
               className={activeSection === 'inicio' ? 'is-active' : ''}
               aria-current={activeSection === 'inicio' ? 'location' : undefined}
-              onClick={() => handleNavLink('inicio')}
+              onClick={(event) => handleNavLink(event, 'inicio')}
             >
               Início
             </a>
@@ -208,7 +227,7 @@ export default function Landing() {
               href="#recursos"
               className={activeSection === 'recursos' ? 'is-active' : ''}
               aria-current={activeSection === 'recursos' ? 'location' : undefined}
-              onClick={() => handleNavLink('recursos')}
+              onClick={(event) => handleNavLink(event, 'recursos')}
             >
               Recursos
             </a>
@@ -216,7 +235,7 @@ export default function Landing() {
               href="#como-funciona"
               className={activeSection === 'como-funciona' ? 'is-active' : ''}
               aria-current={activeSection === 'como-funciona' ? 'location' : undefined}
-              onClick={() => handleNavLink('como-funciona')}
+              onClick={(event) => handleNavLink(event, 'como-funciona')}
             >
               Como funciona
             </a>
@@ -246,9 +265,9 @@ export default function Landing() {
 
         {menuOpen && (
           <nav id="landing-mobile-menu" className="landing-mobile-nav" aria-label="Navegação móvel">
-            <a href="#inicio" onClick={() => handleNavLink('inicio')} className={activeSection === 'inicio' ? 'is-active' : ''}>Início</a>
-            <a href="#recursos" onClick={() => handleNavLink('recursos')} className={activeSection === 'recursos' ? 'is-active' : ''}>Recursos</a>
-            <a href="#como-funciona" onClick={() => handleNavLink('como-funciona')} className={activeSection === 'como-funciona' ? 'is-active' : ''}>Como funciona</a>
+            <a href="#inicio" onClick={(event) => handleNavLink(event, 'inicio')} className={activeSection === 'inicio' ? 'is-active' : ''}>Início</a>
+            <a href="#recursos" onClick={(event) => handleNavLink(event, 'recursos')} className={activeSection === 'recursos' ? 'is-active' : ''}>Recursos</a>
+            <a href="#como-funciona" onClick={(event) => handleNavLink(event, 'como-funciona')} className={activeSection === 'como-funciona' ? 'is-active' : ''}>Como funciona</a>
             <button type="button" className="landing-mobile-register" onClick={goToCadastro}>
               Criar conta
             </button>
